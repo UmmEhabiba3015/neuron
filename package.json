@@ -1,20 +1,13 @@
 {
   "name": "neuron",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "packageManager": "pnpm@11.17.0",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": "^11.17.0",
-      "onFail": "download"
-    }
-  },
-  "type": "module"
+    "dev": "pnpm --filter @neuron/api start:dev",
+    "build": "pnpm --filter @neuron/api build",
+    "test": "pnpm --filter @neuron/api test"
+  }
 }
