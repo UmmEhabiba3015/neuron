@@ -61,12 +61,16 @@ criterion; comprehension is.
 
 ### Open learning debt
 
-| Concept | Introduced | Owed since | Repaid |
+| Concept | Introduced | Owed since | Status |
 |---|---|---|---|
-| Jest — runners, matchers, `describe`/`it`, mocking | Day 1 worker | Day 1 | Day 2 (comprehension), Day 5 (authorship) |
-| `@nestjs/testing` — `Test.createTestingModule`, DI in tests | Day 1 worker | Day 1 | Day 2 (comprehension), Day 5 (authorship) |
-| supertest — HTTP assertions against a booted app | Day 1 worker | Day 1 | Day 2 (comprehension), Day 5 (authorship) |
-| Unit vs e2e — what each catches, what each cannot | Day 1 worker | Day 1 | Day 2 (comprehension), Day 5 (strategy) |
+| `@nestjs/testing` — `Test.createTestingModule`, DI in tests | Day 1 worker | Day 1 | ✅ **Repaid Day 2**, by experiment |
+| DI resolves at runtime, not compile time | Day 1 worker | Day 1 | ✅ **Repaid Day 2** — predicted wrong twice, then proven live |
+| Symbol injection tokens, factory providers | Day 2 worker | Day 2 | ✅ **Repaid Day 2** |
+| Jest — runners, matchers, `describe`/`it`, mocking | Day 1 worker | Day 1 | 🟡 Partial — basics only |
+| supertest — what it does that a unit test cannot | Day 1 worker | Day 1 | ❌ Owed → Day 5 |
+| Unit vs e2e — what each catches, what each cannot | Day 1 worker | Day 1 | ❌ Owed → Day 5 |
+| Why `build`/`test`/`lint` all miss a type error in a spec | Day 2 audit | Day 2 | ❌ Owed → Day 5 |
+| Raw SQL, prepared statements, parameter binding | Day 2 worker | Day 2 | ❌ Owed → Day 3 |
 
 Add a row whenever a worker introduces something unfamiliar. Close it only
 when the explanation happens.
