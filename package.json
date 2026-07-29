@@ -1,0 +1,16 @@
+{
+  "name": "neuron",
+  "private": true,
+  "packageManager": "pnpm@11.17.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @neuron/api start:dev",
+    "build": "pnpm --filter @neuron/api build",
+    "lint": "pnpm --filter @neuron/api lint",
+    "typecheck": "pnpm --filter @neuron/api typecheck",
+    "test": "pnpm --filter @neuron/api test",
+    "test:e2e": "pnpm --filter @neuron/api test:e2e"
+  }
+}
