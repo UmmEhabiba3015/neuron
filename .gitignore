@@ -27,3 +27,8 @@ Thumbs.db
 *.log
 npm-debug.log*
 pnpm-debug.log*
+
+# Worker artifacts — prompts and reports stay local, not in version control
+docs/workers/
+docs/learning/**/report.md
+docs/learning/**/worker-report-*.md

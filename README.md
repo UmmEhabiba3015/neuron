@@ -36,21 +36,25 @@ curl http://localhost:3000/entries
 Other root-level scripts:
 
 ```bash
-pnpm build   # compile the API
-pnpm test    # run the API's unit tests
+pnpm build      # compile the API
+pnpm lint       # lint the API (auto-fixes what it can)
+pnpm typecheck  # typecheck everything, including test files
+pnpm test       # run the API's unit tests
+pnpm test:e2e   # run the API's end-to-end tests
 ```
 
 ## Repo layout
 
 ```
 apps/
-  api/    NestJS API (only app that currently has code)
-  web/    reserved for a future web client — empty for now
+  api/    NestJS API (the only app so far)
 docs/
-  architecture/   reserved for architecture notes — empty for now
-  decisions/      Architecture Decision Records (ADRs)
-  learning/       day-by-day learning notes
-  roadmap.md      the 30-day build plan
+  decisions/        Architecture Decision Records (ADRs)
+  learning/         day-by-day learning notes and worker reports
+  workers/          task briefs handed to worker sessions
+  constitution.md   the engineering principles this project is built under
+  master-state.md   where the project currently stands
+  roadmap.md        the 30-day build plan
 ```
 
 There is no `packages/` directory yet — it's intentionally deferred until
