@@ -13,6 +13,14 @@ build/
 # Test coverage
 coverage/
 
+# SQLite database — local state, never source. A pattern without a leading
+# slash matches at any depth, so this covers apps/api/data/neuron.db too.
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
 # Editor directories
 .vscode/
 .idea/

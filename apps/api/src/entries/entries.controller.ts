@@ -1,6 +1,10 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { EntriesService } from './entries.service';
-import { JournalEntry } from './entry.interface';
+// `import type` rather than a plain import: `emitDecoratorMetadata` makes the
+// compiler emit a *runtime* reference for a decorated method's return type, and
+// an interface has no runtime value to point at. Marking the import as
+// type-only tells TypeScript not to try.
+import type { JournalEntry } from './entry.interface';
 
 // A "controller" in Nest only handles HTTP: which route maps to which
 // method, and what gets returned. It deliberately knows nothing about
@@ -15,5 +19,18 @@ export class EntriesController {
   @Get()
   findAll(): JournalEntry[] {
     return this.entriesService.findAll();
+  }
+  // Returns the created entry rather than an empty body: the server generates
+  // `id` and `createdAt`, so a client that only got a 201 would have no way to
+  // learn either without immediately re-fetching the whole list.
+  //
+  // `body` is typed inline and trusted completely. Post `{}` and this will
+  // fail — deliberately. DTOs and validation are Day 4, and that failure is
+  // the evidence Day 4 gets built on.
+  @Post()
+  create(@Body() body: { content: string }): JournalEntry {
+    // Unwrapping happens here, at the HTTP boundary, so the service keeps
+    // receiving a plain string.
+    return this.entriesService.create(body.content);
   }
 }
