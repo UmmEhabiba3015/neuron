@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { DatabaseModule } from '../database/database.module';
 import { EntriesController } from './entries.controller';
 import { EntriesService } from './entries.service';
 
@@ -9,6 +10,10 @@ import { EntriesService } from './entries.service';
 // what to hand it, without the controller ever calling `new EntriesService()`
 // itself.
 @Module({
+  // EntriesService asks for the DATABASE token, which lives in DatabaseModule.
+  // Importing it here is what makes that token resolvable — providers are
+  // private to their own module until they're exported *and* imported.
+  imports: [DatabaseModule],
   controllers: [EntriesController],
   providers: [EntriesService],
 })
