@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Param, Query } from '@nestjs/common';
 import { EntriesService } from './entries.service';
 // `import type` rather than a plain import: `emitDecoratorMetadata` makes the
 // compiler emit a *runtime* reference for a decorated method's return type, and
@@ -17,7 +17,10 @@ export class EntriesController {
   constructor(private readonly entriesService: EntriesService) {}
 
   @Get()
-  findAll(): JournalEntry[] {
+  findAll(@Query('word') word?: string): JournalEntry[] {
+    if (word) {
+      return this.entriesService.findByContent(word);
+    }
     return this.entriesService.findAll();
   }
   // Returns the created entry rather than an empty body: the server generates
@@ -32,5 +35,14 @@ export class EntriesController {
     // Unwrapping happens here, at the HTTP boundary, so the service keeps
     // receiving a plain string.
     return this.entriesService.create(body.content);
+  }
+  @Get('count')
+  countEntries() {
+    return this.entriesService.countEntries();
+  }
+
+  @Get(':id')
+  findById(@Param('id') id: string): JournalEntry {
+    return this.entriesService.findById(id);
   }
 }

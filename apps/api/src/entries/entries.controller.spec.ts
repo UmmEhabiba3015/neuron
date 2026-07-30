@@ -2,6 +2,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DATABASE } from '../database/database.module';
 import { EntriesController } from './entries.controller';
+import { EntriesRepository } from './entries.repository';
 import { EntriesService } from './entries.service';
 
 // `describe` groups related tests under a label, `it` is a single test case,
@@ -36,11 +37,17 @@ describe('EntriesController', () => {
     // a construction path production never uses.
     //
     // That wiring is also what lets the real service run against a throwaway
-    // database: it asks for the DATABASE token, and this list decides what
-    // that token means here.
+    // database: the repository below it asks for the DATABASE token, and this
+    // list decides what that token means here. The chain is three links long
+    // now — controller → service → repository — and every link has to be
+    // listed, because Nest constructs each one from this list alone.
     const module: TestingModule = await Test.createTestingModule({
       controllers: [EntriesController],
-      providers: [EntriesService, { provide: DATABASE, useValue: db }],
+      providers: [
+        EntriesService,
+        EntriesRepository,
+        { provide: DATABASE, useValue: db },
+      ],
     }).compile();
 
     // `module.get<T>()` retrieves a fully-constructed instance out of that
