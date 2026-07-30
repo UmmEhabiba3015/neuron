@@ -18,20 +18,18 @@ the recovery cost most of a working session.
 
 **Last updated:** 2026-07-30 (end of Day 3)
 **Current day:** Day 3 of 29 complete (public numbering — see roadmap)
-**Current branch:** `day-03-data-access`, **uncommitted**. Day 3 work is not yet
-committed, pushed, or merged. See *Next Session Starts Here*.
+**Current branch:** `day-03-data-access`, clean and pushed. Day 3 committed as
+`ee20124`. **PR #3 is open and not yet merged** —
+https://github.com/UmmEhabiba3015/neuron/pull/3
 
 ---
 
 ## Next Session Starts Here
 
-**First, close out Day 3.** The work is done and audited but still sits
-uncommitted on `day-03-data-access`. Commit, push, open a PR, squash-merge — the
-same one-branch-one-PR-per-day flow as Day 2. Files involved: the five modified
-`apps/api/src/entries/*` files, the new `entries.repository.ts`, new
-`ADR-004-repository-raw-sql.md`, plus the `roadmap.md` / `master-state.md`
-updates. (`docs/workers/` and `docs/learning/**/report.md` are gitignored and
-will not appear.)
+**First, close out Day 3.** The work is done, audited, committed and pushed.
+The only step left is squash-merging PR #3 into `main`, then branching
+`day-04-validation` from the updated `main`. If the PR was already merged before
+this session started, just confirm `main` is current and branch from it.
 
 **Day 4 — the roadmap problem is:** *"A client sent `{}` and the server returned
 a 500."* Afterwards she should be able to explain validation at the boundary,
