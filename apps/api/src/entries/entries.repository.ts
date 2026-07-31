@@ -62,21 +62,20 @@ export class EntriesRepository {
     return rows.map(toJournalEntry);
   }
 
-  findById(id: string): JournalEntry {
+  // Returns `undefined` rather than throwing when the id matches nothing. "No
+  // such row" is an ordinary storage outcome, not a failure — the query ran
+  // correctly and the honest answer is that there is nothing there. Whether
+  // that deserves a 404 is a question about HTTP, and this file is not allowed
+  // to have an opinion about HTTP (ADR-004, ADR-005).
+  findById(id: string): JournalEntry | undefined {
     const record = this.db
       .prepare('SELECT id, content, created_at FROM entries WHERE id = ?')
       .get(id) as EntryRow | undefined;
 
-    // A plain Error, which Nest turns into a 500 where a 404 belongs. Known
-    // wrong and preserved exactly as it was written, because mapping storage
-    // outcomes onto HTTP status codes is Day 4's subject. Note that even the
-    // fixed version cannot throw a Nest HTTP exception from this file — the
-    // repository is not allowed to know what a status code is.
-    if (!record) {
-      throw new Error(`Entry with ID ${id} not found`);
-    }
-
-    return toJournalEntry(record);
+    // `undefined` in, `undefined` out. The mapper only runs on a real row,
+    // which is what keeps the return type honest instead of asserting a
+    // JournalEntry that was never found.
+    return record ? toJournalEntry(record) : undefined;
   }
 
   findByContent(word: string): JournalEntry[] {
@@ -86,12 +85,10 @@ export class EntriesRepository {
       )
       .all(`%${word}%`) as unknown as EntryRow[];
 
-    // Also known wrong: "nothing matched a search" is an empty list and a 200,
-    // not an error. Preserved unchanged for the same reason as above.
-    if (!records.length) {
-      throw new Error(`Entry with content ${word} not found`);
-    }
-
+    // No empty-check on the way out, deliberately. A search that matched
+    // nothing has a complete answer — the empty list — and `.map` over an
+    // empty array already produces it. Adding a branch here would only be a
+    // place for a future error to hide (ADR-005).
     return records.map(toJournalEntry);
   }
 

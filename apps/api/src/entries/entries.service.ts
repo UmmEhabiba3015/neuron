@@ -48,7 +48,13 @@ export class EntriesService {
     return entry;
   }
 
-  findById(id: string): JournalEntry {
+  // `undefined` is passed through rather than converted into an exception. The
+  // reason is the same one that keeps SQL out of this file, applied one layer
+  // up: a `NotFoundException` is an instruction to write an HTTP response, and
+  // this service has to stay callable from a background job or a script where
+  // there is no response to write. Turning absence into a status code is the
+  // controller's job (ADR-005).
+  findById(id: string): JournalEntry | undefined {
     return this.entriesRepository.findById(id);
   }
 

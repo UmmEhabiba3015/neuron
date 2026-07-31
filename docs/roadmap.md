@@ -71,6 +71,13 @@ criterion; comprehension is.
 | Unit vs e2e — what each catches, what each cannot | Day 1 worker | Day 1 | ❌ Owed → Day 5 |
 | Why `build`/`test`/`lint` all miss a type error in a spec | Day 2 audit | Day 2 | ❌ Owed → Day 5 |
 | Raw SQL, prepared statements, parameter binding | Day 2 worker | Day 2 | 🟡 **Partial** — she hand-wrote 3 queries on Day 3, so SQL itself is owned. The prepared-statement mechanism was *explained* but not demonstrated back; the injection experiment was offered and skipped → Day 5 |
+| 4xx vs 5xx — "could the client fix this by sending a different request?" | Day 3 | Day 3 | ✅ **Repaid Day 4** — got all three re-test questions right, and answered the third with the *rule* rather than the two instances, which is the distinction that had failed on Day 3 |
+| `400` vs `404` — malformed request vs well-formed request for a thing that does not exist | Day 4 | Day 4 | ✅ **Repaid Day 4** — did not know it, was told once, then applied it correctly and unprompted to `POST {}` |
+| **Empty collection is a complete answer, not a failure** | Day 4 | Day 4 | ❌ **Owed** — took three rounds and the conclusion came from the Master Thread, not from her. She said "I understand, move on" without demonstrating it back. The `[].length` vs `undefined.length` experiment was offered and not run → Day 5 |
+| **Type erasure** — TypeScript annotations do not exist at runtime | Day 4 | Day 4 | ✅ **Repaid Day 4** — she compiled the project, read the emitted JavaScript, and saw `{ content: string }` become bare `body` herself. This is the load-bearing fact under all validation |
+| Where validation belongs (boundary vs service) | Day 4 | Day 4 | 🟡 **Partial** — she reasoned it out and got it wrong (chose the service), then accepted the argument. The distinction between "is this well-formed?" and "is this allowed?" was given to her, not derived → re-test Day 10 when ownership checks arrive |
+| `@Body() body: unknown` vs a named DTO type at a trust boundary | Day 4 worker | Day 4 | ❌ **Owed** — the worker deviated from the prompt to introduce this and was right to. The question "why can't the compiler stop you skipping validation?" was asked and not answered → Day 5 |
+| Writing tests, not just reading them | Day 1 | Day 1 | ❌ **Owed** — explicitly declined on Day 4 when offered the three test rewrites. All 20 new tests on Day 4 were worker-written → Day 5 |
 | Route matching is declaration order, first match wins | Day 3 (her own bug) | Day 3 | ✅ **Repaid Day 3** — predicted "static before dynamic", disproven by her own unreachable `/entries/count` |
 | Repository pattern — what it is, what crosses the boundary | Day 3 | Day 3 | ✅ **Repaid Day 3** — derived by her from the duplication before it was named |
 | Where `id`/`createdAt` should be generated; UUID vs sequential ids | Day 3 | Day 3 | ✅ **Repaid Day 3** — she argued for DB-generated, changed position on evidence, and raised the enforcement objection now recorded in ADR-004 |
@@ -102,8 +109,8 @@ what a backend *is* before adding anything to it.
 |-----|------------------|---------------------------------------------|
 | 2 | Restart the server and the data is gone. Where should data actually live? | Files vs SQLite vs Postgres vs document DBs. What a migration is and why it exists. **Plus: repay testing debt** — what the three existing tests actually do. |
 | 3 | SQL strings are scattered through my controller. | Raw SQL vs query builder vs ORM. What a repository is. Why data access gets its own layer. |
-| 4 | A client sent `{}` and the server returned a 500. | Validation at the boundary. DTOs. HTTP status semantics. Why errors are a design surface. |
-| 5 | I changed something and don't know what I broke. | Unit vs integration vs e2e. What is worth testing and what isn't. **Writing** tests, not just reading them. |
+| 4 | A client sent `{}` and the server returned a 500. | ✅ **Done.** Validation at the boundary, DTOs, 400 vs 404, and the layering rule that status codes are HTTP vocabulary and belong only in the controller. The load-bearing fact turned out to be **type erasure** — she watched `{ content: string }` vanish from the compiled JavaScript, which is *why* runtime validation has to exist at all. ADR-005. |
+| 5 | I changed something and don't know what I broke. | Unit vs integration vs e2e. What is worth testing and what isn't. **Writing** tests, not just reading them. ⚠️ **This day is overloaded — see below.** |
 | 6 | My DB password is in a committed file. | Configuration, environments, secret handling, config validation at boot. |
 | 7 | **Review day.** Audit, refactor, document. | Everything above, written down as handbook entries. |
 
@@ -111,6 +118,34 @@ what a backend *is* before adding anything to it.
 repository pattern until you've felt SQL sprawl); validation before testing
 (you need behavior worth asserting); config last, because you only feel the
 pain once there's something environment-specific to configure.
+
+### ⚠️ Day 5 is carrying more than one day of work
+
+This is recorded here, not buried in the debt table, because it needs a
+decision at the *start* of Day 5 rather than a discovery at the end of it.
+
+Day 5 currently owes, in rough priority order:
+
+1. **Writing tests by hand** — the day's actual subject, and the largest single
+   item. All 20 tests added on Day 4 were worker-written; she has still never
+   written a test on this project.
+2. supertest — what it does that a unit test cannot.
+3. Unit vs e2e — the route-rename experiment.
+4. Why three of four commands miss a type error in a spec file.
+5. The prepared-statement injection demonstration (offered twice, skipped twice).
+6. The empty-collection idea (`[].length` vs `undefined.length`).
+7. Why `unknown` at a trust boundary beats a named DTO type.
+8. `docs/learning/day-02/testing-literacy.md` experiments 2–5, unrun since Day 2.
+
+That is not one day. **Items 1 and 2 are the day; the rest are candidates.**
+Several will fold into item 1 naturally — writing an e2e test by hand teaches
+supertest, and renaming a route to watch which test catches it teaches unit vs
+e2e. The remainder should be pushed to Day 7 (review day) rather than rushed,
+and Day 7 is where they belong anyway.
+
+The pattern worth naming: **learning debt compounds faster than technical
+debt**, because the same worker that repays velocity accrues more of it. Day 4
+closed three items and opened four.
 
 ---
 
@@ -201,6 +236,14 @@ dashboard, not how systems are built.
 ## Open questions
 
 - ~~Does the monorepo earn its complexity?~~ **Resolved** — ADR-001.
+- ~~Where does the storage-outcome → HTTP-status mapping belong?~~ **Resolved**
+  — ADR-005. The controller, and only the controller. The rule generalises:
+  each layer reports outcomes in its own vocabulary, and translation happens
+  where the vocabulary changes.
+- **Should `POST` reject unknown fields, or ignore them?** Opened Day 4.
+  `{"content":"x","id":"mine"}` currently returns 201 and silently drops `id`.
+  Safe today because the service reads only `content`. Day 5's `PATCH` forces
+  the decision.
 - Rich text vs plain text for entries — deferred until the data model forces it.
 - Which AI provider, and does that decision need to be reversible? (Phase 3)
 - TypeScript 7 (Go-native compiler) is released but blocked by `ts-jest` and

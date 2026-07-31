@@ -16,57 +16,81 @@ the recovery cost most of a working session.
 
 ---
 
-**Last updated:** 2026-07-30 (end of Day 3)
-**Current day:** Day 3 of 29 complete (public numbering — see roadmap)
-**Current branch:** `day-03-data-access`, clean and pushed. Day 3 committed as
-`ee20124`. **PR #3 is open and not yet merged** —
-https://github.com/UmmEhabiba3015/neuron/pull/3
+**Last updated:** 2026-08-01 (end of Day 4)
+**Current day:** Day 4 of 29 complete (public numbering — see roadmap)
+**Current branch:** `day-04-validation`, **committed and pushed; PR not yet
+opened** at the time of writing. Day 3 merged to `main` as `488acc9` (PR #3,
+squash).
 
 ---
 
 ## Next Session Starts Here
 
-**First, close out Day 3.** The work is done, audited, committed and pushed.
-The only step left is squash-merging PR #3 into `main`, then branching
-`day-04-validation` from the updated `main`. If the PR was already merged before
-this session started, just confirm `main` is current and branch from it.
+**First, close out Day 4.** The work is done and independently audited. Open
+PR #4 from `day-04-validation`, squash-merge it, then branch `day-05-testing`
+from the updated `main`.
 
-**Day 4 — the roadmap problem is:** *"A client sent `{}` and the server returned
-a 500."* Afterwards she should be able to explain validation at the boundary,
-DTOs, HTTP status semantics, and why errors are a design surface.
+**Day 5 — the roadmap problem is:** *"I changed something and don't know what I
+broke."* Afterwards she should be able to explain unit vs integration vs e2e,
+what is worth testing, and — the part that matters — she should have **written
+tests herself**.
 
-**Day 4 has unusually good raw material already sitting in the code**, produced
-live on Day 3 rather than invented for the lesson. Do not discard it and do not
-fix it early:
+### ⚠️ Read the Day 5 warning in the roadmap before planning the day
 
-1. `POST /entries` with `{}` → uncaught 500 (inherited from Day 2).
-2. `GET /entries/does-not-exist` → **500 where 404 belongs.** She wrote this
-   herself, watched it, and could not initially explain why her error message
-   vanished from the response.
-3. `GET /entries?word=zzz` → **500 where `200 []` belongs.** A search matching
-   nothing is not an error.
+`docs/roadmap.md` now carries a section titled *"Day 5 is carrying more than one
+day of work"* listing **eight** owed items. Do not attempt all eight.
 
-Cases 2 and 3 are deliberately preserved and pinned by tests that assert
-today's *wrong* behaviour, so Day 4 has to change them consciously.
+**The recommendation recorded there: items 1 and 2 are the day.**
 
-**Groundwork already laid on Day 3, to build on rather than repeat:**
+1. **Writing tests by hand.** She has still never written a test on this
+   project. All 20 tests added on Day 4 were worker-written — she was offered
+   the three test rewrites on Day 4 and explicitly declined them.
+2. **supertest** — what it does that a unit test cannot.
 
-- She has the 4xx-vs-5xx test: *"could the client fix this by sending a
-  different request?"* If yes → 400s. If no → 500s. She applied it correctly
-  once and got the reasoning wrong once (she grouped "record missing" with
-  "database file deleted"). Worth re-testing that it stuck.
-- She knows Nest only understands `HttpException` and its subclasses, and that a
-  plain `Error` becomes a 500 with the message stripped — security reason and
-  correctness reason both explained.
-- **Open design question deliberately left for Day 4:** the repository is not
-  allowed to know what a status code is (ADR-004), so it *cannot* throw
-  `NotFoundException`. Where does the storage-outcome → HTTP-status mapping
-  belong? This is the natural Day 4 opening and she has the boundary rule
-  already in hand.
+Several other items fold into those two naturally: writing an e2e test teaches
+supertest; renaming a route and watching which test catches it teaches unit vs
+e2e. Push the remainder to **Day 7 (review day)**, where they belong anyway.
 
-**Also outstanding:** experiments 2 to 5 in
-`docs/learning/day-02/testing-literacy.md` were never run. Still scheduled for
-Day 5, along with the prepared-statement demonstration she skipped on Day 3.
+### How Day 4 actually went, because it changes how to run Day 5
+
+The design work was genuinely hers and came out of discussion, not instruction:
+the layering rule, the `undefined`/`[]` asymmetry, the four validation rules,
+and the decision to hand-write validation with a named revisit condition.
+
+**The code was not hers, and neither were the tests.** She declined the test
+rewrites when offered.
+
+Three moments worth knowing about:
+
+- **The best moment of the day** was type erasure. She ran `pnpm build` and read
+  the compiled JavaScript herself, and watched `{ content: string }` become a
+  bare `body`. That is the load-bearing fact under all validation and she now
+  owns it by observation rather than by being told.
+- **The hardest moment** was the empty-collection idea. It took three rounds,
+  she answered "5xx" for an empty search, and the conclusion ultimately came
+  from the Master Thread rather than from her. She ended it with "I understand,
+  move on" without demonstrating it back. **Still owed.**
+- **She asked to move on three times** in the second half of the day (on the
+  empty-collection idea, on the Day 5 load warning, and on two unanswered
+  questions at the end). Per *How To Work With The Learner*, this was honoured
+  each time and recorded rather than pushed. Worth watching whether this is
+  fatigue on a long day or a pattern forming.
+
+### Two questions asked on Day 4 and never answered — pick these up early
+
+1. **Why can the compiler not stop you writing `@Body() body: CreateEntryDto`
+   and skipping validation entirely? What happens at runtime?** This is the
+   direct payoff of the type-erasure lesson she *did* get, so it should be a
+   short conversation.
+2. **The `[].length` vs `undefined.length` experiment.** Two `node -e` commands.
+   `[].length` is `0`; `undefined.length` throws. This is the concrete
+   demonstration behind the empty-collection idea she has not shown back.
+
+### Also outstanding
+
+Experiments 2 to 5 in `docs/learning/day-02/testing-literacy.md` remain unrun
+since Day 2, and the prepared-statement injection demonstration has now been
+offered and skipped twice (Day 3, Day 4).
 
 ---
 
@@ -76,32 +100,51 @@ Day 5, along with the prepared-statement demonstration she skipped on Day 3.
 
 ```
 GET  /entries              → 200, all entries, newest first
-GET  /entries?word=<term>  → 200, entries whose content matches, newest first
-                             (500 when nothing matches — known wrong, Day 4)
-GET  /entries/count        → 200, a bare number
-GET  /entries/:id          → 200, one entry
-                             (500 when not found — known wrong, Day 4)
+GET  /entries?word=<term>  → 200, matching entries newest first; 200 [] when
+                             nothing matches
+GET  /entries/count        → 200, { "count": n }
+GET  /entries/:id          → 200, one entry; 404 when not found
 POST /entries              → 201, { "content": "..." }, returns the created entry
-                             (500 on {} — known wrong, Day 4)
+                             400 when content is absent, not a string, or has no
+                             non-whitespace character; 400 on a null body
 ```
 
-Entries persist across restarts. No auth, no frontend, no validation, no CI,
-no deployment.
+Entries persist across restarts. **Every endpoint now returns a correct status
+code** — the three known-wrong 500s are gone. No auth, no frontend, no CI, no
+deployment.
 
-**Verified working on Fedora KDE as of 2026-07-30, end of Day 3:**
-`pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (18 tests,
-up from 11) · `pnpm test:e2e` ✅ (1 test, **file unmodified** — the real proof
-the refactor changed no behaviour)
+**Verified working on Fedora KDE as of 2026-08-01, end of Day 4:**
+`pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (29 tests,
+up from 18) · `pnpm test:e2e` ✅ (10 tests, up from 1)
 
 All re-verified independently by the Master Thread against a fresh database on
-port 3999, not taken from the worker's report. All five endpoints returned
-exactly the expected status and ordering, including the two preserved 500s.
+port 3998, not taken from the worker's report. Every status code above was
+confirmed over real HTTP, plus three checks the worker did not claim:
+
+- whitespace survived storage unmodified (`"  padded  "` in, `"  padded  "` out)
+- three rejected writes stored nothing (count unchanged)
+- `content` is a string on every endpoint, so POST and GET cannot disagree
+
+`apps/api/package.json` and `pnpm-lock.yaml` confirmed unmodified — **no
+dependency was added.**
 
 **Boundary check** (re-runnable, must return nothing):
 
 ```bash
 grep -n "node:sqlite\|DatabaseSync\|DATABASE\|SELECT\|INSERT\|prepare(" \
   apps/api/src/entries/entries.service.ts apps/api/src/entries/entries.controller.ts
+```
+
+**HTTP-boundary check, added Day 4** (must return nothing — the service and
+repository may not know status codes exist). The `grep -v` strips comment
+lines: both files legitimately *mention* `NotFoundException` in comments
+explaining why they must never throw one, and a check that reports those is a
+check nobody will trust.
+
+```bash
+grep -nE "HttpException|NotFoundException|BadRequestException" \
+  apps/api/src/entries/entries.service.ts apps/api/src/entries/entries.repository.ts \
+  | grep -v "^\S*:[0-9]*: *[/*]"
 ```
 
 `EntryRow` was also confirmed to appear nowhere outside `entries.repository.ts`.
@@ -132,12 +175,17 @@ neuron/                    pnpm workspace root
 │           │                           provider, CREATE TABLE at boot
 │           └── entries/
 │               ├── entries.module.ts      wires controller + service + repository
-│               ├── entries.controller.ts  HTTP only — routes, params, query
+│               ├── entries.controller.ts  HTTP only — routes, params, query,
+│               │                          validation, and the ONLY place a
+│               │                          status code appears. Owns
+│               │                          parseCreateEntryDto
 │               ├── entries.service.ts     application logic; generates id +
 │               │                          createdAt, delegates storage
 │               ├── entries.repository.ts  the ONLY class that knows a database
 │               │                          exists. Owns EntryRow + toJournalEntry
-│               └── entry.interface.ts     { id, content, createdAt } all strings
+│               ├── create-entry.dto.ts    what a client may SEND ({ content })
+│               └── entry.interface.ts     what an entry IS ({ id, content,
+│                                          createdAt }) — all strings
 └── docs/
     ├── constitution.md    engineering principles
     ├── roadmap.md         30-day plan (Day 0–29)
@@ -158,6 +206,7 @@ and that is deliberate — see ADR-001.
 | [ADR-002](decisions/ADR-002-nestjs.md) | NestJS over raw `http` / Express / Fastify | Accepted |
 | [ADR-003](decisions/ADR-003-sqlite.md) | SQLite via built-in `node:sqlite`, raw SQL, no ORM | Accepted, **expected to be replaced** (Day 16 / Day 24) |
 | [ADR-004](decisions/ADR-004-repository-raw-sql.md) | Data access gets its own layer (`EntriesRepository`); SQL stays hand-written. Query builder and ORM rejected on timing, not merit. `id`/`createdAt` generated in the service | Accepted, **revisit Day 13 / Day 24** |
+| [ADR-005](decisions/ADR-005-validation-and-error-semantics.md) | Status codes live in the controller and nowhere else — the service may not throw HTTP exceptions either. `findById` → `undefined`, `findByContent` → `[]`. Validation hand-written; `class-validator` and `zod` rejected on timing, not merit. `/entries/count` returns `{ count }` | Accepted, **revisit Day 5 (PATCH) / when a check is duplicated** |
 
 **Decided outside an ADR:**
 
@@ -206,7 +255,21 @@ and that is deliberate — see ADR-001.
   the repository pattern herself from the duplication, chose raw SQL over a
   query builder and an ORM with reasons, and argued the `id`/`createdAt`
   placement hard enough to change the ADR. ADR-004 written. Extraction done by a
-  worker and audited. **Not yet committed or merged.**
+  worker and audited. Merged as `488acc9` (PR #3, squash).
+- **Day 4** — the three known-wrong 500s fixed, and validation added. She
+  derived the layering rule herself: status codes are HTTP vocabulary, so the
+  service may not throw `NotFoundException` either — the same boundary argument
+  as ADR-004, applied one layer up. She got the 4xx/5xx re-test right, learned
+  400 vs 404, and **watched type erasure happen** by reading the compiled
+  JavaScript, which is the fact that makes runtime validation necessary at all.
+  She chose hand-written validation over `class-validator`/`zod` on timing, and
+  decided all four validation rules including rejecting `{"content": 42}`.
+  ADR-005 written. Implementation by a worker and audited. The worker
+  **deviated once and was right to**: it used `@Body() body: unknown` rather
+  than the `CreateEntryDto` the prompt specified, because an unvalidated body is
+  not a `CreateEntryDto` and naming it one repeats the exact falsehood the day
+  removed. It also caught a `null`-body case the design missed
+  (`typeof null === 'object'`).
 
 ---
 
@@ -230,8 +293,10 @@ and that is deliberate — see ADR-001.
 | Item | Detail |
 |---|---|
 | `apps/api` `lint` script has `--fix` | `pnpm lint` silently **rewrites** files rather than reporting. Fine locally, wrong for a CI gate. Split into `lint` / `lint:fix` by Day 25 |
-| `res.body` is untyped (`any`) in e2e | Can't make shape assertions without a cast. Day 4 (DTOs) |
+| `res.body` is untyped (`any`) in e2e | Can't make shape assertions without a cast. Not resolved on Day 4 — the new e2e tests assert on `res.body` through the same untyped path. Day 5 or Day 7 |
 | Worker prompts + reports are gitignored | `docs/workers/` and `docs/learning/**/report.md` stay local only. They exist on disk but are not in version control |
+| **`POST /entries` ignores unknown fields** | `{"content":"x","id":"mine"}` returns 201 and silently drops `id`. Safe today because the service reads only `content`, but "ignore" vs "reject" is an unmade decision. Day 5 (`PATCH` forces it) |
+| **Validation is enforced by memory, not by mechanism** | Nothing makes a future endpoint validate its body. A forgotten check passes lint, typecheck, build and tests. This is ADR-005's accepted cost and its named revisit condition — the same failure class as the Day 3 `ORDER BY` bug |
 
 **Resolved during Day 2** (no longer debt):
 
@@ -249,14 +314,14 @@ and that is deliberate — see ADR-001.
 | **Casts survive the repository extraction.** Rename `created_at`, miss one `SELECT`, and the API serves `"createdAt": null` with lint, typecheck and build all green. Same class of failure as the Day 3 `ORDER BY` bug — a rule the type system cannot see. Accepted knowingly in ADR-004 | Reopen if it causes a bug, or Day 13 / Day 24 |
 | `id`/`createdAt` format is enforced by convention, not by the database or the type system. Tolerable only while `create()` is the single write path | When a second write path appears (ADR-004) |
 | `entry.interface.ts` names the language construct, not the concept | Unscheduled — cosmetic |
-| `POST /entries` with `{}` fails as an uncaught 500 | Day 4 (validation) |
-| `GET /entries/:id` returns **500 where 404 belongs** — pinned by a test asserting the wrong behaviour | Day 4 |
-| `GET /entries?word=<no matches>` returns **500 where `200 []` belongs** — also pinned | Day 4 |
-| Storage-outcome → HTTP-status mapping has no home. The repository is barred from knowing status codes (ADR-004), so the translation must happen above it | Day 4 |
+| ~~`POST /entries` with `{}` fails as an uncaught 500~~ | ✅ **Resolved Day 4** — 400 |
+| ~~`GET /entries/:id` returns 500 where 404 belongs~~ | ✅ **Resolved Day 4** — 404, and the pinned test moved to the controller spec where the behaviour now lives |
+| ~~`GET /entries?word=<no matches>` returns 500 where `200 []` belongs~~ | ✅ **Resolved Day 4** — fixed by *deleting* the `throw`; no new code |
+| ~~Storage-outcome → HTTP-status mapping has no home~~ | ✅ **Resolved Day 4** — ADR-005: the controller, and only the controller |
+| ~~`GET /entries/count` returns a bare number~~ | ✅ **Resolved Day 4** — `{ "count": n }` |
+| ~~One type serves as both domain model and HTTP wire shape~~ | ✅ **Resolved Day 4** — `CreateEntryDto` (send) vs `JournalEntry` (is) |
 | `LIKE '%term%'` search is lexical and cannot match meaning | Day 15 / Day 16 (this is the Phase 3 premise) |
-| `GET /entries/count` returns a bare number, not JSON | Day 4 (response shape) |
-| One type serves as both domain model and HTTP wire shape | Day 4 (DTOs) |
-| No validation pipe, exception filter, or CORS | Days 4 / 12 |
+| No exception filter or CORS. **A `ValidationPipe` was deliberately declined**, not deferred by omission — see ADR-005 | Day 12 (CORS); pipe revisits per ADR-005 |
 | `process.env.PORT` and `DATABASE_PATH` read raw and unvalidated | Day 6 (config) |
 | `CREATE TABLE IF NOT EXISTS` at boot is not migration tooling | First non-additive schema change |
 | No index on `created_at`, no pagination | Day 23 (measure first) |
@@ -304,11 +369,40 @@ the roadmap's *Learning Debt* section for why this is tracked.
   different request?"* She applied it correctly once and wrongly once, grouping
   "record missing" with "database file deleted." **Worth re-testing on Day 4.**
 
+**Repaid on Day 4:**
+
+- **Type erasure.** The best moment of the day. She ran `pnpm build`, read the
+  compiled JavaScript, and saw `{ content: string }` become a bare `body`. She
+  now owns the reason validation must be *runtime code*: TypeScript is not
+  present when the request arrives. Learned by observation, not assertion.
+- **4xx vs 5xx, re-tested.** All three questions right, and question 3 answered
+  with the *rule* ("who can fix it, the client or the engineer?") rather than
+  the two instances. That is the exact distinction that failed on Day 3.
+- **400 vs 404.** Did not know it; was told once; then applied it correctly and
+  unprompted to `POST {}`.
+
 **Still owed:**
 
+- **Writing tests.** She has never written a test on this project. Offered the
+  three Day 4 test rewrites and declined; all 20 new tests are worker-written.
+  **This is the largest single item and it is Day 5's actual subject.**
 - supertest, and what it does that a unit test cannot → Day 5
 - Unit vs e2e — the route-rename experiment → Day 5
 - Why three of four commands miss a type error in a spec file → Day 5
+- **Empty collection is a complete answer, not a failure.** Took three rounds on
+  Day 4; she answered "5xx" for an empty search and the conclusion came from the
+  Master Thread. Ended with "I understand, move on" without demonstrating it
+  back. The `[].length` vs `undefined.length` experiment was offered and not
+  run. → Day 5, and it is two commands
+- **Why `@Body() body: unknown` beats a named DTO type at a trust boundary.**
+  The worker introduced this by deviating from the prompt. The question *"why
+  can't the compiler stop you writing `CreateEntryDto` and skipping
+  validation?"* was asked twice and not answered. It is the direct payoff of the
+  type-erasure lesson she did get → Day 5
+- **Where validation belongs.** 🟡 Partial — she reasoned it out and chose the
+  *service*, then accepted the counter-argument. The distinction between "is
+  this well-formed?" (boundary) and "is this allowed?" (service) was given to
+  her, not derived. → re-test Day 10 when ownership checks arrive
 - **Prepared statements — 🟡 explained, not verified.** The mechanism was taught
   in full (parse-then-bind; the database parses before it has seen any value, so
   data cannot become instruction). She said she understood and declined the
