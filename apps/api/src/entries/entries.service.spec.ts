@@ -111,6 +111,21 @@ describe('EntriesService', () => {
     });
   });
 
+  describe('create', () => {
+    // The controller rejects whitespace-only content, but content that merely
+    // *contains* surrounding whitespace is valid and must survive unchanged.
+    // Trimming happens nowhere: whitespace decides validity at the boundary and
+    // never rewrites what the user actually wrote (ADR-005).
+    it('should store content verbatim, without trimming surrounding whitespace', () => {
+      const padded = '  spacing the user chose  ';
+
+      const created = service.create(padded);
+
+      expect(created.content).toBe(padded);
+      expect(service.findById(created.id)?.content).toBe(padded);
+    });
+  });
+
   describe('findById', () => {
     it('should return the entry that was created', () => {
       const created = service.create('findable by its id');
@@ -118,12 +133,12 @@ describe('EntriesService', () => {
       expect(service.findById(created.id)).toEqual(created);
     });
 
-    // Documents today's behaviour, not the desired behaviour. A missing entry
-    // is a 404, and a plain Error becomes a 500 — that gap is Day 4's work.
-    // Asserting it now means the day it changes, this test fails and forces
-    // the change to be deliberate rather than accidental.
-    it('should throw when the id does not exist', () => {
-      expect(() => service.findById('no-such-id')).toThrow();
+    // `undefined`, not an exception. The service has to stay callable from a
+    // background job with no HTTP response to write, so it reports absence as
+    // a value and leaves the 404 to the controller — asserted in
+    // entries.controller.spec.ts (ADR-005).
+    it('should return undefined when the id does not exist', () => {
+      expect(service.findById('no-such-id')).toBeUndefined();
     });
   });
 
@@ -177,12 +192,15 @@ describe('EntriesService', () => {
       ]);
     });
 
-    // Wrong on purpose, like `findById` above: no matches is an empty array
-    // and a 200, not an exception. Pinned here so Day 4 changes it knowingly.
-    it('should throw when nothing matches', () => {
+    // An empty array is the complete answer to "which entries contain zzz",
+    // not a failure — so this is a 200 with `[]` and never an exception. Note
+    // the asymmetry with `findById` returning `undefined`: a single missing
+    // thing has no representation, but a collection query always has one
+    // (ADR-005).
+    it('should return an empty array when nothing matches', () => {
       seed();
 
-      expect(() => service.findByContent('zzz')).toThrow();
+      expect(service.findByContent('zzz')).toEqual([]);
     });
   });
 
