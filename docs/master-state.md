@@ -16,11 +16,13 @@ the recovery cost most of a working session.
 
 ---
 
-**Last updated:** 2026-08-01 (end of Day 4)
+**Last updated:** 2026-08-01 (end of Day 4, after the evening debt-clearing
+session)
 **Current day:** Day 4 of 29 complete (public numbering — see roadmap)
-**Current branch:** `day-04-validation`, **committed and pushed; PR not yet
-opened** at the time of writing. Day 3 merged to `main` as `488acc9` (PR #3,
-squash).
+**Current branch:** `day-04-validation`, committed and pushed. Day 4 code is
+`1c74b1a`. **PR #4 is not yet opened** —
+https://github.com/UmmEhabiba3015/neuron/pull/new/day-04-validation
+Day 3 merged to `main` as `488acc9` (PR #3, squash).
 
 ---
 
@@ -35,21 +37,35 @@ broke."* Afterwards she should be able to explain unit vs integration vs e2e,
 what is worth testing, and — the part that matters — she should have **written
 tests herself**.
 
-### ⚠️ Read the Day 5 warning in the roadmap before planning the day
+### Day 5 starts clear — six debts were closed on Day 4 evening
 
-`docs/roadmap.md` now carries a section titled *"Day 5 is carrying more than one
-day of work"* listing **eight** owed items. Do not attempt all eight.
+Day 5 was carrying eight owed items and was over capacity. **Six closed in one
+evening session**, by direct question and experiment. Two had been owed since
+Day 1; one since Day 2 and offered twice before.
 
-**The recommendation recorded there: items 1 and 2 are the day.**
+Closed: prepared statements · which command catches a spec type error · unit vs
+e2e · supertest · `EntriesRepository` wiring · empty-collection · `unknown` vs a
+named DTO at a trust boundary.
 
-1. **Writing tests by hand.** She has still never written a test on this
-   project. All 20 tests added on Day 4 were worker-written — she was offered
-   the three test rewrites on Day 4 and explicitly declined them.
-2. **supertest** — what it does that a unit test cannot.
+**Day 5 therefore has room.** What remains for it:
 
-Several other items fold into those two naturally: writing an e2e test teaches
-supertest; renaming a route and watching which test catches it teaches unit vs
-e2e. Push the remainder to **Day 7 (review day)**, where they belong anyway.
+- Reading and judging an existing suite — naming what it *fails* to cover.
+- `docs/learning/day-02/testing-literacy.md` experiments 2–5, unrun since Day 2.
+- The `PATCH`/`DELETE` work the day was scheduled for, which forces the
+  unknown-fields decision.
+
+### ⚠️ Direction set by her husband on Day 4 — do not relitigate this
+
+**She is not required to write test suites by hand.** His position, stated
+directly: AI writes tests in practice now, and what matters is that she
+understands what tests are, how they work, and the difference between unit,
+integration and e2e.
+
+Day 5 should therefore run **read → predict → break → observe**, not "write a
+suite from scratch." The two experiments below are the model for this, and both
+worked well. The remaining gap is judgement: looking at an existing suite and
+naming what it does *not* cover — which is the skill the Day 3 `ORDER BY` bug
+actually needed.
 
 ### How Day 4 actually went, because it changes how to run Day 5
 
@@ -76,21 +92,32 @@ Three moments worth knowing about:
   each time and recorded rather than pushed. Worth watching whether this is
   fatigue on a long day or a pattern forming.
 
-### Two questions asked on Day 4 and never answered — pick these up early
+### The two experiments from Day 4 evening — reuse this format
 
-1. **Why can the compiler not stop you writing `@Body() body: CreateEntryDto`
-   and skipping validation entirely? What happens at runtime?** This is the
-   direct payoff of the type-erasure lesson she *did* get, so it should be a
-   short conversation.
-2. **The `[].length` vs `undefined.length` experiment.** Two `node -e` commands.
-   `[].length` is `0`; `undefined.length` throws. This is the concrete
-   demonstration behind the empty-collection idea she has not shown back.
+Both produced results that contradict intuition, and both are re-runnable in
+under a minute. They are the best teaching tools found so far.
+
+**1. Rename the route.** `@Controller('entries')` → `@Controller('journal')`.
+The application is completely broken — every existing client gets a 404 — and
+**all 29 unit tests still pass.** 9 of 10 e2e tests fail with
+`expected 201 "Created", got 404 "Not Found"`.
+
+> Unit tests verify the pieces work. E2E verifies the pieces are *connected*.
+
+**2. Delete a provider.** Remove `EntriesRepository` from `providers` in
+`entries.module.ts`. `typecheck` ✅, `build` ✅, **server crashes at boot** with
+`Nest can't resolve dependencies of the EntriesService (?)`, and **29 unit tests
+still pass** — because every spec file declares its own `providers` list and
+never reads `entries.module.ts`. Only the e2e suite does `imports: [AppModule]`,
+so only e2e can catch broken production wiring.
+
+Restore both afterwards and re-verify. (A backup copy before editing saves
+time; `git checkout <file>` also works.)
 
 ### Also outstanding
 
 Experiments 2 to 5 in `docs/learning/day-02/testing-literacy.md` remain unrun
-since Day 2, and the prepared-statement injection demonstration has now been
-offered and skipped twice (Day 3, Day 4).
+since Day 2.
 
 ---
 
@@ -269,7 +296,10 @@ and that is deliberate — see ADR-001.
   than the `CreateEntryDto` the prompt specified, because an unvalidated body is
   not a `CreateEntryDto` and naming it one repeats the exact falsehood the day
   removed. It also caught a `null`-body case the design missed
-  (`typeof null === 'object'`).
+  (`typeof null === 'object'`). **In an evening session after the code was
+  committed, six learning debts were closed** by direct question and experiment
+  — two of them owed since Day 1, one since Day 2 and previously skipped twice.
+  This cleared Day 5, which had been over capacity.
 
 ---
 
@@ -381,24 +411,37 @@ the roadmap's *Learning Debt* section for why this is tracked.
 - **400 vs 404.** Did not know it; was told once; then applied it correctly and
   unprompted to `POST {}`.
 
+**Repaid on Day 4 (evening session — six items, two owed since Day 1):**
+
+- **Prepared statements.** Owed since Day 2, offered and skipped twice. She
+  explained the parse-then-bind mechanism unprompted: the database parses the
+  instruction text first, so by the time values arrive the sentence structure is
+  already fixed and data cannot become instruction. Not the slogan — the
+  mechanism.
+- **Why three of four commands miss a type error in a spec file.** All four
+  answered correctly with the reason for each, including that `ts-jest`
+  transpiles rather than compiles, so types are stripped without being checked.
+- **Unit vs e2e, and supertest.** Predicted the route-rename result correctly
+  and gave the right reason: unit tests never mention the route, e2e names the
+  path in the request. Then watched 29 unit tests pass on a completely broken
+  application.
+- **`EntriesRepository` wiring.** Four-part prediction, all four correct —
+  including the hard one, that unit tests would still pass because spec files
+  declare their own providers.
+- **Empty collection is an answer, not a failure.** Ran the experiment, then
+  said it in her own words: *"even in that case the correct answer is no row
+  contains the word and empty array can satisfy it."* This is the exact idea she
+  could not reach earlier the same day.
+- **Why `unknown` beats a named DTO at a trust boundary.** Explained that the
+  compiler *believes* the label, so typecheck and build both pass and the
+  failure only appears at runtime.
+
 **Still owed:**
 
-- **Writing tests.** She has never written a test on this project. Offered the
-  three Day 4 test rewrites and declined; all 20 new tests are worker-written.
-  **This is the largest single item and it is Day 5's actual subject.**
-- supertest, and what it does that a unit test cannot → Day 5
-- Unit vs e2e — the route-rename experiment → Day 5
-- Why three of four commands miss a type error in a spec file → Day 5
-- **Empty collection is a complete answer, not a failure.** Took three rounds on
-  Day 4; she answered "5xx" for an empty search and the conclusion came from the
-  Master Thread. Ended with "I understand, move on" without demonstrating it
-  back. The `[].length` vs `undefined.length` experiment was offered and not
-  run. → Day 5, and it is two commands
-- **Why `@Body() body: unknown` beats a named DTO type at a trust boundary.**
-  The worker introduced this by deviating from the prompt. The question *"why
-  can't the compiler stop you writing `CreateEntryDto` and skipping
-  validation?"* was asked twice and not answered. It is the direct payoff of the
-  type-erasure lesson she did get → Day 5
+- **Reading and judging an existing suite.** 🟡 Partial. She can now predict
+  what unit vs e2e catches. What remains is looking at a suite and naming what
+  it *fails* to cover — the skill the Day 3 `ORDER BY` bug needed. Per her
+  husband's direction, this is the goal rather than writing suites by hand.
 - **Where validation belongs.** 🟡 Partial — she reasoned it out and chose the
   *service*, then accepted the counter-argument. The distinction between "is
   this well-formed?" (boundary) and "is this allowed?" (service) was given to

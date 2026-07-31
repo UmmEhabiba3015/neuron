@@ -67,21 +67,21 @@ criterion; comprehension is.
 | DI resolves at runtime, not compile time | Day 1 worker | Day 1 | ✅ **Repaid Day 2** — predicted wrong twice, then proven live |
 | Symbol injection tokens, factory providers | Day 2 worker | Day 2 | ✅ **Repaid Day 2** |
 | Jest — runners, matchers, `describe`/`it`, mocking | Day 1 worker | Day 1 | 🟡 Partial — basics only |
-| supertest — what it does that a unit test cannot | Day 1 worker | Day 1 | ❌ Owed → Day 5 |
-| Unit vs e2e — what each catches, what each cannot | Day 1 worker | Day 1 | ❌ Owed → Day 5 |
-| Why `build`/`test`/`lint` all miss a type error in a spec | Day 2 audit | Day 2 | ❌ Owed → Day 5 |
-| Raw SQL, prepared statements, parameter binding | Day 2 worker | Day 2 | 🟡 **Partial** — she hand-wrote 3 queries on Day 3, so SQL itself is owned. The prepared-statement mechanism was *explained* but not demonstrated back; the injection experiment was offered and skipped → Day 5 |
+| supertest — what it does that a unit test cannot | Day 1 worker | Day 1 | ✅ **Repaid Day 4 (evening)** — via the route-rename experiment; she explained that e2e names the path in the request and unit tests never mention it |
+| Unit vs e2e — what each catches, what each cannot | Day 1 worker | Day 1 | ✅ **Repaid Day 4 (evening)** — predicted correctly that renaming `@Controller('entries')` → `'journal'` would leave all 29 unit tests green and break e2e. Ran it: **29 passed, 9 of 10 e2e failed** |
+| Why `build`/`test`/`lint` all miss a type error in a spec | Day 2 audit | Day 2 | ✅ **Repaid Day 4 (evening)** — all four commands answered correctly with the mechanism for each, including that `ts-jest` transpiles rather than compiles |
+| Raw SQL, prepared statements, parameter binding | Day 2 worker | Day 2 | ✅ **Repaid Day 4 (evening)** — she explained the parse-then-bind mechanism unprompted and in her own words: the database parses the instruction text first, so by the time values arrive the sentence structure is fixed and data cannot become instruction. Offered and skipped twice before this |
 | 4xx vs 5xx — "could the client fix this by sending a different request?" | Day 3 | Day 3 | ✅ **Repaid Day 4** — got all three re-test questions right, and answered the third with the *rule* rather than the two instances, which is the distinction that had failed on Day 3 |
 | `400` vs `404` — malformed request vs well-formed request for a thing that does not exist | Day 4 | Day 4 | ✅ **Repaid Day 4** — did not know it, was told once, then applied it correctly and unprompted to `POST {}` |
-| **Empty collection is a complete answer, not a failure** | Day 4 | Day 4 | ❌ **Owed** — took three rounds and the conclusion came from the Master Thread, not from her. She said "I understand, move on" without demonstrating it back. The `[].length` vs `undefined.length` experiment was offered and not run → Day 5 |
+| **Empty collection is a complete answer, not a failure** | Day 4 | Day 4 | ✅ **Repaid Day 4 (evening)** — ran the experiment, then said it in her own words: *"even in that case the correct answer is no row contains the word and empty array can satisfy it."* That is the idea she could not reach earlier the same day |
 | **Type erasure** — TypeScript annotations do not exist at runtime | Day 4 | Day 4 | ✅ **Repaid Day 4** — she compiled the project, read the emitted JavaScript, and saw `{ content: string }` become bare `body` herself. This is the load-bearing fact under all validation |
 | Where validation belongs (boundary vs service) | Day 4 | Day 4 | 🟡 **Partial** — she reasoned it out and got it wrong (chose the service), then accepted the argument. The distinction between "is this well-formed?" and "is this allowed?" was given to her, not derived → re-test Day 10 when ownership checks arrive |
-| `@Body() body: unknown` vs a named DTO type at a trust boundary | Day 4 worker | Day 4 | ❌ **Owed** — the worker deviated from the prompt to introduce this and was right to. The question "why can't the compiler stop you skipping validation?" was asked and not answered → Day 5 |
-| Writing tests, not just reading them | Day 1 | Day 1 | ❌ **Owed** — explicitly declined on Day 4 when offered the three test rewrites. All 20 new tests on Day 4 were worker-written → Day 5 |
+| **Reading and judging an existing test suite** | Day 4 | Day 4 | 🟡 **Partial** — she can now predict what unit vs e2e catches. What remains is looking at a suite and naming what it *fails* to cover, which is the skill the Day 3 `ORDER BY` bug needed → Day 5 |
 | Route matching is declaration order, first match wins | Day 3 (her own bug) | Day 3 | ✅ **Repaid Day 3** — predicted "static before dynamic", disproven by her own unreachable `/entries/count` |
 | Repository pattern — what it is, what crosses the boundary | Day 3 | Day 3 | ✅ **Repaid Day 3** — derived by her from the duplication before it was named |
 | Where `id`/`createdAt` should be generated; UUID vs sequential ids | Day 3 | Day 3 | ✅ **Repaid Day 3** — she argued for DB-generated, changed position on evidence, and raised the enforcement objection now recorded in ADR-004 |
-| `EntriesRepository` wiring — why the module needed a new provider | Day 3 worker | Day 3 | ❌ **Owed** — the worker did the extraction; she has not wired a repository herself |
+| `EntriesRepository` wiring — why the module needed a new provider | Day 3 worker | Day 3 | ✅ **Repaid Day 4 (evening)** — four-part prediction, all four correct. Removed from `providers`: typecheck ✅, build ✅, **server crashed at boot**, **29 unit tests still passed**, e2e failed. She predicted the unit-test result and its reason (spec files declare their own providers and never read `entries.module.ts`) |
+| `@Body() body: unknown` vs a named DTO type at a trust boundary | Day 4 worker | Day 4 | ✅ **Repaid Day 4 (evening)** — explained that the compiler *believes* the label, so typecheck and build both pass and the failure surfaces at runtime |
 
 Add a row whenever a worker introduces something unfamiliar. Close it only
 when the explanation happens.
@@ -119,33 +119,48 @@ repository pattern until you've felt SQL sprawl); validation before testing
 (you need behavior worth asserting); config last, because you only feel the
 pain once there's something environment-specific to configure.
 
-### ⚠️ Day 5 is carrying more than one day of work
+### Day 5 was cleared in advance, on Day 4 evening
 
-This is recorded here, not buried in the debt table, because it needs a
-decision at the *start* of Day 5 rather than a discovery at the end of it.
+Day 5 was originally carrying eight owed items and was over capacity. **Six
+were closed on the evening of Day 4**, in a single session, by explanation and
+experiment rather than by instruction. Two had been owed since Day 1, one since
+Day 2 and offered twice before.
 
-Day 5 currently owes, in rough priority order:
+What closed: prepared statements · which command catches a spec type error ·
+unit vs e2e (route-rename experiment) · supertest · `EntriesRepository` wiring ·
+the empty-collection idea · why `unknown` beats a named DTO at a trust boundary.
 
-1. **Writing tests by hand** — the day's actual subject, and the largest single
-   item. All 20 tests added on Day 4 were worker-written; she has still never
-   written a test on this project.
-2. supertest — what it does that a unit test cannot.
-3. Unit vs e2e — the route-rename experiment.
-4. Why three of four commands miss a type error in a spec file.
-5. The prepared-statement injection demonstration (offered twice, skipped twice).
-6. The empty-collection idea (`[].length` vs `undefined.length`).
-7. Why `unknown` at a trust boundary beats a named DTO type.
-8. `docs/learning/day-02/testing-literacy.md` experiments 2–5, unrun since Day 2.
+**The two experiments worth repeating on later days**, because both produced a
+result that contradicts intuition:
 
-That is not one day. **Items 1 and 2 are the day; the rest are candidates.**
-Several will fold into item 1 naturally — writing an e2e test by hand teaches
-supertest, and renaming a route to watch which test catches it teaches unit vs
-e2e. The remainder should be pushed to Day 7 (review day) rather than rushed,
-and Day 7 is where they belong anyway.
+1. **Rename `@Controller('entries')` to `'journal'`.** The application is
+   completely broken — every existing client gets a 404 — and **all 29 unit
+   tests still pass.** 9 of 10 e2e tests fail. Unit tests verify that the pieces
+   work; e2e verifies that the pieces are *connected*.
+2. **Delete `EntriesRepository` from the module's `providers` array.**
+   `typecheck` ✅, `build` ✅, **server crashes at boot**, and **29 unit tests
+   still pass** — because every spec file declares its own `providers` list and
+   never reads `entries.module.ts`. Only the e2e suite loads `AppModule`, so
+   only the e2e suite can catch broken production wiring.
 
-The pattern worth naming: **learning debt compounds faster than technical
-debt**, because the same worker that repays velocity accrues more of it. Day 4
-closed three items and opened four.
+**Day 5 therefore starts with room.** What remains for it:
+
+- Reading and judging an existing suite — naming what it *fails* to cover. This
+  is the skill the Day 3 `ORDER BY` bug actually needed.
+- `docs/learning/day-02/testing-literacy.md` experiments 2–5, unrun since Day 2.
+- The `PATCH`/`DELETE` work the day was scheduled for, which forces the
+  unknown-fields decision recorded in *Open questions*.
+
+**Direction set by the project owner's husband (Day 4):** she is not required to
+write test suites by hand. AI-generated tests are the norm and that is accepted.
+The goal is that she can *read* a suite, explain what each kind of test does,
+and judge what a suite misses. Day 5 should follow **read → predict → break →
+observe**, not "write from scratch."
+
+The pattern still worth naming: **learning debt compounds faster than technical
+debt**, because the same worker that repays velocity accrues more of it. But it
+is also cheaper to repay than expected — six items took one evening once they
+were asked as direct questions with an experiment attached.
 
 ---
 
