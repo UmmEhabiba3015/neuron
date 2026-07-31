@@ -70,7 +70,11 @@ criterion; comprehension is.
 | supertest — what it does that a unit test cannot | Day 1 worker | Day 1 | ❌ Owed → Day 5 |
 | Unit vs e2e — what each catches, what each cannot | Day 1 worker | Day 1 | ❌ Owed → Day 5 |
 | Why `build`/`test`/`lint` all miss a type error in a spec | Day 2 audit | Day 2 | ❌ Owed → Day 5 |
-| Raw SQL, prepared statements, parameter binding | Day 2 worker | Day 2 | ❌ Owed → Day 3 |
+| Raw SQL, prepared statements, parameter binding | Day 2 worker | Day 2 | 🟡 **Partial** — she hand-wrote 3 queries on Day 3, so SQL itself is owned. The prepared-statement mechanism was *explained* but not demonstrated back; the injection experiment was offered and skipped → Day 5 |
+| Route matching is declaration order, first match wins | Day 3 (her own bug) | Day 3 | ✅ **Repaid Day 3** — predicted "static before dynamic", disproven by her own unreachable `/entries/count` |
+| Repository pattern — what it is, what crosses the boundary | Day 3 | Day 3 | ✅ **Repaid Day 3** — derived by her from the duplication before it was named |
+| Where `id`/`createdAt` should be generated; UUID vs sequential ids | Day 3 | Day 3 | ✅ **Repaid Day 3** — she argued for DB-generated, changed position on evidence, and raised the enforcement objection now recorded in ADR-004 |
+| `EntriesRepository` wiring — why the module needed a new provider | Day 3 worker | Day 3 | ❌ **Owed** — the worker did the extraction; she has not wired a repository herself |
 
 Add a row whenever a worker introduces something unfamiliar. Close it only
 when the explanation happens.

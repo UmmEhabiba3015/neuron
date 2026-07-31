@@ -16,44 +16,57 @@ the recovery cost most of a working session.
 
 ---
 
-**Last updated:** 2026-07-29 (end of Day 2)
-**Current day:** Day 2 of 29 complete (public numbering — see roadmap)
-**Current branch:** `main`, clean. Day 2 merged as `9c7365e` via PR #2 (squash).
+**Last updated:** 2026-07-30 (end of Day 3)
+**Current day:** Day 3 of 29 complete (public numbering — see roadmap)
+**Current branch:** `day-03-data-access`, clean and pushed. Day 3 committed as
+`ee20124`. **PR #3 is open and not yet merged** —
+https://github.com/UmmEhabiba3015/neuron/pull/3
 
 ---
 
 ## Next Session Starts Here
 
-**Day 3 — the roadmap problem is:** *"SQL strings are scattered through my
-controller."* Afterwards she should be able to explain raw SQL versus query
-builder versus ORM, what a repository is, and why data access earns its own
-layer.
+**First, close out Day 3.** The work is done, audited, committed and pushed.
+The only step left is squash-merging PR #3 into `main`, then branching
+`day-04-validation` from the updated `main`. If the PR was already merged before
+this session started, just confirm `main` is current and branch from it.
 
-**Do not start by explaining the repository pattern.** The Day 2 method worked
-and should be repeated: she could not feel the data-loss problem until `POST`
-existed, so she built `POST` first and watched an entry vanish. The same
-applies here.
+**Day 4 — the roadmap problem is:** *"A client sent `{}` and the server returned
+a 500."* Afterwards she should be able to explain validation at the boundary,
+DTOs, HTTP status semantics, and why errors are a design surface.
 
-Right now `entries.service.ts` has exactly **two** queries. Two is not sprawl.
-The duplicated `EntryRow` interface, the `toJournalEntry` mapper, and the
-`as unknown as` cast look harmless at this size, and any argument for a
-repository layer will sound theoretical.
+**Day 4 has unusually good raw material already sitting in the code**, produced
+live on Day 3 rather than invented for the lesson. Do not discard it and do not
+fix it early:
 
-So block one of Day 3 is to **make the duplication real** — add two or three
-more queries (fetch one entry by id, filter or search by content, count
-entries). She writes them by hand. By the third one she will be copying the
-same three pieces every time, and the Day 3 question stops being abstract.
+1. `POST /entries` with `{}` → uncaught 500 (inherited from Day 2).
+2. `GET /entries/does-not-exist` → **500 where 404 belongs.** She wrote this
+   herself, watched it, and could not initially explain why her error message
+   vanished from the response.
+3. `GET /entries?word=zzz` → **500 where `200 []` belongs.** A search matching
+   nothing is not an error.
 
-Only then compare raw SQL, a query builder, and an ORM, and write ADR-004.
+Cases 2 and 3 are deliberately preserved and pinned by tests that assert
+today's *wrong* behaviour, so Day 4 has to change them consciously.
 
-**Before anything else:** `docs/master-state.md` and `docs/roadmap.md` have
-uncommitted edits from the end of Day 2 (this file's own update, and the
-learning-debt tables). Either commit them directly to `main` as a `docs:`
-commit, or fold them into the Day 3 branch.
+**Groundwork already laid on Day 3, to build on rather than repeat:**
+
+- She has the 4xx-vs-5xx test: *"could the client fix this by sending a
+  different request?"* If yes → 400s. If no → 500s. She applied it correctly
+  once and got the reasoning wrong once (she grouped "record missing" with
+  "database file deleted"). Worth re-testing that it stuck.
+- She knows Nest only understands `HttpException` and its subclasses, and that a
+  plain `Error` becomes a 500 with the message stripped — security reason and
+  correctness reason both explained.
+- **Open design question deliberately left for Day 4:** the repository is not
+  allowed to know what a status code is (ADR-004), so it *cannot* throw
+  `NotFoundException`. Where does the storage-outcome → HTTP-status mapping
+  belong? This is the natural Day 4 opening and she has the boundary rule
+  already in hand.
 
 **Also outstanding:** experiments 2 to 5 in
-`docs/learning/day-02/testing-literacy.md` were never run. They are scheduled
-for Day 5, not Day 3.
+`docs/learning/day-02/testing-literacy.md` were never run. Still scheduled for
+Day 5, along with the prepared-statement demonstration she skipped on Day 3.
 
 ---
 
@@ -62,20 +75,36 @@ for Day 5, not Day 3.
 **What runs today:**
 
 ```
-GET  /entries → 200, all entries from SQLite, newest first
-POST /entries → 201, { "content": "..." }, returns the created entry
+GET  /entries              → 200, all entries, newest first
+GET  /entries?word=<term>  → 200, entries whose content matches, newest first
+                             (500 when nothing matches — known wrong, Day 4)
+GET  /entries/count        → 200, a bare number
+GET  /entries/:id          → 200, one entry
+                             (500 when not found — known wrong, Day 4)
+POST /entries              → 201, { "content": "..." }, returns the created entry
+                             (500 on {} — known wrong, Day 4)
 ```
 
 Entries persist across restarts. No auth, no frontend, no validation, no CI,
 no deployment.
 
-**Verified working on Fedora KDE as of 2026-07-29, end of Day 2:**
-`pnpm install` ✅ · `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ ·
-`pnpm test` ✅ (11 tests) · `pnpm test:e2e` ✅ (1 test) · restart-survival ✅
+**Verified working on Fedora KDE as of 2026-07-30, end of Day 3:**
+`pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (18 tests,
+up from 11) · `pnpm test:e2e` ✅ (1 test, **file unmodified** — the real proof
+the refactor changed no behaviour)
 
-All re-verified independently by the Master Thread, not taken from the worker's
-report. The restart proof was re-run from a deleted database: same entry id
-returned across two different process IDs.
+All re-verified independently by the Master Thread against a fresh database on
+port 3999, not taken from the worker's report. All five endpoints returned
+exactly the expected status and ordering, including the two preserved 500s.
+
+**Boundary check** (re-runnable, must return nothing):
+
+```bash
+grep -n "node:sqlite\|DatabaseSync\|DATABASE\|SELECT\|INSERT\|prepare(" \
+  apps/api/src/entries/entries.service.ts apps/api/src/entries/entries.controller.ts
+```
+
+`EntryRow` was also confirmed to appear nowhere outside `entries.repository.ts`.
 
 **Workflow decision:** one branch and one PR per day, squash-merged. Branch
 naming `day-NN-topic`.
@@ -102,9 +131,12 @@ neuron/                    pnpm workspace root
 │           │   └── database.module.ts  DATABASE symbol token, factory
 │           │                           provider, CREATE TABLE at boot
 │           └── entries/
-│               ├── entries.module.ts      wires controller + service
-│               ├── entries.controller.ts  GET + POST /entries
-│               ├── entries.service.ts     raw SQL against injected DatabaseSync
+│               ├── entries.module.ts      wires controller + service + repository
+│               ├── entries.controller.ts  HTTP only — routes, params, query
+│               ├── entries.service.ts     application logic; generates id +
+│               │                          createdAt, delegates storage
+│               ├── entries.repository.ts  the ONLY class that knows a database
+│               │                          exists. Owns EntryRow + toJournalEntry
 │               └── entry.interface.ts     { id, content, createdAt } all strings
 └── docs/
     ├── constitution.md    engineering principles
@@ -125,6 +157,7 @@ and that is deliberate — see ADR-001.
 | [ADR-001](decisions/ADR-001-monorepo.md) | pnpm workspace monorepo; `packages/` deferred until `apps/web` exists | Accepted |
 | [ADR-002](decisions/ADR-002-nestjs.md) | NestJS over raw `http` / Express / Fastify | Accepted |
 | [ADR-003](decisions/ADR-003-sqlite.md) | SQLite via built-in `node:sqlite`, raw SQL, no ORM | Accepted, **expected to be replaced** (Day 16 / Day 24) |
+| [ADR-004](decisions/ADR-004-repository-raw-sql.md) | Data access gets its own layer (`EntriesRepository`); SQL stays hand-written. Query builder and ORM rejected on timing, not merit. `id`/`createdAt` generated in the service | Accepted, **revisit Day 13 / Day 24** |
 
 **Decided outside an ADR:**
 
@@ -166,6 +199,14 @@ and that is deliberate — see ADR-001.
   found and closed). `POST /entries` written by hand to make the data-loss
   problem demonstrable, then SQLite persistence added via a worker and audited.
   ADR-003 written. Merged as `9c7365e` (PR #2, squash).
+- **Day 3** — three further queries (`findById`, `findByContent`, `countEntries`)
+  hand-written by her to make the duplication real. That produced a genuine bug
+  (a copied `SELECT` that lost its `ORDER BY`, missed by all four checks) and a
+  routing bug (`/entries/count` unreachable under `@Get(':id')`). She derived
+  the repository pattern herself from the duplication, chose raw SQL over a
+  query builder and an ORM with reasons, and argued the `id`/`createdAt`
+  placement hard enough to change the ADR. ADR-004 written. Extraction done by a
+  worker and audited. **Not yet committed or merged.**
 
 ---
 
@@ -205,10 +246,15 @@ and that is deliberate — see ADR-001.
 
 | Item | Resolves |
 |---|---|
-| SQL sits inline in the service; `EntryRow` + `toJournalEntry` + an unchecked cast must be repeated per query | Day 3 — this repetition **is** the Day 3 problem |
-| `as unknown as EntryRow[]` is unchecked — change the SELECT and the type keeps lying | Day 3 |
-| `entry.interface.ts` names the language construct, not the concept | Day 3 |
+| **Casts survive the repository extraction.** Rename `created_at`, miss one `SELECT`, and the API serves `"createdAt": null` with lint, typecheck and build all green. Same class of failure as the Day 3 `ORDER BY` bug — a rule the type system cannot see. Accepted knowingly in ADR-004 | Reopen if it causes a bug, or Day 13 / Day 24 |
+| `id`/`createdAt` format is enforced by convention, not by the database or the type system. Tolerable only while `create()` is the single write path | When a second write path appears (ADR-004) |
+| `entry.interface.ts` names the language construct, not the concept | Unscheduled — cosmetic |
 | `POST /entries` with `{}` fails as an uncaught 500 | Day 4 (validation) |
+| `GET /entries/:id` returns **500 where 404 belongs** — pinned by a test asserting the wrong behaviour | Day 4 |
+| `GET /entries?word=<no matches>` returns **500 where `200 []` belongs** — also pinned | Day 4 |
+| Storage-outcome → HTTP-status mapping has no home. The repository is barred from knowing status codes (ADR-004), so the translation must happen above it | Day 4 |
+| `LIKE '%term%'` search is lexical and cannot match meaning | Day 15 / Day 16 (this is the Phase 3 premise) |
+| `GET /entries/count` returns a bare number, not JSON | Day 4 (response shape) |
 | One type serves as both domain model and HTTP wire shape | Day 4 (DTOs) |
 | No validation pipe, exception filter, or CORS | Days 4 / 12 |
 | `process.env.PORT` and `DATABASE_PATH` read raw and unvalidated | Day 6 (config) |
@@ -235,16 +281,45 @@ the roadmap's *Learning Debt* section for why this is tracked.
 - Symbol injection tokens and factory providers — explained in depth after the
   persistence worker introduced them.
 
-**Still owed** (`docs/learning/day-02/testing-literacy.md`, experiments 2–5 were
-not run — she chose to move on, which was her call):
+**Repaid on Day 3:**
 
-- supertest, and what it does that a unit test cannot
-- Unit vs e2e — the route-rename experiment that demonstrates the difference
-- Why three of four commands miss a type error in a spec file
-- Raw SQL and prepared statements — introduced by the worker, not yet taught
+- **Raw SQL** — she hand-wrote three queries (`findById`, `findByContent`,
+  `countEntries`) including `LIKE`, `COUNT(*)` and `ORDER BY`. SQL itself is now
+  owned rather than inherited from a worker.
+- **Route matching is declaration order, first match wins.** She predicted
+  "static before dynamic" and her own unreachable `/entries/count` disproved it.
+  The distinction that landed: static-before-dynamic is the *discipline forced
+  by* the rule, not the rule.
+- **The repository pattern** — derived by her from the duplication before it was
+  named. She proposed "a function where I dictate what I need," chose the
+  application-language form over the SQL-language form, and located the SQL in a
+  new file (she called it `schema.ts`; the naming correction taught the
+  schema/operations distinction).
+- **UUID vs sequential ids, and where generation belongs.** She argued for
+  database-generated, which is defensible and common. She changed position on
+  evidence, then raised the objection that application-side generation is
+  unenforced — now recorded in ADR-004 as an accepted cost with a revisit
+  condition.
+- **4xx vs 5xx** — given the test *"could the client fix this by sending a
+  different request?"* She applied it correctly once and wrongly once, grouping
+  "record missing" with "database file deleted." **Worth re-testing on Day 4.**
 
-Scheduled: Day 5 (testing day) picks up the remaining experiments plus
-authorship.
+**Still owed:**
+
+- supertest, and what it does that a unit test cannot → Day 5
+- Unit vs e2e — the route-rename experiment → Day 5
+- Why three of four commands miss a type error in a spec file → Day 5
+- **Prepared statements — 🟡 explained, not verified.** The mechanism was taught
+  in full (parse-then-bind; the database parses before it has seen any value, so
+  data cannot become instruction). She said she understood and declined the
+  in-memory injection experiment, which was her call. She has not demonstrated
+  it back. → Day 5
+- **`EntriesRepository` wiring** — the worker did the extraction, so she has not
+  registered a repository provider herself or seen that failure mode. → surfaces
+  naturally on Day 13 when a second entity needs one
+
+`docs/learning/day-02/testing-literacy.md` experiments 2–5 remain unrun.
+Scheduled: Day 5 (testing day) picks up all of the above plus authorship.
 
 ---
 

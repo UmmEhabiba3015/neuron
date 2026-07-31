@@ -1,6 +1,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DATABASE } from '../database/database.module';
+import { EntriesRepository } from './entries.repository';
 import { EntriesService } from './entries.service';
 
 describe('EntriesService', () => {
@@ -26,8 +27,12 @@ describe('EntriesService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EntriesService,
-        // Same token, different value. The service asks for DATABASE and has
-        // no idea it's been handed a throwaway.
+        // EntriesService no longer touches the database itself, but it can't
+        // be constructed without the repository that does — so the repository
+        // has to be here for the module to compile.
+        EntriesRepository,
+        // Same token, different value. The repository asks for DATABASE and
+        // has no idea it's been handed a throwaway.
         { provide: DATABASE, useValue: db },
       ],
     }).compile();
@@ -103,6 +108,95 @@ describe('EntriesService', () => {
       service.create(hostile);
 
       expect(service.findAll().map((e) => e.content)).toEqual([hostile]);
+    });
+  });
+
+  describe('findById', () => {
+    it('should return the entry that was created', () => {
+      const created = service.create('findable by its id');
+
+      expect(service.findById(created.id)).toEqual(created);
+    });
+
+    // Documents today's behaviour, not the desired behaviour. A missing entry
+    // is a 404, and a plain Error becomes a 500 — that gap is Day 4's work.
+    // Asserting it now means the day it changes, this test fails and forces
+    // the change to be deliberate rather than accidental.
+    it('should throw when the id does not exist', () => {
+      expect(() => service.findById('no-such-id')).toThrow();
+    });
+  });
+
+  describe('findByContent', () => {
+    // Fixed timestamps written straight to the table, for the reason the
+    // comment in `findAll` above explains: `create()` uses the real clock, and
+    // two calls in a row tie on milliseconds.
+    const seed = () => {
+      const insert = db.prepare(
+        'INSERT INTO entries (id, content, created_at) VALUES (?, ?, ?)',
+      );
+      insert.run(
+        'older-match',
+        'felt overwhelmed at work',
+        '2026-07-28T09:00:00.000Z',
+      );
+      insert.run(
+        'no-match',
+        'quiet evening at home',
+        '2026-07-29T09:00:00.000Z',
+      );
+      insert.run(
+        'newer-match',
+        'back at work again',
+        '2026-07-30T09:00:00.000Z',
+      );
+    };
+
+    it('should return only the entries containing the word', () => {
+      seed();
+
+      expect(
+        service
+          .findByContent('work')
+          .map((entry) => entry.id)
+          .sort(),
+      ).toEqual(['newer-match', 'older-match']);
+    });
+
+    // This is the regression test the whole day exists for. `findByContent`
+    // was written by copying the SELECT from `findAll` without its
+    // `ORDER BY created_at DESC`, so `/entries` and `/entries?word=…` returned
+    // the same resource in different orders — and lint, typecheck, build and
+    // test all passed anyway, because no test had ever stated the rule.
+    it('should return matching entries newest first', () => {
+      seed();
+
+      expect(service.findByContent('work').map((entry) => entry.id)).toEqual([
+        'newer-match',
+        'older-match',
+      ]);
+    });
+
+    // Wrong on purpose, like `findById` above: no matches is an empty array
+    // and a 200, not an exception. Pinned here so Day 4 changes it knowingly.
+    it('should throw when nothing matches', () => {
+      seed();
+
+      expect(() => service.findByContent('zzz')).toThrow();
+    });
+  });
+
+  describe('countEntries', () => {
+    it('should return zero for a fresh database', () => {
+      expect(service.countEntries()).toBe(0);
+    });
+
+    it('should return the number of entries', () => {
+      service.create('one');
+      service.create('two');
+      service.create('three');
+
+      expect(service.countEntries()).toBe(3);
     });
   });
 });
