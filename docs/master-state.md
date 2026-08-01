@@ -94,17 +94,21 @@ application, and gave the right reason both times. On prepared statements she
 did not answer the question asked — she volunteered the full mechanism
 unprompted. Six debts closed in one session, two of them owed since Day 1.
 
-**The difference was not effort or energy. It was format.** A concrete question
-with a runnable experiment beats open-ended Socratic questioning for her, by a
-wide margin. When she says "I understand, move on," the productive response is
-not to re-explain — it is to ask a sharp question and hand her a command to run.
+**The difference was not effort or energy.** It was that the afternoon kept
+asking her to reason toward concepts she had not met yet, for three rounds,
+while the evening taught directly and then verified with an experiment.
 
-Use that format. It is now the default for this project.
+**Do not read this as "drop the Socratic method."** That was the Master Thread's
+first conclusion and her husband corrected it the same evening — see *The
+three-step sequence* under *How To Work With The Learner*, which is the
+authoritative version. Socratic still opens every topic. What changed is the
+exit condition: two attempts, then teach it properly, then verify.
 
 **One thing that reversed on the same day:** the empty-collection idea was
 recorded as owed in the afternoon and closed in the evening, when she said in
 her own words that an empty array *satisfies* the question. Worth knowing that
-"she did not get it" can mean "the format was wrong," not "she cannot get it."
+"she did not get it today" often means "she has not been taught it yet," not
+"she cannot get it."
 
 ### The two experiments from Day 4 evening — reuse this format
 
@@ -529,34 +533,64 @@ that is him.
 6. Prefer running an experiment over asserting a fact. She learns from watching
    something break, not from being told it would.
 
-### ⚠️ The format finding from Day 4 — the most useful thing in this file
+### ⚠️ The three-step sequence — read this before teaching anything
 
-Day 4 ran both teaching formats on the same person on the same day, and the
-results were not close.
+Set by her husband on Day 4, correcting an over-broad conclusion the Master
+Thread had drawn from a single day. **Use all three steps in order. Do not skip
+step 1, and do not linger past step 2.**
 
-**Open-ended Socratic questioning produced poor results.** Three rounds on a
-single idea, a wrong answer, the conclusion supplied by the Master Thread
-rather than reached by her, and three requests to move on.
+**Step 1 — Open Socratic.** Give her the situation and ask what she thinks. No
+options, no leading. Real thinking time. This step is not optional, and it is
+not there for the answer — it is there because the habit of thinking through an
+unfamiliar problem is itself being rebuilt after a four-year career break.
 
-**Direct question plus a runnable experiment produced excellent results.** Seven
-predictions, all seven correct, including two counter-intuitive ones. Six
-learning debts closed in a single evening — two of which had been owed since
-Day 1 and one offered and skipped twice.
+**Step 2 — One narrowing question.** If she is stuck, ask *one* question that
+narrows the problem. Not a rephrasing of the first question. One attempt only.
 
-The concrete shape that works:
+**Step 3 — Teach it, then verify with an experiment.** If she is still stuck
+after step 2, **she does not have the concept.** Explain it properly and
+directly. Then use a prediction-plus-experiment to confirm it landed.
+
+### Why step 3 is teaching and not another kind of question
+
+This is the correction, and it matters. Being stuck after two attempts is
+usually an **information** state, not a motivational one — she does not have the
+concept yet. No amount of reframing produces knowledge she was never given.
+Most of this material is genuinely new to her: NestJS, databases, HTTP
+semantics, testing. **It is not realistic to expect any of it in one go.**
+
+What went wrong on Day 4 was not starting Socratic. It was staying there for
+three rounds on the same idea, re-explaining in different words each time. That
+turns thinking time into pressure. The trigger for moving on is **rounds, not
+difficulty**: two attempts, then teach.
+
+Note also that the evening's seven correct predictions were not purely the
+format winning. A prediction question is only tractable once some model of the
+system exists, and the afternoon's struggle is part of what built it. Cutting
+straight to prediction questions every time would quietly remove the step where
+that model forms — and it would not show up as a failure, because the
+predictions would keep coming back correct.
+
+### The concrete shape of step 3's experiment
 
 > Here is the situation in three sentences. Here is what someone changes.
 > **Predict** what happens to typecheck, to build, to the server, to the tests.
 > Now run this command and let us compare.
 
-The shape that does not work: asking her to reason her way to a principle she
-has not met yet, and re-explaining when she does not arrive at it.
+### When she says "I understand, move on"
 
-**When she says "I understand, move on," do not re-explain and do not push.**
-Ask one sharp question with a command attached instead. On Day 4 an idea she had
-"moved on" from in the afternoon was fully owned by evening, using exactly that.
-Her asking to move on is a signal that the *format* is wrong, not that she is
-disengaged or that the concept is beyond her.
+Do not re-explain and do not push. Move on, and record what was skipped. But
+treat it as a signal worth reading: on Day 4 it consistently meant *"this has
+stopped being productive"*, and an idea she had moved on from in the afternoon
+was fully owned by evening once it was taught directly and then verified with an
+experiment.
+
+### Track where she lands, across days
+
+Worth recording per topic: **which step did she answer at?** If topics that
+needed step 3 in week one are being answered at step 1 by week three, the habit
+is returning and it is measurable. If it never moves, this plan needs revisiting
+rather than repeating. Do not assume either outcome.
 
 Rules 1 to 6 above still hold. This is how to execute rule 3.
 
