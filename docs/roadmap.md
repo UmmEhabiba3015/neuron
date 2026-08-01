@@ -110,7 +110,7 @@ what a backend *is* before adding anything to it.
 | 2 | Restart the server and the data is gone. Where should data actually live? | Files vs SQLite vs Postgres vs document DBs. What a migration is and why it exists. **Plus: repay testing debt** — what the three existing tests actually do. |
 | 3 | SQL strings are scattered through my controller. | Raw SQL vs query builder vs ORM. What a repository is. Why data access gets its own layer. |
 | 4 | A client sent `{}` and the server returned a 500. | ✅ **Done.** Validation at the boundary, DTOs, 400 vs 404, and the layering rule that status codes are HTTP vocabulary and belong only in the controller. The load-bearing fact turned out to be **type erasure** — she watched `{ content: string }` vanish from the compiled JavaScript, which is *why* runtime validation has to exist at all. ADR-005. |
-| 5 | I changed something and don't know what I broke. | Unit vs integration vs e2e. What is worth testing and what isn't. **Writing** tests, not just reading them. ⚠️ **This day is overloaded — see below.** |
+| 5 | I changed something and don't know what I broke. | Unit vs integration vs e2e. What is worth testing and what isn't. **Reading and judging** tests — naming what a suite fails to cover. ~~Writing tests by hand~~ was removed on Day 4 by the project owner's husband; see the note below. |
 | 6 | My DB password is in a committed file. | Configuration, environments, secret handling, config validation at boot. |
 | 7 | **Review day.** Audit, refactor, document. | Everything above, written down as handbook entries. |
 

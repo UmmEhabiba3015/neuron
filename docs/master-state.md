@@ -17,25 +17,30 @@ the recovery cost most of a working session.
 ---
 
 **Last updated:** 2026-08-01 (end of Day 4, after the evening debt-clearing
-session)
+session and the merge)
 **Current day:** Day 4 of 29 complete (public numbering — see roadmap)
-**Current branch:** `day-04-validation`, committed and pushed. Day 4 code is
-`1c74b1a`. **PR #4 is not yet opened** —
-https://github.com/UmmEhabiba3015/neuron/pull/new/day-04-validation
-Day 3 merged to `main` as `488acc9` (PR #3, squash).
+**Current branch:** `main`, clean and in sync with `origin/main`. **Day 4 is
+merged** as `5dd755e` (PR #4, squash). The `day-04-validation` branch has been
+deleted. Nothing is outstanding from Day 4.
+
+**Verified green on `main` after the merge:** `pnpm test` 29 ✅ ·
+`pnpm test:e2e` 10 ✅.
 
 ---
 
 ## Next Session Starts Here
 
-**First, close out Day 4.** The work is done and independently audited. Open
-PR #4 from `day-04-validation`, squash-merge it, then branch `day-05-testing`
-from the updated `main`.
+**Day 4 is fully closed.** Code merged, docs current, LinkedIn post drafted and
+delivered. There is no leftover work. Start by branching `day-05-testing` from
+`main`.
 
 **Day 5 — the roadmap problem is:** *"I changed something and don't know what I
-broke."* Afterwards she should be able to explain unit vs integration vs e2e,
-what is worth testing, and — the part that matters — she should have **written
-tests herself**.
+broke."* Afterwards she should be able to explain unit vs integration vs e2e and
+judge what a test suite fails to cover.
+
+⚠️ **Note:** the roadmap's own Day 5 row says she should have "**written** tests,
+not just read them." **That is superseded** — see the direction from her husband
+below. Do not open Day 5 by asking her to write a suite.
 
 ### Day 5 starts clear — six debts were closed on Day 4 evening
 
@@ -67,30 +72,39 @@ worked well. The remaining gap is judgement: looking at an existing suite and
 naming what it does *not* cover — which is the skill the Day 3 `ORDER BY` bug
 actually needed.
 
-### How Day 4 actually went, because it changes how to run Day 5
+### How Day 4 actually went — the single most useful thing to know
 
-The design work was genuinely hers and came out of discussion, not instruction:
-the layering rule, the `undefined`/`[]` asymmetry, the four validation rules,
-and the decision to hand-write validation with a named revisit condition.
+**The format changed the outcome, and this is the main lesson to carry forward.**
 
-**The code was not hers, and neither were the tests.** She declined the test
-rewrites when offered.
+The design work was genuinely hers: the layering rule, the `undefined`/`[]`
+asymmetry, the four validation rules, and the decision to hand-write validation
+with a named revisit condition. The code was not hers; a worker wrote it.
 
-Three moments worth knowing about:
+**The day had two halves that looked completely different.**
 
-- **The best moment of the day** was type erasure. She ran `pnpm build` and read
-  the compiled JavaScript herself, and watched `{ content: string }` become a
-  bare `body`. That is the load-bearing fact under all validation and she now
-  owns it by observation rather than by being told.
-- **The hardest moment** was the empty-collection idea. It took three rounds,
-  she answered "5xx" for an empty search, and the conclusion ultimately came
-  from the Master Thread rather than from her. She ended it with "I understand,
-  move on" without demonstrating it back. **Still owed.**
-- **She asked to move on three times** in the second half of the day (on the
-  empty-collection idea, on the Day 5 load warning, and on two unanswered
-  questions at the end). Per *How To Work With The Learner*, this was honoured
-  each time and recorded rather than pushed. Worth watching whether this is
-  fatigue on a long day or a pattern forming.
+*Afternoon — open-ended Socratic questioning.* Uneven. The empty-collection idea
+took three rounds, she answered "5xx" for an empty search, and the conclusion
+came from the Master Thread rather than from her. She asked to move on three
+times. At the time this looked like fatigue or disengagement.
+
+*Evening — direct questions, each with an experiment attached.* Seven
+predictions, **all seven correct**, including the two hard ones where she
+worked out that 29 unit tests would still pass on a completely broken
+application, and gave the right reason both times. On prepared statements she
+did not answer the question asked — she volunteered the full mechanism
+unprompted. Six debts closed in one session, two of them owed since Day 1.
+
+**The difference was not effort or energy. It was format.** A concrete question
+with a runnable experiment beats open-ended Socratic questioning for her, by a
+wide margin. When she says "I understand, move on," the productive response is
+not to re-explain — it is to ask a sharp question and hand her a command to run.
+
+Use that format. It is now the default for this project.
+
+**One thing that reversed on the same day:** the empty-collection idea was
+recorded as owed in the afternoon and closed in the evening, when she said in
+her own words that an empty array *satisfies* the question. Worth knowing that
+"she did not get it" can mean "the format was wrong," not "she cannot get it."
 
 ### The two experiments from Day 4 evening — reuse this format
 
@@ -455,8 +469,9 @@ the roadmap's *Learning Debt* section for why this is tracked.
   registered a repository provider herself or seen that failure mode. → surfaces
   naturally on Day 13 when a second entity needs one
 
-`docs/learning/day-02/testing-literacy.md` experiments 2–5 remain unrun.
-Scheduled: Day 5 (testing day) picks up all of the above plus authorship.
+`docs/learning/day-02/testing-literacy.md` experiments 2–5 remain unrun. Day 5
+picks these up. Note that authorship of tests is **no longer** part of Day 5 —
+see the direction recorded in *Next Session Starts Here*.
 
 ---
 
@@ -513,6 +528,37 @@ that is him.
    her mental model and the machine disagree.
 6. Prefer running an experiment over asserting a fact. She learns from watching
    something break, not from being told it would.
+
+### ⚠️ The format finding from Day 4 — the most useful thing in this file
+
+Day 4 ran both teaching formats on the same person on the same day, and the
+results were not close.
+
+**Open-ended Socratic questioning produced poor results.** Three rounds on a
+single idea, a wrong answer, the conclusion supplied by the Master Thread
+rather than reached by her, and three requests to move on.
+
+**Direct question plus a runnable experiment produced excellent results.** Seven
+predictions, all seven correct, including two counter-intuitive ones. Six
+learning debts closed in a single evening — two of which had been owed since
+Day 1 and one offered and skipped twice.
+
+The concrete shape that works:
+
+> Here is the situation in three sentences. Here is what someone changes.
+> **Predict** what happens to typecheck, to build, to the server, to the tests.
+> Now run this command and let us compare.
+
+The shape that does not work: asking her to reason her way to a principle she
+has not met yet, and re-explaining when she does not arrive at it.
+
+**When she says "I understand, move on," do not re-explain and do not push.**
+Ask one sharp question with a command attached instead. On Day 4 an idea she had
+"moved on" from in the afternoon was fully owned by evening, using exactly that.
+Her asking to move on is a signal that the *format* is wrong, not that she is
+disengaged or that the concept is beyond her.
+
+Rules 1 to 6 above still hold. This is how to execute rule 3.
 
 If she says she wants to move on, move on. Record what was skipped in the
 Learning Debt section rather than pushing.
