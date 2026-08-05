@@ -156,6 +156,24 @@ describe('EntriesController', () => {
 
       expect(controller.findAll()).toEqual([]);
     });
+
+    // Previously a 201: the extra field was silently discarded, which was
+    // harmless only because the service happens to read nothing but `content`.
+    // A rule nobody stated is a rule nothing enforces (ADR-006).
+    it('should reject a body containing an unrecognised field', () => {
+      expect(() =>
+        controller.create({ content: 'x', id: 'i-picked-this-myself' }),
+      ).toThrow(BadRequestException);
+    });
+
+    // The message has to name the field. A user who typed `contnet` needs to
+    // be told which word was wrong, which is the entire reason this check
+    // exists rather than a generic "invalid body".
+    it('should name the unrecognised field in the message', () => {
+      expect(() => controller.create({ content: 'x', contnet: 'y' })).toThrow(
+        /contnet/,
+      );
+    });
   });
 
   describe('findById', () => {
@@ -182,6 +200,102 @@ describe('EntriesController', () => {
       controller.create({ content: 'quiet evening at home' });
 
       expect(controller.findAll('zzzzz')).toEqual([]);
+    });
+
+    // What Express actually delivers for `?word=a&word=b`. The old signature
+    // said `string`, so the compiler never saw the array coming and the search
+    // ran against the text `a,b` — answering "I found nothing" to a question
+    // it had never managed to read (ADR-006).
+    it('should reject a word given more than once', () => {
+      expect(() => controller.findAll(['a', 'b'])).toThrow(BadRequestException);
+    });
+  });
+
+  describe('update', () => {
+    it('should return the entry with its new content', () => {
+      const created = controller.create({ content: 'the first draft' });
+
+      const updated = controller.update(created.id, {
+        content: 'the second draft',
+      });
+
+      expect(updated.content).toBe('the second draft');
+      expect(controller.findById(created.id).content).toBe('the second draft');
+    });
+
+    it('should leave createdAt unchanged', () => {
+      const created = controller.create({ content: 'written once' });
+
+      const updated = controller.update(created.id, {
+        content: 'edited later',
+      });
+
+      expect(updated.createdAt).toBe(created.createdAt);
+    });
+
+    // The same three content rules as `create`, because they are literally the
+    // same function — see `parseContent` in entries.controller.ts.
+    it.each([
+      ['content that is not a string', { content: 42 }],
+      ['empty content', { content: '' }],
+      ['content that is only whitespace', { content: '   ' }],
+    ])('should reject %s', (_label, body) => {
+      const created = controller.create({ content: 'unchanged' });
+
+      expect(() => controller.update(created.id, body)).toThrow(
+        BadRequestException,
+      );
+      expect(controller.findById(created.id).content).toBe('unchanged');
+    });
+
+    // The case that motivated rejecting unknown fields at all. Under "ignore
+    // what you do not recognise" this returned 200 and changed nothing, so the
+    // user believed a correction was saved that had been thrown away.
+    it('should reject a misspelled field rather than silently doing nothing', () => {
+      const created = controller.create({ content: 'unchanged' });
+
+      expect(() =>
+        controller.update(created.id, { contnet: 'I fixed my typo' }),
+      ).toThrow(BadRequestException);
+      expect(controller.findById(created.id).content).toBe('unchanged');
+    });
+
+    it('should reject a body with nothing to update', () => {
+      const created = controller.create({ content: 'unchanged' });
+
+      expect(() => controller.update(created.id, {})).toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw NotFoundException when the id does not exist', () => {
+      expect(() =>
+        controller.update('no-such-id', { content: 'anything' }),
+      ).toThrow(NotFoundException);
+    });
+  });
+
+  describe('delete', () => {
+    it('should return the deleted entry and leave it gone', () => {
+      const created = controller.create({ content: 'here for a moment' });
+
+      expect(controller.delete(created.id)).toEqual(created);
+      expect(() => controller.findById(created.id)).toThrow(NotFoundException);
+    });
+
+    it('should throw NotFoundException when the id does not exist', () => {
+      expect(() => controller.delete('no-such-id')).toThrow(NotFoundException);
+    });
+
+    // A `DELETE` against an id that was never there must not report success.
+    // The SQL alone would not catch this: deleting nothing is not an error in
+    // SQLite, so the row has to be read before it is removed.
+    it('should not report success twice for the same entry', () => {
+      const created = controller.create({ content: 'deleted once' });
+
+      controller.delete(created.id);
+
+      expect(() => controller.delete(created.id)).toThrow(NotFoundException);
     });
   });
 

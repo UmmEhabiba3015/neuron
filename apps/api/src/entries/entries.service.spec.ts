@@ -204,6 +204,156 @@ describe('EntriesService', () => {
     });
   });
 
+  // These three claims never mention SQL, `LIKE`, or escaping, and that is
+  // deliberate. The implementation underneath them is condemned — full-text
+  // search replaces it on Day 15 and embeddings on Day 16 — but the sentence
+  // *searching for a character finds entries containing that character* is true
+  // of all three implementations, so these tests should survive the rewrite
+  // (ADR-006).
+  describe('findByContent with characters the search engine treats specially', () => {
+    // Four entries, of which exactly one contains each special character. The
+    // count is the point: a broken search returns all four, so an assertion
+    // naming one id fails loudly rather than passing because the one entry it
+    // wanted happened to be somewhere in the result. This is what the word
+    // "only" in each test name is doing.
+    const seedSpecialCharacters = () => {
+      const insert = db.prepare(
+        'INSERT INTO entries (id, content, created_at) VALUES (?, ?, ?)',
+      );
+      insert.run(
+        'has-percent',
+        '100% exhausted today',
+        '2026-07-28T09:00:00.000Z',
+      );
+      insert.run(
+        'has-underscore',
+        'named the file snake_case',
+        '2026-07-29T09:00:00.000Z',
+      );
+      // A single backslash in the stored text. Written `\\` because a
+      // backslash is JavaScript's own escape character too.
+      insert.run(
+        'has-backslash',
+        'the path was C:\\temp',
+        '2026-07-30T09:00:00.000Z',
+      );
+      insert.run(
+        'has-none',
+        'an ordinary quiet evening',
+        '2026-07-31T09:00:00.000Z',
+      );
+    };
+
+    it('should return only entries containing a literal percent sign', () => {
+      seedSpecialCharacters();
+
+      expect(service.findByContent('%').map((entry) => entry.id)).toEqual([
+        'has-percent',
+      ]);
+    });
+
+    it('should return only entries containing a literal underscore', () => {
+      seedSpecialCharacters();
+
+      expect(service.findByContent('_').map((entry) => entry.id)).toEqual([
+        'has-underscore',
+      ]);
+    });
+
+    // The character the escaping mechanism uses for itself, and the only claim
+    // here that catches a particular mistake: escaping `%` and `_` while never
+    // escaping the escape character. Under that version the two claims above
+    // still pass, and this one returns the entry containing a percent sign,
+    // because the lone backslash in the pattern is read as marking the
+    // character after it rather than as text. Verified by making the change and
+    // watching exactly this test go red.
+    it('should return only entries containing a literal backslash', () => {
+      seedSpecialCharacters();
+
+      expect(service.findByContent('\\').map((entry) => entry.id)).toEqual([
+        'has-backslash',
+      ]);
+    });
+
+    // The user-facing half of the same rule. A journal that cannot find the
+    // words someone actually wrote is the reason any of this matters.
+    it('should find an entry by a word that contains a percent sign', () => {
+      seedSpecialCharacters();
+
+      expect(service.findByContent('100%').map((entry) => entry.id)).toEqual([
+        'has-percent',
+      ]);
+    });
+  });
+
+  describe('update', () => {
+    it('should change the content and leave the entry findable', () => {
+      const created = service.create('the first draft');
+
+      const updated = service.update(created.id, 'the second draft');
+
+      expect(updated?.content).toBe('the second draft');
+      expect(service.findById(created.id)?.content).toBe('the second draft');
+    });
+
+    // `createdAt` records when the entry was written, not when it was last
+    // touched. Nothing displays or sorts by an edit time yet, so there is no
+    // `updatedAt` either — see ADR-006.
+    it('should not change id or createdAt', () => {
+      const created = service.create('written once');
+
+      const updated = service.update(created.id, 'edited later');
+
+      expect(updated?.id).toBe(created.id);
+      expect(updated?.createdAt).toBe(created.createdAt);
+    });
+
+    // Whitespace decides validity at the boundary and never rewrites the
+    // value, on update exactly as on create.
+    it('should store the new content verbatim, without trimming', () => {
+      const created = service.create('before');
+      const padded = '  the spacing the user chose  ';
+
+      expect(service.update(created.id, padded)?.content).toBe(padded);
+      expect(service.findById(created.id)?.content).toBe(padded);
+    });
+
+    // `undefined`, not an exception. Turning absence into a 404 is the
+    // controller's job and only the controller's (ADR-005).
+    it('should return undefined when the id does not exist', () => {
+      expect(service.update('no-such-id', 'anything')).toBeUndefined();
+    });
+
+    it('should not create an entry for an id that does not exist', () => {
+      service.update('no-such-id', 'anything');
+
+      expect(service.countEntries()).toBe(0);
+    });
+  });
+
+  describe('delete', () => {
+    it('should return the deleted entry and remove it', () => {
+      const created = service.create('here for a moment');
+
+      expect(service.delete(created.id)).toEqual(created);
+      expect(service.findById(created.id)).toBeUndefined();
+      expect(service.countEntries()).toBe(0);
+    });
+
+    it('should leave other entries alone', () => {
+      const doomed = service.create('the one being removed');
+      const survivor = service.create('the one that stays');
+
+      service.delete(doomed.id);
+
+      expect(service.findAll()).toEqual([survivor]);
+    });
+
+    it('should return undefined when the id does not exist', () => {
+      expect(service.delete('no-such-id')).toBeUndefined();
+    });
+  });
+
   describe('countEntries', () => {
     it('should return zero for a fresh database', () => {
       expect(service.countEntries()).toBe(0);

@@ -81,9 +81,17 @@ export class EntriesRepository {
   findByContent(word: string): JournalEntry[] {
     const records = this.db
       .prepare(
-        'SELECT id, content, created_at FROM entries WHERE content LIKE ? ORDER BY created_at DESC',
+        // `ESCAPE '\'` tells LIKE that a backslash in the pattern marks the
+        // next character as ordinary text. SQLite has no escape character for
+        // LIKE unless a query names one, so without this clause the backslashes
+        // added by `escapeLikePattern` would themselves be matched literally.
+        //
+        // The quotes are SQL's, not JavaScript's: SQLite does not treat a
+        // backslash as special inside a single-quoted string, so `'\'` is a
+        // one-character string holding a backslash.
+        `SELECT id, content, created_at FROM entries WHERE content LIKE ? ESCAPE '${LIKE_ESCAPE_CHARACTER}' ORDER BY created_at DESC`,
       )
-      .all(`%${word}%`) as unknown as EntryRow[];
+      .all(`%${escapeLikePattern(word)}%`) as unknown as EntryRow[];
 
     // No empty-check on the way out, deliberately. A search that matched
     // nothing has a complete answer — the empty list — and `.map` over an
@@ -116,6 +124,96 @@ export class EntriesRepository {
       .prepare('INSERT INTO entries (id, content, created_at) VALUES (?, ?, ?)')
       .run(entry.id, entry.content, entry.createdAt);
   }
+
+  // Returns the stored entry after the change, or `undefined` when no row has
+  // that id — the same vocabulary `findById` uses, and for the same reason.
+  // "There was nothing to update" is an ordinary storage outcome, and whether
+  // it deserves a 404 is a question about HTTP that this file may not answer
+  // (ADR-004, ADR-005).
+  //
+  // Only `content` is written. `id` identifies the row and `created_at` records
+  // when the entry was written, not when it was last touched, so neither is
+  // touched here — that is ADR-006's decision, and the `SET` clause is what
+  // enforces it.
+  update(id: string, content: string): JournalEntry | undefined {
+    const result = this.db
+      .prepare('UPDATE entries SET content = ? WHERE id = ?')
+      .run(content, id);
+
+    // `changes` counts the rows the statement matched. SQLite reports 1 even
+    // when the new value equals the old one, so 0 means one thing only: no row
+    // has this id.
+    if (result.changes === 0) {
+      return undefined;
+    }
+
+    // Read back rather than returning a hand-assembled object. What the caller
+    // gets is then what the database actually holds, which is the difference
+    // that ADR-005 records: a POST response echoing its input claimed
+    // `"content": 42` while every later GET returned `"content": "42"`.
+    return this.findById(id);
+  }
+
+  // Reads the row before removing it, because the entry cannot be reported
+  // after it is gone. The read is also what distinguishes "deleted" from "there
+  // was nothing there" — a `DELETE` alone succeeds quietly against an id that
+  // never existed.
+  delete(id: string): JournalEntry | undefined {
+    const existing = this.findById(id);
+
+    if (!existing) {
+      return undefined;
+    }
+
+    this.db.prepare('DELETE FROM entries WHERE id = ?').run(id);
+
+    return existing;
+  }
+}
+
+// LIKE's pattern language, and the reason a bound parameter does not protect
+// against it. A prepared statement keeps a value from being parsed as SQL, and
+// that works exactly as intended here — but `%` and `_` are not SQL grammar.
+// They are the pattern language LIKE itself interprets, *after* the value has
+// been bound, which is precisely where user input lands. `?word=%` therefore
+// returned every entry in the journal, and `100%` could not be searched for at
+// all (ADR-006).
+//
+// This lives in the repository because it is a fact about how LIKE reads a
+// pattern, and that is database vocabulary. The caller passes ordinary text and
+// never learns that a pattern language exists.
+const LIKE_ESCAPE_CHARACTER = '\\';
+
+// The order of these three replacements is the whole correctness of the
+// function, and getting it wrong fails silently.
+//
+// The escape character must be escaped FIRST. Each later replacement introduces
+// new backslashes; if the backslash pass ran after them, it would double the
+// backslashes it had just added and turn each escape marker back into a literal
+// backslash followed by a live wildcard.
+//
+// Searching for `100%`, with the order reversed:
+//
+//   '100%'  --%-->  '100\%'  --\-->  '100\\%'
+//
+// which LIKE reads as "the text 100, then a literal backslash, then any run of
+// characters" — so `100% exhausted today` no longer matches, and an entry
+// containing `100\` would.
+//
+// The two ways to get this wrong fail differently, which is why the tests cover
+// both. Escaping in the wrong *order* breaks searches for `%` and `_` and
+// leaves a search for a backslash working. *Omitting* the backslash pass
+// altogether does the reverse: `%` and `_` behave correctly, and a search for a
+// backslash silently returns entries containing a percent sign instead, because
+// the lone `\` in the pattern is read as marking the character after it.
+function escapeLikePattern(term: string): string {
+  return term
+    .replaceAll(
+      LIKE_ESCAPE_CHARACTER,
+      LIKE_ESCAPE_CHARACTER + LIKE_ESCAPE_CHARACTER,
+    )
+    .replaceAll('%', LIKE_ESCAPE_CHARACTER + '%')
+    .replaceAll('_', LIKE_ESCAPE_CHARACTER + '_');
 }
 
 function toJournalEntry(row: EntryRow): JournalEntry {

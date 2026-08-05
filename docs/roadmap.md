@@ -76,7 +76,9 @@ criterion; comprehension is.
 | **Empty collection is a complete answer, not a failure** | Day 4 | Day 4 | ✅ **Repaid Day 4 (evening)** — ran the experiment, then said it in her own words: *"even in that case the correct answer is no row contains the word and empty array can satisfy it."* That is the idea she could not reach earlier the same day |
 | **Type erasure** — TypeScript annotations do not exist at runtime | Day 4 | Day 4 | ✅ **Repaid Day 4** — she compiled the project, read the emitted JavaScript, and saw `{ content: string }` become bare `body` herself. This is the load-bearing fact under all validation |
 | Where validation belongs (boundary vs service) | Day 4 | Day 4 | 🟡 **Partial** — she reasoned it out and got it wrong (chose the service), then accepted the argument. The distinction between "is this well-formed?" and "is this allowed?" was given to her, not derived → re-test Day 10 when ownership checks arrive |
-| **Reading and judging an existing test suite** | Day 4 | Day 4 | 🟡 **Partial** — she can now predict what unit vs e2e catches. What remains is looking at a suite and naming what it *fails* to cover, which is the skill the Day 3 `ORDER BY` bug needed → Day 5 |
+| **Reading and judging an existing test suite** | Day 4 | Day 4 | 🟡 **Partial, advanced Day 5** — she found two real gaps (unknown fields on `POST`; `LIKE` wildcards in search), placed a new test in the correct spec file, and wrote the claim sentence once the underlying decision existed. Still owed: doing this unprompted across a whole suite rather than on cases handed over one at a time |
+| **`LIKE` wildcards survive parameter binding** | Day 5 | Day 5 | ✅ **Repaid Day 5** — predicted instantly and correctly that `?word=%` returns every entry. The point that landed: bound parameters protect the *structure of the statement*, but `%` and `_` are the pattern language `LIKE` interprets after binding, so the protection does not reach them |
+| **A missing test is usually a missing decision** | Day 5 | Day 5 | ✅ **Repaid Day 5** — she could not write a claim for the wildcard gap, correctly, because nobody had decided what search should do with `%`. Once she chose, the claim came immediately. The reframing is the lesson |
 | Route matching is declaration order, first match wins | Day 3 (her own bug) | Day 3 | ✅ **Repaid Day 3** — predicted "static before dynamic", disproven by her own unreachable `/entries/count` |
 | Repository pattern — what it is, what crosses the boundary | Day 3 | Day 3 | ✅ **Repaid Day 3** — derived by her from the duplication before it was named |
 | Where `id`/`createdAt` should be generated; UUID vs sequential ids | Day 3 | Day 3 | ✅ **Repaid Day 3** — she argued for DB-generated, changed position on evidence, and raised the enforcement objection now recorded in ADR-004 |
@@ -110,7 +112,7 @@ what a backend *is* before adding anything to it.
 | 2 | Restart the server and the data is gone. Where should data actually live? | Files vs SQLite vs Postgres vs document DBs. What a migration is and why it exists. **Plus: repay testing debt** — what the three existing tests actually do. |
 | 3 | SQL strings are scattered through my controller. | Raw SQL vs query builder vs ORM. What a repository is. Why data access gets its own layer. |
 | 4 | A client sent `{}` and the server returned a 500. | ✅ **Done.** Validation at the boundary, DTOs, 400 vs 404, and the layering rule that status codes are HTTP vocabulary and belong only in the controller. The load-bearing fact turned out to be **type erasure** — she watched `{ content: string }` vanish from the compiled JavaScript, which is *why* runtime validation has to exist at all. ADR-005. |
-| 5 | I changed something and don't know what I broke. | Unit vs integration vs e2e. What is worth testing and what isn't. **Reading and judging** tests — naming what a suite fails to cover. ~~Writing tests by hand~~ was removed on Day 4 by the project owner's husband; see the note below. |
+| 5 | I changed something and don't know what I broke. | ✅ **Done.** Reading and judging a suite — naming what it fails to cover. ~~Writing tests by hand~~ was removed on Day 4 by the project owner's husband. **Three real defects found inside a fully green 39-test suite**, all by her, all confirmed over real HTTP. The idea that came out of it: **a missing test is usually a missing decision.** Also: prepared statements protect a statement's *structure*, not a value's *meaning* once `LIKE` reads it. ADR-006. 29 → 55 unit, 10 → 18 e2e. |
 | 6 | My DB password is in a committed file. | Configuration, environments, secret handling, config validation at boot. |
 | 7 | **Review day.** Audit, refactor, document. | Everything above, written down as handbook entries. |
 
@@ -146,10 +148,13 @@ result that contradicts intuition:
 **Day 5 therefore starts with room.** What remains for it:
 
 - Reading and judging an existing suite — naming what it *fails* to cover. This
-  is the skill the Day 3 `ORDER BY` bug actually needed.
-- `docs/learning/day-02/testing-literacy.md` experiments 2–5, unrun since Day 2.
+  is the skill the Day 3 `ORDER BY` bug actually needed. **Started on Day 5's
+  first session; two gaps found. See `master-state.md` for where to resume.**
+- `docs/learning/day-02/testing-literacy.md` experiments **3 and 4**, unrun
+  since Day 2. Experiments 2 and 5 are redundant — she answered both on Day 4
+  evening — and should be skipped.
 - The `PATCH`/`DELETE` work the day was scheduled for, which forces the
-  unknown-fields decision recorded in *Open questions*.
+  unknown-fields decision recorded in *Open questions*. **Not started.**
 
 **Direction set by the project owner's husband (Day 4):** she is not required to
 write test suites by hand. AI-generated tests are the norm and that is accepted.
@@ -255,10 +260,21 @@ dashboard, not how systems are built.
   — ADR-005. The controller, and only the controller. The rule generalises:
   each layer reports outcomes in its own vocabulary, and translation happens
   where the vocabulary changes.
-- **Should `POST` reject unknown fields, or ignore them?** Opened Day 4.
-  `{"content":"x","id":"mine"}` currently returns 201 and silently drops `id`.
-  Safe today because the service reads only `content`. Day 5's `PATCH` forces
-  the decision.
+- ~~**Should `POST` reject unknown fields, or ignore them?**~~ **Resolved Day 5**
+  — both `POST` and `PATCH` reject them with a 400 (ADR-006). What forced it was
+  `PATCH /entries/:id {"contnet": "…"}`: under "ignore", a misspelled field name
+  returns `200 OK` and changes nothing, so the user believes an edit was saved
+  that was not. `POST` matches for consistency, and because its safety came from
+  a coincidence of the implementation rather than a stated rule.
+- ~~**What should search do with `%` and `_`?**~~ **Resolved Day 5** — treat
+  them as ordinary characters and escape them before they reach `LIKE`.
+  Rejected: a 400 on wildcard input (a user searching for `100%` gets an error
+  they cannot act on), and declaring wildcards a power-user feature (one
+  keystroke returns the entire journal). **Decided but not implemented.** The
+  Rule Zero objection — this query dies on Day 15 and again on Day 16 — was
+  weighed and answered: the durable artifact is the claim, *"searching for a
+  character finds entries containing that character"*, which mentions no SQL and
+  survives every replacement of the mechanism underneath it.
 - Rich text vs plain text for entries — deferred until the data model forces it.
 - Which AI provider, and does that decision need to be reversible? (Phase 3)
 - TypeScript 7 (Go-native compiler) is released but blocked by `ts-jest` and
