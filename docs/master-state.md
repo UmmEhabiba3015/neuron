@@ -16,23 +16,134 @@ the recovery cost most of a working session.
 
 ---
 
-**Last updated:** 2026-08-01 (end of Day 4, after the evening debt-clearing
-session and the merge)
-**Current day:** Day 4 of 29 complete (public numbering — see roadmap)
-**Current branch:** `main`, clean and in sync with `origin/main`. **Day 4 is
-merged** as `5dd755e` (PR #4, squash). The `day-04-validation` branch has been
-deleted. Nothing is outstanding from Day 4.
+**Last updated:** 2026-08-05, after Day 5 was audited, committed and pushed.
 
-**Verified green on `main` after the merge:** `pnpm test` 29 ✅ ·
-`pnpm test:e2e` 10 ✅.
+**Current day:** Day 5 of 29 is complete. Day 6 has not started.
+
+**Current branch:** `day-05-testing`. It holds one commit, `f148935`, which
+contains all of Day 5. The branch has been pushed to GitHub. A pull request has
+**not** been opened yet, and the working tree is clean.
+
+**All five checks were re-run by the Master Thread itself rather than taken from
+the worker's report.** `pnpm lint`, `pnpm typecheck` and `pnpm build` all pass.
+`pnpm test` passes with 55 tests, up from 29. `pnpm test:e2e` passes with 18
+tests, up from 10. Both `apps/api/package.json` and `pnpm-lock.yaml` are
+unmodified, so no dependency was added. Both boundary checks return nothing, and
+`EntryRow` is still confined to the repository file.
 
 ---
 
 ## Next Session Starts Here
 
-**Day 4 is fully closed.** Code merged, docs current, LinkedIn post drafted and
-delivered. There is no leftover work. Start by branching `day-05-testing` from
-`main`.
+Day 5 is finished, audited, committed and pushed. The work is on the branch
+`day-05-testing` as commit `f148935`, and that branch now exists on GitHub.
+
+Two things are still outstanding, and both of them are hers to do.
+
+The first is opening the pull request. The branch is pushed but no pull request
+has been created yet. GitHub offers the link at
+`https://github.com/UmmEhabiba3015/neuron/pull/new/day-05-testing`. The standing
+workflow on this project is one branch and one pull request per day, merged with
+a squash. Nobody except her performs git actions, which is why this was left
+undone rather than completed automatically.
+
+The second is the LinkedIn post. A finished draft exists in the Master Thread
+conversation and covers the `LIKE` wildcard discovery, the idea that a missing
+test is usually a missing decision, and the argument for fixing code that is
+scheduled for deletion. She asked for that draft and received it, so it only
+needs copying out and posting. There is also a second, separate story that was
+deliberately left out of it, described further down under *A second LinkedIn
+story*.
+
+The audit found no defects and required no rework. The full detail is in
+`docs/learning/day-05/report.md`, which holds the worker's own report followed by
+the Master Thread's independent verification of it.
+
+**Day 6 is the next working day.** Its brief is written out in full further down,
+under *Day 6 — the brief already prepared*.
+
+### What Day 5 decided
+
+Five decisions were made. All of them are written up with full reasoning in
+[ADR-006](decisions/ADR-006-strict-input-and-mutation-semantics.md). Four of the
+five were hers, and it is worth recording which, because the point of this
+project is that she can defend the decisions later.
+
+She decided that both `POST` and `PATCH` should reject a body containing any
+field the server does not recognise, and answer with a 400. She reached this by
+working through what happens when somebody misspells a field name on an update.
+Under the old behaviour of quietly ignoring unknown fields, `PATCH` with
+`{"contnet": "I fixed my typo"}` would answer `200 OK` and change nothing at
+all. The user would believe their correction had been saved. She said that was
+unacceptable and that the server has to tell the client to send the data
+correctly.
+
+She decided that a repeated query parameter, such as `?word=a&word=b`, should be
+a 400 rather than the `200` with an empty list that it used to produce. She got
+there by applying the test she learned on Day 3, which is to ask whether the
+client could fix the problem by sending a different request.
+
+She decided that the `%` and `_` characters in a search term should be escaped
+and treated as ordinary text. She chose this over two alternatives that were put
+to her, which were rejecting any search containing those characters, and
+declaring wildcard searching to be a deliberate feature. Her reason was that the
+other two options are not friendly to the person using the product.
+
+She decided that `DELETE` should answer with a 200 and the entry that was
+deleted, rather than the more conventional `204 No Content`.
+
+The fifth decision was mine rather than hers, and that is worth flagging. I
+recommended keeping validation hand-written and extracting the shared parts into
+one function, instead of adopting a validation library. She accepted this without
+arguing it, at close to midnight. Since she did not push back on it at all, it is
+worth confirming with her when she is fresh that she actually agrees.
+
+That fifth decision was not optional to consider. ADR-005 had named Day 5 in
+advance as the day to reconsider hand-written validation, on the grounds that a
+partial update duplicates the rules of a create. That condition fired exactly as
+predicted, so it was reconsidered properly rather than skipped. The outcome was
+to defer a library again, and ADR-006 replaces ADR-005's rather vague trigger
+with four specific ones. See the amendment note below, because the reasoning
+behind this deferral turned out to be weaker than first written down.
+
+### The audit — what was checked and what it found
+
+All three of the flagged risks were verified **by breaking the code**, not by
+reading the worker's report:
+
+1. **Escape ordering.** Three mutations introduced by the Master Thread. Removing
+   escaping entirely fails 3 tests; reversing the order fails 3 *different* ones
+   (percent, underscore and `100%`, while backslash still passes); omitting only
+   the backslash pass fails exactly 1. **The suite distinguishes the two ways of
+   getting this wrong**, which is stronger than the prompt asked for.
+2. **The `only` claims fail on too many, not on none.** Confirmed by reading the
+   failure output: the wanted entry is still present and the test goes red
+   purely because three others came with it. The word `only` — the one word she
+   was missing when she wrote the claim — is doing exactly the work it was added
+   for.
+3. **The shared-validation extraction.** Real, but **the worker reported a
+   weaker version of its own success and was right to.** See below.
+
+**No defects. No rework.**
+
+### ⚠️ ADR-006 was amended the same day
+
+The worker found that `parseCreateEntryDto` and `parseUpdateEntryDto` came out
+**structurally identical**, differing only in their error message — because
+there is exactly one updatable field, so *"at least one field present"* and
+*"`content` present"* are the same sentence.
+
+ADR-006 had justified deferring `zod` partly on "extraction removed the
+duplication." The truthful version is that **one optional field is not a
+schema** — the duplication never had room to form. Deferral still stands, but on
+"there is no complexity yet," not on "the hand-written approach absorbed it."
+
+The amendment is recorded in ADR-006 rather than quietly fixed, and the likeliest
+trigger moved **from Day 12 to Day 13**, when mood adds a second updatable field
+and the two validators genuinely diverge.
+
+**This is the behaviour to want from a worker.** It could have reported "duplication
+removed, as designed" and nobody would have checked.
 
 **Day 5 — the roadmap problem is:** *"I changed something and don't know what I
 broke."* Afterwards she should be able to explain unit vs integration vs e2e and
@@ -42,22 +153,174 @@ judge what a test suite fails to cover.
 not just read them." **That is superseded** — see the direction from her husband
 below. Do not open Day 5 by asking her to write a suite.
 
-### Day 5 starts clear — six debts were closed on Day 4 evening
+**Shape she chose for Day 5:** judgement work first, then `PATCH`/`DELETE`.
+Reason: it puts the hardest learning in the freshest hours. Both halves are now
+done.
 
-Day 5 was carrying eight owed items and was over capacity. **Six closed in one
-evening session**, by direct question and experiment. Two had been owed since
-Day 1; one since Day 2 and offered twice before.
+### What Day 5 produced
 
-Closed: prepared statements · which command catches a spec type error · unit vs
-e2e · supertest · `EntriesRepository` wiring · empty-collection · `unknown` vs a
-named DTO at a trust boundary.
+**Three coverage gaps found by her, all real, all invisible to a fully green
+39-test suite. All three now fixed and tested.**
 
-**Day 5 therefore has room.** What remains for it:
+| # | Gap | Outcome |
+|---|---|---|
+| 1 | `POST /entries` silently ignores unknown fields. `{"content":"x","id":"mine"}` → 201, `"mine"` discarded | **Fixed.** `POST` and `PATCH` both 400 and name the offending field |
+| 2 | `%` and `_` are `LIKE` wildcards. `?word=%` returns **every entry**; `100%` cannot be searched for | **Fixed.** Escaped and treated literally |
+| 3 | `?word=a&word=b` — Express supplies an *array* to a parameter typed `string`, producing `%a,b%` and a misleading `200 []` | **Fixed.** 400, and `@Query('word')` retyped to `unknown` |
 
-- Reading and judging an existing suite — naming what it *fails* to cover.
-- `docs/learning/day-02/testing-literacy.md` experiments 2–5, unrun since Day 2.
-- The `PATCH`/`DELETE` work the day was scheduled for, which forces the
-  unknown-fields decision.
+**Gap 2's decision (hers, and I agreed):** treat `%` and `_` as ordinary
+characters — escape them before they reach `LIKE`. Options rejected: reject such
+input with a 400 (a user wanting `100%` gets an error they cannot act on), and
+declare wildcards a feature (a search box that returns the whole journal for one
+keystroke).
+
+**The Rule Zero objection was raised and answered on the record**, because it is
+a fair one: this `LIKE` query is condemned on Day 15 (full-text) and again on
+Day 16 (embeddings), so why fix it? The answer that settled it: the durable
+artifact is not the fix, it is the claim — *"searching for a character finds
+entries containing that character."* That sentence never mentions SQL, `LIKE`,
+or `%`, so it survives all three generations of the implementation. Same shape
+as "newest first", which survived the Day 3 repository extraction because it
+never mentioned where the SQL lived.
+
+**The claim she wrote, sharpened by one word:**
+
+```ts
+it('should return only entries containing a literal percent sign', () => {
+```
+
+She produced everything except `only`. The word is load-bearing: without it, a
+completely broken search that returns all four seed entries still satisfies the
+sentence, because one of those four does contain a `%`. This is the same
+failure mode her own suite already documents at
+`entries.controller.spec.ts:82-84` — a claim a broken implementation can satisfy
+is a green checkmark, not a check.
+
+### The idea worth carrying forward from tonight
+
+**A missing test is usually a missing decision.**
+
+She could not write the claim for gap 2 when first asked, and said so. That was
+not a gap in testing skill — the behaviour had never been decided, so there was
+nothing to write down. Once she chose Option A, the claim came immediately. This
+reframing is what unstuck the block and it is worth reusing.
+
+### Day 6 — the brief already prepared
+
+This was written at the end of Day 5 and given to her, so a fresh Master Thread
+should continue from it rather than invent a new one.
+
+The problem for Day 6, taken from the roadmap, is *"my database password is in a
+committed file."* There is no password in the project yet, and that is precisely
+why this is the right moment to look at configuration, before there is a secret
+to leak.
+
+Two places in the code read the environment directly and trust whatever they
+find. `main.ts` line 6 reads `process.env.PORT ?? 3000`, and
+`database.module.ts` line 26 reads `process.env.DATABASE_PATH`. Nothing checks
+either value, nothing writes down anywhere that these two variables exist, and
+nothing stops the application starting up with a value that makes no sense. It
+will start happily and then fail later, in a place that gives no hint about the
+real cause.
+
+By the end of the day she should be able to explain why configuration is treated
+differently from code, what an environment actually is, why a secret needs more
+careful handling than an ordinary setting, and why checking configuration when
+the application starts is different from checking it the first time it gets
+used.
+
+The format should be the same one that worked on Day 5, which is to read, then
+predict, then break, then observe. This topic breaks in ways that are easy to
+watch. Setting `PORT=hello` and starting the server should teach her something
+within about thirty seconds.
+
+Two things from Day 5 connect directly into Day 6, and both are worth using.
+
+The first is the idea she took away from Day 5, that a missing test is usually a
+missing decision. It applies here without any modification. Nobody has decided
+what `DATABASE_PATH` should mean when it is missing, or when it holds nonsense,
+or when it points at a location the process cannot write to.
+
+The second is that an environment variable is a trust boundary, exactly like a
+request body or a query parameter. `process.env.PORT` has the type
+`string | undefined`, and the code treats it as though it were a port number.
+That is the same category of mistake she found twice on Day 5, so she has a
+model for it already and should be asked to spot it rather than told.
+
+### A second LinkedIn story, deliberately held back
+
+Day 5 contains a second story that was left out of the post on purpose, because
+putting both in one post would weaken each of them.
+
+When the worker agent finished the implementation, it was asked whether
+extracting the shared validation had genuinely removed the duplication it was
+being credited with removing. It answered no. Its words were that one optional
+field is not a schema, and that the duplication had never had room to form in the
+first place. It reported a weaker version of its own success without being
+pushed, and ADR-006 was amended because of it.
+
+That is a good story for an audience thinking about how to work with AI agents,
+and it stands on its own. It has not been drafted yet.
+
+### Gaps still unspent — material for a later session
+
+Found by the Master Thread on Day 5 and **deliberately never shown to her.** Do
+not hand these over; they are practice for the skill she was building.
+
+- **Empty search value.** `?word=` is falsy, so it falls through to `findAll()`
+  and returns everything rather than searching. **Still true after Day 5** — the
+  worker left it alone on purpose, because nobody has decided what an empty
+  search term means and implementing an unchosen behaviour is the exact failure
+  ADR-006 describes.
+- **No maximum content length.** A multi-megabyte entry is accepted.
+- **Search case sensitivity is untested in either direction**, so nobody knows
+  whether the current behaviour is intended.
+
+`docs/learning/day-02/testing-literacy.md` experiments 3 and 4 remain unrun and
+are still worth doing — they cover brittle assertions and test isolation.
+**Experiments 2 and 5 are now redundant** and should be skipped: 2 is the
+route-rename experiment and 5 is the four-commands question, both of which she
+answered correctly on Day 4 evening.
+
+### A teaching finding from tonight — this one is actionable
+
+**The opening question failed, and the failure mode is worth not repeating.**
+
+Day 5 opened by asking her to *invent* a bug: "imagine a careless engineer makes
+one change that breaks the API while all 39 tests stay green — what change?"
+Her entire reply was *"i do not understand."*
+
+That question asked her to **generate** an example, from nothing, before she had
+opened a single test file. Generation is far harder than recognition, and there
+was no worked example to pattern-match against.
+
+**What fixed it immediately:** doing one worked example first — here is a change
+(`ORDER BY ... DESC` → `ASC`), here is the exact test that catches it, therefore
+this rule is covered — and then handing her a second case and asking only
+*"is there a test for this?"* She answered that correctly straight away, and
+every question after it.
+
+**The rule:** when introducing a new *kind* of thinking, work one example
+yourself before asking her to produce one. This is not the same as skipping
+Socratic questioning — the questions that followed were all open, and she
+answered them. It is about giving the task a recognisable shape first.
+
+### Where she answered, per topic — the tracking the plan asks for
+
+| Question | Step reached |
+|---|---|
+| Invent a bug the suite would miss | **Did not parse.** Replaced with a worked example rather than narrowed |
+| Is there a test for unknown fields? | **Step 1**, immediately after one worked example |
+| Extra `id` — rejected, stored, or ignored? | **Step 1.** Correct, with the right reason |
+| What does `?word=%` return? | **Step 1.** Immediate |
+| Which spec file does the new test belong in? | **Step 1.** Correct — service spec |
+| What should the claim assert? | **Stuck at step 1**, legitimately — the decision did not exist yet. One narrowing question (*"what should it return?"*) resolved it |
+| Which option for wildcard handling? | **Step 1.** Chose A, with a reason |
+| The claim sentence | **Step 1**, missing only the word `only` |
+
+Six of eight at step 1. The two that were not are both explained by something
+other than difficulty: one was a badly-shaped question, the other was blocked on
+an unmade decision.
 
 ### ⚠️ Direction set by her husband on Day 4 — do not relitigate this
 
@@ -134,8 +397,14 @@ time; `git checkout <file>` also works.)
 
 ### Also outstanding
 
-Experiments 2 to 5 in `docs/learning/day-02/testing-literacy.md` remain unrun
-since Day 2.
+**Experiments 3 and 4** in `docs/learning/day-02/testing-literacy.md` remain
+unrun and are still worth doing — brittle assertions, and why tests must be
+independent.
+
+**Experiments 2 and 5 are now redundant and should be skipped.** Experiment 2 is
+the route-rename experiment and experiment 5 is the four-commands type-error
+question; she answered both correctly on Day 4 evening. Running them again would
+be revision, not learning.
 
 ---
 
@@ -144,23 +413,36 @@ since Day 2.
 **What runs today:**
 
 ```
-GET  /entries              → 200, all entries, newest first
-GET  /entries?word=<term>  → 200, matching entries newest first; 200 [] when
-                             nothing matches
-GET  /entries/count        → 200, { "count": n }
-GET  /entries/:id          → 200, one entry; 404 when not found
-POST /entries              → 201, { "content": "..." }, returns the created entry
-                             400 when content is absent, not a string, or has no
-                             non-whitespace character; 400 on a null body
+GET    /entries              → 200, all entries, newest first
+GET    /entries?word=<term>  → 200, matching entries newest first; 200 [] when
+                               nothing matches. `%`, `_` and `\` in the term are
+                               ordinary characters, not wildcards
+                               400 when `word` is given more than once
+GET    /entries/count        → 200, { "count": n }
+GET    /entries/:id          → 200, one entry; 404 when not found
+POST   /entries              → 201, { "content": "..." }, returns the created entry
+                               400 when content is absent, not a string, or has no
+                               non-whitespace character; 400 on a null body;
+                               400 naming any field other than `content`
+PATCH  /entries/:id          → 200, the updated entry. `createdAt` is unchanged
+                               404 when the id does not exist
+                               400 on an empty body, an invalid `content`, or any
+                               field other than `content`
+DELETE /entries/:id          → 200, the deleted entry; 404 when the id does not
+                               exist
 ```
 
 Entries persist across restarts. **Every endpoint now returns a correct status
 code** — the three known-wrong 500s are gone. No auth, no frontend, no CI, no
 deployment.
 
-**Verified working on Fedora KDE as of 2026-08-01, end of Day 4:**
-`pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (29 tests,
-up from 18) · `pnpm test:e2e` ✅ (10 tests, up from 1)
+**Verified working on Fedora KDE as of 2026-08-04, end of Day 5:**
+`pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (55 tests,
+up from 29) · `pnpm test:e2e` ✅ (18 tests, up from 10)
+
+Day 5's endpoints and search behaviour were exercised over real HTTP by the
+worker against a throwaway database on port 3999. **Not yet re-verified
+independently by the Master Thread** — that audit is still owed.
 
 All re-verified independently by the Master Thread against a fresh database on
 port 3998, not taken from the worker's report. Every status code above was
@@ -223,12 +505,17 @@ neuron/                    pnpm workspace root
 │               ├── entries.controller.ts  HTTP only — routes, params, query,
 │               │                          validation, and the ONLY place a
 │               │                          status code appears. Owns
-│               │                          parseCreateEntryDto
+│               │                          parseEntryBody + parseContent (shared
+│               │                          by POST and PATCH), the two DTO
+│               │                          parsers, and parseSearchTerm
 │               ├── entries.service.ts     application logic; generates id +
 │               │                          createdAt, delegates storage
 │               ├── entries.repository.ts  the ONLY class that knows a database
-│               │                          exists. Owns EntryRow + toJournalEntry
-│               ├── create-entry.dto.ts    what a client may SEND ({ content })
+│               │                          exists. Owns EntryRow, toJournalEntry
+│               │                          and escapeLikePattern — LIKE's pattern
+│               │                          language is database vocabulary
+│               ├── create-entry.dto.ts    what a client may SEND to POST
+│               ├── update-entry.dto.ts    what a client may SEND to PATCH
 │               └── entry.interface.ts     what an entry IS ({ id, content,
 │                                          createdAt }) — all strings
 └── docs/
@@ -251,7 +538,8 @@ and that is deliberate — see ADR-001.
 | [ADR-002](decisions/ADR-002-nestjs.md) | NestJS over raw `http` / Express / Fastify | Accepted |
 | [ADR-003](decisions/ADR-003-sqlite.md) | SQLite via built-in `node:sqlite`, raw SQL, no ORM | Accepted, **expected to be replaced** (Day 16 / Day 24) |
 | [ADR-004](decisions/ADR-004-repository-raw-sql.md) | Data access gets its own layer (`EntriesRepository`); SQL stays hand-written. Query builder and ORM rejected on timing, not merit. `id`/`createdAt` generated in the service | Accepted, **revisit Day 13 / Day 24** |
-| [ADR-005](decisions/ADR-005-validation-and-error-semantics.md) | Status codes live in the controller and nowhere else — the service may not throw HTTP exceptions either. `findById` → `undefined`, `findByContent` → `[]`. Validation hand-written; `class-validator` and `zod` rejected on timing, not merit. `/entries/count` returns `{ count }` | Accepted, **revisit Day 5 (PATCH) / when a check is duplicated** |
+| [ADR-005](decisions/ADR-005-validation-and-error-semantics.md) | Status codes live in the controller and nowhere else — the service may not throw HTTP exceptions either. `findById` → `undefined`, `findByContent` → `[]`. Validation hand-written; `class-validator` and `zod` rejected on timing, not merit. `/entries/count` returns `{ count }` | Accepted. **Revisit condition fired on Day 5 as predicted; answered in ADR-006** |
+| [ADR-006](decisions/ADR-006-strict-input-and-mutation-semantics.md) | `POST` and `PATCH` reject unknown fields (400). Repeated query parameter → 400. `%`/`_` escaped and treated literally in search. `PATCH` partial update, `createdAt` unchanged, no `updatedAt`. `DELETE` → 200 with the deleted entry. Validation stays hand-written with a shared check extracted; `zod` deferred again under four sharper triggers | Accepted and **implemented by the Day 5 worker**; Master Thread audit still owed. Revisit Day 12 (frontend) / Day 15–16 (search replaced) |
 
 **Decided outside an ADR:**
 
@@ -318,6 +606,21 @@ and that is deliberate — see ADR-001.
   committed, six learning debts were closed** by direct question and experiment
   — two of them owed since Day 1, one since Day 2 and previously skipped twice.
   This cleared Day 5, which had been over capacity.
+- **Day 5** — the day the suite was judged rather than extended. She found
+  **three real defects inside a fully green 39-test suite**: unknown fields
+  silently dropped, `LIKE` wildcards returning the whole journal, and a repeated
+  query parameter producing a misleading `200 []`. Each was confirmed over real
+  HTTP before being accepted. She then made every design decision that followed
+  — reject unknown fields on both `POST` and `PATCH`, 400 on a repeated
+  parameter, escape `%`/`_` rather than reject them, `DELETE` returns the
+  deleted entry. The idea worth keeping: **a missing test is usually a missing
+  decision.** She could not write the wildcard claim until she had chosen what
+  search meant, and that was not a gap in testing skill. ADR-006 written;
+  implementation by a worker, audited by deliberately breaking the code in three
+  places. 29 → 55 unit tests, 10 → 18 e2e, no dependency added, no defects
+  found. **ADR-006 was amended the same day** because the worker honestly
+  reported that the duplication it was credited with removing had never had room
+  to form.
 
 ---
 
@@ -341,10 +644,21 @@ and that is deliberate — see ADR-001.
 | Item | Detail |
 |---|---|
 | `apps/api` `lint` script has `--fix` | `pnpm lint` silently **rewrites** files rather than reporting. Fine locally, wrong for a CI gate. Split into `lint` / `lint:fix` by Day 25 |
-| `res.body` is untyped (`any`) in e2e | Can't make shape assertions without a cast. Not resolved on Day 4 — the new e2e tests assert on `res.body` through the same untyped path. Day 5 or Day 7 |
+| `res.body` is untyped (`any`) in e2e | 🟡 **Partly resolved Day 5.** The new e2e tests read the body through one `entryFrom(res)` helper that casts once to `JournalEntry`, so field access is compiler-checked from there on. It is still a cast, and the three older tests still assert on raw `res.body`. Day 7 |
 | Worker prompts + reports are gitignored | `docs/workers/` and `docs/learning/**/report.md` stay local only. They exist on disk but are not in version control |
-| **`POST /entries` ignores unknown fields** | `{"content":"x","id":"mine"}` returns 201 and silently drops `id`. Safe today because the service reads only `content`, but "ignore" vs "reject" is an unmade decision. Day 5 (`PATCH` forces it) |
-| **Validation is enforced by memory, not by mechanism** | Nothing makes a future endpoint validate its body. A forgotten check passes lint, typecheck, build and tests. This is ADR-005's accepted cost and its named revisit condition — the same failure class as the Day 3 `ORDER BY` bug |
+| **`?word=` (empty value) returns everything** | `if (word)` treats the empty string as absent and falls through to `findAll()`. **Deliberately left unchanged on Day 5**, and this is the point rather than an oversight: ADR-006's own lesson is that a missing test is usually a missing decision, and nobody has decided whether an empty search term means "list everything" or "reject the request". Still untested. **Not yet shown to her** |
+| **Escaping is enforced by memory, not by mechanism** | New Day 5, and named as an accepted cost in ADR-006. Nothing stops a future query interpolating a raw term into a `LIKE` without calling `escapeLikePattern`. Same class as the `created_at` cast and the forgettable validation checks below |
+| **Validation is enforced by memory, not by mechanism** | Nothing makes a future endpoint validate its body. A forgotten check passes lint, typecheck, build and tests. This is ADR-005's accepted cost and its named revisit condition — the same failure class as the Day 3 `ORDER BY` bug. Day 5 shrank it but did not remove it: `POST` and `PATCH` now call the same two checking functions, so the *rules* exist once, but nothing forces a third endpoint to call them |
+
+**Resolved by the Day 5 worker** (implemented and verified over real HTTP;
+Master Thread audit still owed):
+
+| Item | Resolution |
+|---|---|
+| `POST /entries` ignores unknown fields | ✅ **400 naming the field.** `{"content":"x","id":"mine"}` now answers `Unrecognised field(s): id. Only content may be sent.` `PATCH` applies the identical rule |
+| `LIKE` wildcards are not escaped in search | ✅ `%`, `_` and `\` are escaped before the value is bound, and the query names `ESCAPE '\'`. `?word=%` returns only entries containing a percent sign; `?word=100%` finds `100% exhausted today`. The escape character is escaped **first**. Both ways of getting this wrong were introduced deliberately and the tests were watched going red: reversing the order breaks the `%` and `_` claims, and omitting the backslash pass entirely breaks only the backslash claim |
+| Duplicate query parameters are a type lie | ✅ `@Query('word')` is now typed `unknown` and checked. `?word=a&word=b` is a 400, not `200 []`. The first element is deliberately **not** taken — that would guess which of the two terms the user meant |
+| `PATCH` and `DELETE` do not exist | ✅ Both added. `PATCH` leaves `createdAt` unchanged and there is no `updatedAt`. `DELETE` returns the deleted entry with 200, and reads the row before removing it so a second `DELETE` is a 404 rather than a quiet success |
 
 **Resolved during Day 2** (no longer debt):
 
@@ -454,27 +768,46 @@ the roadmap's *Learning Debt* section for why this is tracked.
   compiler *believes* the label, so typecheck and build both pass and the
   failure only appears at runtime.
 
+**Repaid on Day 5 (first session):**
+
+- **Prepared statements have a boundary, and she has now seen it.** She could
+  already explain that bound parameters stop data becoming instruction. Tonight
+  she predicted, correctly and instantly, that `?word=%` returns every entry —
+  then saw why the protection does not apply. `%` and `_` are not SQL grammar;
+  they are the pattern language `LIKE` interprets *after* the value is bound, so
+  binding works perfectly and the bug happens anyway. This also closes the
+  "explained, not verified" flag on prepared statements below: the mechanism was
+  load-bearing in a prediction she got right.
+
 **Still owed:**
 
-- **Reading and judging an existing suite.** 🟡 Partial. She can now predict
-  what unit vs e2e catches. What remains is looking at a suite and naming what
-  it *fails* to cover — the skill the Day 3 `ORDER BY` bug needed. Per her
-  husband's direction, this is the goal rather than writing suites by hand.
+- **Reading and judging an existing suite.** 🟡 Partial, and moved forward
+  tonight. She found two genuine gaps, correctly placed a new test in the right
+  spec file, and wrote the claim sentence for one of them once the underlying
+  decision existed. What is not yet demonstrated is doing this **unprompted
+  across a whole suite** rather than on cases handed to her one at a time. Four
+  further gaps are listed in *Block 3* for exactly this, deliberately withheld.
+- **Turning a found gap into a claim without help.** New, opened Day 5. The
+  first attempt stalled — legitimately, because the behaviour had never been
+  decided. Worth re-testing on a gap where the correct behaviour is obvious, so
+  the decision step is not confounded with the writing step.
 - **Where validation belongs.** 🟡 Partial — she reasoned it out and chose the
   *service*, then accepted the counter-argument. The distinction between "is
   this well-formed?" (boundary) and "is this allowed?" (service) was given to
   her, not derived. → re-test Day 10 when ownership checks arrive
-- **Prepared statements — 🟡 explained, not verified.** The mechanism was taught
-  in full (parse-then-bind; the database parses before it has seen any value, so
-  data cannot become instruction). She said she understood and declined the
-  in-memory injection experiment, which was her call. She has not demonstrated
-  it back. → Day 5
+- ~~**Prepared statements — 🟡 explained, not verified.**~~ ✅ **Verified Day 5.**
+  The mechanism turned out to be load-bearing in a prediction she got right
+  instantly: that `?word=%` returns every entry, because `%` is interpreted by
+  `LIKE` *after* binding and so binding cannot protect against it. She could not
+  have reached that without the parse-then-bind model. The in-memory injection
+  experiment she declined is no longer needed.
 - **`EntriesRepository` wiring** — the worker did the extraction, so she has not
   registered a repository provider herself or seen that failure mode. → surfaces
   naturally on Day 13 when a second entity needs one
 
-`docs/learning/day-02/testing-literacy.md` experiments 2–5 remain unrun. Day 5
-picks these up. Note that authorship of tests is **no longer** part of Day 5 —
+`docs/learning/day-02/testing-literacy.md` experiments **3 and 4** remain unrun;
+2 and 5 were overtaken by the Day 4 evening session and should be skipped. Note
+that authorship of tests is **no longer** part of Day 5 —
 see the direction recorded in *Next Session Starts Here*.
 
 ---

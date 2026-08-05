@@ -62,6 +62,25 @@ export class EntriesService {
     return this.entriesRepository.findByContent(word);
   }
 
+  // A partial update, so only the fields a client may change are parameters.
+  // `id` and `createdAt` are absent by design: the server decided both when the
+  // entry was created, and `createdAt` records when the entry was written
+  // rather than when it was last edited (ADR-006).
+  //
+  // `undefined` for an unknown id, for the same reason `findById` returns it —
+  // whether a missing entry is an error depends on who is asking, and a
+  // background job has no 404 to write.
+  update(id: string, content: string): JournalEntry | undefined {
+    return this.entriesRepository.update(id, content);
+  }
+
+  // Returns the entry that was removed rather than nothing, so a caller can
+  // report or undo what it just deleted without having fetched it first
+  // (ADR-006). `undefined` means there was no such entry to delete.
+  delete(id: string): JournalEntry | undefined {
+    return this.entriesRepository.delete(id);
+  }
+
   countEntries(): number {
     return this.entriesRepository.countEntries();
   }
