@@ -16,56 +16,95 @@ the recovery cost most of a working session.
 
 ---
 
-**Last updated:** 2026-08-05, after the Day 5 worker ran and was audited.
-**Current day:** **Day 5 code-complete and audited. Not committed.**
-**Current branch:** `day-05-testing`, branched from `main` at `ed1bab3`.
-**No commits on it at all.** Everything from Day 5 is uncommitted in the working
-tree.
+**Last updated:** 2026-08-05, after Day 5 was audited, committed and pushed.
 
-**Verified green by the Master Thread independently, not taken from the worker's
-report:** `pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ ·
-`pnpm test` ✅ **55** (was 29) · `pnpm test:e2e` ✅ **18** (was 10).
-`apps/api/package.json` and `pnpm-lock.yaml` unmodified — **no dependency
-added.** Both boundary greps clean; `EntryRow` still confined.
+**Current day:** Day 5 of 29 is complete. Day 6 has not started.
+
+**Current branch:** `day-05-testing`. It holds one commit, `f148935`, which
+contains all of Day 5. The branch has been pushed to GitHub. A pull request has
+**not** been opened yet, and the working tree is clean.
+
+**All five checks were re-run by the Master Thread itself rather than taken from
+the worker's report.** `pnpm lint`, `pnpm typecheck` and `pnpm build` all pass.
+`pnpm test` passes with 55 tests, up from 29. `pnpm test:e2e` passes with 18
+tests, up from 10. Both `apps/api/package.json` and `pnpm-lock.yaml` are
+unmodified, so no dependency was added. Both boundary checks return nothing, and
+`EntryRow` is still confined to the repository file.
 
 ---
 
 ## Next Session Starts Here
 
-**Day 5 is done except for git and the LinkedIn post.**
+Day 5 is finished, audited, committed and pushed. The work is on the branch
+`day-05-testing` as commit `f148935`, and that branch now exists on GitHub.
 
-Two things remain, both hers:
+Two things are still outstanding, and both of them are hers to do.
 
-1. **Commit and open the PR.** Nothing is committed. One branch, one PR,
-   squash-merged, per the standing workflow. Worker agents and the Master Thread
-   do not touch git on this project.
-2. **The LinkedIn post.** A draft exists in the thread but is **out of date** —
-   it was written mid-session when the day had two findings and no code. It
-   needs rewriting now that the day produced four decisions, an ADR, two new
-   endpoints and 24 new tests.
+The first is opening the pull request. The branch is pushed but no pull request
+has been created yet. GitHub offers the link at
+`https://github.com/UmmEhabiba3015/neuron/pull/new/day-05-testing`. The standing
+workflow on this project is one branch and one pull request per day, merged with
+a squash. Nobody except her performs git actions, which is why this was left
+undone rather than completed automatically.
 
-**The audit found no defects and required no rework.** Full detail in
-`docs/learning/day-05/report.md`, which contains the worker's report followed by
-the Master Thread's independent verification.
+The second is the LinkedIn post. A finished draft exists in the Master Thread
+conversation and covers the `LIKE` wildcard discovery, the idea that a missing
+test is usually a missing decision, and the argument for fixing code that is
+scheduled for deletion. She asked for that draft and received it, so it only
+needs copying out and posting. There is also a second, separate story that was
+deliberately left out of it, described further down under *A second LinkedIn
+story*.
+
+The audit found no defects and required no rework. The full detail is in
+`docs/learning/day-05/report.md`, which holds the worker's own report followed by
+the Master Thread's independent verification of it.
+
+**Day 6 is the next working day.** Its brief is written out in full further down,
+under *Day 6 — the brief already prepared*.
 
 ### What Day 5 decided
 
-| # | Decision | Source |
-|---|---|---|
-| 1 | `POST` **and** `PATCH` reject unknown fields with a 400 | Hers. Derived from the `PATCH {"contnet": …}` silent-success case |
-| 2 | A repeated query parameter (`?word=a&word=b`) is a 400, not `200 []` | Hers, via the 4xx test |
-| 3 | `%` and `_` in a search term are escaped and treated literally | Hers — chose escaping over rejecting or declaring it a feature |
-| 4 | `DELETE` returns `200` with the deleted entry; `404` when absent | Hers |
-| 5 | Validation stays hand-written; shared check extracted instead | Master Thread's recommendation, accepted by her without objection — **worth re-confirming**, as it was late and she did not argue it |
+Five decisions were made. All of them are written up with full reasoning in
+[ADR-006](decisions/ADR-006-strict-input-and-mutation-semantics.md). Four of the
+five were hers, and it is worth recording which, because the point of this
+project is that she can defend the decisions later.
 
-All five are recorded in
-[ADR-006](decisions/ADR-006-strict-input-and-mutation-semantics.md).
+She decided that both `POST` and `PATCH` should reject a body containing any
+field the server does not recognise, and answer with a 400. She reached this by
+working through what happens when somebody misspells a field name on an update.
+Under the old behaviour of quietly ignoring unknown fields, `PATCH` with
+`{"contnet": "I fixed my typo"}` would answer `200 OK` and change nothing at
+all. The user would believe their correction had been saved. She said that was
+unacceptable and that the server has to tell the client to send the data
+correctly.
 
-⚠️ **ADR-005's named revisit condition fired on schedule** and was answered
-rather than skipped. It said Day 5's `PATCH` would be the first real test of
-hand-written validation. It was reconsidered, `zod` was deferred again, and
-ADR-006 replaces ADR-005's vague trigger with four specific ones. The most
-likely to fire is **Day 12**, when the frontend may duplicate validation rules.
+She decided that a repeated query parameter, such as `?word=a&word=b`, should be
+a 400 rather than the `200` with an empty list that it used to produce. She got
+there by applying the test she learned on Day 3, which is to ask whether the
+client could fix the problem by sending a different request.
+
+She decided that the `%` and `_` characters in a search term should be escaped
+and treated as ordinary text. She chose this over two alternatives that were put
+to her, which were rejecting any search containing those characters, and
+declaring wildcard searching to be a deliberate feature. Her reason was that the
+other two options are not friendly to the person using the product.
+
+She decided that `DELETE` should answer with a 200 and the entry that was
+deleted, rather than the more conventional `204 No Content`.
+
+The fifth decision was mine rather than hers, and that is worth flagging. I
+recommended keeping validation hand-written and extracting the shared parts into
+one function, instead of adopting a validation library. She accepted this without
+arguing it, at close to midnight. Since she did not push back on it at all, it is
+worth confirming with her when she is fresh that she actually agrees.
+
+That fifth decision was not optional to consider. ADR-005 had named Day 5 in
+advance as the day to reconsider hand-written validation, on the grounds that a
+partial update duplicates the rules of a create. That condition fired exactly as
+predicted, so it was reconsidered properly rather than skipped. The outcome was
+to defer a library again, and ADR-006 replaces ADR-005's rather vague trigger
+with four specific ones. See the amendment note below, because the reasoning
+behind this deferral turned out to be weaker than first written down.
 
 ### The audit — what was checked and what it found
 
@@ -165,6 +204,63 @@ She could not write the claim for gap 2 when first asked, and said so. That was
 not a gap in testing skill — the behaviour had never been decided, so there was
 nothing to write down. Once she chose Option A, the claim came immediately. This
 reframing is what unstuck the block and it is worth reusing.
+
+### Day 6 — the brief already prepared
+
+This was written at the end of Day 5 and given to her, so a fresh Master Thread
+should continue from it rather than invent a new one.
+
+The problem for Day 6, taken from the roadmap, is *"my database password is in a
+committed file."* There is no password in the project yet, and that is precisely
+why this is the right moment to look at configuration, before there is a secret
+to leak.
+
+Two places in the code read the environment directly and trust whatever they
+find. `main.ts` line 6 reads `process.env.PORT ?? 3000`, and
+`database.module.ts` line 26 reads `process.env.DATABASE_PATH`. Nothing checks
+either value, nothing writes down anywhere that these two variables exist, and
+nothing stops the application starting up with a value that makes no sense. It
+will start happily and then fail later, in a place that gives no hint about the
+real cause.
+
+By the end of the day she should be able to explain why configuration is treated
+differently from code, what an environment actually is, why a secret needs more
+careful handling than an ordinary setting, and why checking configuration when
+the application starts is different from checking it the first time it gets
+used.
+
+The format should be the same one that worked on Day 5, which is to read, then
+predict, then break, then observe. This topic breaks in ways that are easy to
+watch. Setting `PORT=hello` and starting the server should teach her something
+within about thirty seconds.
+
+Two things from Day 5 connect directly into Day 6, and both are worth using.
+
+The first is the idea she took away from Day 5, that a missing test is usually a
+missing decision. It applies here without any modification. Nobody has decided
+what `DATABASE_PATH` should mean when it is missing, or when it holds nonsense,
+or when it points at a location the process cannot write to.
+
+The second is that an environment variable is a trust boundary, exactly like a
+request body or a query parameter. `process.env.PORT` has the type
+`string | undefined`, and the code treats it as though it were a port number.
+That is the same category of mistake she found twice on Day 5, so she has a
+model for it already and should be asked to spot it rather than told.
+
+### A second LinkedIn story, deliberately held back
+
+Day 5 contains a second story that was left out of the post on purpose, because
+putting both in one post would weaken each of them.
+
+When the worker agent finished the implementation, it was asked whether
+extracting the shared validation had genuinely removed the duplication it was
+being credited with removing. It answered no. Its words were that one optional
+field is not a schema, and that the duplication had never had room to form in the
+first place. It reported a weaker version of its own success without being
+pushed, and ADR-006 was amended because of it.
+
+That is a good story for an audience thinking about how to work with AI agents,
+and it stands on its own. It has not been drafted yet.
 
 ### Gaps still unspent — material for a later session
 
