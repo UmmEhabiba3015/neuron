@@ -16,13 +16,14 @@ the recovery cost most of a working session.
 
 ---
 
-**Last updated:** 2026-08-05, after Day 5 was audited, committed and pushed.
+**Last updated:** 2026-08-05, after Day 5 was audited, merged and closed.
 
-**Current day:** Day 5 of 29 is complete. Day 6 has not started.
+**Current day:** Day 5 of 29 is complete and merged. Day 6 has not started.
 
-**Current branch:** `day-05-testing`. It holds one commit, `f148935`, which
-contains all of Day 5. The branch has been pushed to GitHub. A pull request has
-**not** been opened yet, and the working tree is clean.
+**Current branch:** `main`, clean and in sync with `origin/main`. Day 5 was
+merged as commit `44590a9` through pull request #5, using a squash. The
+`day-05-testing` branch has been deleted both locally and on GitHub. Nothing at
+all is outstanding from Day 5.
 
 **All five checks were re-run by the Master Thread itself rather than taken from
 the worker's report.** `pnpm lint`, `pnpm typecheck` and `pnpm build` all pass.
@@ -35,25 +36,25 @@ unmodified, so no dependency was added. Both boundary checks return nothing, and
 
 ## Next Session Starts Here
 
-Day 5 is finished, audited, committed and pushed. The work is on the branch
-`day-05-testing` as commit `f148935`, and that branch now exists on GitHub.
+Day 5 is fully closed. It was audited, committed, merged through pull request #5
+with a squash, and the branch has been deleted. `main` is green: lint, typecheck
+and build all pass, `pnpm test` gives 55 tests and `pnpm test:e2e` gives 18.
+There is no leftover code work.
 
-Two things are still outstanding, and both of them are hers to do.
+One thing is still outstanding, and it is hers. The LinkedIn post for Day 5 has
+not gone out. A finished draft exists in the Master Thread conversation from
+2026-08-05 and covers three things: the `LIKE` wildcard discovery, the idea that
+a missing test is usually a missing decision, and the argument for fixing code
+that is already scheduled for deletion. She asked for that draft and received it,
+so it only needs copying out and posting. If the conversation is gone, it can be
+rebuilt from ADR-006 and the notes below. There is also a second, separate story
+that was deliberately kept out of that post, described further down under
+*A second LinkedIn story*.
 
-The first is opening the pull request. The branch is pushed but no pull request
-has been created yet. GitHub offers the link at
-`https://github.com/UmmEhabiba3015/neuron/pull/new/day-05-testing`. The standing
-workflow on this project is one branch and one pull request per day, merged with
-a squash. Nobody except her performs git actions, which is why this was left
-undone rather than completed automatically.
-
-The second is the LinkedIn post. A finished draft exists in the Master Thread
-conversation and covers the `LIKE` wildcard discovery, the idea that a missing
-test is usually a missing decision, and the argument for fixing code that is
-scheduled for deletion. She asked for that draft and received it, so it only
-needs copying out and posting. There is also a second, separate story that was
-deliberately left out of it, described further down under *A second LinkedIn
-story*.
+Note on the merge, since it departs from the usual pattern. Git actions are
+normally hers alone. Day 5 was committed, pushed, opened as a pull request and
+merged by the Master Thread because her husband asked for it directly on
+2026-08-05. That was a one-off instruction and does not change the standing rule.
 
 The audit found no defects and required no rework. The full detail is in
 `docs/learning/day-05/report.md`, which holds the worker's own report followed by
