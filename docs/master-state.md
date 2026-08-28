@@ -16,9 +16,13 @@ the recovery cost most of a working session.
 
 ---
 
-**Last updated:** 2026-08-05, after Day 5 was audited, merged and closed.
+**Last updated:** 2026-08-06, after the Day 6 implementation was audited.
 
-**Current day:** Day 5 of 29 is complete and merged. Day 6 has not started.
+**Current day:** Day 6 of 29 is **implemented and audited**, with one follow-up
+task outstanding. ADR-007 is written and amended. The worker's implementation was
+audited by breaking the code in five places; four mutations were caught and one
+was not. The one that was not is the day's finding, and a follow-up worker prompt
+exists to close it. Nothing is committed. Day 5 is complete and merged.
 
 **Current branch:** `main`, clean and in sync with `origin/main`. Day 5 was
 merged as commit `44590a9` through pull request #5, using a squash. The
@@ -36,10 +40,341 @@ unmodified, so no dependency was added. Both boundary checks return nothing, and
 
 ## Next Session Starts Here
 
+**Resume by running `docs/workers/day-06-wiring-test.md`,** then auditing what it
+produces, then committing Day 6. Everything else about Day 6 is done. The Day 5
+history further down is still accurate.
+
+### Day 6 follow-up: audited and closed, 2026-08-28
+
+`apps/api/test/config-wiring.e2e-spec.ts` was added by a worker and audited by me
+rather than taken from its report. **No defects, no rework.**
+
+All five checks green: lint, typecheck, build, **80 unit**, **24 end-to-end** (21
+→ 24 exactly as specified). No dependency added. No production code changed —
+verified by diffing `app.module.ts` against a copy taken *before* the worker ran,
+because file timestamps were useless here: my own mutations had rewritten the
+file.
+
+**Both required mutations caught, and they fail differently, which is stronger
+than the prompt asked for:**
+
+```
+delete 'validate,'       -> 2 tests fail   (claims 1 and 2)
+delete 'isGlobal: true'  -> 1 test fails   (claim 3)
+restored                 -> 24 passed
+```
+
+No stray sockets, no leftover temp directories, real application boots and serves.
+
+#### ⚠️ The worker corrected a factual error I had taught her
+
+My prompt stated as an established mechanical fact that `@nestjs/config` "does not
+validate when `forRoot()` is called; it validates when Nest initialises the
+module." **That is false**, and I had taught her the same thing in Day 7 Block 1.
+
+`ConfigModule.forRoot` is an `async` static and it calls `options.validate(config)`
+in the synchronous part of its body, so the check runs while `app.module.ts` is
+being *imported*. Because an `async` function returns a rejected promise rather
+than throwing, the failure sits unhandled in the `imports` array until Nest awaits
+it — which is why the import looks like it succeeded. Confirmed against the
+library's source and by an `unhandledRejection` handler firing before Nest was
+asked to build anything.
+
+Every *observation* previously recorded is unaffected: the import succeeds,
+`compile()` rejects, `main.ts`'s own `catch` never runs. Only the explanation was
+wrong. The `useFactory` analogy still holds for `DATABASE`; it does not hold for
+`validate`.
+
+Corrected in ADR-007 (Amendment 4) and in the worker prompt. **She was told the
+correction directly.** This is the second time a worker here has corrected the
+record it was handed, and both times it happened because the prompt asked a direct
+question inviting it.
+
+**Day 6 is now complete and ready to commit.** Nothing is outstanding except the
+git work, which is hers: branch `day-06-configuration`, one squashed pull request.
+
+### Day 7 — first block, 2026-08-19 (after a 13-day gap)
+
+The project sat untouched from 2026-08-06 to 2026-08-19. Day 6's work was still
+uncommitted on `main` the whole time. Nothing was lost; all 101 tests still pass.
+
+Day 7 opened by repaying the `@nestjs/config` learning debt, since she chose that
+package specifically to learn how NestJS does things and had not read a line of
+what the worker wrote.
+
+**What she now owns:** that `ConfigModule.forRoot({ validate })` does not call
+`validate` — it stores it in a module description that Nest reads later — and
+that because Nest calls it, Nest also catches it, which is why the `catch` in
+`main.ts` never runs. She predicted correctly that merely importing
+`app.module.js` with `PORT=hello` would succeed.
+
+**⚠️ A regression worth acting on.** Asked what deleting `isGlobal: true` would
+do, she predicted **typecheck and build would fail**. They cannot; Nest resolves
+dependencies at runtime. This is the *third* time she has made this exact
+prediction wrong — Day 2 for `providers`, Day 2 for `exports` — and she got it
+**right** on Day 4 evening for `EntriesRepository`. It slipped back over the
+two-week gap. Re-test it again rather than assuming Day 4 closed it.
+
+**The finding of the block, and it is a real one.** Deleting `isGlobal: true`
+gives:
+
+```
+typecheck  PASSES   build  PASSES   80 unit PASS   21 e2e PASS
+the application  ->  exit 1, Nest can't resolve dependencies of the Symbol(DATABASE)
+```
+
+**The e2e suite does not catch this, though it caught the equivalent Day 4
+break.** The reason is `.overrideProvider(DATABASE).useValue(db)` — that replaces
+the whole factory, and the factory is the only thing that asks for
+`ConfigService`, so the broken edge is never travelled. The idea to keep: **the
+more a test replaces, the less of the real wiring it can check.** The override
+that keeps the suite away from her real journal is the same override that blinds
+it here.
+
+She predicted, correctly, that the planned wiring test would **not** catch this
+either. Verified: with `isGlobal` gone and `PORT=hello`, `compile()` still
+rejects with `PORT must be a whole number…`, because `validate` throws before
+Nest reaches dependency resolution. The asserted message arrives and the test goes
+green.
+
+**My own error, and the same shape as the `successfully started` mistake.** The
+original `day-06-wiring-test.md` said in writing *"do not test valid configuration
+here — the existing suites already cover that."* That instruction would have
+removed the only test that catches this, because the existing suites cover valid
+configuration **with `DATABASE` overridden**, which is exactly what hides it. The
+prompt has been corrected: it now requires a third claim — the real `AppModule`
+builds successfully with valid configuration and no overrides — and a second
+mutation, deleting `isGlobal: true`, which claim 3 must fail against. Expected
+e2e count is now 21 → 24.
+
+### Day 6 — exactly what is outstanding
+
+1. **Run `docs/workers/day-06-wiring-test.md`** in a fresh Claude Code session.
+   It adds one end-to-end spec and no production code. End-to-end count should go
+   21 → 23.
+2. **Audit it the same way**: the acceptance criterion is that deleting
+   `validate,` from `ConfigModule.forRoot` in `apps/api/src/app.module.ts` makes
+   the new tests fail. Verify that yourself rather than reading the report.
+3. **Commit and merge Day 6.** Nothing is committed yet. The branch does not
+   exist yet either; git is hers.
+4. **The Day 6 LinkedIn post is drafted but covers only the first session** — the
+   problem, not the solution. See *Day 6 — LinkedIn* below. She confirmed she
+   posted Day 5 on 2026-08-05.
+
+### Day 6 — second session: the decisions, the implementation, the audit
+
+**ADR-007 is written**, at
+`docs/decisions/ADR-007-configuration-and-boot-validation.md`, and was **amended
+the same day** with three corrections the audit forced. Read the amendments; they
+matter more than the original text.
+
+**Every decision in it was hers.** Check at boot rather than at first use. `PORT`
+absent defaults to 3000 while `PORT` present-but-wrong refuses to boot — she
+produced the distinction that drives this, which is that *absent means "choose for
+me" and wrong means "I had an opinion and expressed it badly", so a default is the
+right answer to the first and the wrong answer to the second.* Reject `PORT=0`.
+Do not trim whitespace, on the same reasoning she used for journal content on Day
+4. Warn rather than refuse when `DATABASE_PATH` names a missing file. Use `.env`.
+Use `@nestjs/config`.
+
+**The `@nestjs/config` choice was hers and was made against my advice**, with the
+facts in front of her: that it is a real dependency, that it validates nothing by
+itself, and that its `.env` loading is redundant on Node 24. Her reason was that
+learning how NestJS conventionally does things is one of the goals of this
+project. That is the second time in one day she chose the framework's own way for
+that reason, so it is a position rather than a mood. **Do not relitigate it.** It
+is in tension with ADR-005's argument that framework API names do not transfer,
+and ADR-007 records the tension rather than smoothing it over.
+
+#### The audit — what I checked and what it found
+
+All five checks re-run by me, not taken from the report: lint, typecheck, build,
+**80 unit tests** (up from 55) and **21 end-to-end** (up from 18).
+
+Verified against the real application on a free port: `PORT=hello` exits 1 with
+`received "hello"`; `PORT=" 3000 "` exits 1 with the spaces visible inside the
+quotes; `PORT=4242` serves real HTTP; a missing `DATABASE_PATH` file warns and
+then serves `{"count":0}`. Her real journal still holds its four entries. No
+socket files anywhere.
+
+**Five deliberate mutations. Four caught:**
+
+| Mutation | Result |
+|---|---|
+| Accept `PORT=0` | 1 test fails |
+| Accept `PORT=99999` | 1 test fails |
+| Return `PORT` as a string, not a number | 4 tests fail |
+| Warn on the default path too | 3 tests fail |
+| **Delete `validate,` from `ConfigModule.forRoot`** | **nothing fails** |
+
+**The finding.** With that one word deleted, typecheck passes, build passes, all
+80 unit tests pass, all 21 end-to-end tests pass, and the real application accepts
+`PORT=hello` and creates the socket file again. Every rule still exists and is
+fully tested; nothing calls it. This is Day 4's `EntriesRepository` experiment
+repeating exactly. It is a gap in the suite, not a defect in the code.
+
+**A process error of mine worth not repeating.** My first run of the
+`DATABASE_PATH` warning case reported `{"count":4}`, which would have meant the
+path was ignored. It was not. A `pnpm --filter @neuron/api start` server left
+running by the Day 6 worker held port 3000 for twelve minutes, so my test process
+died with `EADDRINUSE` and my `curl` was answered by that older server. **When an
+audit result contradicts the code, check what is holding the port before
+concluding anything.** Re-running on port 3997 gave the correct `{"count":0}`.
+
+#### The worker was honest about its own work, again
+
+It volunteered that `@nestjs/config` pulled in `dotenv` at two versions plus
+`dotenv-expand`, all unused, directly contradicting ADR-007's own sentence that
+`dotenv` is not added. It also wrote that *"if the explicit learning goal were
+removed from the ledger, I do not think the remaining benefit would justify it
+today, at two variables."* That is the second worker on this project to report a
+weaker version of its own success without being pushed, and it is the behaviour to
+keep asking for. Both prompts asked a direct question inviting it; that appears to
+be what produces it.
+
+It also found a real library quirk by reading source rather than documentation:
+`@nestjs/config` copies whatever `validate` returns back into `process.env`, and
+`process.env.X = undefined` stores the string `"undefined"`, which would have had
+the application open a database file named `undefined`.
+
+#### Where she answered, second session
+
+| Question | Step reached |
+|---|---|
+| When should configuration be checked? | **Step 1.** Correct and complete — at boot, refuse to start, say exactly what is wrong |
+| Are "not set" and "set to hello" the same problem? | **Step 1.** Correct, both parts |
+| What should each variable mean? | **Step 1**, but too vague to act on. Narrowed once, then answered well |
+| What does `PORT=` do? | **Asked to be told.** Genuinely obscure; not a failure |
+| Can a check catch `data/nueron.db`? | **Step 1, and better than the question.** She did not find a check — she changed the design so the mistake becomes visible. The distinction worth reusing: checking *form* versus checking *reality* |
+| `PORT=0` and whitespace | **Step 1.** Both decided with reasons |
+| How does anybody know the variables exist? | **Step 1**, though "a configuration file" needed splitting into three things |
+| Is `.env` justified today? | **Step 1.** Chose it; Node 24 makes it free |
+| Which mechanism? | **Step 1.** Chose `@nestjs/config` with a stated reason |
+
+### Day 6 — first session (2026-08-05 evening into 2026-08-06)
+
+No production code was changed. `git status` shows only `docs/master-state.md`
+modified. The whole session was understanding work, in the order the constitution
+sets out, and it stopped deliberately before the decision.
+
+**Why it stopped there.** The session ran past midnight, and the next block is
+where the options get compared and one gets chosen. The single thing this Master
+Thread was told to fix on Day 6 was a decision she accepted near midnight without
+arguing. Asking her to make a fresh set of decisions at one in the morning would
+have reproduced the same fault, so she was offered the choice and stopped.
+
+**Four things were established, each by an experiment rather than by assertion.**
+
+*One. An unvalidated configuration value does not crash the application; it makes
+it start.* The server was run with `PORT=hello`. She predicted a crash. What
+actually happened is that Nest reported `Nest application successfully started`,
+mapped every route, and stayed healthy, while nothing at all was listening on TCP
+port 3000. Node's `listen` accepts either a port number or a filesystem path, and
+because `"hello"` does not look like a number it was treated as a path. A Unix
+domain socket named `hello` appeared in `apps/api/`. The sentence she was given to
+keep is that **the dangerous configuration bug is not the one that crashes, it is
+the one that starts.**
+
+*Two. She then predicted the `DATABASE_PATH` typo case completely correctly, in
+one step,* including the mechanism: the application starts, a second database file
+is created under the misspelled name, and `GET /entries` returns an empty array.
+Running `DATABASE_PATH=data/nueron.db` produced exactly that, `{"count":0}` beside
+a real database holding four entries. This case is worse than the port case
+because the application is fully reachable and fully functional, so the only
+symptom reaching the user is that their journal is empty.
+
+*Three. A committed secret cannot be un-committed.* She was asked whether deleting
+a password in a later commit solves the problem and answered correctly that it
+survives in the history. A throwaway repository was built to show it: the working
+tree was clean, `grep` found nothing, and one `git grep` across all commits
+returned the password. She was then told directly, as fact rather than as a
+question, that rewriting history does not reliably fix it either, because forks
+and clones are outside your control and public repositories are scanned
+continuously by automated tools. The only real fix is to rotate the credential.
+The sentence to keep is that **a secret that has been committed is a secret that
+has been leaked.**
+
+*Four. Environments.* This is the one that needed teaching. See the step tracking
+below for how it went.
+
+**The `pnpm test:e2e` experiment is the best teaching artifact of the day and is
+worth reusing.** The e2e suite was pointed at a copy of her real development
+database instead of `:memory:`. Result: **2 failed, 16 passed**, with no
+production code changed at all, and the database grew from 4 entries to 10 as the
+suite left six fake ones behind. Three points came out of it. Correctness is a
+property of code plus environment, not of code alone. The tests that failed were
+precisely the two making a claim about the *whole* collection being empty, while
+every test claiming only "what I put in comes back out" passed, because a claim
+about everything is only true if you control everything. And the suite's result
+now depends on what she happens to have written in her journal, which means it has
+stopped measuring the code. The spec file was restored with `git checkout`.
+
+**Where to pick up — Block 5.** The understanding is done and the design work has
+not started. The open questions for the next session are: whether configuration
+should be checked when the application boots or when each value is first used;
+where the list of variables that exist gets written down, since nothing records
+that `PORT` and `DATABASE_PATH` exist at all; what belongs in `.gitignore`; and
+which mechanism to use, with the real candidates being hand-written checks at
+boot, `@nestjs/config`, and plain `dotenv`. An ADR is owed once that is settled,
+and then a worker prompt. **Do not start Block 5 by presenting a conclusion** —
+she has answered at step 1 on most of today's questions and the comparison work is
+hers.
+
+Note that the `@nestjs/config` question rhymes with the morning's validation
+argument, and the same trap is available: `@nestjs/config` is a real Nest package
+but it is still a dependency, and it does not validate anything by itself.
+
+### Day 6 — where she answered, per topic
+
+| Question | Step reached |
+|---|---|
+| What could go wrong in the two `process.env` reads? | **Step 1**, but general — "it can crash at runtime". Right category, wrong outcome |
+| Does `PORT=hello` crash or start? | **Step 2.** Predicted a crash. The experiment corrected it |
+| What does the `DATABASE_PATH` typo do? | **Step 1.** Completely correct, with the mechanism, unprompted |
+| What is wrong with a hardcoded password? | **Step 1.** Named exposure via a public repository, correctly |
+| Is the password safe after you delete it in a later commit? | **Step 1.** Immediate and correct — "it is still available in the commit history" |
+| Why not hardcode a connection string that holds no secret? | **Step 3.** Her reason was future-proofing, which this project's own rules forbid, and her "every point where it is hardcoded" argument does not hold because there is one such point. Narrowed once, answer was still vague, so environments were taught directly |
+| Does the e2e suite pass against the dev database? | **Asked to be told.** A fair response — the prediction was not answerable without having read the eighteen tests, so the question was badly shaped rather than too hard |
+
+**The teaching finding worth carrying:** the future-proofing correction landed
+well and is worth repeating in that form. She reached the right conclusion by an
+argument the constitution forbids, and instead of accepting the conclusion she was
+shown five real commands from this repository's own history that needed
+`DATABASE_PATH`. The problem had already happened five times in five days. Telling
+her *"you do not need an argument about the future, because the evidence is in
+your own repository"* is a better correction than restating Rule Zero at her.
+
+### Day 6 — LinkedIn
+
+**Correction to the note below under *Next Session Starts Here*: the Day 5 post
+was posted.** She confirmed on 2026-08-06 that it went out on 2026-08-05. The
+older claim that it was still outstanding is wrong and should be ignored. A Day 5
+post was redrafted in this session before she said so, which was wasted effort;
+check with her before rebuilding anything that the state file lists as owed.
+
+The **Day 6 post was drafted and covers the first session only**, which is the
+problem rather than the solution. Its three beats are the `PORT=hello` Unix socket
+result, the `DATABASE_PATH` typo producing a silently empty journal, and the e2e
+suite going 16 passed / 2 failed against a real database with no code changed. Its
+single quotable line is *"the dangerous configuration bug is not the one that
+crashes, it is the one that starts."* It ends by naming tomorrow's work, so the
+decision half of Day 6 is still available as its own post and has not been spent.
+
+Two stories remain deliberately unspent: the worker-honesty story from Day 5 (see
+*A second LinkedIn story* below), and the secret-in-git-history material from Day
+6's first session, which was held back because it belongs with the secret-handling
+work rather than with the configuration experiments.
+
+---
+
 Day 5 is fully closed. It was audited, committed, merged through pull request #5
 with a squash, and the branch has been deleted. `main` is green: lint, typecheck
 and build all pass, `pnpm test` gives 55 tests and `pnpm test:e2e` gives 18.
 There is no leftover code work.
+
+⚠️ **The paragraph below is out of date and was corrected on 2026-08-06. The Day 5
+post did go out, on 2026-08-05. Nothing about it is outstanding.** It is left here
+only so the correction has something to point at.
 
 One thing is still outstanding, and it is hers. The LinkedIn post for Day 5 has
 not gone out. A finished draft exists in the Master Thread conversation from
@@ -247,6 +582,57 @@ request body or a query parameter. `process.env.PORT` has the type
 `string | undefined`, and the code treats it as though it were a port number.
 That is the same category of mistake she found twice on Day 5, so she has a
 model for it already and should be asked to spot it rather than told.
+
+### Decision taken on the morning of Day 6: validation moves to Nest's own approach, on Day 7
+
+The Master Thread reopened yesterday's fifth decision, which was the only one of
+the five that was mine rather than hers, and which she had accepted near midnight
+without arguing it. She did not agree with it once she was fresh.
+
+Her position is that the project should adopt Nest's own validation approach,
+meaning `class-validator` together with a global `ValidationPipe`, and that `zod`
+should be rejected. This reverses the ADR-005 and ADR-006 deferrals.
+
+Two things happened during that conversation which are worth keeping, because the
+reasoning she started with was not the reasoning that survived.
+
+Her first argument was that `class-validator` is built into Nest and so costs
+nothing, whereas `zod` is an extra dependency. That premise is false and she saw
+it proved. `ValidationPipe` is exported by `@nestjs/common`, but constructing one
+without `class-validator` installed fails immediately with the message *"The
+class-validator package is missing."* Nest ships the socket and not the plug. The
+true dependency count is zero for hand-written, one for `zod`, and two for the
+Nest approach, which makes her chosen option the most expensive on the exact axis
+she argued from.
+
+Her second argument was that a library increases accuracy. She then predicted,
+correctly, that `@IsNotEmpty()` would accept a string of three spaces and return
+a 201, which breaks her own Day 4 rule that content must hold at least one
+non-whitespace character. This was confirmed by running `isNotEmpty` from the
+real package: `""` is false, but `"   "` and `"\t\n"` are both true. The
+conclusion drawn was that a library increases *consistency* rather than accuracy,
+because accuracy is the question of whether the rule you wrote is the rule you
+meant, and no library can know what you meant. The sentence worth reusing is that
+**a decorator whose name sounds like your rule is not your rule**, which is the
+same shape as her own Day 5 lesson that a missing test is usually a missing
+decision.
+
+The argument that actually justifies her decision was supplied by the Master
+Thread, because it depends on the Known Debt list rather than on anything visible
+in the code. Validation here is enforced by memory and not by mechanism: nothing
+forces a future endpoint to validate its body, and a forgotten check passes lint,
+typecheck, build and every test. A global pipe runs before every controller
+method whether anyone remembered it or not, and `forbidNonWhitelisted: true`
+expresses her Day 5 unknown-fields rule as one setting rather than as code called
+in two places.
+
+She chose to keep Day 6 for the configuration problem the roadmap set, and to
+carry this out on Day 7, which is the review day and exists for exactly this kind
+of refactor.
+
+**Owed on Day 7:** ADR-007 recording this properly, the implementation itself,
+and a deliberate decision about how to express the non-whitespace rule, since
+`@IsNotEmpty()` demonstrably does not.
 
 ### A second LinkedIn story, deliberately held back
 
@@ -542,6 +928,8 @@ and that is deliberate — see ADR-001.
 | [ADR-005](decisions/ADR-005-validation-and-error-semantics.md) | Status codes live in the controller and nowhere else — the service may not throw HTTP exceptions either. `findById` → `undefined`, `findByContent` → `[]`. Validation hand-written; `class-validator` and `zod` rejected on timing, not merit. `/entries/count` returns `{ count }` | Accepted. **Revisit condition fired on Day 5 as predicted; answered in ADR-006** |
 | [ADR-006](decisions/ADR-006-strict-input-and-mutation-semantics.md) | `POST` and `PATCH` reject unknown fields (400). Repeated query parameter → 400. `%`/`_` escaped and treated literally in search. `PATCH` partial update, `createdAt` unchanged, no `updatedAt`. `DELETE` → 200 with the deleted entry. Validation stays hand-written with a shared check extracted; `zod` deferred again under four sharper triggers | Accepted and **implemented by the Day 5 worker**; Master Thread audit still owed. Revisit Day 12 (frontend) / Day 15–16 (search replaced) |
 
+| [ADR-007](decisions/ADR-007-configuration-and-boot-validation.md) | Configuration is read and checked once, at boot; a bad value refuses the boot. `PORT` defaults to 3000 when absent and must otherwise be a whole number 1–65535, with no trimming. `DATABASE_PATH` empty refuses; set-but-missing warns loudly then creates. `.env` at the repository root, gitignored, loaded by Node's `--env-file-if-exists`; `.env.example` committed. `@nestjs/config` with a hand-written `validate` | Accepted, **amended the same day** (three corrections). Implemented and audited; one follow-up test outstanding. Revisit Day 19 (optional config) / Day 24 (real secrets) |
+
 **Decided outside an ADR:**
 
 - Public day numbering (Day 0–29) is canonical; roadmap renumbered to match.
@@ -649,7 +1037,11 @@ and that is deliberate — see ADR-001.
 | Worker prompts + reports are gitignored | `docs/workers/` and `docs/learning/**/report.md` stay local only. They exist on disk but are not in version control |
 | **`?word=` (empty value) returns everything** | `if (word)` treats the empty string as absent and falls through to `findAll()`. **Deliberately left unchanged on Day 5**, and this is the point rather than an oversight: ADR-006's own lesson is that a missing test is usually a missing decision, and nobody has decided whether an empty search term means "list everything" or "reject the request". Still untested. **Not yet shown to her** |
 | **Escaping is enforced by memory, not by mechanism** | New Day 5, and named as an accepted cost in ADR-006. Nothing stops a future query interpolating a raw term into a `LIKE` without calling `escapeLikePattern`. Same class as the `created_at` cast and the forgettable validation checks below |
-| **Validation is enforced by memory, not by mechanism** | Nothing makes a future endpoint validate its body. A forgotten check passes lint, typecheck, build and tests. This is ADR-005's accepted cost and its named revisit condition — the same failure class as the Day 3 `ORDER BY` bug. Day 5 shrank it but did not remove it: `POST` and `PATCH` now call the same two checking functions, so the *rules* exist once, but nothing forces a third endpoint to call them |
+| **Nothing forces a third environment variable into the validator** | New Day 6, and the same memory-not-mechanism class as the row below. A variable added straight to `process.env` and read somewhere new would bypass every rule in `env.validation.ts`. Partly mitigated: one test pins the exact set of variables `validate` returns, so a *silent* expansion is caught |
+| **The configuration wiring was untested until the follow-up task** | New Day 6, found by the audit. Deleting `validate,` from `ConfigModule.forRoot` left typecheck, build, 80 unit tests and 21 e2e tests all green on an application where the whole day's work was disconnected. `docs/workers/day-06-wiring-test.md` closes it. **Until that task is run and audited, this is open** |
+| **Three unused `dotenv` packages are installed** | New Day 6. `@nestjs/config` bundles `dotenv` at two versions plus `dotenv-expand`, and `ignoreEnvFile: true` means none of it runs. Cost of choosing the framework's own module; recorded in ADR-007 Amendment 1 |
+| **A `.env` in `apps/api/` is silently ignored** | New Day 6, accepted knowingly. The start scripts load `../../.env` from the repository root. Because `.env` is gitignored, nothing warns. `.env.example` documents the rule instead |
+| **Validation is enforced by memory, not by mechanism** | Nothing makes a future endpoint validate its body. A forgotten check passes lint, typecheck, build and tests. This is ADR-005's accepted cost and its named revisit condition — the same failure class as the Day 3 `ORDER BY` bug. Day 5 shrank it but did not remove it: `POST` and `PATCH` now call the same two checking functions, so the *rules* exist once, but nothing forces a third endpoint to call them. **Scheduled for removal on Day 7** — she decided on the morning of Day 6 to adopt a global `ValidationPipe`, which is a mechanism rather than a memory. See *Decision taken on the morning of Day 6* above |
 
 **Resolved by the Day 5 worker** (implemented and verified over real HTTP;
 Master Thread audit still owed):
@@ -685,7 +1077,7 @@ Master Thread audit still owed):
 | ~~One type serves as both domain model and HTTP wire shape~~ | ✅ **Resolved Day 4** — `CreateEntryDto` (send) vs `JournalEntry` (is) |
 | `LIKE '%term%'` search is lexical and cannot match meaning | Day 15 / Day 16 (this is the Phase 3 premise) |
 | No exception filter or CORS. **A `ValidationPipe` was deliberately declined**, not deferred by omission — see ADR-005 | Day 12 (CORS); pipe revisits per ADR-005 |
-| `process.env.PORT` and `DATABASE_PATH` read raw and unvalidated | Day 6 (config) |
+| ~~`process.env.PORT` and `DATABASE_PATH` read raw and unvalidated~~ | ✅ **Resolved Day 6** — ADR-007. Checked once at boot; `dist/` contains no `process.env` at all |
 | `CREATE TABLE IF NOT EXISTS` at boot is not migration tooling | First non-additive schema change |
 | No index on `created_at`, no pagination | Day 23 (measure first) |
 | Millisecond ties in `created_at` ordering have no tiebreaker | Not worth solving; documented in the service |
@@ -779,6 +1171,24 @@ the roadmap's *Learning Debt* section for why this is tracked.
   binding works perfectly and the bug happens anyway. This also closes the
   "explained, not verified" flag on prepared statements below: the mechanism was
   load-bearing in a prediction she got right.
+
+**Opened on Day 6 — introduced by the worker, not yet learned:**
+
+- **`ConfigModule.forRoot` and `ConfigService`.** She chose `@nestjs/config`
+  deliberately, so the wiring is the thing she wanted to learn, and she has not
+  yet seen it. Worth asking her to explain what `isGlobal: true` buys, why
+  `database.module.ts` needed a factory with `inject: [ConfigService]` when it
+  previously computed its path at module load, and where `validate` is actually
+  called from. The audit established that `require()` on `app.module.js` does
+  **not** trigger it — Nest does, when it initialises the module — and that is a
+  good prediction question.
+- **Why configuration must be injected rather than imported.** The compiled `dist/`
+  now contains no `process.env` at all. She has not been shown that, or why it
+  is the same argument as the `DATABASE` token she already understands.
+- **The `undefined` round-trip quirk.** `@nestjs/config` writes `validate`'s
+  return value back into `process.env`, where `undefined` becomes the string
+  `"undefined"`. Small, concrete, and a good example of a library's behaviour
+  differing from its documentation.
 
 **Still owed:**
 
