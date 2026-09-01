@@ -1,7 +1,9 @@
-import { mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import type { EnvironmentVariables } from '../config/env.validation';
 
 // Nest normally identifies a provider by its class: a constructor asking for
 // `EntriesService` is enough, because the class itself is the lookup key.
@@ -13,30 +15,80 @@ import { Module } from '@nestjs/common';
 // this exact connection.
 export const DATABASE = Symbol('DATABASE');
 
-// Where the file lives. `process.env` is read directly here, not through
-// @nestjs/config — configuration is a Day 6 problem, and one environment
-// variable does not yet justify a whole configuration module.
-//
-// The default is anchored to this file's location rather than to
-// `process.cwd()`, so the database is always `apps/api/data/neuron.db` whether
-// you run `pnpm dev` (cwd = apps/api) or `node apps/api/dist/main.js` from the
-// repo root. `__dirname` is `apps/api/{src,dist}/database` in either case,
-// hence two levels up. An explicit DATABASE_PATH is resolved from the cwd
-// instead, because that's where a person typing one expects it to land.
-const databasePath = process.env.DATABASE_PATH
-  ? resolve(process.cwd(), process.env.DATABASE_PATH)
-  : resolve(__dirname, '../..', 'data/neuron.db');
+const logger = new Logger('DatabaseModule');
+
+// Where the database lives when nobody says otherwise. Anchored to this file's
+// location rather than to `process.cwd()`, so the database is always
+// `apps/api/data/neuron.db` whether you run `pnpm dev` (cwd = apps/api) or
+// `node apps/api/dist/main.js` from the repo root. `__dirname` is
+// `apps/api/{src,dist}/database` in either case, hence two levels up.
+export const DEFAULT_DATABASE_PATH = resolve(
+  __dirname,
+  '../..',
+  'data/neuron.db',
+);
+
+// Takes the checked `DATABASE_PATH` (or `undefined` when it was never set) and
+// decides which file to open. Both the configured path and the default are
+// arguments rather than things this function reaches for, so its behaviour
+// depends on nothing but what it is handed — which is what lets the rule below
+// be tested against a directory that is genuinely empty, instead of against
+// whatever happens to be on the machine running the tests.
+export function resolveDatabasePath(
+  configuredPath: string | undefined,
+  defaultPath: string,
+): string {
+  // Nothing was asked for, so nothing is suspicious. A missing database at the
+  // default path is a first run — on a freshly cloned repository there is no
+  // database by definition — and warning about it every time would teach
+  // everyone that this warning means nothing.
+  if (configuredPath === undefined) {
+    return defaultPath;
+  }
+
+  // An explicit path is resolved from the cwd, because that is where a person
+  // typing one expects it to land.
+  const databasePath = resolve(process.cwd(), configuredPath);
+
+  // The other half of the rule, and the one the day exists for.
+  // `DATABASE_PATH=data/nueron.db` is a typo with nothing wrong with it as a
+  // string, so it survives every check `env.validation.ts` can make. Left
+  // alone, `new DatabaseSync(path)` creates the missing file,
+  // `CREATE TABLE IF NOT EXISTS` fills it in, and the application comes up
+  // completely functional and completely empty — every endpoint working, the
+  // user's entire journal apparently gone, and not one log line mentioning it.
+  //
+  // Saying so out loud is the weaker of the two options considered: it only
+  // works if somebody reads it. Refusing to boot would catch the typo outright
+  // but would also break every throwaway run that deliberately points at a new
+  // file (ADR-007).
+  if (!existsSync(databasePath)) {
+    logger.warn(
+      `DATABASE_PATH is set to ${JSON.stringify(configuredPath)} but no database exists at ${databasePath}. ` +
+        'A new, empty one is being created. If you expected to find your existing entries, check that path for a typo.',
+    );
+  }
+
+  return databasePath;
+}
 
 // A "factory provider": instead of Nest calling `new SomeClass()`, it calls
 // this function once and hands the result to everyone who asks for DATABASE.
-// That indirection is the entire point of task-1 — because nothing constructs
-// its own connection, a test can supply an in-memory database under the same
-// token and the code under test never notices the difference.
+// That indirection is the entire point — because nothing constructs its own
+// connection, a test can supply an in-memory database under the same token and
+// the code under test never notices the difference.
 @Module({
   providers: [
     {
       provide: DATABASE,
-      useFactory: (): DatabaseSync => {
+      useFactory: (
+        config: ConfigService<EnvironmentVariables, true>,
+      ): DatabaseSync => {
+        const databasePath = resolveDatabasePath(
+          config.get('DATABASE_PATH', { infer: true }),
+          DEFAULT_DATABASE_PATH,
+        );
+
         // SQLite will not create missing directories for us; it just fails to
         // open the file.
         mkdirSync(dirname(databasePath), { recursive: true });
@@ -62,6 +114,12 @@ const databasePath = process.env.DATABASE_PATH
 
         return db;
       },
+      // The path used to be computed when this file was loaded. It can't be any
+      // more: it comes from ConfigService, which does not exist until the
+      // injector does. `inject` is what tells Nest to build ConfigService first
+      // and hand it to the factory — the same dependency injection every other
+      // provider in the app already uses, now applied to configuration.
+      inject: [ConfigService],
     },
   ],
   // A provider is private to its module unless exported. Without this line,

@@ -33,16 +33,46 @@ This starts the API in watch mode on `http://localhost:3000`. Try:
 curl http://localhost:3000/entries
 ```
 
+## Configuration
+
+The API reads exactly two environment variables. Both are optional, and both
+are checked once when the application starts — a value that is set but unusable
+stops the boot with a message naming the variable and quoting the value, rather
+than being quietly corrected.
+
+| Variable        | Default                  | Rule                                                                                                |
+| --------------- | ------------------------ | --------------------------------------------------------------------------------------------------- |
+| `PORT`          | `3000`                   | A whole number from 1 to 65535. Empty, `0`, negative, above the range, text, or a number with stray spaces around it all refuse to boot. |
+| `DATABASE_PATH` | `apps/api/data/neuron.db` | Any non-empty path; empty refuses to boot. A relative path resolves from the directory the API was started in. If the file does not exist, the API warns and creates an empty one. |
+
+Copy [.env.example](.env.example) to `.env` to set them locally. `.env` is
+gitignored and is loaded by Node itself (`--env-file-if-exists`), so there is no
+`dotenv` dependency and a fresh clone with no `.env` starts fine. A real
+environment variable always wins over a value in the file:
+
+```bash
+PORT=4242 pnpm dev
+```
+
+See [ADR-007](docs/decisions/ADR-007-configuration-and-boot-validation.md) for
+why these are checked at boot rather than at first use.
+
 ## Data
 
 Entries are stored in a SQLite database — a single file at
 `apps/api/data/neuron.db`, created automatically on first run. Set
-`DATABASE_PATH` to put it somewhere else (relative paths resolve from the
-directory the API is started in):
+`DATABASE_PATH` to put it somewhere else:
 
 ```bash
 DATABASE_PATH=./data/scratch.db pnpm dev
 ```
+
+Because a mistyped path is still a perfectly valid path, the API cannot tell
+`data/nueron.db` from `data/neuron.db` by looking at it. What it can do is
+notice that no database is there and say so, which is why pointing
+`DATABASE_PATH` at a file that does not exist prints a warning before creating
+it. No warning is printed for the default path, where a missing database just
+means this is the first run.
 
 The file is gitignored and holds nothing but local state, so deleting it resets
 the API to empty:
