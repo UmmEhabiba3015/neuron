@@ -202,6 +202,22 @@ describe('EntriesService', () => {
 
       expect(service.findByContent('zzz')).toEqual([]);
     });
+
+    // Searching for nothing finds nothing, and this is the one search claim
+    // that a correct-looking implementation gets exactly backwards. `LIKE '%%'`
+    // matches every row, so a `findByContent` that simply forwarded the empty
+    // string would answer with the entire journal — the same wrong answer, from
+    // a different layer, that the controller used to give by treating `""` as
+    // falsy (ADR-008, Decision 7).
+    //
+    // The seed matters: without rows in the table, returning everything and
+    // returning nothing look identical.
+    it('should return nothing for an empty search term', () => {
+      seed();
+
+      expect(service.findAll().length).toBeGreaterThan(0);
+      expect(service.findByContent('')).toEqual([]);
+    });
   });
 
   // These three claims never mention SQL, `LIKE`, or escaping, and that is

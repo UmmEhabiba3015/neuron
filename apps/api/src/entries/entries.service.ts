@@ -58,7 +58,22 @@ export class EntriesService {
     return this.entriesRepository.findById(id);
   }
 
+  // An empty search term matches nothing, and that is a rule rather than an
+  // accident. `LIKE '%%'` matches every row, so handing the empty string
+  // straight to the repository would answer `GET /entries?word=` with the whole
+  // journal — the same wrong answer the controller used to give by treating
+  // `""` as falsy and falling through to `findAll()`.
+  //
+  // The decision lives here and not in the controller, because "searching for
+  // nothing finds nothing" is a rule about entries rather than about HTTP, and
+  // not in the repository, because `%%` matching everything is a true fact
+  // about `LIKE` that this application is choosing to override. The controller
+  // decides only whether a search was requested at all (ADR-008, Decision 7).
   findByContent(word: string): JournalEntry[] {
+    if (word === '') {
+      return [];
+    }
+
     return this.entriesRepository.findByContent(word);
   }
 

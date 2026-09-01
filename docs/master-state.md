@@ -44,6 +44,173 @@ unmodified, so no dependency was added. Both boundary checks return nothing, and
 produces, then committing Day 6. Everything else about Day 6 is done. The Day 5
 history further down is still accurate.
 
+### ⚠️ Day 7's "document" third was not done — carried to Day 14
+
+The roadmap's Day 7 is *audit, refactor, document — everything above, written down
+as handbook entries.* The first two were done thoroughly. **The third was not
+started**, and it was deferred by decision rather than forgotten.
+
+The gap is specific and worth stating plainly. Every worker report — Days 2, 3, 4,
+5, 6 and 7 — is **gitignored and exists only on this laptop**, along with every
+worker prompt. The eight ADRs are committed and carry the *why* for each decision.
+Everything else that explains how those decisions were reached would vanish with
+the machine.
+
+There is no handbook. The roadmap has been asking for one since Day 2.
+
+**Carried to Day 14**, the next review day. It wants its own session and a real
+decision about what belongs in it — which reports get promoted into version
+control, what a handbook entry is as distinct from an ADR, and whether the
+gitignore rule on `docs/learning/**/report.md` still earns its place now that the
+reports have become the most interesting writing in the project.
+
+### Day 7 learning debt — two of four paid, 2026-09-01
+
+Paid the same day the code landed, deliberately, because the `@nestjs/config`
+equivalent was left for three weeks and had to be rebuilt from scratch.
+
+**1. Decorators register; something else runs them. ✅ Paid by experiment.**
+Asked when the two functions in `contains-non-whitespace.decorator.ts` run, she
+answered *"when dto class is called"* — which is the one moment neither of them
+runs. Logging was added to the real decorator, the code rebuilt, and the result
+watched: the outer function fired **once, at import**, creating an instance fired
+**nothing at all**, and `validate` fired **once per validation**. Restored
+afterwards.
+
+**She then asked the best question of the session unprompted: "does a function run
+on import?"** That is the actual gap, and it was answered by reading the compiled
+output — the same technique she used on Day 4 for type erasure. The decorators
+vanish from the class body and become a top-level `__decorate([...])` statement,
+so importing the file calls them. `__metadata("design:type", String)` sits in the
+same statement, which is the line `ValidationPipe` reads; typed `unknown` it would
+say `Object` and the pipe would skip everything.
+
+**The generalisation, and it is a correction to something I taught wrongly:**
+handing a function to a library is a separate act from that function running, and
+**the library decides when — differently each time.**
+
+```
+useFactory        (DATABASE provider)  -> Nest calls it once, later
+registerDecorator (custom decorator)   -> called on every validation
+forRoot({ validate })                  -> called immediately, during import
+```
+
+I told her this morning that `forRoot` defers, because I assumed the pattern held.
+It does not. You cannot tell from the call site; all three look like passing an
+argument. **Do not teach "registration always defers" as a rule.**
+
+**2. `@IsOptional()` versus `@ValidateIf`. ✅ Paid by putting the bug back.**
+She predicted a 400 with `content must be a string`, which is exactly what the API
+does *today* — she read the fixed behaviour rather than the counterfactual. The
+`@IsOptional()` version was restored, rebuilt, and run against the real
+application: `PATCH {"content": null}` answered **500 Internal server error**, and
+the entry survived unchanged. Restored, 32 e2e green.
+
+The path: `@IsOptional()` skips every other rule on `null` as well as `undefined`,
+so `@IsString()` never runs, the class-level rule is satisfied because a field did
+arrive, `null` reaches a `NOT NULL` column, and Nest turns the unrecognised error
+into a 500. Applying her own Day 3 test — *could the client fix this by sending a
+different request?* — makes it plainly a 400.
+
+**The reason underneath is hers, used for the third time in three places:**
+`@IsOptional()` assumes `null` and `undefined` mean the same thing, and for a
+`NOT NULL` column they do not. That is the absent-versus-wrong distinction she
+invented on Day 6 for configuration, applied to a request body.
+
+**Still owed from Day 7:** `transform: true` — what the controller actually
+receives, a real `CreateEntryDto` or a plain object wearing its name. She was
+offered it and said no; recorded rather than pushed. `APP_PIPE` versus
+`useGlobalPipes` is largely paid — she reasoned through it during the design
+session — but has never been verified by experiment.
+
+### ⚠️ Teaching correction she made herself, and it was right
+
+Day 7's design session opened by asking her which of her five ADR-006 decisions a
+validation library would fail to express. Her reply: *"how would I know, i did not
+learn this, i am doing it for the first time — why you ask me stuff before
+teaching me?"*
+
+**She was right and the question was badly built.** It asked her to work out the
+limits of a tool she had never used. This is the Day 5 failure repeating: that day
+opened by asking her to invent a bug before she had opened a test file, and she
+said *"i do not understand."* The rule that came out of it — **work one example
+yourself before asking her to produce one** — was recorded and then not followed.
+
+What fixed it immediately was running `class-validator` against the real cases,
+showing three decorator combinations and their actual output, and *then* asking
+her about the second behaviour. She answered that one at step 1 and every design
+question afterwards.
+
+**The Socratic opening is not the problem and must not be dropped.** The problem
+is opening Socratic on material where she has no example to pattern-match against.
+Show one, then ask.
+
+### Day 7 — implemented and audited, 2026-09-01
+
+ADR-008 written and **amended four times** after the audit. Validation now runs
+through `class-validator` with a `ValidationPipe` registered as an `APP_PIPE`
+provider in `AppModule`. **No defects, no rework.**
+
+**Every decision was hers**, and made against real output rather than description:
+a custom decorator for the non-whitespace rule, `PATCH {}` stays a 400 (re-examined
+rather than preserved, since `forbidNonWhitelisted` now covers the misspelled-field
+case that originally motivated it), `?werd=x` is a 400, `?word=` returns `[]` while
+an absent `word` returns everything, and the library's message wording is accepted.
+
+**The mechanical fact that shaped the day:** `ValidationPipe` refuses to validate
+anything whose declared type is `Object`, and `unknown` compiles to exactly that.
+Switching the pipe on without replacing `unknown` would have done nothing at all.
+This reverses the Day 4 `@Body() body: unknown` decision, correctly: that decision
+was right while nothing ran before the handler, and the pipe is what makes the
+label true.
+
+**Audit: all five checks green, 80 → 96 unit, 24 → 32 end-to-end.** Exactly two
+direct dependencies; the lockfile gained four, including a 13M phone-number library
+nothing calls. All three boundary greps silent. Real HTTP verified independently,
+including the pair that had to disagree (`?word=` → `[]`, `/entries` → everything),
+that `"  padded  "` survives `transform: true` unedited, and that `?word=100%`
+still finds only the percent entry through the new query DTO.
+
+**Six mutations, all caught** — the worker's two plus four of mine:
+
+| Mutation | Result |
+|---|---|
+| Remove the `APP_PIPE` provider | 14 e2e fail |
+| Revert `@Query()` to `unknown` | 2 e2e fail (lint/typecheck/build all pass) |
+| Drop `@ContainsNonWhitespace` | 3 unit + 3 e2e fail |
+| Revert `@ValidateIf` to `@IsOptional()` | 1 unit + 1 e2e fail |
+| Drop `forbidNonWhitelisted` | 4 e2e fail |
+| Drop `whitelist` | 4 e2e fail |
+
+The unit suite stays green on the pipe mutations, and that is correct rather than a
+miss: DTO specs assert the rules are right and cannot assert that anything calls
+them — the same split as `env.validation.spec.ts` on Day 6.
+
+**⚠️ What the audit found that the report did not.** A 400 no longer has one
+response shape. The pipe answers `{"message": ["..."]}` while Express's JSON parser
+— which rejects `null`, `42` and bare strings before the pipe runs — answers
+`{"message": "Unexpected token ..."}`. Before Day 7 every 400 from this API had a
+string `message`. Recorded as debt in ADR-008 Amendment 3 rather than fixed,
+because no client exists yet.
+
+**The worker was honest against itself for the third time on this project**, and
+most sharply yet: it reported that the refactor made the codebase **+31 lines
+longer**, that the two rules the library does not understand cost 51 lines of
+boilerplate against eight hand-written, and that *"if this were a decision about
+code alone I would say so more loudly."* What it argued was actually bought is the
+inversion of the default — validation now happens unless somebody stops it. All
+three cases came from a prompt that asked a direct question inviting disagreement.
+
+**Learning debt opened by this day:** `class-validator` decorators, custom
+decorators via `registerDecorator`, `APP_PIPE` versus `useGlobalPipes`, and
+`transform: true`. She chose this library to learn how Nest does things and a
+worker wrote it, which is the same situation Day 7 Block 1 existed to repair for
+`@nestjs/config`. **Do not let this sit as long.**
+
+**Still outstanding:** Day 6 is committed and pushed but **not merged** (`main` is
+at `d24606f`, no PR). Day 7's work is sitting on the `day-06-configuration` branch,
+so the two days need separating before either is merged.
+
 ### Day 6 follow-up: audited and closed, 2026-08-28
 
 `apps/api/test/config-wiring.e2e-spec.ts` was added by a worker and audited by me

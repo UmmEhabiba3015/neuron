@@ -16,6 +16,18 @@ import type { JournalEntry } from './../src/entries/entry.interface';
 const entryFrom = (res: request.Response): JournalEntry =>
   res.body as JournalEntry;
 
+// `ValidationPipe` answers with `{ statusCode, message, error }` where
+// `message` is an **array** of sentences, one per rule that failed. Reading it
+// through one cast, for the same reason `entryFrom` exists.
+//
+// The tests below assert on those sentences and not merely on the number 400.
+// A status code alone is satisfied by the wrong rule firing — by the body being
+// rejected for a reason nobody intended — and this project has a written case
+// of a completely broken search passing its test because the claim was too
+// loose to notice.
+const messagesFrom = (res: request.Response): string[] =>
+  (res.body as { message: string[] }).message;
+
 // The companion unit test (`src/entries/entries.controller.spec.ts`) calls the
 // controller class directly through Nest's DI wiring. This file is the other
 // half: it boots the whole application and talks to it over HTTP, so it covers
@@ -87,18 +99,85 @@ describe('EntriesController (e2e)', () => {
   // running application — so these tests are what actually prove the day's work:
   // the number on the wire.
   describe('status codes', () => {
-    // Four bodies, one expectation. Each fails a different check, and before
-    // today every one of them returned 500 or silently succeeded.
+    // Four bodies, four different rules, and the message each one produces.
+    //
+    // The messages are `class-validator`'s own, and two of them changed on
+    // Day 7: a missing `content` used to answer `content is required` and now
+    // answers `content must be a string`, and both the empty and the
+    // whitespace-only body used to answer `content must not be empty`. Each is
+    // a change to what a client sees, decided rather than inherited — the
+    // library's defaults were accepted as the price of not hand-writing a
+    // `message` on every rule (ADR-008, Decision 8).
+    //
+    // The third message is the exception: it belongs to a custom decorator,
+    // because no rule the library ships enforces it and its own attempt reads
+    // `content must match /\S/ regular expression`.
     it.each([
-      ['no content field', {}],
-      ['content that is not a string', { content: 42 }],
-      ['empty content', { content: '' }],
-      ['whitespace-only content', { content: '   ' }],
-    ])('POST /entries rejects %s with 400', async (_label, body) => {
-      await request(app.getHttpServer())
+      ['no content field', {}, 'content must be a string'],
+      [
+        'content that is not a string',
+        { content: 42 },
+        'content must be a string',
+      ],
+      [
+        'empty content',
+        { content: '' },
+        'content must contain at least one character that is not whitespace',
+      ],
+      [
+        'whitespace-only content',
+        { content: '   ' },
+        'content must contain at least one character that is not whitespace',
+      ],
+    ])(
+      'POST /entries rejects %s with 400 and says why',
+      async (_label, body, message) => {
+        const rejected = await request(app.getHttpServer())
+          .post('/entries')
+          .send(body)
+          .expect(400);
+
+        expect(messagesFrom(rejected)).toEqual([message]);
+      },
+    );
+
+    // Exactly one sentence, which is the claim. `@Matches(/\S/)` was rejected
+    // as the implementation of the non-whitespace rule partly because it fires
+    // alongside the string rule, answering one mistake with two sentences of
+    // which one is noise (ADR-008, Decision 4).
+    it('POST /entries answers a non-string content with one message', async () => {
+      const rejected = await request(app.getHttpServer())
         .post('/entries')
-        .send(body)
+        .send({ content: 42 })
         .expect(400);
+
+      expect(messagesFrom(rejected)).toHaveLength(1);
+    });
+
+    // `transform: true` hands the controller a real `CreateEntryDto` built by
+    // `class-transformer`, and the risk that comes with it is that something in
+    // that conversion quietly edits the value. Nothing does, and this is what
+    // says so: whitespace decides validity at the boundary and never rewrites
+    // what the user wrote (ADR-005).
+    it('POST /entries stores content verbatim, spacing included', async () => {
+      const padded = '  the spacing I chose  ';
+
+      const created = entryFrom(
+        await request(app.getHttpServer())
+          .post('/entries')
+          .send({ content: padded })
+          .expect(201),
+      );
+
+      expect(created.content).toBe(padded);
+
+      const reread = entryFrom(
+        await request(app.getHttpServer())
+          .get(`/entries/${created.id}`)
+          .expect(200),
+      );
+
+      expect(reread.content).toBe(padded);
     });
 
     it('POST /entries accepts valid content with 201', async () => {
@@ -150,10 +229,32 @@ describe('EntriesController (e2e)', () => {
     // Both endpoints are listed because a body that is a 400 on one and a 201
     // on the other is the inconsistency ADR-006 set out to remove.
     it('POST /entries rejects an unrecognised field with 400', async () => {
-      await request(app.getHttpServer())
+      const rejected = await request(app.getHttpServer())
         .post('/entries')
         .send({ content: 'x', id: 'i-picked-this-myself' })
         .expect(400);
+
+      // `Unrecognised field(s): id. Only content may be sent.` until Day 7.
+      // The old sentence named the rule and said what a client may send; this
+      // one names the symptom. It is worse, and it is accepted rather than
+      // patched with a `message` option, because writing one on every rule is
+      // the hand-writing this whole day exists to stop. Revisit when a person
+      // rather than an engineer has to read it — Day 12 (ADR-008, Decision 8).
+      expect(messagesFrom(rejected)).toEqual(['property id should not exist']);
+    });
+
+    // The message has to name the offending field. Somebody who typed `contnet`
+    // needs to be told which word was wrong, which is the entire reason
+    // unrecognised fields are refused rather than ignored (ADR-006).
+    it('POST /entries names the unrecognised field', async () => {
+      const rejected = await request(app.getHttpServer())
+        .post('/entries')
+        .send({ content: 'x', contnet: 'y' })
+        .expect(400);
+
+      expect(messagesFrom(rejected)).toEqual([
+        'property contnet should not exist',
+      ]);
     });
 
     it('PATCH /entries/:id rejects an unrecognised field with 400', async () => {
@@ -164,10 +265,14 @@ describe('EntriesController (e2e)', () => {
           .expect(201),
       );
 
-      await request(app.getHttpServer())
+      const rejected = await request(app.getHttpServer())
         .patch(`/entries/${created.id}`)
         .send({ contnet: 'I fixed my typo' })
         .expect(400);
+
+      expect(messagesFrom(rejected)).toEqual([
+        'property contnet should not exist',
+      ]);
 
       // The 400 is only half the claim. The other half is that the entry was
       // left alone — a server that rejected the request and edited the row
@@ -185,9 +290,94 @@ describe('EntriesController (e2e)', () => {
     // the old handler searched for the text `a,b` and answered `200 []` —
     // "I found nothing" in place of "I could not read your request".
     it('GET /entries rejects a repeated word parameter with 400', async () => {
-      await request(app.getHttpServer())
+      const rejected = await request(app.getHttpServer())
         .get('/entries?word=a&word=b')
         .expect(400);
+
+      // Enforced by the library now rather than by `parseSearchTerm`, and the
+      // sentence changed with it: `word may only be given once` became
+      // `word must be a string`. The second is the literal truth about what
+      // Express delivered — an array — and the first said more about what the
+      // sender should do. Accepted along with the rest (ADR-008, Decision 8).
+      expect(messagesFrom(rejected)).toEqual(['word must be a string']);
+    });
+
+    // New behaviour on Day 7, arriving as a side effect and kept on purpose.
+    // `forbidNonWhitelisted` does not distinguish a body from a query string,
+    // so an unrecognised query parameter is refused exactly like an
+    // unrecognised field. It was put as a decision rather than accepted
+    // silently, and chosen for consistency with POST and PATCH; the standing
+    // counter-argument is that browsers and analytics tools append parameters
+    // to URLs, which is a real difference between a query string and a body
+    // (ADR-008, Decision 6).
+    it('GET /entries rejects an unrecognised query parameter with 400', async () => {
+      const rejected = await request(app.getHttpServer())
+        .get('/entries?werd=sister')
+        .expect(400);
+
+      expect(messagesFrom(rejected)).toEqual([
+        'property werd should not exist',
+      ]);
+    });
+
+    // The pair, in one test, and the pairing is the point. An absent `word` and
+    // an empty one are different messages: `GET /entries` means "I am not
+    // searching, show me everything", `GET /entries?word=` means "I am
+    // searching, and this is my term" — and searching for nothing finds
+    // nothing.
+    //
+    // Written as two assertions in one test because the failure this catches is
+    // that they agree. `if (word)` treats `""` as falsy and answers both with
+    // the whole journal; a `%%` pattern handed to LIKE does the same thing one
+    // layer down. Split across two tests, either mistake leaves one of them
+    // green and looking fine (ADR-008, Decision 7).
+    it('GET /entries?word= finds nothing while GET /entries finds everything', async () => {
+      const created = entryFrom(
+        await request(app.getHttpServer())
+          .post('/entries')
+          .send({ content: 'a quiet evening at home' })
+          .expect(201),
+      );
+
+      await request(app.getHttpServer())
+        .get('/entries?word=')
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toEqual([]);
+        });
+
+      await request(app.getHttpServer())
+        .get('/entries')
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toEqual([created]);
+        });
+    });
+
+    // A percent sign is ordinary text to a person writing a journal and a
+    // wildcard to `LIKE`. The escaping that reconciles those two lives in the
+    // repository and is untouched by this day's work — asserted here because a
+    // query string is where such a character actually arrives, URL-encoded
+    // (ADR-006).
+    it('GET /entries?word=100%25 finds the entry containing 100%', async () => {
+      await request(app.getHttpServer())
+        .post('/entries')
+        .send({ content: '100% exhausted today' })
+        .expect(201);
+      await request(app.getHttpServer())
+        .post('/entries')
+        .send({ content: 'an ordinary quiet evening' })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .get('/entries?word=100%25')
+        .expect(200)
+        .expect((res) => {
+          expect(res.body as JournalEntry[]).toHaveLength(1);
+          expect((res.body as JournalEntry[])[0].content).toBe(
+            '100% exhausted today',
+          );
+        });
     });
 
     it('PATCH /entries/:id returns 200 and the updated entry', async () => {
@@ -230,10 +420,74 @@ describe('EntriesController (e2e)', () => {
           .expect(201),
       );
 
-      await request(app.getHttpServer())
+      const rejected = await request(app.getHttpServer())
         .patch(`/entries/${created.id}`)
         .send({})
         .expect(400);
+
+      // Ours, not the library's. No per-property decorator can express "at
+      // least one field must be present", so this comes from a class-level
+      // check — and its sentence says what the body needs rather than what was
+      // wrong with it (ADR-008, Decision 5).
+      expect(messagesFrom(rejected)).toEqual([
+        'the request body must contain at least one field to update',
+      ]);
+    });
+
+    // The case that was a 500 before `@IsOptional()` was replaced with
+    // `@ValidateIf` on `UpdateEntryDto`: `null` looked absent to the pipe, so
+    // the body passed every rule and reached a `NOT NULL` column. The 400 is
+    // half the claim; the other half is that the entry was left alone.
+    it('PATCH /entries/:id returns 400 for a content field of null', async () => {
+      const created = entryFrom(
+        await request(app.getHttpServer())
+          .post('/entries')
+          .send({ content: 'unchanged' })
+          .expect(201),
+      );
+
+      const rejected = await request(app.getHttpServer())
+        .patch(`/entries/${created.id}`)
+        .send({ content: null })
+        .expect(400);
+
+      expect(messagesFrom(rejected)).toEqual(['content must be a string']);
+
+      const reread = entryFrom(
+        await request(app.getHttpServer())
+          .get(`/entries/${created.id}`)
+          .expect(200),
+      );
+
+      expect(reread.content).toBe('unchanged');
+    });
+
+    // The one gap the class-level check has to close by hand. `class-validator`
+    // has no class-level registration, so the rule is registered against no
+    // property at all — which makes a field named literally `undefined` look,
+    // to `forbidNonWhitelisted`, like a property the server recognises. Without
+    // the guard inside the decorator this body slips through validation and
+    // fails downstream as a 500.
+    it('PATCH /entries/:id returns 400 for a field named undefined', async () => {
+      const created = entryFrom(
+        await request(app.getHttpServer())
+          .post('/entries')
+          .send({ content: 'unchanged' })
+          .expect(201),
+      );
+
+      await request(app.getHttpServer())
+        .patch(`/entries/${created.id}`)
+        .send({ undefined: 'x' })
+        .expect(400);
+
+      const reread = entryFrom(
+        await request(app.getHttpServer())
+          .get(`/entries/${created.id}`)
+          .expect(200),
+      );
+
+      expect(reread.content).toBe('unchanged');
     });
 
     // 200 with the entry, not 204 with nothing — the caller gets back what it
