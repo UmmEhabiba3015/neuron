@@ -1,6 +1,6 @@
 import { DatabaseSync } from 'node:sqlite';
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { DATABASE } from '../database/database.module';
 import { EntriesController } from './entries.controller';
 import { EntriesRepository } from './entries.repository';
@@ -10,6 +10,26 @@ import { EntriesService } from './entries.service';
 // and `expect` states one claim about a value — the test fails the moment a
 // claim is false. Nested `describe` blocks only shape the output; they don't
 // change how anything runs.
+//
+// What this file stopped being able to test on Day 7, and why that is correct.
+//
+// Until then it held thirteen claims about rejected input, all of the form
+// `expect(() => controller.create({ content: 42 })).toThrow(...)`. Those rules
+// now live on the DTO classes and are enforced by the `ValidationPipe`
+// registered in `app.module.ts` — which runs between the network and this
+// class, and therefore not at all when a test calls a method directly. Keeping
+// those tests would have meant keeping tests that pass whatever the rules say,
+// which is worse than not having them (ADR-008).
+//
+// They were not deleted so much as split in two, along the seam Day 6 found:
+// the rules are asserted in `create-entry.dto.spec.ts`,
+// `update-entry.dto.spec.ts` and `find-entries-query.dto.spec.ts`, and the fact
+// that the application actually applies them is asserted over real HTTP in
+// `test/app.e2e-spec.ts`.
+//
+// What is left here is what this class genuinely decides on its own: absence
+// becoming a 404, the shape of the count response, and whether a search was
+// asked for at all.
 describe('EntriesController', () => {
   let controller: EntriesController;
   let db: DatabaseSync;
@@ -77,7 +97,7 @@ describe('EntriesController', () => {
       // create its own precondition through the same public API it exercises.
       controller.create({ content: 'an entry to have something to assert on' });
 
-      const result = controller.findAll();
+      const result = controller.findAll({});
 
       // Without this, an empty array would pass every per-entry check below
       // by never running one.
@@ -108,7 +128,7 @@ describe('EntriesController', () => {
     it('should hand the created entry to findAll', () => {
       const created = controller.create({ content: 'should be readable back' });
 
-      expect(controller.findAll()).toContainEqual(created);
+      expect(controller.findAll({})).toContainEqual(created);
     });
 
     // Content that merely contains whitespace is valid, and what the user wrote
@@ -117,62 +137,6 @@ describe('EntriesController', () => {
       const padded = '  the user chose this spacing  ';
 
       expect(controller.create({ content: padded }).content).toBe(padded);
-    });
-  });
-
-  // These assert the exception *class*, which is what a unit test at this level
-  // can see. That each class becomes the right number on the wire is a separate
-  // claim, proven over real HTTP in test/app.e2e-spec.ts.
-  describe('create validation', () => {
-    it('should reject a body with no content field', () => {
-      expect(() => controller.create({})).toThrow(BadRequestException);
-    });
-
-    // The case that looks pedantic and is not. SQLite's TEXT affinity would
-    // coerce 42 into "42" on the way in, so the POST response and every later
-    // GET would disagree about the type of the same entry's content.
-    it('should reject content that is not a string', () => {
-      expect(() => controller.create({ content: 42 })).toThrow(
-        BadRequestException,
-      );
-    });
-
-    it('should reject empty content', () => {
-      expect(() => controller.create({ content: '' })).toThrow(
-        BadRequestException,
-      );
-    });
-
-    it('should reject content that is only whitespace', () => {
-      expect(() => controller.create({ content: '   ' })).toThrow(
-        BadRequestException,
-      );
-    });
-
-    // Nothing rejected above may reach storage. Without this, all four checks
-    // could pass while still having written a row.
-    it('should not store anything it rejected', () => {
-      expect(() => controller.create({ content: '   ' })).toThrow();
-
-      expect(controller.findAll()).toEqual([]);
-    });
-
-    // Previously a 201: the extra field was silently discarded, which was
-    // harmless only because the service happens to read nothing but `content`.
-    // A rule nobody stated is a rule nothing enforces (ADR-006).
-    it('should reject a body containing an unrecognised field', () => {
-      expect(() =>
-        controller.create({ content: 'x', id: 'i-picked-this-myself' }),
-      ).toThrow(BadRequestException);
-    });
-
-    // The message has to name the field. A user who typed `contnet` needs to
-    // be told which word was wrong, which is the entire reason this check
-    // exists rather than a generic "invalid body".
-    it('should name the unrecognised field in the message', () => {
-      expect(() => controller.create({ content: 'x', contnet: 'y' })).toThrow(
-        /contnet/,
-      );
     });
   });
 
@@ -199,15 +163,23 @@ describe('EntriesController', () => {
     it('should return an empty array when nothing matches', () => {
       controller.create({ content: 'quiet evening at home' });
 
-      expect(controller.findAll('zzzzz')).toEqual([]);
+      expect(controller.findAll({ word: 'zzzzz' })).toEqual([]);
     });
 
-    // What Express actually delivers for `?word=a&word=b`. The old signature
-    // said `string`, so the compiler never saw the array coming and the search
-    // ran against the text `a,b` — answering "I found nothing" to a question
-    // it had never managed to read (ADR-006).
-    it('should reject a word given more than once', () => {
-      expect(() => controller.findAll(['a', 'b'])).toThrow(BadRequestException);
+    // The one search decision this class still makes, and the single most
+    // likely thing in Day 7 to get wrong. An absent `word` and an empty one are
+    // different messages: no `word` at all means "I am not searching, show me
+    // everything", while `?word=` means "I am searching, and this is my term".
+    //
+    // Both halves are asserted in one test on purpose. `if (query.word)` — the
+    // truthiness test this replaced — makes the two calls return the same
+    // thing, and a run where they agree has failed even though each line looks
+    // reasonable on its own (ADR-008, Decision 7).
+    it('should list everything for an absent word and nothing for an empty one', () => {
+      const created = controller.create({ content: 'quiet evening at home' });
+
+      expect(controller.findAll({})).toEqual([created]);
+      expect(controller.findAll({ word: '' })).toEqual([]);
     });
   });
 
@@ -231,41 +203,6 @@ describe('EntriesController', () => {
       });
 
       expect(updated.createdAt).toBe(created.createdAt);
-    });
-
-    // The same three content rules as `create`, because they are literally the
-    // same function — see `parseContent` in entries.controller.ts.
-    it.each([
-      ['content that is not a string', { content: 42 }],
-      ['empty content', { content: '' }],
-      ['content that is only whitespace', { content: '   ' }],
-    ])('should reject %s', (_label, body) => {
-      const created = controller.create({ content: 'unchanged' });
-
-      expect(() => controller.update(created.id, body)).toThrow(
-        BadRequestException,
-      );
-      expect(controller.findById(created.id).content).toBe('unchanged');
-    });
-
-    // The case that motivated rejecting unknown fields at all. Under "ignore
-    // what you do not recognise" this returned 200 and changed nothing, so the
-    // user believed a correction was saved that had been thrown away.
-    it('should reject a misspelled field rather than silently doing nothing', () => {
-      const created = controller.create({ content: 'unchanged' });
-
-      expect(() =>
-        controller.update(created.id, { contnet: 'I fixed my typo' }),
-      ).toThrow(BadRequestException);
-      expect(controller.findById(created.id).content).toBe('unchanged');
-    });
-
-    it('should reject a body with nothing to update', () => {
-      const created = controller.create({ content: 'unchanged' });
-
-      expect(() => controller.update(created.id, {})).toThrow(
-        BadRequestException,
-      );
     });
 
     it('should throw NotFoundException when the id does not exist', () => {

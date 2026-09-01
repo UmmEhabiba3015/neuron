@@ -44,6 +44,72 @@ unmodified, so no dependency was added. Both boundary checks return nothing, and
 produces, then committing Day 6. Everything else about Day 6 is done. The Day 5
 history further down is still accurate.
 
+### Day 7 — implemented and audited, 2026-09-01
+
+ADR-008 written and **amended four times** after the audit. Validation now runs
+through `class-validator` with a `ValidationPipe` registered as an `APP_PIPE`
+provider in `AppModule`. **No defects, no rework.**
+
+**Every decision was hers**, and made against real output rather than description:
+a custom decorator for the non-whitespace rule, `PATCH {}` stays a 400 (re-examined
+rather than preserved, since `forbidNonWhitelisted` now covers the misspelled-field
+case that originally motivated it), `?werd=x` is a 400, `?word=` returns `[]` while
+an absent `word` returns everything, and the library's message wording is accepted.
+
+**The mechanical fact that shaped the day:** `ValidationPipe` refuses to validate
+anything whose declared type is `Object`, and `unknown` compiles to exactly that.
+Switching the pipe on without replacing `unknown` would have done nothing at all.
+This reverses the Day 4 `@Body() body: unknown` decision, correctly: that decision
+was right while nothing ran before the handler, and the pipe is what makes the
+label true.
+
+**Audit: all five checks green, 80 → 96 unit, 24 → 32 end-to-end.** Exactly two
+direct dependencies; the lockfile gained four, including a 13M phone-number library
+nothing calls. All three boundary greps silent. Real HTTP verified independently,
+including the pair that had to disagree (`?word=` → `[]`, `/entries` → everything),
+that `"  padded  "` survives `transform: true` unedited, and that `?word=100%`
+still finds only the percent entry through the new query DTO.
+
+**Six mutations, all caught** — the worker's two plus four of mine:
+
+| Mutation | Result |
+|---|---|
+| Remove the `APP_PIPE` provider | 14 e2e fail |
+| Revert `@Query()` to `unknown` | 2 e2e fail (lint/typecheck/build all pass) |
+| Drop `@ContainsNonWhitespace` | 3 unit + 3 e2e fail |
+| Revert `@ValidateIf` to `@IsOptional()` | 1 unit + 1 e2e fail |
+| Drop `forbidNonWhitelisted` | 4 e2e fail |
+| Drop `whitelist` | 4 e2e fail |
+
+The unit suite stays green on the pipe mutations, and that is correct rather than a
+miss: DTO specs assert the rules are right and cannot assert that anything calls
+them — the same split as `env.validation.spec.ts` on Day 6.
+
+**⚠️ What the audit found that the report did not.** A 400 no longer has one
+response shape. The pipe answers `{"message": ["..."]}` while Express's JSON parser
+— which rejects `null`, `42` and bare strings before the pipe runs — answers
+`{"message": "Unexpected token ..."}`. Before Day 7 every 400 from this API had a
+string `message`. Recorded as debt in ADR-008 Amendment 3 rather than fixed,
+because no client exists yet.
+
+**The worker was honest against itself for the third time on this project**, and
+most sharply yet: it reported that the refactor made the codebase **+31 lines
+longer**, that the two rules the library does not understand cost 51 lines of
+boilerplate against eight hand-written, and that *"if this were a decision about
+code alone I would say so more loudly."* What it argued was actually bought is the
+inversion of the default — validation now happens unless somebody stops it. All
+three cases came from a prompt that asked a direct question inviting disagreement.
+
+**Learning debt opened by this day:** `class-validator` decorators, custom
+decorators via `registerDecorator`, `APP_PIPE` versus `useGlobalPipes`, and
+`transform: true`. She chose this library to learn how Nest does things and a
+worker wrote it, which is the same situation Day 7 Block 1 existed to repair for
+`@nestjs/config`. **Do not let this sit as long.**
+
+**Still outstanding:** Day 6 is committed and pushed but **not merged** (`main` is
+at `d24606f`, no PR). Day 7's work is sitting on the `day-06-configuration` branch,
+so the two days need separating before either is merged.
+
 ### Day 6 follow-up: audited and closed, 2026-08-28
 
 `apps/api/test/config-wiring.e2e-spec.ts` was added by a worker and audited by me
