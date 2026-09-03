@@ -1,10 +1,15 @@
-import { DatabaseSync } from 'node:sqlite';
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { DATABASE } from '../database/database.module';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import type { DataSource } from 'typeorm';
+import {
+  closeTestDataSource,
+  createTestDataSource,
+} from '../../test/test-database';
 import { EntriesController } from './entries.controller';
 import { EntriesRepository } from './entries.repository';
 import { EntriesService } from './entries.service';
+import { JournalEntry } from './entry.interface';
 
 // `describe` groups related tests under a label, `it` is a single test case,
 // and `expect` states one claim about a value — the test fails the moment a
@@ -30,9 +35,15 @@ import { EntriesService } from './entries.service';
 // What is left here is what this class genuinely decides on its own: absence
 // becoming a 404, the shape of the count response, and whether a search was
 // asked for at all.
+// Every handler returns a promise since Day 8, because TypeORM has no
+// synchronous API, so every call below is awaited and every "it should throw"
+// became "it should reject". The claims are word for word the ones that were
+// here yesterday: a missing entry still produces a `NotFoundException`, and
+// `rejects.toThrow(NotFoundException)` is how that sentence is written about a
+// promise (ADR-010).
 describe('EntriesController', () => {
   let controller: EntriesController;
-  let db: DatabaseSync;
+  let dataSource: DataSource;
 
   // `beforeEach` runs before *every* `it` below, rebuilding the controller
   // from scratch each time. That isolation is the point: state left behind by
@@ -41,14 +52,7 @@ describe('EntriesController', () => {
   // single method call, that isolation has to reach the database too — hence a
   // fresh in-memory one per test.
   beforeEach(async () => {
-    db = new DatabaseSync(':memory:');
-    db.exec(`
-      CREATE TABLE entries (
-        id         TEXT PRIMARY KEY,
-        content    TEXT NOT NULL,
-        created_at TEXT NOT NULL
-      )
-    `);
+    dataSource = await createTestDataSource();
 
     // The controller doesn't construct itself — it declares in its constructor
     // that it needs an `EntriesService`, and Nest's dependency injection
@@ -58,16 +62,20 @@ describe('EntriesController', () => {
     // a construction path production never uses.
     //
     // That wiring is also what lets the real service run against a throwaway
-    // database: the repository below it asks for the DATABASE token, and this
-    // list decides what that token means here. The chain is three links long
-    // now — controller → service → repository — and every link has to be
-    // listed, because Nest constructs each one from this list alone.
+    // database: the repository below it asks for the token that
+    // `TypeOrmModule.forFeature([JournalEntry])` registers, and this list
+    // decides what that token means here. The chain is three links long now —
+    // controller → service → repository — and every link has to be listed,
+    // because Nest constructs each one from this list alone.
     const module: TestingModule = await Test.createTestingModule({
       controllers: [EntriesController],
       providers: [
         EntriesService,
         EntriesRepository,
-        { provide: DATABASE, useValue: db },
+        {
+          provide: getRepositoryToken(JournalEntry),
+          useValue: dataSource.getRepository(JournalEntry),
+        },
       ],
     }).compile();
 
@@ -77,8 +85,8 @@ describe('EntriesController', () => {
     controller = module.get<EntriesController>(EntriesController);
   });
 
-  afterEach(() => {
-    db.close();
+  afterEach(async () => {
+    await closeTestDataSource(dataSource);
   });
 
   it('should be defined', () => {
@@ -92,12 +100,14 @@ describe('EntriesController', () => {
     // is exactly the failure mode it was written to avoid. Note also what isn't
     // asserted: TypeScript already guarantees the field types at this boundary,
     // so the assertions spend themselves on the rules types can't express.
-    it('should return entries that each satisfy the JournalEntry contract', () => {
+    it('should return entries that each satisfy the JournalEntry contract', async () => {
       // The database no longer arrives pre-populated, so the test has to
       // create its own precondition through the same public API it exercises.
-      controller.create({ content: 'an entry to have something to assert on' });
+      await controller.create({
+        content: 'an entry to have something to assert on',
+      });
 
-      const result = controller.findAll({});
+      const result = await controller.findAll({});
 
       // Without this, an empty array would pass every per-entry check below
       // by never running one.
@@ -115,8 +125,10 @@ describe('EntriesController', () => {
   });
 
   describe('create', () => {
-    it('should return the created entry rather than nothing', () => {
-      const created = controller.create({ content: 'returned to the client' });
+    it('should return the created entry rather than nothing', async () => {
+      const created = await controller.create({
+        content: 'returned to the client',
+      });
 
       expect(created.content).toBe('returned to the client');
       // These are the fields the client cannot know unless the response
@@ -125,33 +137,39 @@ describe('EntriesController', () => {
       expect(Number.isNaN(Date.parse(created.createdAt))).toBe(false);
     });
 
-    it('should hand the created entry to findAll', () => {
-      const created = controller.create({ content: 'should be readable back' });
+    it('should hand the created entry to findAll', async () => {
+      const created = await controller.create({
+        content: 'should be readable back',
+      });
 
-      expect(controller.findAll({})).toContainEqual(created);
+      expect(await controller.findAll({})).toContainEqual(created);
     });
 
     // Content that merely contains whitespace is valid, and what the user wrote
     // is what gets stored. Whitespace decides validity; it never edits the text.
-    it('should store valid content verbatim, without trimming', () => {
+    it('should store valid content verbatim, without trimming', async () => {
       const padded = '  the user chose this spacing  ';
 
-      expect(controller.create({ content: padded }).content).toBe(padded);
+      expect((await controller.create({ content: padded })).content).toBe(
+        padded,
+      );
     });
   });
 
   describe('findById', () => {
-    it('should return the entry that was created', () => {
-      const created = controller.create({ content: 'findable by its id' });
+    it('should return the entry that was created', async () => {
+      const created = await controller.create({
+        content: 'findable by its id',
+      });
 
-      expect(controller.findById(created.id)).toEqual(created);
+      expect(await controller.findById(created.id)).toEqual(created);
     });
 
     // The layer this behaviour lives in is the point. The service returns
     // `undefined` for a missing entry; translating that absence into a 404 is
     // this controller's job and only this controller's job (ADR-005).
-    it('should throw NotFoundException when the id does not exist', () => {
-      expect(() => controller.findById('no-such-id')).toThrow(
+    it('should throw NotFoundException when the id does not exist', async () => {
+      await expect(controller.findById('no-such-id')).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -160,10 +178,10 @@ describe('EntriesController', () => {
   describe('findAll by word', () => {
     // No matches is a complete answer, not an error — so this returns rather
     // than throws, and the HTTP status stays 200.
-    it('should return an empty array when nothing matches', () => {
-      controller.create({ content: 'quiet evening at home' });
+    it('should return an empty array when nothing matches', async () => {
+      await controller.create({ content: 'quiet evening at home' });
 
-      expect(controller.findAll({ word: 'zzzzz' })).toEqual([]);
+      expect(await controller.findAll({ word: 'zzzzz' })).toEqual([]);
     });
 
     // The one search decision this class still makes, and the single most
@@ -175,64 +193,74 @@ describe('EntriesController', () => {
     // truthiness test this replaced — makes the two calls return the same
     // thing, and a run where they agree has failed even though each line looks
     // reasonable on its own (ADR-008, Decision 7).
-    it('should list everything for an absent word and nothing for an empty one', () => {
-      const created = controller.create({ content: 'quiet evening at home' });
+    it('should list everything for an absent word and nothing for an empty one', async () => {
+      const created = await controller.create({
+        content: 'quiet evening at home',
+      });
 
-      expect(controller.findAll({})).toEqual([created]);
-      expect(controller.findAll({ word: '' })).toEqual([]);
+      expect(await controller.findAll({})).toEqual([created]);
+      expect(await controller.findAll({ word: '' })).toEqual([]);
     });
   });
 
   describe('update', () => {
-    it('should return the entry with its new content', () => {
-      const created = controller.create({ content: 'the first draft' });
+    it('should return the entry with its new content', async () => {
+      const created = await controller.create({ content: 'the first draft' });
 
-      const updated = controller.update(created.id, {
+      const updated = await controller.update(created.id, {
         content: 'the second draft',
       });
 
       expect(updated.content).toBe('the second draft');
-      expect(controller.findById(created.id).content).toBe('the second draft');
+      expect((await controller.findById(created.id)).content).toBe(
+        'the second draft',
+      );
     });
 
-    it('should leave createdAt unchanged', () => {
-      const created = controller.create({ content: 'written once' });
+    it('should leave createdAt unchanged', async () => {
+      const created = await controller.create({ content: 'written once' });
 
-      const updated = controller.update(created.id, {
+      const updated = await controller.update(created.id, {
         content: 'edited later',
       });
 
       expect(updated.createdAt).toBe(created.createdAt);
     });
 
-    it('should throw NotFoundException when the id does not exist', () => {
-      expect(() =>
+    it('should throw NotFoundException when the id does not exist', async () => {
+      await expect(
         controller.update('no-such-id', { content: 'anything' }),
-      ).toThrow(NotFoundException);
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('delete', () => {
-    it('should return the deleted entry and leave it gone', () => {
-      const created = controller.create({ content: 'here for a moment' });
+    it('should return the deleted entry and leave it gone', async () => {
+      const created = await controller.create({ content: 'here for a moment' });
 
-      expect(controller.delete(created.id)).toEqual(created);
-      expect(() => controller.findById(created.id)).toThrow(NotFoundException);
+      expect(await controller.delete(created.id)).toEqual(created);
+      await expect(controller.findById(created.id)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
-    it('should throw NotFoundException when the id does not exist', () => {
-      expect(() => controller.delete('no-such-id')).toThrow(NotFoundException);
+    it('should throw NotFoundException when the id does not exist', async () => {
+      await expect(controller.delete('no-such-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     // A `DELETE` against an id that was never there must not report success.
     // The SQL alone would not catch this: deleting nothing is not an error in
     // SQLite, so the row has to be read before it is removed.
-    it('should not report success twice for the same entry', () => {
-      const created = controller.create({ content: 'deleted once' });
+    it('should not report success twice for the same entry', async () => {
+      const created = await controller.create({ content: 'deleted once' });
 
-      controller.delete(created.id);
+      await controller.delete(created.id);
 
-      expect(() => controller.delete(created.id)).toThrow(NotFoundException);
+      await expect(controller.delete(created.id)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -240,13 +268,13 @@ describe('EntriesController', () => {
     // An object, not a bare number. A bare `0` is the only response on this
     // API that is neither an object nor an array of them, and it has no room
     // to gain a field later without breaking every existing client (ADR-005).
-    it('should return the count wrapped in an object', () => {
-      expect(controller.countEntries()).toEqual({ count: 0 });
+    it('should return the count wrapped in an object', async () => {
+      expect(await controller.countEntries()).toEqual({ count: 0 });
 
-      controller.create({ content: 'one' });
-      controller.create({ content: 'two' });
+      await controller.create({ content: 'one' });
+      await controller.create({ content: 'two' });
 
-      expect(controller.countEntries()).toEqual({ count: 2 });
+      expect(await controller.countEntries()).toEqual({ count: 2 });
     });
   });
 });

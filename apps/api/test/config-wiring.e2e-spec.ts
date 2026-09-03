@@ -1,8 +1,7 @@
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import type { DatabaseSync } from 'node:sqlite';
-import { Test, TestingModule } from '@nestjs/testing';
+import type { Test as NestTest, TestingModule } from '@nestjs/testing';
 
 // `src/config/env.validation.spec.ts` proves every rule is correct. It cannot
 // prove anything calls them. Deleting the single word `validate,` from
@@ -62,11 +61,26 @@ describe('configuration wiring (e2e)', () => {
 
     // A static import is hoisted and cached, and this test needs the module
     // evaluated again after `process.env` has been set. `await import(...)` is
-    // not an option either: under ts-jest's CommonJS transform it fails with "A
-    // dynamic import callback was invoked without --experimental-vm-modules".
+    // still not used: the reason it was impossible has gone — Jest now runs
+    // under `--experimental-vm-modules`, because `@nestjs/typeorm` ships as
+    // ESM only — but `require` is what makes the reset above take effect
+    // synchronously, and swapping it would change this file for no gain.
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { AppModule } = require('./../src/app.module') as {
       AppModule: new () => unknown;
+    };
+
+    // `Test` has to come from the same reset as `AppModule`, and this is the
+    // thing Day 8 broke. `jest.resetModules()` gives the required `AppModule` a
+    // fresh copy of `@nestjs/core`; a `Test` imported at the top of the file
+    // still holds the old one, so there are two `ModuleRef` classes and Nest
+    // cannot match the one `TypeOrmCoreModule` asks for against the one the
+    // container has. It failed with "can't resolve dependencies of the
+    // TypeOrmCoreModule (TypeOrmModuleOptions, ?)". Nothing noticed before
+    // because no provider in this application had ever injected `ModuleRef`.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { Test } = require('@nestjs/testing') as {
+      Test: typeof NestTest;
     };
 
     return Test.createTestingModule({ imports: [AppModule] }).compile();
@@ -97,15 +111,19 @@ describe('configuration wiring (e2e)', () => {
   // is the entire point of it being here.
   //
   // Every other end-to-end test that builds `AppModule` first calls
-  // `.overrideProvider(DATABASE).useValue(db)`, which replaces the whole
-  // factory — and that factory is the only thing in the application that asks
-  // for `ConfigService`. Replace it and the edge from the database to the
-  // configuration is never travelled. Deleting `isGlobal: true` therefore gives
-  // passing typecheck, passing build, 80 passing unit tests and 21 passing
-  // end-to-end tests while the real application exits 1 with `Nest can't resolve
-  // dependencies of the Symbol(DATABASE)`. The two tests above do not catch it
-  // either, because `validate` throws long before Nest reaches dependency
-  // resolution, so they see the message they are asserting on and go green.
+  // `.overrideProvider(getDataSourceToken()).useValue(dataSource)`, which
+  // replaces the whole factory — and that factory is the only thing in the
+  // application that asks for `ConfigService`. Replace it and the edge from the
+  // database to the configuration is never travelled. Deleting `isGlobal: true`
+  // therefore gives passing typecheck, passing build, 80 passing unit tests and
+  // 21 passing end-to-end tests while the real application exits 1 with `Nest
+  // can't resolve dependencies of the TypeOrmModuleOptions`. The two tests above
+  // do not catch it either, because `validate` throws long before Nest reaches
+  // dependency resolution, so they see the message they are asserting on and go
+  // green.
+  //
+  // The override changed shape on Day 8 and the hole it leaves did not, which
+  // is why this test needed no new claim to go on covering it.
   //
   // Building the real thing with valid configuration and no overrides is the
   // only thing that walks that edge.
@@ -124,17 +142,14 @@ describe('configuration wiring (e2e)', () => {
 
     const application = await buildTheRealApplication();
 
-    // The factory opened a real connection, and nothing in the application
-    // closes it: `DATABASE` is a plain value provider with no lifecycle hook, so
-    // `application.close()` alone would leave the handle open for the rest of
-    // the run. The token has to come from the same freshly-required copy of the
-    // module the application was built from, or it would be a different Symbol.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { DATABASE } = require('./../src/database/database.module') as {
-      DATABASE: symbol;
-    };
-
-    application.get<DatabaseSync>(DATABASE).close();
+    // The factory opened a real connection, and closing the application is now
+    // enough to close it. It was not before: `DATABASE` was a plain value
+    // provider with no lifecycle hook, so this test had to reach into the
+    // container, fetch the Symbol from the same freshly-required copy of the
+    // module, and call `close()` by hand. `TypeOrmCoreModule` implements
+    // `onApplicationShutdown` and destroys the DataSource itself, so eight
+    // lines of teardown became one — the first thing TypeORM gave back rather
+    // than took (ADR-010).
     await application.close();
   });
 });
