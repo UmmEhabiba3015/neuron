@@ -20,8 +20,12 @@ import { UpdateEntryDto } from './update-entry.dto';
 // to erase the import, and the pipe would receive `Object` and validate
 // nothing.
 //
-// `JournalEntry` stays type-only because it is still an interface: it is only
-// ever a return type, and an interface has no runtime value to point at.
+// `JournalEntry` stays type-only for a different reason. It stopped being an
+// interface on Day 8 and is a decorated TypeORM entity now, so there *is* a
+// runtime value to point at — but nothing here needs one. It appears only in
+// return types, and `import type` is what keeps the guarantee that this file
+// makes no decisions about storage: an erased import cannot be constructed,
+// queried, or handed to a repository (ADR-010).
 import type { JournalEntry } from './entry.interface';
 
 // A "controller" in Nest only handles HTTP: which route maps to which
@@ -42,8 +46,13 @@ import type { JournalEntry } from './entry.interface';
 export class EntriesController {
   constructor(private readonly entriesService: EntriesService) {}
 
+  // `Promise<...>` on every handler below, and nothing observable changed with
+  // it. TypeORM has no synchronous API, so `await` travelled up from the
+  // repository through the service to here; Nest awaits whatever a handler
+  // returns before serializing it, so the status codes and bodies are the ones
+  // that were there yesterday (ADR-010).
   @Get()
-  findAll(@Query() query: FindEntriesQueryDto): JournalEntry[] {
+  findAll(@Query() query: FindEntriesQueryDto): Promise<JournalEntry[]> {
     // `!== undefined`, never `if (query.word)`. An absent `word` and an empty
     // one are two different messages, and truthiness cannot tell them apart:
     // `""` is falsy, so the old `if (term)` treated `?word=` as "no search was
@@ -71,7 +80,7 @@ export class EntriesController {
   // correct at once, and which one is depends entirely on whether anything
   // validates in between (ADR-008).
   @Post()
-  create(@Body() dto: CreateEntryDto): JournalEntry {
+  create(@Body() dto: CreateEntryDto): Promise<JournalEntry> {
     // Unwrapping happens here, at the HTTP boundary, so the service keeps
     // receiving a plain string.
     return this.entriesService.create(dto.content);
@@ -87,13 +96,13 @@ export class EntriesController {
   // exist" is a number in application terms. The object is a fact about this
   // API's response shape, which makes it an HTTP concern.
   @Get('count')
-  countEntries(): { count: number } {
-    return { count: this.entriesService.countEntries() };
+  async countEntries(): Promise<{ count: number }> {
+    return { count: await this.entriesService.countEntries() };
   }
 
   @Get(':id')
-  findById(@Param('id') id: string): JournalEntry {
-    const entry = this.entriesService.findById(id);
+  async findById(@Param('id') id: string): Promise<JournalEntry> {
+    const entry = await this.entriesService.findById(id);
 
     // This is the translation step the layers below refuse to do: the service
     // reports absence as `undefined`, in storage-and-application vocabulary,
@@ -112,7 +121,10 @@ export class EntriesController {
   // `createdAt` — two values it is not permitted to set. `PATCH` means "apply
   // these changes", which is what is actually happening (ADR-006).
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateEntryDto): JournalEntry {
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateEntryDto,
+  ): Promise<JournalEntry> {
     // The one assertion left in this file, and it is worth reading twice.
     // `content` is optional on `UpdateEntryDto` because `PATCH` is a partial
     // update, and `@ContainsAtLeastOneField` is what makes an empty body a 400
@@ -126,7 +138,7 @@ export class EntriesController {
     // `parseUpdateEntryDto` returned a narrowed type and gave the compiler that
     // guarantee for free; this is what the refactor cost, written down where
     // whoever adds the second field will read it.
-    const updated = this.entriesService.update(id, dto.content!);
+    const updated = await this.entriesService.update(id, dto.content!);
 
     // Validation runs before the lookup, so a malformed body against a missing
     // id answers 400 rather than 404. That is deliberate, and it is now the
@@ -146,8 +158,8 @@ export class EntriesController {
   // first. Returning information the caller can ignore is a cheaper mistake
   // than withholding information it needs (ADR-006).
   @Delete(':id')
-  delete(@Param('id') id: string): JournalEntry {
-    const deleted = this.entriesService.delete(id);
+  async delete(@Param('id') id: string): Promise<JournalEntry> {
+    const deleted = await this.entriesService.delete(id);
 
     if (!deleted) {
       throw new NotFoundException(`Entry with ID ${id} not found`);

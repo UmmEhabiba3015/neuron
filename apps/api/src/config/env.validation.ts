@@ -109,3 +109,17 @@ export function validate(
 
   return validated;
 }
+
+// The one caller that is not Nest. `ConfigModule.forRoot({ validate })` covers
+// every path that boots the application, but the TypeORM migration commands run
+// from a shell with no injector in sight and still have to be told which
+// database to open. Reading `process.env` there would put a second, unchecked
+// reader of the environment in the codebase — the exact thing ADR-007 removed.
+//
+// So the environment is read here, in the only file allowed to touch
+// `process.env`, and through the same `validate` the application boots with. A
+// `DATABASE_PATH` that would stop the server also stops a migration, and says
+// the same sentence while doing it.
+export function loadEnvironment(): EnvironmentVariables {
+  return validate(process.env);
+}

@@ -176,13 +176,38 @@ to someone.**
 
 | Day | Problem to solve | What you should be able to explain afterward |
 |-----|------------------|---------------------------------------------|
-| 8 | Anyone can read anyone's entries. Who is making this request? | Sessions vs tokens vs JWT. Statefulness. Why "just use JWT" is not an answer. |
-| 9 | Storing a password is a liability. | Hashing vs encryption. Why bcrypt/argon2 are deliberately slow. Registration and login flows. |
+| 8 | Anyone can read anyone's entries. Who is making this request? | ✅ **Partly done.** The *decisions* were made — sessions vs tokens vs JWT, statefulness, and why "just use JWT" is not an answer (ADR-009). The day then went somewhere the plan did not: `users` needed a second table and `user_id` needed a non-additive schema change, which fired two of ADR-004's named revisit conditions at once, so the project moved to **TypeORM with migrations** (ADR-010). `users` and `entries.user_id` exist. **Nothing yet knows who is asking** — no registration, no login, no token. That moved to Day 9. |
+| 9 | Storing a password is a liability — **and there is still no way to create a user at all.** | Hashing vs encryption. Why bcrypt/argon2 are deliberately slow. Registration and login flows. **Plus the identity work Day 8 did not reach:** issuing and verifying a token, and an endpoint that can name the caller. |
 | 10 | Authenticated ≠ authorized. | Ownership enforcement, request context, guards. Where tenancy bugs actually live. |
 | 11 | Tokens don't expire, and logout does nothing. | Expiry, refresh, revocation, and the tradeoffs of each. |
 | 12 | There's no UI. Where does the token live in the browser? | Next.js rendering models, cookies vs localStorage, CORS, the auth boundary across two apps. |
 | 13 | Mood is part of the product but isn't modeled. | Data modeling for a second entity. Relationships. Migration on a live schema. |
 | 14 | **Review day.** Audit, refactor, document. | |
+
+### What actually happened on Day 8, and why the plan moved
+
+Day 8 was supposed to answer *who is making this request*. It answered *what does
+a request belong to* instead, and the detour was forced rather than chosen.
+
+Adding `users` meant adding `entries.user_id`, and a `NOT NULL` column cannot be
+added to a table that already holds rows by a `CREATE TABLE IF NOT EXISTS`
+statement at boot. Demonstrated rather than argued: the same code produced
+`id, content, created_at` on an existing database and `id, content, created_at,
+user_id` on a fresh one, silently, with nothing reporting the difference.
+
+That fired two conditions ADR-004 had written down on Day 3 — *first non-additive
+schema change* and *the first relationship between tables* — so the ORM decision
+scheduled for Day 13 arrived five days early. See ADR-010.
+
+**The cost is that authentication itself has not started.** Day 9 now carries both
+its own work and the identity work Day 8 did not reach. If that proves too much,
+the honest move is to split it rather than to ship half of each, and Day 14's
+review day is where the slack is.
+
+**The gain is that Day 13 gets easier.** Its stated problem is *"data modeling for
+a second entity, relationships, migration on a live schema"* — and all three of
+those mechanisms now exist and are tested. Day 13 becomes about `mood` rather than
+about migrations.
 
 **Why here:** ownership must be understood *before* AI. A retrieval system
 that leaks another user's memories is the worst possible bug in this product,

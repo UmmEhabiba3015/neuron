@@ -60,8 +60,19 @@ why these are checked at boot rather than at first use.
 ## Data
 
 Entries are stored in a SQLite database — a single file at
-`apps/api/data/neuron.db`, created automatically on first run. Set
-`DATABASE_PATH` to put it somewhere else:
+`apps/api/data/neuron.db`. The **file** is created automatically on first run,
+but the **tables are not**: the schema comes from migrations, and the API never
+applies them itself. Run them once before you start it:
+
+```bash
+pnpm migration:run
+```
+
+Skip that and the API starts perfectly happily, reports
+`Nest application successfully started`, and then fails every request with
+`no such table: entries`. That is deliberate — see *Migrations* below.
+
+Set `DATABASE_PATH` to put the file somewhere else:
 
 ```bash
 DATABASE_PATH=./data/scratch.db pnpm dev
@@ -81,9 +92,66 @@ the API to empty:
 rm apps/api/data/neuron.db
 ```
 
-Tests never touch it — they run against an in-memory database. See
-[ADR-003](docs/decisions/ADR-003-sqlite.md) for why SQLite, and why it is
-expected to be replaced later.
+Tests never touch it — they run against a throwaway database of their own. See
+[ADR-003](docs/decisions/ADR-003-sqlite.md) for why SQLite, and
+[ADR-010](docs/decisions/ADR-010-typeorm.md) for why the driver is now TypeORM
+with `better-sqlite3`.
+
+## Migrations
+
+Every schema change is a migration. Nothing changes the schema at boot — TypeORM's
+`synchronize` is `false` and there is a test that fails if anyone turns it on,
+because schema-on-boot is what this project replaced and it would silently rewrite
+tables rather than merely skipping a check.
+
+```bash
+pnpm migration:run       # apply everything pending
+pnpm migration:revert    # undo the most recent one
+pnpm migration:generate apps/api/src/database/migrations/<Name>
+```
+
+`migration:generate` compares the entity classes against the database and writes
+the SQL for you. **Read what it produces before trusting it.** SQLite cannot add a
+foreign key to an existing table, so TypeORM rebuilds the whole table — creating a
+temporary copy, moving every row, dropping the original and renaming. That is
+correct, and it is not what the word "generate" suggests.
+
+### A database created before migrations existed
+
+If your database was made before Day 8 it has no `migrations` table, so TypeORM
+believes nothing has ever been applied, tries to run the initial migration, and
+stops:
+
+```
+Migration "InitialSchema1788262448946" failed, error: table "entries" already exists
+```
+
+Nothing is lost — the whole thing runs in a transaction and rolls back — but no
+migration is applied either. The database already *has* that initial schema; it
+simply has no record of it. So tell it, once:
+
+Run this **from `apps/api`**, not from the repository root:
+
+```bash
+cd apps/api
+node -e "
+  const Database = require('better-sqlite3');
+  const db = new Database('data/neuron.db');
+  db.exec('CREATE TABLE IF NOT EXISTS migrations (id integer PRIMARY KEY AUTOINCREMENT NOT NULL, timestamp bigint NOT NULL, name varchar NOT NULL)');
+  db.prepare('INSERT INTO migrations (timestamp, name) VALUES (?, ?)')
+    .run(1788262448946, 'InitialSchema1788262448946');
+"
+pnpm migration:run
+```
+
+Two details that are easy to get wrong, and both were got wrong while writing
+this. There is deliberately no `sqlite3` command here: that CLI is a separate
+package this project does not require and which is not installed. And the
+directory matters — `better-sqlite3` lives in `apps/api`'s dependency tree, so the
+same command run from the repository root fails with `Cannot find module`.
+
+This is called baselining. It is needed once per database that predates
+migrations, and never for one created from scratch by `pnpm migration:run`.
 
 Other root-level scripts:
 

@@ -15,8 +15,8 @@ import { EntriesModule } from './entries/entries.module';
       // for `ConfigService`, instead of every feature module having to import
       // this one. Configuration stops being a global that any file can reach
       // into and becomes a dependency handed to whoever needs it — the same
-      // thing the DATABASE token already does, which is what lets the
-      // end-to-end suite swap the database out from underneath the app.
+      // thing the injected `DataSource` does, which is what lets the end-to-end
+      // suite swap the database out from underneath the app.
       isGlobal: true,
       // Node loads `.env` itself, through `--env-file-if-exists` in the start
       // scripts. Leaving this false would point a second parser at the same
