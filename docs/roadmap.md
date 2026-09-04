@@ -1,42 +1,90 @@
-# Neuron — 30-Day Roadmap (v1.0, Ratified)
+# Neuron — Roadmap (v2.0)
 
-**Status:** Ratified 2026-07-29. Amendable — see *Rules for the roadmap itself*.
-**Numbering:** Public LinkedIn numbering, **Day 0 → Day 29** (30 days total).
-This is canonical. The v0.1 draft was one-indexed and off by one; every day
-below shifted down by one when it was ratified.
+**Status:** Revised 2026-09-04, replacing v1.0 (ratified 2026-07-29).
+**Numbering:** Public LinkedIn numbering, **Day 0 → Day 39**. This is canonical.
+
+**What changed in v2.0, and why:**
+
+1. **The plan is now 40 days rather than 30.** This is not a slip being
+   ratified after the fact. Days 0 through 8 delivered more than the original
+   plan asked for — migrations, an ORM, and a configuration story all arrived
+   early because real problems forced them — and the original 30 days had no
+   room for a frontend beyond a single day. Forty days is what the actual scope
+   costs at the standard this project has been holding.
+2. **Frontend designs now exist.** They are shared at a fixed point (Day 12,
+   the design review) so that the API is shaped by what the screens actually
+   need, instead of the screens being bent around whatever the API happened to
+   return.
+3. **The days are honest about where the project really is.** Day 8 did not
+   deliver authentication; it delivered ownership and a migration story.
+   Day 9 carries the difference.
 
 **Constraints this was designed against:**
 
-- ~7 hours/day of focused time
-- Near-total beginner on the backend (NestJS, DI, databases, auth, testing)
-- Day 29 = deployed, demo-quality, publicly reachable
-- Primary learning emphasis: **backend architecture**
+- ~7 hours/day of focused time, taken as whole days rather than spread thin
+- A learner who was a near-total beginner on the backend at Day 0 and is not
+  one now
+- Day 39 = deployed, demo-quality, publicly reachable
+- Primary learning emphasis: **backend architecture**, with frontend treated as
+  a real but secondary skill
+
+---
+
+## Where The Project Actually Stands (as of Day 8, verified 2026-09-04)
+
+Everything in this section was re-run and confirmed rather than copied from a
+previous report.
+
+**Shipped and working.** A NestJS API in a pnpm workspace that stores journal
+entries in SQLite. Data access lives behind a repository. Input is validated at
+the boundary by `class-validator` and a globally registered pipe. Configuration
+is checked once at boot and the application refuses to start when it is wrong.
+Schema changes happen through TypeORM migrations and never at boot. A `users`
+table exists, and `entries.user_id` exists with a real foreign key.
+
+**The numbers.** 874 lines of production code. 108 unit tests and 35
+end-to-end tests, all passing. Ten architecture decision records. Typecheck,
+lint and build all clean.
+
+**Not built yet, and worth saying plainly.** Nothing authenticates. No endpoint
+knows who is calling it. There is no way to create a user. There is no frontend
+at all. There is no AI in the product yet.
+
+**The one structural weakness in the codebase.** The test suite is good at
+checking that pieces work and has been repeatedly bad at checking that pieces
+are *connected*. Three times in three days, deleting a single line disconnected
+an entire day's work while every test stayed green: `validate,` on Day 6, the
+`APP_PIPE` provider on Day 7, and `synchronize: false` on Day 8. Each was found
+by mutation during an audit, not by a test. Each now has a test. **The rule this
+produced: a test that does not fail when the wiring is removed has not been
+written.** Every future day is expected to include one mutation check.
 
 ---
 
 ## The Organizing Idea
 
-This roadmap is **not** a feature checklist divided by 30. It is ordered so
-that each day creates the *problem* that the next day solves. You should
-rarely be told "today we use X." You should arrive at X because yesterday
-hurt.
+This roadmap is **not** a feature checklist divided by forty. It is ordered so
+that each day creates the *problem* that the next day solves. You should rarely
+be told "today we use X." You should arrive at X because yesterday hurt.
 
-The spine is four questions, in this order:
+The spine is five questions, in this order:
 
 1. **Can I store and retrieve a thought?** (persistence, data modeling, HTTP)
 2. **Whose thought is it?** (identity, ownership, multi-tenancy)
-3. **Can I find a thought I half-remember?** (search → semantic search → RAG)
-4. **What do my thoughts mean together?** (aggregation, insight, scheduled work)
+3. **Can a person actually use this?** (frontend, the auth boundary across two apps)
+4. **Can I find a thought I half-remember?** (search → semantic search → RAG)
+5. **What do my thoughts mean together?** (aggregation, insight, scheduled work)
 
-Everything else is optional.
+Question 3 is new in v2.0 and it is deliberately placed before the AI work.
+A retrieval feature with no interface is a feature nobody can judge.
 
 ### Scope decisions
 
 **In the core path:** journaling, mood, search, memory chat (RAG), weekly
-insights, auth, deployment.
+insights, auth, a real frontend, deployment.
 
 **Explicitly deferred:** habit tracking, notifications, calendar view,
-file/image attachments, monthly insights, rich-text editing, analytics
+file and image attachments, monthly insights, rich-text editing, analytics
 dashboards.
 
 Deferred does not mean bad. It means these features teach concepts the core
@@ -45,127 +93,52 @@ ends early, pull one forward — but only if it introduces a *new* problem.
 
 ---
 
-## Learning Debt
+## A Note On Pace
 
-A construct specific to this project, and it needs to be tracked as
-deliberately as technical debt.
+Days 0 through 8 took longer than nine days. That is worth being straight about
+rather than quietly re-baselining.
 
-Worker agents produce correct code faster than a human can learn the concepts
-inside it. Every time that happens, the repo gains code its owner cannot
-explain. That is **learning debt**, and unlike technical debt it does not
-show up in any linter.
+Some of the overrun bought something real. Day 8's detour into TypeORM and
+migrations was forced by an actual problem — a `NOT NULL` column cannot be
+added to a populated table by a `CREATE TABLE IF NOT EXISTS` at boot — and it
+made Day 13 easier rather than harder. That is the roadmap working as intended.
 
-The rule: **a concept a worker introduced is not "done" until it can be
-explained without reading the code.** Shipping is not the completion
-criterion; comprehension is.
+Some of it did not. Gaps between working days cost more than the work itself,
+because every return begins with reloading context that was already paid for
+once.
 
-### Open learning debt
+**The target from here is a working day that ends with something merged.** Not
+a longer day. A finished one. A day that ends with a decision made, a worker
+run, an audit done, and a merge is a day that compounds; a day that ends
+mid-block has to be partly repeated. The single highest-value change available
+right now is not working harder, it is not stopping in the middle.
 
-| Concept | Introduced | Owed since | Status |
-|---|---|---|---|
-| `@nestjs/testing` — `Test.createTestingModule`, DI in tests | Day 1 worker | Day 1 | ✅ **Repaid Day 2**, by experiment |
-| DI resolves at runtime, not compile time | Day 1 worker | Day 1 | ✅ **Repaid Day 2** — predicted wrong twice, then proven live |
-| Symbol injection tokens, factory providers | Day 2 worker | Day 2 | ✅ **Repaid Day 2** |
-| Jest — runners, matchers, `describe`/`it`, mocking | Day 1 worker | Day 1 | 🟡 Partial — basics only |
-| supertest — what it does that a unit test cannot | Day 1 worker | Day 1 | ✅ **Repaid Day 4 (evening)** — via the route-rename experiment; she explained that e2e names the path in the request and unit tests never mention it |
-| Unit vs e2e — what each catches, what each cannot | Day 1 worker | Day 1 | ✅ **Repaid Day 4 (evening)** — predicted correctly that renaming `@Controller('entries')` → `'journal'` would leave all 29 unit tests green and break e2e. Ran it: **29 passed, 9 of 10 e2e failed** |
-| Why `build`/`test`/`lint` all miss a type error in a spec | Day 2 audit | Day 2 | ✅ **Repaid Day 4 (evening)** — all four commands answered correctly with the mechanism for each, including that `ts-jest` transpiles rather than compiles |
-| Raw SQL, prepared statements, parameter binding | Day 2 worker | Day 2 | ✅ **Repaid Day 4 (evening)** — she explained the parse-then-bind mechanism unprompted and in her own words: the database parses the instruction text first, so by the time values arrive the sentence structure is fixed and data cannot become instruction. Offered and skipped twice before this |
-| 4xx vs 5xx — "could the client fix this by sending a different request?" | Day 3 | Day 3 | ✅ **Repaid Day 4** — got all three re-test questions right, and answered the third with the *rule* rather than the two instances, which is the distinction that had failed on Day 3 |
-| `400` vs `404` — malformed request vs well-formed request for a thing that does not exist | Day 4 | Day 4 | ✅ **Repaid Day 4** — did not know it, was told once, then applied it correctly and unprompted to `POST {}` |
-| **Empty collection is a complete answer, not a failure** | Day 4 | Day 4 | ✅ **Repaid Day 4 (evening)** — ran the experiment, then said it in her own words: *"even in that case the correct answer is no row contains the word and empty array can satisfy it."* That is the idea she could not reach earlier the same day |
-| **Type erasure** — TypeScript annotations do not exist at runtime | Day 4 | Day 4 | ✅ **Repaid Day 4** — she compiled the project, read the emitted JavaScript, and saw `{ content: string }` become bare `body` herself. This is the load-bearing fact under all validation |
-| Where validation belongs (boundary vs service) | Day 4 | Day 4 | 🟡 **Partial** — she reasoned it out and got it wrong (chose the service), then accepted the argument. The distinction between "is this well-formed?" and "is this allowed?" was given to her, not derived → re-test Day 10 when ownership checks arrive |
-| **Reading and judging an existing test suite** | Day 4 | Day 4 | 🟡 **Partial, advanced Day 5** — she found two real gaps (unknown fields on `POST`; `LIKE` wildcards in search), placed a new test in the correct spec file, and wrote the claim sentence once the underlying decision existed. Still owed: doing this unprompted across a whole suite rather than on cases handed over one at a time |
-| **`LIKE` wildcards survive parameter binding** | Day 5 | Day 5 | ✅ **Repaid Day 5** — predicted instantly and correctly that `?word=%` returns every entry. The point that landed: bound parameters protect the *structure of the statement*, but `%` and `_` are the pattern language `LIKE` interprets after binding, so the protection does not reach them |
-| **A missing test is usually a missing decision** | Day 5 | Day 5 | ✅ **Repaid Day 5** — she could not write a claim for the wildcard gap, correctly, because nobody had decided what search should do with `%`. Once she chose, the claim came immediately. The reframing is the lesson |
-| Route matching is declaration order, first match wins | Day 3 (her own bug) | Day 3 | ✅ **Repaid Day 3** — predicted "static before dynamic", disproven by her own unreachable `/entries/count` |
-| Repository pattern — what it is, what crosses the boundary | Day 3 | Day 3 | ✅ **Repaid Day 3** — derived by her from the duplication before it was named |
-| Where `id`/`createdAt` should be generated; UUID vs sequential ids | Day 3 | Day 3 | ✅ **Repaid Day 3** — she argued for DB-generated, changed position on evidence, and raised the enforcement objection now recorded in ADR-004 |
-| `EntriesRepository` wiring — why the module needed a new provider | Day 3 worker | Day 3 | ✅ **Repaid Day 4 (evening)** — four-part prediction, all four correct. Removed from `providers`: typecheck ✅, build ✅, **server crashed at boot**, **29 unit tests still passed**, e2e failed. She predicted the unit-test result and its reason (spec files declare their own providers and never read `entries.module.ts`) |
-| `@Body() body: unknown` vs a named DTO type at a trust boundary | Day 4 worker | Day 4 | ✅ **Repaid Day 4 (evening)** — explained that the compiler *believes* the label, so typecheck and build both pass and the failure surfaces at runtime |
-
-Add a row whenever a worker introduces something unfamiliar. Close it only
-when the explanation happens.
+Days 20, 27, 34 and 38 exist as slack. They are real days with real work in
+them, but they are the first places to absorb an overrun, and using them for
+that is expected rather than a failure.
 
 ---
-
-## Phase 0 — Setup (Day 0–1)
+## Phase 0 — Setup (Days 0–1) — complete
 
 | Day | What happened |
 |---|---|
 | 0 | Repo initialized. Public build announced. |
-| 1 | pnpm workspace wired, NestJS scaffolded, `GET /entries` returning a hardcoded array. ADR-001 (monorepo), ADR-002 (NestJS). **Not audited on the day** — audited retroactively on Day 2. |
+| 1 | pnpm workspace wired, NestJS scaffolded, `GET /entries` returning a hardcoded array. ADR-001 (monorepo), ADR-002 (NestJS). Not audited on the day; audited retroactively on Day 2, and the cost was real — lint failing on committed code, two contradictory ADRs, and a README describing directories that did not exist. |
 
 ---
 
-## Phase 1 — The Request (Days 2–7)
+## Phase 1 — The Request (Days 2–7) — complete
 
-**Goal: one feature, end to end, that you fully understand.**
+**Goal: one feature, end to end, that she fully understands.**
 
-No auth. No AI. No frontend polish. A single journal entry, created and read
-over HTTP. The point is not the feature — it's building the mental model of
-what a backend *is* before adding anything to it.
-
-| Day | Problem to solve | What you should be able to explain afterward |
-|-----|------------------|---------------------------------------------|
-| 2 | Restart the server and the data is gone. Where should data actually live? | Files vs SQLite vs Postgres vs document DBs. What a migration is and why it exists. **Plus: repay testing debt** — what the three existing tests actually do. |
-| 3 | SQL strings are scattered through my controller. | Raw SQL vs query builder vs ORM. What a repository is. Why data access gets its own layer. |
-| 4 | A client sent `{}` and the server returned a 500. | ✅ **Done.** Validation at the boundary, DTOs, 400 vs 404, and the layering rule that status codes are HTTP vocabulary and belong only in the controller. The load-bearing fact turned out to be **type erasure** — she watched `{ content: string }` vanish from the compiled JavaScript, which is *why* runtime validation has to exist at all. ADR-005. |
-| 5 | I changed something and don't know what I broke. | ✅ **Done.** Reading and judging a suite — naming what it fails to cover. ~~Writing tests by hand~~ was removed on Day 4 by the project owner's husband. **Three real defects found inside a fully green 39-test suite**, all by her, all confirmed over real HTTP. The idea that came out of it: **a missing test is usually a missing decision.** Also: prepared statements protect a statement's *structure*, not a value's *meaning* once `LIKE` reads it. ADR-006. 29 → 55 unit, 10 → 18 e2e. |
-| 6 | My DB password is in a committed file. | Configuration, environments, secret handling, config validation at boot. |
-| 7 | **Review day.** Audit, refactor, document. | Everything above, written down as handbook entries. |
-
-**Why this order:** persistence before abstraction (you can't appreciate a
-repository pattern until you've felt SQL sprawl); validation before testing
-(you need behavior worth asserting); config last, because you only feel the
-pain once there's something environment-specific to configure.
-
-### Day 5 was cleared in advance, on Day 4 evening
-
-Day 5 was originally carrying eight owed items and was over capacity. **Six
-were closed on the evening of Day 4**, in a single session, by explanation and
-experiment rather than by instruction. Two had been owed since Day 1, one since
-Day 2 and offered twice before.
-
-What closed: prepared statements · which command catches a spec type error ·
-unit vs e2e (route-rename experiment) · supertest · `EntriesRepository` wiring ·
-the empty-collection idea · why `unknown` beats a named DTO at a trust boundary.
-
-**The two experiments worth repeating on later days**, because both produced a
-result that contradicts intuition:
-
-1. **Rename `@Controller('entries')` to `'journal'`.** The application is
-   completely broken — every existing client gets a 404 — and **all 29 unit
-   tests still pass.** 9 of 10 e2e tests fail. Unit tests verify that the pieces
-   work; e2e verifies that the pieces are *connected*.
-2. **Delete `EntriesRepository` from the module's `providers` array.**
-   `typecheck` ✅, `build` ✅, **server crashes at boot**, and **29 unit tests
-   still pass** — because every spec file declares its own `providers` list and
-   never reads `entries.module.ts`. Only the e2e suite loads `AppModule`, so
-   only the e2e suite can catch broken production wiring.
-
-**Day 5 therefore starts with room.** What remains for it:
-
-- Reading and judging an existing suite — naming what it *fails* to cover. This
-  is the skill the Day 3 `ORDER BY` bug actually needed. **Started on Day 5's
-  first session; two gaps found. See `master-state.md` for where to resume.**
-- `docs/learning/day-02/testing-literacy.md` experiments **3 and 4**, unrun
-  since Day 2. Experiments 2 and 5 are redundant — she answered both on Day 4
-  evening — and should be skipped.
-- The `PATCH`/`DELETE` work the day was scheduled for, which forces the
-  unknown-fields decision recorded in *Open questions*. **Not started.**
-
-**Direction set by the project owner's husband (Day 4):** she is not required to
-write test suites by hand. AI-generated tests are the norm and that is accepted.
-The goal is that she can *read* a suite, explain what each kind of test does,
-and judge what a suite misses. Day 5 should follow **read → predict → break →
-observe**, not "write from scratch."
-
-The pattern still worth naming: **learning debt compounds faster than technical
-debt**, because the same worker that repays velocity accrues more of it. But it
-is also cheaper to repay than expected — six items took one evening once they
-were asked as direct questions with an experiment attached.
+| Day | Problem solved | The idea that came out of it |
+|---|---|---|
+| 2 | Restart the server and the data is gone. | Files vs SQLite vs Postgres. What a migration is. ADR-003. |
+| 3 | SQL strings scattered through the controller. | What a repository is, and what may cross its boundary. ADR-004. |
+| 4 | A client sent `{}` and the server returned a 500. | Validation at the boundary; 400 vs 404; status codes are HTTP vocabulary and belong only in the controller. The load-bearing fact was **type erasure** — she watched `{ content: string }` vanish from the compiled JavaScript. ADR-005. |
+| 5 | I changed something and don't know what I broke. | Reading and judging a suite. **Three real defects found inside a fully green 39-test suite**, all by her, all confirmed over real HTTP. The idea: **a missing test is usually a missing decision.** ADR-006. |
+| 6 | My database path is in a committed file. | Configuration checked once at boot, refusing to start when wrong. The idea: **the dangerous configuration bug is not the one that crashes — it is the one that starts.** ADR-007. |
+| 7 | 91 lines of hand-written parsing in a controller. | `class-validator` and a globally registered pipe. The idea: **a library knows about shapes; it does not know about your product** — which is why two rules stayed hand-written. ADR-008. |
 
 ---
 
@@ -174,134 +147,278 @@ were asked as direct questions with an experiment attached.
 **Goal: the single most important backend-architecture lesson — data belongs
 to someone.**
 
-| Day | Problem to solve | What you should be able to explain afterward |
-|-----|------------------|---------------------------------------------|
-| 8 | Anyone can read anyone's entries. Who is making this request? | ✅ **Partly done.** The *decisions* were made — sessions vs tokens vs JWT, statefulness, and why "just use JWT" is not an answer (ADR-009). The day then went somewhere the plan did not: `users` needed a second table and `user_id` needed a non-additive schema change, which fired two of ADR-004's named revisit conditions at once, so the project moved to **TypeORM with migrations** (ADR-010). `users` and `entries.user_id` exist. **Nothing yet knows who is asking** — no registration, no login, no token. That moved to Day 9. |
-| 9 | Storing a password is a liability — **and there is still no way to create a user at all.** | Hashing vs encryption. Why bcrypt/argon2 are deliberately slow. Registration and login flows. **Plus the identity work Day 8 did not reach:** issuing and verifying a token, and an endpoint that can name the caller. |
-| 10 | Authenticated ≠ authorized. | Ownership enforcement, request context, guards. Where tenancy bugs actually live. |
-| 11 | Tokens don't expire, and logout does nothing. | Expiry, refresh, revocation, and the tradeoffs of each. |
-| 12 | There's no UI. Where does the token live in the browser? | Next.js rendering models, cookies vs localStorage, CORS, the auth boundary across two apps. |
-| 13 | Mood is part of the product but isn't modeled. | Data modeling for a second entity. Relationships. Migration on a live schema. |
-| 14 | **Review day.** Audit, refactor, document. | |
+| Day | Problem to solve | What she should be able to explain afterward |
+|---|---|---|
+| 8 | Anyone can read anyone's entries. Who is making this request? | **Done, partly.** The decisions were made — sessions vs tokens, why "just use JWT" is not an answer (ADR-009) — and then the day went somewhere the plan did not. `users` needed a second table and `user_id` needed a non-additive schema change, which fired two of ADR-004's named revisit conditions at once, so the project moved to **TypeORM with migrations** (ADR-010). `users` and `entries.user_id` exist. **Nothing yet knows who is asking.** |
+| 9 | Storing a password is a liability — and there is still no way to create a user at all. | Hashing vs encryption. Why bcrypt and argon2 are deliberately slow. Registration and login. **Plus the identity work Day 8 did not reach:** issuing and verifying a token, and an endpoint that can name its caller. This is a heavy day; if it splits, it splits at "a user exists" / "a request is identified", and Day 20 absorbs it. |
+| 10 | Authenticated is not the same as authorized. | Ownership enforcement, request context, guards. Where tenancy bugs actually live. **This is the day `select: false` on `entries.user_id` stops being a safety net and becomes a thing a query must opt into by name.** |
+| 11 | Tokens don't expire, and logging out does nothing. | Expiry, refresh, revocation, and the trade-offs of each. This is where her Day 8 objection gets answered in code: she argued that a stolen token stays cryptographically valid after logout, and she was right. |
+| 12 | **Design review. The screens exist; the API was built without seeing them.** | See the section below. This is where the frontend designs are shared, the API is checked against what the screens actually need, and both the roadmap and the designs are amended. **No implementation on this day.** |
+| 13 | Mood is part of the product but isn't modeled. | Data modeling for a second entity. Relationships. A migration on a live schema. Easier than it would have been, because Day 8 already built all three mechanisms. |
+| 14 | **Review day.** Audit, refactor, document. | The handbook entries for Phase 2. This is also where the Phase 1 documentation debt gets paid. |
 
-### What actually happened on Day 8, and why the plan moved
-
-Day 8 was supposed to answer *who is making this request*. It answered *what does
-a request belong to* instead, and the detour was forced rather than chosen.
-
-Adding `users` meant adding `entries.user_id`, and a `NOT NULL` column cannot be
-added to a table that already holds rows by a `CREATE TABLE IF NOT EXISTS`
-statement at boot. Demonstrated rather than argued: the same code produced
-`id, content, created_at` on an existing database and `id, content, created_at,
-user_id` on a fresh one, silently, with nothing reporting the difference.
-
-That fired two conditions ADR-004 had written down on Day 3 — *first non-additive
-schema change* and *the first relationship between tables* — so the ORM decision
-scheduled for Day 13 arrived five days early. See ADR-010.
-
-**The cost is that authentication itself has not started.** Day 9 now carries both
-its own work and the identity work Day 8 did not reach. If that proves too much,
-the honest move is to split it rather than to ship half of each, and Day 14's
-review day is where the slack is.
-
-**The gain is that Day 13 gets easier.** Its stated problem is *"data modeling for
-a second entity, relationships, migration on a live schema"* — and all three of
-those mechanisms now exist and are tested. Day 13 becomes about `mood` rather than
-about migrations.
-
-**Why here:** ownership must be understood *before* AI. A retrieval system
-that leaks another user's memories is the worst possible bug in this product,
-and you cannot design retrieval safely if tenancy is still fuzzy.
+**Why identity comes before AI:** a retrieval system that leaks another user's
+memories is the worst possible bug in this product, and retrieval cannot be
+designed safely while tenancy is still fuzzy.
 
 ---
 
-## Phase 3 — Memory (Days 15–21)
+## Phase 3 — The Interface (Days 15–20)
+
+**Goal: a person who is not her can use this.**
+
+This phase is new in v2.0. In v1.0 the frontend was one day (the old Day 12)
+and that was never realistic — it would have produced a screenshot rather than
+a product.
+
+| Day | Problem to solve | What she should be able to explain afterward |
+|---|---|---|
+| 15 | There is no UI, and the token has to live somewhere in a browser. | Next.js rendering models — what runs on the server and what runs in the browser, and why that question decides everything else. Cookies vs `localStorage` for the token, and why the answer is a security decision rather than a convenience one. CORS: what it actually protects against. |
+| 16 | Two apps now describe the same data, in two places, and they will drift. | Sharing types across a monorepo. This is the day `packages/` earns the workspace ADR-001 argued for on Day 1 — or fails to, and gets removed. Either outcome is a real result. |
+| 17 | The journal screen works and feels broken. | Loading, empty and error states as first-class design concerns rather than afterthoughts. Optimistic updates. What a user sees while a request is in flight. |
+| 18 | Writing an entry is the product, and the editor is an afterthought. | The core writing experience. Autosave and what it means for the API — does a draft hit the server, and if so how often, and what happens on a failed save. This is likely to produce a real API change. |
+| 19 | It works on her laptop, at her screen size, signed in as herself. | Responsive layout, keyboard access, and a genuine pass at accessibility rather than a checklist. |
+| 20 | **Slack / overflow.** | Deliberately light. First call on absorbing an overrun from Day 9 or Phase 2. |
+
+---
+
+## Phase 4 — Memory (Days 21–27)
 
 **Goal: the product's actual differentiator. Discovered, not prescribed.**
 
-| Day | Problem to solve | What you should be able to explain afterward |
-|-----|------------------|---------------------------------------------|
-| 15 | I want to find the entry about my sister. `LIKE '%sister%'` misses it. | Keyword search, full-text search, indexes. Why lexical matching has a ceiling. |
-| 16 | I searched "felt overwhelmed at work" and it matched nothing, though three entries describe exactly that. | Embeddings. Vector similarity. pgvector vs a dedicated vector DB — and why the boring answer usually wins. |
-| 17 | A 2000-word entry embedded as one vector retrieves badly. | Chunking. Why chunk size is a real tradeoff, not a config value to copy. |
-| 18 | The request now takes 9 seconds because it waits on an AI call. | Sync vs async processing. Queues, workers, job state, failure and retry. |
-| 19 | I can retrieve chunks. I want an answer. | RAG end to end. Context assembly. Prompt design. Grounding and citation. |
-| 20 | It confidently made something up. | RAG failure modes. Evaluation. Cost and latency budgets. When retrieval is the bug vs when the prompt is. |
-| 21 | **Review day.** Audit, refactor, document. | |
+| Day | Problem to solve | What she should be able to explain afterward |
+|---|---|---|
+| 21 | I want to find the entry about my sister. `LIKE '%sister%'` misses it. | Keyword search, full-text search, indexes. Why lexical matching has a ceiling. **The escaping work from Day 5 dies here, and that was predicted on Day 5** — the durable artifact was the claim, not the SQL. |
+| 22 | I searched "felt overwhelmed at work" and it matched nothing, though three entries describe exactly that. | Embeddings. Vector similarity. pgvector vs a dedicated vector database, and why the boring answer usually wins. |
+| 23 | A 2000-word entry embedded as one vector retrieves badly. | Chunking, and why chunk size is a real trade-off rather than a config value to copy. |
+| 24 | The request now takes nine seconds because it waits on an AI call. | Synchronous vs asynchronous processing. Queues, workers, job state, failure and retry. |
+| 25 | I can retrieve chunks. I want an answer. | RAG end to end. Context assembly, prompt design, grounding and citation. |
+| 26 | It confidently made something up. | RAG failure modes. Evaluation. Cost and latency budgets. When retrieval is the bug and when the prompt is. |
+| 27 | **Review day + slack.** | Audit, refactor, document. Second call on absorbing an overrun. |
 
-**Why this order:** every step here exists because the previous step visibly
-failed. Skipping Day 15 to "just do embeddings" would remove the entire reason
+**Why this order:** every step exists because the previous step visibly failed.
+Skipping Day 21 to "just do embeddings" would remove the entire reason
 embeddings are interesting.
 
 ---
 
-## Phase 4 — Insight, Deployment, Hardening (Days 22–29)
+## Phase 5 — Insight, Deployment, Hardening (Days 28–39)
 
 **Goal: make it real, and make it survivable.**
 
-| Day | Problem to solve | What you should be able to explain afterward |
-|-----|------------------|---------------------------------------------|
-| 22 | Weekly summaries have to run without a user clicking anything. | Scheduled work vs queued work. Idempotency. What happens when a job runs twice. |
-| 23 | The timeline query loads every entry ever written. | Read patterns, pagination, aggregation, N+1. Measuring before optimizing. |
-| 24 | It only runs on my laptop. | Containers, environments, managed Postgres, build vs runtime config. |
-| 25 | Deploying by hand is a coin flip. | CI, running migrations in production, secret management, rollback. |
-| 26 | Something broke in prod and I have no idea what. | Structured logging, error tracking, health checks, what "observability" actually buys. |
-| 27 | Anyone can hammer my AI endpoint and spend my money. | Rate limiting, abuse, input hardening, a real security pass. |
-| 28 | Buffer / overflow day. | (Deployment always takes longer than planned. This day is deliberately empty.) |
-| 29 | **Final audit + retrospective.** | The full handbook. Every "why" from the success criteria, answered in writing. |
+| Day | Problem to solve | What she should be able to explain afterward |
+|---|---|---|
+| 28 | Weekly summaries have to run without a user clicking anything. | Scheduled work vs queued work. Idempotency. What happens when a job runs twice. |
+| 29 | The timeline query loads every entry ever written. | Read patterns, pagination, aggregation, N+1. Measuring before optimizing. |
+| 30 | Insights exist in the database and nowhere on screen. | The insight and chat interfaces. Streaming a response into a UI, and what that costs in complexity. |
+| 31 | It only runs on my laptop. | Containers, environments, managed Postgres, build-time vs runtime configuration. **This is where SQLite is left behind, and where ADR-003's stated revisit condition finally fires.** |
+| 32 | Deploying by hand is a coin flip. | CI, running migrations in production, secret management, rollback. Day 8's migration work is what makes this a real conversation rather than a hosting tutorial. |
+| 33 | Something broke in production and I have no idea what. | Structured logging, error tracking, health checks, and what observability actually buys. |
+| 34 | **Slack / overflow.** | Third call on absorbing an overrun. Deployment always takes longer than planned. |
+| 35 | Anyone can hammer my AI endpoint and spend my money. | Rate limiting, abuse, input hardening, and a real security pass. |
+| 36 | Nobody has ever used this except me. | A real user test with a real person. Findings become a backlog, and the backlog gets triaged rather than implemented wholesale. |
+| 37 | The findings from Day 36. | Fix what a real person actually tripped over. |
+| 38 | **Slack / polish.** | Final buffer. |
+| 39 | **Final audit and retrospective.** | The full handbook. Every "why" from the success criteria, answered in writing. |
 
-**Why deployment is on Day 24, not Day 29:** first deployments fail in ways
-nobody predicts. Five days of slack after the first deploy is the difference
+**Why deployment is on Day 31 and not Day 39:** first deployments fail in ways
+nobody predicts. Eight days of slack after the first deploy is the difference
 between a live demo and a screenshot of localhost.
 
-**Why deployment isn't on Day 4:** deploying an app with no auth, no data
-model, and no config story teaches you how to click buttons on a hosting
-dashboard, not how systems are built.
+---
+## Day 12 — The Design Review
+
+Frontend designs exist. They were made outside this thread and have not been
+seen by anyone who has been building the API.
+
+**This is the day they are shared.** It is placed here on purpose. Earlier, and
+the API would be shaped by screens before ownership and auth are settled, which
+are the two things most likely to change what a screen can show. Later, and the
+API would be finished and the screens would have to bend around it. Day 12 is
+after auth is real and before the frontend is built, which is the only window
+where both documents can still move.
+
+**Nothing is implemented on Day 12.** The output is an amended roadmap, an
+amended set of designs, and — if the gap is large enough — an ADR.
+
+### What has to be established on the day
+
+For each screen, three questions, asked in this order:
+
+1. **What does this screen need from the API that does not exist yet?**
+2. **What does the API already return that this screen has no place for?** An
+   unused field is a maintained field, and it is cheaper to notice now.
+3. **What is on this screen that no data model can currently support?** This is
+   the expensive category, because the answer is a migration.
+
+Then one question about the set as a whole: **is there a screen that only makes
+sense if two requests happen together?** That is where pagination, batching or
+a combined endpoint gets decided, and deciding it after the screens are built
+means rebuilding them.
+
+### Frontend changes to expect, and why
+
+These are raised now so the designs can be revisited before the day rather than
+argued about during it. Each one comes from something the API already does, or
+already cannot do.
+
+**1. Every list needs an empty state, and it is not an error.** ADR-005
+established that an empty collection is a complete answer. `GET /entries` on a
+new account returns `[]` and that is success. If the designs show a journal
+list with no "you haven't written anything yet" state, one is needed — and it
+is the first screen a new user ever sees, so it is not a minor case.
+
+**2. Search needs a "no results" state that is visibly different from an empty
+journal.** Same reason, different sentence. "You have no entries" and "no
+entries match *sister*" are different messages, and the API deliberately
+distinguishes them.
+
+**3. Search needs to show what was searched for.** ADR-006 decided that `%` and
+`_` are ordinary characters, so searching for `100%` is a legitimate query with
+a real answer. The design should not assume the search term is cosmetic.
+
+**4. Validation errors need somewhere to appear, per field.** The API answers a
+bad body with a 400 carrying an array of messages — for example `content must
+contain at least one character that is not whitespace`. If the designs only
+have room for one global error banner, that array has nowhere to go. This is
+the most likely place the designs and the API are already misaligned.
+
+**5. An entry that is only whitespace is refused.** The editor should not let a
+user write four spaces, press save, and receive an error they do not
+understand. Either the button disables, or the message is written for a person.
+
+**6. Editing does not change the entry's date.** ADR-006 decided `created_at`
+records when the entry was written, not when it was last touched. If a design
+shows "last edited", that field does not exist and would need a migration —
+which is a real decision, not a small one.
+
+**7. Deleting returns the deleted entry, which was chosen so undo is
+possible.** ADR-006 made that choice explicitly. If the designs have no undo,
+either add one or the API is returning something nobody wants.
+
+**8. There is no draft or autosave concept in the API.** Day 18 is where this
+is decided, and it will be much cheaper if the designs have already said
+whether the editor saves as you type, saves on blur, or saves on a button.
+These are three different APIs.
+
+**9. Login has to fail visibly and vaguely.** "Wrong password" tells an
+attacker the account exists. The design needs one failure state that covers
+both cases, and that constraint should be in the design rather than discovered
+in review.
+
+**10. Nothing in the API supports a calendar or a mood chart yet.** Mood
+arrives on Day 13 and analytics are explicitly deferred. If the designs contain
+either, that is a scope conversation for Day 12 rather than a surprise on
+Day 30.
+
+### What to bring
+
+The designs themselves, at whatever fidelity they exist, and a note of which
+screens are considered settled versus still in flux. A design that is still
+moving is more useful on this day than one that is frozen, because Day 12 is
+allowed to change both documents.
+
+---
+## Learning Debt
+
+A construct specific to this project, tracked as deliberately as technical
+debt.
+
+Worker agents produce correct code faster than a human can learn the concepts
+inside it. Every time that happens, the repository gains code its owner cannot
+explain. That is **learning debt**, and unlike technical debt it shows up in no
+linter.
+
+The rule: **a concept a worker introduced is not "done" until it can be
+explained without reading the code.** Shipping is not the completion criterion;
+comprehension is.
+
+### Currently open
+
+| Concept | Introduced | Status |
+|---|---|---|
+| **TypeORM** — entities, the repository boundary, `select: false`, `Raw` vs `Like`, `synchronize`, migrations | Day 8 | 🔴 **Open.** Partly addressed in-session — she predicted correctly that `select: false` means a query returns no `userId`. A full study prompt exists at `docs/learning/day-08/study-typeorm.md` and is designed to be run in a separate session. |
+| `transform: true` on the validation pipe | Day 7 | 🟡 **Offered and declined.** Logged rather than forgotten. Worth picking up on Day 14. |
+| Where validation belongs — boundary vs service | Day 4 | 🟡 **Partial.** She reasoned it out, got it wrong, and accepted the argument; the distinction was given to her rather than derived. **Re-test on Day 10**, when ownership checks arrive and the same question returns in a harder form. |
+| Reading and judging a whole suite unprompted | Day 4 | 🟡 **Partial.** She has found real gaps when handed cases one at a time. Doing it across an entire suite without prompting is the remaining step. |
+| Jest — runners, matchers, mocking | Day 1 | 🟡 **Basics only.** Sufficient for now and not worth a dedicated day. |
+
+### Closed, with how it closed
+
+Twenty-one items have been closed since Day 1. The full record is in the git
+history of this file; what matters is the pattern rather than the list.
+
+**Six items closed in a single evening on Day 4** — two of which had been owed
+since Day 1 and one offered twice before. They closed when they were asked as
+direct questions with an experiment attached, rather than explained. That is
+the most useful finding this project has produced about how she learns, and it
+is why every teaching block now carries a prediction and a command to run.
+
+**The two experiments worth repeating on later days**, because both produce a
+result that contradicts intuition:
+
+1. **Rename `@Controller('entries')` to `'journal'`.** The application is
+   completely broken — every existing client gets a 404 — and all unit tests
+   still pass. Unit tests verify that the pieces work; end-to-end verifies that
+   the pieces are connected.
+2. **Delete `EntriesRepository` from the module's `providers` array.**
+   Typecheck passes, build passes, the server crashes at boot, and the unit
+   tests still pass — because every spec file declares its own providers and
+   never reads `entries.module.ts`.
+
+Add a row whenever a worker introduces something unfamiliar. Close it only when
+the explanation happens.
 
 ---
 
 ## Rules for the roadmap itself
 
 1. **This roadmap will change.** If a day surfaces a better learning
-   opportunity, we take it and push the rest down. The buffer on Day 28 exists
-   partly for this.
-2. **Review days are not optional.** Days 7, 14, 21 are where the audit and
+   opportunity, take it and push the rest down. That is what the slack days are
+   for. v2.0 exists because v1.0 was followed rather than obeyed.
+2. **Review days are not optional.** Days 14, 27 and 39 are where the audit and
    refactor loop lives. Skipping them to build more features defeats the point.
-3. **No day begins with implementation.** Problem → research → discussion →
-   decision → ADR (if significant) → design → implement → review.
+3. **No day begins with implementation.** Problem, then research, then
+   discussion, then decision, then an ADR if it is significant, then design,
+   then implementation, then review.
 4. **Every phase ends with written documentation**, not just working code.
-5. **Every day ends with an audit.** Day 1 shipped unaudited and the cost was
-   real: lint failing on committed code, two contradictory ADRs, and a README
-   describing directories that didn't exist. The audit is not a formality.
+5. **Every day ends with an audit, and the audit includes a mutation.** Delete
+   the line that makes the day's work load-bearing and run everything. If it
+   all still passes, the day shipped untested wiring. This rule exists because
+   that has now happened three times.
 6. **Learning debt is tracked, not assumed away.** A worker shipping code is
    not the same as the concept being learned.
+7. **A day ends merged.** A day that stops mid-block costs part of itself again
+   on the next start.
 
 ---
 
 ## Open questions
 
-- ~~Does the monorepo earn its complexity?~~ **Resolved** — ADR-001.
-- ~~Where does the storage-outcome → HTTP-status mapping belong?~~ **Resolved**
+- ~~Does the monorepo earn its complexity?~~ Answered provisionally by ADR-001
+  and **genuinely tested on Day 16**, when a second application needs the same
+  types. That is the day the answer is real rather than argued.
+- ~~Where does the storage-outcome to HTTP-status mapping belong?~~ **Resolved**
   — ADR-005. The controller, and only the controller. The rule generalises:
   each layer reports outcomes in its own vocabulary, and translation happens
   where the vocabulary changes.
-- ~~**Should `POST` reject unknown fields, or ignore them?**~~ **Resolved Day 5**
-  — both `POST` and `PATCH` reject them with a 400 (ADR-006). What forced it was
-  `PATCH /entries/:id {"contnet": "…"}`: under "ignore", a misspelled field name
-  returns `200 OK` and changes nothing, so the user believes an edit was saved
-  that was not. `POST` matches for consistency, and because its safety came from
-  a coincidence of the implementation rather than a stated rule.
-- ~~**What should search do with `%` and `_`?**~~ **Resolved Day 5** — treat
-  them as ordinary characters and escape them before they reach `LIKE`.
-  Rejected: a 400 on wildcard input (a user searching for `100%` gets an error
-  they cannot act on), and declaring wildcards a power-user feature (one
-  keystroke returns the entire journal). **Decided but not implemented.** The
-  Rule Zero objection — this query dies on Day 15 and again on Day 16 — was
-  weighed and answered: the durable artifact is the claim, *"searching for a
-  character finds entries containing that character"*, which mentions no SQL and
-  survives every replacement of the mechanism underneath it.
-- Rich text vs plain text for entries — deferred until the data model forces it.
-- Which AI provider, and does that decision need to be reversible? (Phase 3)
-- TypeScript 7 (Go-native compiler) is released but blocked by `ts-jest` and
-  `typescript-eslint` peer ranges. Revisit when the ecosystem catches up —
-  likely around Phase 3.
+- ~~Should `POST` reject unknown fields, or ignore them?~~ **Resolved Day 5** —
+  both `POST` and `PATCH` reject with a 400 (ADR-006).
+- ~~What should search do with `%` and `_`?~~ **Resolved Day 5** — treat them as
+  ordinary characters and escape them before they reach `LIKE`.
+- **Does deleting a user delete their journal?** The foreign key currently says
+  `ON DELETE NO ACTION`, which refuses. That is the generator's default rather
+  than a decision. Day 10 or Day 11 must decide it deliberately.
+- **When does `user_id` become `NOT NULL`?** Day 8 added it nullable because no
+  user existed yet. That is the expand step of expand-backfill-contract, and
+  the contract step is unscheduled. Day 10 is the natural home.
+- **Where does the token live in the browser?** Day 15, and it is a security
+  decision rather than a convenience one.
+- Rich text versus plain text for entries — deferred until the data model
+  forces it, most likely Day 18.
+- Which AI provider, and does that decision need to be reversible? Phase 4.
+- `better-sqlite3@13.0.3` sits outside `typeorm`'s `^12.0.0` peer range. It
+  works and is pinned. It dissolves on Day 31 when Postgres arrives, so it is
+  deliberately not being fixed.
+- TypeScript 7 (the Go-native compiler) is released but blocked by `ts-jest` and
+  `typescript-eslint` peer ranges. Revisit around Phase 4.

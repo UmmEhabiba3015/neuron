@@ -174,7 +174,8 @@ docs/
   workers/          task briefs handed to worker sessions
   constitution.md   the engineering principles this project is built under
   master-state.md   where the project currently stands
-  roadmap.md        the 30-day build plan
+  roadmap.md        the 40-day build plan
+  SETUP.md          how to continue this project on another machine
 ```
 
 There is no `packages/` directory yet — it's intentionally deferred until

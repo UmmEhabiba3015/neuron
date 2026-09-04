@@ -8,7 +8,7 @@ import {
 } from '../../test/test-database';
 import { EntriesRepository } from './entries.repository';
 import { EntriesService } from './entries.service';
-import { JournalEntry } from './entry.interface';
+import { JournalEntry } from './entry.entity';
 
 // Every call below is awaited, and none of the claims moved. TypeORM has no
 // synchronous API, so `findAll()` returns a promise where it used to return an

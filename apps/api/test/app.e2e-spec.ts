@@ -6,7 +6,7 @@ import { App } from 'supertest/types';
 import type { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
 import { closeTestDataSource, createTestDataSource } from './test-database';
-import type { JournalEntry } from './../src/entries/entry.interface';
+import type { JournalEntry } from './../src/entries/entry.entity';
 
 // `supertest` types `res.body` as `any`, so every field read off it is an
 // unchecked assumption — and reading one directly is a lint error, correctly,
