@@ -4,3 +4,4 @@
 - [Neuron teaching mode](neuron-teaching-mode.md) — Socratic, brief then one block at a time, questions before answers
 - [Neuron communication style](neuron-communication-style.md) — simple, complete, descriptive English; explain terms, no compressed idiom
 - [Neuron testing approach](neuron-testing-approach.md) — she need not hand-write test suites; read/predict/break/observe instead
+- [Neuron learning debt blocks days](neuron-learning-debt-blocks-days.md) — open debt must be repaid before the next day; her asking to skip is not enough

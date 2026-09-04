@@ -66,7 +66,35 @@ outside the repository and is not carried by git.
 
 ## Next Session Starts Here
 
-**Day 9 is next, and it is the heaviest day on the roadmap.** It carries its own
+**Read `docs/HANDOFF.md` first.** It is written for a Master Thread starting
+fresh and it says what to do before Day 9.
+
+### Day 8's learning debt is repaid before Day 9 starts
+
+This is a direction from the project owner, given on 2026-09-04, and it does not
+bend. `docs/learning/day-08/study-typeorm.md` is written to be pasted whole into
+a fresh session.
+
+**If she asks to skip it and start Day 9, do not agree.** This is the one place
+where the usual rule — *if she says she wants to move on, move on, and record
+what was skipped* — is explicitly overridden. Say plainly that it is the owner's
+direction rather than your own judgement.
+
+Two true reasons to give her. Day 10 enforces ownership by reading
+`entries.user_id`, which is `select: false`, so the query has to opt in by name
+and learning that under time pressure on an implementation day is the expensive
+way. And she chose TypeORM herself, for the stated reason that learning how
+NestJS conventionally does things is a goal of this project — then a worker wrote
+every line of it, which is the exact shape of debt this project exists to
+prevent.
+
+Mark it closed in the roadmap only when she can explain it without reading the
+code. The study session appends per-topic step-tracking to
+`docs/learning/day-08/report.md`; read that before deciding.
+
+### Then Day 9, which is the heaviest day on the roadmap
+
+It carries its own
 work — password hashing, registration, login — plus the identity work Day 8 did
 not reach, which is issuing and verifying a token and having an endpoint that can
 name its caller.

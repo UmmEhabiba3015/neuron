@@ -335,9 +335,15 @@ comprehension is.
 
 ### Currently open
 
+**Day 8's TypeORM debt blocks Day 9.** Direction from the project owner,
+2026-09-04: the debt is repaid before the next day starts, and a request from
+her to skip it is not sufficient to skip it. This overrides the usual rule that
+she may choose to move on. See `docs/HANDOFF.md`.
+
+
 | Concept | Introduced | Status |
 |---|---|---|
-| **TypeORM** — entities, the repository boundary, `select: false`, `Raw` vs `Like`, `synchronize`, migrations | Day 8 | 🔴 **Open.** Partly addressed in-session — she predicted correctly that `select: false` means a query returns no `userId`. A full study prompt exists at `docs/learning/day-08/study-typeorm.md` and is designed to be run in a separate session. |
+| **TypeORM** — entities, the repository boundary, `select: false`, `Raw` vs `Like`, `synchronize`, migrations | Day 8 | 🔴 **Open, and blocking Day 9 by the owner's direction.** Partly addressed in-session — she predicted correctly that `select: false` means a query returns no `userId`. A full study prompt exists at `docs/learning/day-08/study-typeorm.md` and is designed to be run in a separate session. |
 | `transform: true` on the validation pipe | Day 7 | 🟡 **Offered and declined.** Logged rather than forgotten. Worth picking up on Day 14. |
 | Where validation belongs — boundary vs service | Day 4 | 🟡 **Partial.** She reasoned it out, got it wrong, and accepted the argument; the distinction was given to her rather than derived. **Re-test on Day 10**, when ownership checks arrive and the same question returns in a harder form. |
 | Reading and judging a whole suite unprompted | Day 4 | 🟡 **Partial.** She has found real gaps when handed cases one at a time. Doing it across an entire suite without prompting is the remaining step. |

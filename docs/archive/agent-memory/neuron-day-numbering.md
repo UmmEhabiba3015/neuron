@@ -8,8 +8,13 @@ metadata:
   modified: 2026-07-29T11:24:24.980Z
 ---
 
-Neuron is a 30-day public build challenge on LinkedIn. Posts are numbered from
-**Day 0**, so the public numbering runs Day 0 → Day 29 (30 posts total).
+Neuron is a public build challenge on LinkedIn. Posts are numbered from **Day
+0**.
+
+**The plan was extended to 40 days on 2026-09-04** (roadmap v2.0), so the
+numbering now runs Day 0 → Day 39. It was originally 30 days, Day 0 → Day 29.
+The extension added a whole phase for the frontend and made room for the work
+Days 0–8 delivered beyond the original plan.
 
 Anchor dates:
 - Day 0 = 2026-07-27 (repo init)
