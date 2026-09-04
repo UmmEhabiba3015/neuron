@@ -16,33 +16,104 @@ the recovery cost most of a working session.
 
 ---
 
-**Last updated:** 2026-08-06, after the Day 6 implementation was audited.
+**Last updated:** 2026-09-04, after a maintenance pass requested by the project
+owner's husband.
 
-**Current day:** Day 6 of 29 is **implemented and audited**, with one follow-up
-task outstanding. ADR-007 is written and amended. The worker's implementation was
-audited by breaking the code in five places; four mutations were caught and one
-was not. The one that was not is the day's finding, and a follow-up worker prompt
-exists to close it. Nothing is committed. Day 5 is complete and merged.
+**Current day:** Day 8 is **complete and merged**. Day 9 has not started.
 
-**Current branch:** `main`, clean and in sync with `origin/main`. Day 5 was
-merged as commit `44590a9` through pull request #5, using a squash. The
-`day-05-testing` branch has been deleted both locally and on GitHub. Nothing at
-all is outstanding from Day 5.
+**Current branch:** `main`, at commit `3a52694` — Day 8 merged through pull
+request #8. Four merged branches still exist locally and on the remote
+(`day-02-persistence`, `day-06-configuration`, `day-07-validation`,
+`day-08-identity`); they were deliberately left rather than deleted.
 
-**All five checks were re-run by the Master Thread itself rather than taken from
-the worker's report.** `pnpm lint`, `pnpm typecheck` and `pnpm build` all pass.
-`pnpm test` passes with 55 tests, up from 29. `pnpm test:e2e` passes with 18
-tests, up from 10. Both `apps/api/package.json` and `pnpm-lock.yaml` are
-unmodified, so no dependency was added. Both boundary checks return nothing, and
-`EntryRow` is still confined to the repository file.
+**Verified on 2026-09-04, by re-running rather than by reading a report:**
+`pnpm lint`, `pnpm typecheck` and `pnpm build` all pass. `pnpm test` passes with
+108 tests. `pnpm test:e2e` passes with 35 tests.
+
+### What changed in the 2026-09-04 maintenance pass
+
+Four things were done at the request of the project owner's husband. None of
+them changed behaviour, and the full check suite was re-run after each.
+
+**The roadmap was rewritten as v2.0.** It is now 40 days rather than 30, it
+records where the project actually stands, and it adds a whole phase for the
+frontend. The old plan gave the frontend one day, which was never realistic.
+
+**Day 12 is now a design review.** Frontend designs exist and have not been seen
+by anyone building the API. Day 12 is the fixed point where they are shared,
+before the frontend is built and after auth is real — the only window where both
+the API and the designs can still move. The roadmap lists ten frontend changes
+to expect, each derived from something the API already does or already cannot
+do. Read that section before the day rather than during it.
+
+**`entry.interface.ts` was renamed to `entry.entity.ts`.** It stopped being an
+interface on Day 8 and the name had been left behind, which made it inconsistent
+with `user.entity.ts`. This was a pending item from the Day 8 report.
+
+**Comments were swept, from 926 lines down to 218.** The standard going forward:
+a comment earns its place by preventing a specific mistake. Reasoning about why
+a decision was made belongs in an ADR. A comment is for the trap a future reader
+would otherwise walk into — that `created_at` must stay TEXT, that `@ValidateIf`
+is not interchangeable with `@IsOptional()`, that the replacement order in
+`escapeLikePattern` fails silently if reversed. Narrative comments explaining
+what the code does were removed.
+
+**`docs/SETUP.md` was written.** It is everything needed to continue this project
+on a different machine, including the Claude Code memory directory, which lives
+outside the repository and is not carried by git.
 
 ---
 
 ## Next Session Starts Here
 
-**Resume by running `docs/workers/day-06-wiring-test.md`,** then auditing what it
-produces, then committing Day 6. Everything else about Day 6 is done. The Day 5
-history further down is still accurate.
+**Read `docs/HANDOFF.md` first.** It is written for a Master Thread starting
+fresh and it says what to do before Day 9.
+
+### Day 8's learning debt is repaid before Day 9 starts
+
+This is a direction from the project owner, given on 2026-09-04, and it does not
+bend. `docs/learning/day-08/study-typeorm.md` is written to be pasted whole into
+a fresh session.
+
+**If she asks to skip it and start Day 9, do not agree.** This is the one place
+where the usual rule — *if she says she wants to move on, move on, and record
+what was skipped* — is explicitly overridden. Say plainly that it is the owner's
+direction rather than your own judgement.
+
+Two true reasons to give her. Day 10 enforces ownership by reading
+`entries.user_id`, which is `select: false`, so the query has to opt in by name
+and learning that under time pressure on an implementation day is the expensive
+way. And she chose TypeORM herself, for the stated reason that learning how
+NestJS conventionally does things is a goal of this project — then a worker wrote
+every line of it, which is the exact shape of debt this project exists to
+prevent.
+
+Mark it closed in the roadmap only when she can explain it without reading the
+code. The study session appends per-topic step-tracking to
+`docs/learning/day-08/report.md`; read that before deciding.
+
+### Then Day 9, which is the heaviest day on the roadmap
+
+It carries its own
+work — password hashing, registration, login — plus the identity work Day 8 did
+not reach, which is issuing and verifying a token and having an endpoint that can
+name its caller.
+
+Start by deciding with her whether Day 9 splits. If it does, it splits at "a user
+exists" and "a request is identified", and Day 20 is the slack that absorbs it.
+Make that call at the start of the day rather than discovering it at hour six.
+
+**Two things to raise with her before Day 9 begins.**
+
+First, the TypeORM learning debt from Day 8 is still open. A study prompt exists
+at `docs/learning/day-08/study-typeorm.md`, written to be pasted whole into a
+fresh session. Day 10 enforces ownership and reads `entries.user_id`, so the
+`select: false` behaviour stops being background knowledge on that day.
+
+Second, pace. Days 0 through 8 took longer than nine days, and the roadmap now
+says so plainly in its "A Note On Pace" section. The framing that matters is not
+"work harder" — it is that a day which ends mid-block costs part of itself again
+on the next start, so the target is a day that ends merged.
 
 ### ⚠️ Day 7's "document" third was not done — carried to Day 14
 
@@ -1070,7 +1141,7 @@ neuron/                    pnpm workspace root
 │               │                          language is database vocabulary
 │               ├── create-entry.dto.ts    what a client may SEND to POST
 │               ├── update-entry.dto.ts    what a client may SEND to PATCH
-│               └── entry.interface.ts     what an entry IS ({ id, content,
+│               └── entry.entity.ts        what an entry IS ({ id, content,
 │                                          createdAt }) — all strings
 └── docs/
     ├── constitution.md    engineering principles
@@ -1235,7 +1306,7 @@ Master Thread audit still owed):
 |---|---|
 | **Casts survive the repository extraction.** Rename `created_at`, miss one `SELECT`, and the API serves `"createdAt": null` with lint, typecheck and build all green. Same class of failure as the Day 3 `ORDER BY` bug — a rule the type system cannot see. Accepted knowingly in ADR-004 | Reopen if it causes a bug, or Day 13 / Day 24 |
 | `id`/`createdAt` format is enforced by convention, not by the database or the type system. Tolerable only while `create()` is the single write path | When a second write path appears (ADR-004) |
-| `entry.interface.ts` names the language construct, not the concept | Unscheduled — cosmetic |
+| ~~`entry.interface.ts` names the language construct, not the concept~~ | ✅ **Resolved 2026-09-04** — renamed to `entry.entity.ts`, matching `user.entity.ts` |
 | ~~`POST /entries` with `{}` fails as an uncaught 500~~ | ✅ **Resolved Day 4** — 400 |
 | ~~`GET /entries/:id` returns 500 where 404 belongs~~ | ✅ **Resolved Day 4** — 404, and the pinned test moved to the controller spec where the behaviour now lives |
 | ~~`GET /entries?word=<no matches>` returns 500 where `200 []` belongs~~ | ✅ **Resolved Day 4** — fixed by *deleting* the `throw`; no new code |

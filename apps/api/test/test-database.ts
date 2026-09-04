@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm';
 import { migrations } from '../src/database/migrations';
-import { JournalEntry } from '../src/entries/entry.interface';
+import { JournalEntry } from '../src/entries/entry.entity';
 import { User } from '../src/users/user.entity';
 
 // The replacement for `new DatabaseSync(':memory:')` plus a copy of the

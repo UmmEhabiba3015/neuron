@@ -4,7 +4,7 @@ import {
   createTestDataSource,
 } from '../../test/test-database';
 import { User } from '../users/user.entity';
-import { JournalEntry } from './entry.interface';
+import { JournalEntry } from './entry.entity';
 
 // Ownership, as the schema and the entity express it today — which is to say
 // completely, and used by nothing.

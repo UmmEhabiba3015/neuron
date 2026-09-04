@@ -9,7 +9,7 @@ import {
 import { EntriesController } from './entries.controller';
 import { EntriesRepository } from './entries.repository';
 import { EntriesService } from './entries.service';
-import { JournalEntry } from './entry.interface';
+import { JournalEntry } from './entry.entity';
 
 // `describe` groups related tests under a label, `it` is a single test case,
 // and `expect` states one claim about a value — the test fails the moment a
