@@ -40,3 +40,11 @@ pnpm-debug.log*
 docs/workers/
 docs/learning/**/report.md
 docs/learning/**/worker-report-*.md
+
+# Exception: the Day 8 TypeORM study report. It is a record of a learning
+# session rather than a worker artifact, and it is the evidence that the debt
+# blocking Day 9 was actually repaid — which the roadmap, master-state and
+# HANDOFF all point at. Narrow on purpose: whether the rule above still earns
+# its place for the rest of the reports is a Day 14 decision, and this does not
+# pre-empt it.
+!docs/learning/day-08/report.md

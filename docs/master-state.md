@@ -69,28 +69,32 @@ outside the repository and is not carried by git.
 **Read `docs/HANDOFF.md` first.** It is written for a Master Thread starting
 fresh and it says what to do before Day 9.
 
-### Day 8's learning debt is repaid before Day 9 starts
+### Day 8's learning debt is repaid ✅ — Day 9 is unblocked
 
-This is a direction from the project owner, given on 2026-09-04, and it does not
-bend. `docs/learning/day-08/study-typeorm.md` is written to be pasted whole into
-a fresh session.
+Run 2026-09-05/06 from `docs/learning/day-08/study-typeorm.md`. **All seven
+topics answered at step 1**, against the real repository, on copies of the
+database. The per-topic record, including the misses, is in
+`docs/learning/day-08/report.md` under *Study session: TypeORM*.
 
-**If she asks to skip it and start Day 9, do not agree.** This is the one place
-where the usual rule — *if she says she wants to move on, move on, and record
-what was skipped* — is explicitly overridden. Say plainly that it is the owner's
-direction rather than your own judgement.
+Three corrections came out of it and are worth carrying forward. **The study
+prompt's topic-2 premise is wrong** — it claims `entry.userId !== callerId →
+deny` "passes for everybody", and it does the opposite; she caught this and was
+right. **The entity comment on `userId` saying the property is "simply absent"**
+is inaccurate: it is present holding `undefined`. And the prompt refers to
+`entry.interface.ts`, which is now `entry.entity.ts`.
 
-Two true reasons to give her. Day 10 enforces ownership by reading
-`entries.user_id`, which is `select: false`, so the query has to opt in by name
-and learning that under time pressure on an implementation day is the expensive
-way. And she chose TypeORM herself, for the stated reason that learning how
-NestJS conventionally does things is a goal of this project — then a worker wrote
-every line of it, which is the exact shape of debt this project exists to
-prevent.
+**Still open, and it will bite on Day 9:** `apps/api/data/neuron.db` predates
+migrations and is **not baselined**, so the next `pnpm migration:run` against it
+fails with `table "entries" already exists`. Day 9 adds a credential column,
+which means a migration. The repair is one row, in the README under *A database
+created before migrations existed*. It was deliberately not run during a study
+session.
 
-Mark it closed in the roadmap only when she can explain it without reading the
-code. The study session appends per-topic step-tracking to
-`docs/learning/day-08/report.md`; read that before deciding.
+One carry-forward for Day 10 rather than Day 9. Ownership enforcement reads
+`entries.user_id`, and she has now seen on her own data that a query which does
+not select it by name produces a *constant*, not a check — a test asserting "Bob
+cannot read Alice's entry" passes because the check denies everybody. Re-test
+that on Day 10 rather than re-explaining it.
 
 ### Then Day 9, which is the heaviest day on the roadmap
 

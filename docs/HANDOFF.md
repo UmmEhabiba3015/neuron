@@ -1,6 +1,7 @@
 # Handoff — starting a new Master Thread
 
 **Written:** 2026-09-04, after the maintenance pass and before the machine move.
+**Updated:** 2026-09-06, after the Day 8 TypeORM study session closed the debt.
 **Read this after** `master-prompt.md`, `constitution.md`, `roadmap.md` and
 `master-state.md`, in that order. This file says what to do first; those four
 say who you are and where the project stands.
@@ -14,47 +15,48 @@ and the last three commits are a maintenance pass that changed no behaviour.
 Everything verified on 2026-09-04 by re-running rather than by reading a report:
 lint, typecheck and build clean, 108 unit tests, 35 end-to-end tests.
 
-**Branch note.** The maintenance work is on `chore/maintenance-pass`, not on
-`main`. It has not been merged, because merging is a human action on this
-project. Ask before doing anything with it.
+**Branch note.** The maintenance work has since been merged; `main` is at
+`95ec3db`, which is that commit. Nothing is waiting on a merge.
 
 ---
 
-## The first thing you do, and it is not Day 9
+## The first thing you do
 
-**Day 8's learning debt is repaid before Day 9 begins. This is a direction from
-the project owner and it does not bend.**
+**Day 8's TypeORM debt is repaid ✅ and Day 9 is unblocked.** The session ran on
+2026-09-05/06 from `docs/learning/day-08/study-typeorm.md`, against the real
+repository, on copies of the database. **All seven topics were answered at step
+1** — no topic needed teaching before she produced the mechanism. The per-topic
+record, with the misses written down, is in `docs/learning/day-08/report.md`
+under *Study session: TypeORM*. Read it before teaching anything that builds on
+TypeORM, because it says exactly which details she has seen run and which she
+has only read.
 
-`docs/learning/day-08/study-typeorm.md` is a study prompt written to be pasted
-whole into a fresh session. It covers the seven TypeORM concepts that are
-actually in her code — entities registering at import, `select: false`, the
-repository boundary and `@InjectRepository`, `Raw()` versus `Like()`,
-`synchronize: false`, migrations and baselining, and the honest cost of the
-change. It is written as predict-run-compare against her own repository rather
-than as a lecture.
+**Do this before Day 9 needs a migration.** `apps/api/data/neuron.db` predates
+migrations and is **not baselined**. The next `pnpm migration:run` against it
+fails with `table "entries" already exists` — demonstrated on a copy during the
+study session, exit code 1, transaction rolled back, no data lost. Day 9 adds a
+credential column, which means a migration, so this will be hit. The repair is
+one row and is documented in the README under *A database created before
+migrations existed*. It was deliberately not run during a study session, because
+altering her actual journal is not a side effect a teaching session should have.
 
-**If she asks to skip it and start Day 9, do not agree.** This is the one place
-where the usual rule — *if she says she wants to move on, move on, and record
-what was skipped* — is explicitly overridden. Say plainly that the debt is
-being cleared first, and that this is the owner's direction rather than your
-judgement call.
+**Three corrections found while running the session**, all still unfixed and
+none urgent:
 
-Two honest reasons to give her, both true:
-
-**Day 10 needs it.** Ownership enforcement reads `entries.user_id`, and that
-column is `select: false`. On Day 10 she has to know what that means, because
-the query has to opt in by name. Learning it under time pressure on an
-implementation day is the expensive way.
-
-**She chose TypeORM herself.** Her stated reason was that learning how NestJS
-conventionally does things is a goal of this project. Then a worker wrote every
-line of it. That is the exact shape of learning debt this project was set up to
-prevent.
-
-Mark it closed in `docs/roadmap.md` under *Currently open* only when she can
-explain the concepts without reading the code. The study session is instructed to
-append per-topic step-tracking to `docs/learning/day-08/report.md`; read that
-before deciding it is closed.
+- `docs/learning/day-08/study-typeorm.md`'s topic-2 premise is **wrong**. It
+  claims the ownership check `entry.userId !== callerId → deny` "passes for
+  everybody and hands every journal to every user". With `callerId` guaranteed
+  to be a string, `undefined !== callerId` is pinned to `true`, so it denies
+  everybody. She caught this and defended it against two rounds of pressure
+  toward the prompt's answer. The real danger is subtler and worth rewriting the
+  section around: the check does not invert, it **stops being a check**, and a
+  test asserting "Bob cannot read Alice's entry" passes for the wrong reason.
+- The comment on `userId` in `entry.entity.ts` says the property is "simply
+  absent" from loaded entities. It is **present, holding `undefined`** —
+  `'userId' in loaded` is `true`. No behavioural consequence; it is why
+  `JSON.stringify` still omits it.
+- The study prompt refers to `entry.interface.ts`, renamed to `entry.entity.ts`
+  in `95ec3db`.
 
 **Also still open, and lighter:** `transform: true` from Day 7 was offered and
 declined. It is worth ten minutes on Day 14, not a day of its own.

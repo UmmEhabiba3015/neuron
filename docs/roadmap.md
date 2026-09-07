@@ -335,15 +335,15 @@ comprehension is.
 
 ### Currently open
 
-**Day 8's TypeORM debt blocks Day 9.** Direction from the project owner,
-2026-09-04: the debt is repaid before the next day starts, and a request from
-her to skip it is not sufficient to skip it. This overrides the usual rule that
-she may choose to move on. See `docs/HANDOFF.md`.
+**Day 8's TypeORM debt is repaid, and Day 9 is unblocked.** The owner's
+direction of 2026-09-04 — that the debt is repaid before the next day starts —
+was carried out on 2026-09-05/06. The study session ran all seven topics against
+the real repository and the per-topic record is in
+`docs/learning/day-08/report.md` under *Study session: TypeORM*.
 
 
 | Concept | Introduced | Status |
 |---|---|---|
-| **TypeORM** — entities, the repository boundary, `select: false`, `Raw` vs `Like`, `synchronize`, migrations | Day 8 | 🔴 **Open, and blocking Day 9 by the owner's direction.** Partly addressed in-session — she predicted correctly that `select: false` means a query returns no `userId`. A full study prompt exists at `docs/learning/day-08/study-typeorm.md` and is designed to be run in a separate session. |
 | `transform: true` on the validation pipe | Day 7 | 🟡 **Offered and declined.** Logged rather than forgotten. Worth picking up on Day 14. |
 | Where validation belongs — boundary vs service | Day 4 | 🟡 **Partial.** She reasoned it out, got it wrong, and accepted the argument; the distinction was given to her rather than derived. **Re-test on Day 10**, when ownership checks arrive and the same question returns in a harder form. |
 | Reading and judging a whole suite unprompted | Day 4 | 🟡 **Partial.** She has found real gaps when handed cases one at a time. Doing it across an entire suite without prompting is the remaining step. |
@@ -351,7 +351,25 @@ she may choose to move on. See `docs/HANDOFF.md`.
 
 ### Closed, with how it closed
 
-Twenty-one items have been closed since Day 1. The full record is in the git
+**TypeORM — closed 2026-09-06, seven topics at step 1.** The largest single
+debt this project has carried, and it closed in one session. She answered every
+topic from an open question: decorators registering at import, `select: false`,
+the repository boundary and `@InjectRepository`, `Raw()` versus `Like()`,
+`synchronize`, the baseline problem, and the cost. Two results are worth keeping.
+**She was right and the study prompt was wrong** on the `select: false`
+ownership check — the prompt claimed `entry.userId !== callerId → deny` "passes
+for everybody"; with `callerId` guaranteed to be a string it denies everybody,
+and she held that position against two rounds of pressure toward the prompt's
+answer. And on the cost question she went past what was asked, observing that
+migrations depend on the history table being *aligned* with the database, so
+adopting them onto an older database creates a one-time historical problem —
+which is the correct generalisation of the baseline bug. Where she was
+incomplete it was on physical detail invisible from the source: that
+`synchronize: true` drops and rebuilds the table rather than altering it, that
+`InitialSchema` carries no `IF NOT EXISTS`, and that lint has no boundary rule
+at all. Those had to be run to be known, and they were.
+
+Twenty-two items have been closed since Day 1. The full record is in the git
 history of this file; what matters is the pattern rather than the list.
 
 **Six items closed in a single evening on Day 4** — two of which had been owed
