@@ -66,58 +66,56 @@ outside the repository and is not carried by git.
 
 ## Next Session Starts Here
 
-**Read `docs/HANDOFF.md` first.** It is written for a Master Thread starting
-fresh and it says what to do before Day 9.
+### Day 9 is done and did not split ✅
 
-### Day 8's learning debt is repaid ✅ — Day 9 is unblocked
+Password storage and identity, finished in one session on 2026-09-13. The
+roadmap allowed a split at "a user exists" / "a request is identified" with Day
+20 as slack; it was not needed.
 
-Run 2026-09-05/06 from `docs/learning/day-08/study-typeorm.md`. **All seven
-topics answered at step 1**, against the real repository, on copies of the
-database. The per-topic record, including the misses, is in
-`docs/learning/day-08/report.md` under *Study session: TypeORM*.
+**What exists now.** `POST /auth/register`, `POST /auth/login`, `GET /auth/me`,
+and `JwtAuthGuard` on every `/entries` route. Passwords are argon2id hashes in
+one `password_hash` column. `JWT_SECRET` is required with no default and the
+application refuses to boot without it. New entries record their owner.
 
-Three corrections came out of it and are worth carrying forward. **The study
-prompt's topic-2 premise is wrong** — it claims `entry.userId !== callerId →
-deny` "passes for everybody", and it does the opposite; she caught this and was
-right. **The entity comment on `userId` saying the property is "simply absent"**
-is inaccurate: it is present holding `undefined`. And the prompt refers to
-`entry.interface.ts`, which is now `entry.entity.ts`.
+**ADR-011** (password storage) and **ADR-012** (endpoints) carry the reasoning,
+including the arguments that lost.
 
-**Still open, and it will bite on Day 9:** `apps/api/data/neuron.db` predates
-migrations and is **not baselined**, so the next `pnpm migration:run` against it
-fails with `table "entries" already exists`. Day 9 adds a credential column,
-which means a migration. The repair is one row, in the README under *A database
-created before migrations existed*. It was deliberately not run during a study
-session.
+**Two things she worked out that are worth not re-teaching.** She reached
+credential stuffing herself — that the blast radius is set by the user's *other*
+accounts, not by how important Neuron is — and her own summary of why encryption
+fails was *"for a password, recoverable is the problem."* She also produced the
+correct frame for the registration race without prompting: *"the pre-check is no
+longer the guard — it's an optimization. The guard is the insert failing."*
 
-One carry-forward for Day 10 rather than Day 9. Ownership enforcement reads
-`entries.user_id`, and she has now seen on her own data that a query which does
-not select it by name produces a *constant*, not a check — a test asserting "Bob
-cannot read Alice's entry" passes because the check denies everybody. Re-test
-that on Day 10 rather than re-explaining it.
+**One decision she made and then reversed**, which is the interesting one:
+bcrypt first, on the grounds that it is conventional, then argon2id once the
+OWASP position was on the table. The reversal was right and the reasoning was
+hers.
 
-### Then Day 9, which is the heaviest day on the roadmap
+### ⚠️ Before Day 10 — the database is still un-baselined
 
-It carries its own
-work — password hashing, registration, login — plus the identity work Day 8 did
-not reach, which is issuing and verifying a token and having an endpoint that can
-name its caller.
+`apps/api/data/neuron.db` predates migrations and has no `migrations` table, so
+`pnpm migration:run` against it fails with `table "entries" already exists`. It
+was demonstrated on a copy during the Day 8 study session and has not been
+repaired, because altering her real journal is not a side effect a session should
+have. **Day 9 added two migrations**, so this now blocks anything that touches
+her actual data. The repair is one row, in the README under *A database created
+before migrations existed*.
 
-Start by deciding with her whether Day 9 splits. If it does, it splits at "a user
-exists" and "a request is identified", and Day 20 is the slack that absorbs it.
-Make that call at the start of the day rather than discovering it at hour six.
+### Then Day 10 — authenticated is not authorized
 
-**Two things to raise with her before Day 9 begins.**
+The middle state Day 9 deliberately shipped: **every signed-in user can read
+every entry.** That is strictly better than the anonymous free-for-all before it
+and still wrong, and the roadmap names the day that fixes it.
 
-First, the TypeORM learning debt from Day 8 is still open. A study prompt exists
-at `docs/learning/day-08/study-typeorm.md`, written to be pasted whole into a
-fresh session. Day 10 enforces ownership and reads `entries.user_id`, so the
-`select: false` behaviour stops being background knowledge on that day.
-
-Second, pace. Days 0 through 8 took longer than nine days, and the roadmap now
-says so plainly in its "A Note On Pace" section. The framing that matters is not
-"work harder" — it is that a day which ends mid-block costs part of itself again
-on the next start, so the target is a day that ends merged.
+Three things are already in place for it. `entries.user_id` is recorded on every
+new write, so the set of ownerless rows is closed rather than growing. The old
+rows are still NULL and need a decision — backfill to a user, or delete. And
+`select: false` means the ownership check has to ask for the column **by name**:
+she has now seen on her own data that a query which does not select it produces
+a *constant* rather than a check, so a test asserting "Bob cannot read Alice's
+entry" passes because the check denies everybody. Re-test that rather than
+re-explaining it.
 
 ### ⚠️ Day 7's "document" third was not done — carried to Day 14
 

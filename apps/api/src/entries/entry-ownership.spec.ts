@@ -4,6 +4,8 @@ import {
   createTestDataSource,
 } from '../../test/test-database';
 import { User } from '../users/user.entity';
+import { EntriesRepository } from './entries.repository';
+import { EntriesService } from './entries.service';
 import { JournalEntry } from './entry.entity';
 
 // Ownership, as the schema and the entity express it today — which is to say
@@ -55,40 +57,63 @@ describe('entry ownership', () => {
     // The exact list, not `toContain`. `toContain` would pass on a table that
     // had grown a column nobody decided on, and the thing this test is most
     // useful for saying is what is *absent*.
-    it('should have exactly id, name and created_at', async () => {
+    it('should have exactly id, name, created_at and password_hash', async () => {
       expect((await columnsOf('users')).map((column) => column.name)).toEqual([
         'id',
         'name',
         'created_at',
+        'password_hash',
       ]);
     });
 
-    // Stated as its own test because it is a decision rather than a
-    // consequence, and a decision that will be tempting to undo on Day 9
-    // without reading why.
+    // Day 9 made the decision this test used to record the absence of. ADR-009
+    // named a `password` column "for completeness" and said it would not
+    // survive Day 9; ADR-011 says what replaced it and why.
     //
-    // ADR-009 named a `password` column "for completeness" and said in the same
-    // paragraph that it will not survive Day 9, whose entire problem is that
-    // storing a password is a liability. What replaces it — a hash, an
-    // algorithm marker, a salt, more than one column — is that day's decision
-    // and it has not been made. A column added now would be a column whose
-    // contents are undecided, and it would read as answered to the next person
-    // who opened the schema (ADR-006: a missing constraint is usually a missing
-    // decision).
-    it('should have no credential column yet', async () => {
+    // Still one test of its own, and still stated as a decision rather than a
+    // consequence: there is exactly **one** credential column, never a
+    // `password`, and never a separate `salt`. argon2 stores the algorithm, its
+    // version, the cost parameters, the salt and the hash in a single PHC
+    // string, so splitting them would mean re-gluing the pieces on every verify
+    // and would strand the cost parameters — which have to rise as hardware
+    // gets faster — outside the row that was created with them.
+    it('should store the credential as one column and never a plaintext password', async () => {
       const names = (await columnsOf('users')).map((column) => column.name);
 
+      expect(names).toContain('password_hash');
       expect(names).not.toContain('password');
-      expect(names).not.toContain('password_hash');
+      expect(names).not.toContain('salt');
     });
 
-    // `name` is deliberately not unique. Two users called "habiba" is obviously
-    // wrong, and it is only obviously wrong once there is a login — uniqueness
-    // is what makes a name identify one person to authenticate as, and login is
-    // Day 9. That day also gets to say whether the identifier is a name at all.
-    // This test exists so the constraint's absence is a recorded choice rather
-    // than something nobody got round to.
-    it('should not yet require names to be unique', async () => {
+    // `notnull: 0`, and deliberately so. This column was added to a table that
+    // already existed, and a row written before it had no password — nullable
+    // says that truthfully. The alternative that satisfies a NOT NULL
+    // constraint is `DEFAULT ''`, which is worse: it invents a credential that
+    // nothing can verify and that `argon2.verify` will happily be asked about.
+    //
+    // The application reads a null hash as an account that cannot log in.
+    //
+    // This is also the assertion that would have caught the generated
+    // migration. `migration:generate` produced `password_hash text NOT NULL`
+    // followed by a row copy that supplied no value for it — which passes on an
+    // empty table and fails the moment one user exists.
+    it('should allow the credential to be null for rows that predate it', async () => {
+      const passwordHash = (await columnsOf('users')).find(
+        (column) => column.name === 'password_hash',
+      );
+
+      expect(passwordHash?.notnull).toBe(0);
+    });
+
+    // Day 9 is the day this test pointed at. `name` is what a person
+    // authenticates *as*, so two users called "habiba" would leave login with a
+    // choice to make and no basis for making it.
+    //
+    // Asserted against the database rather than against `UsersService`, because
+    // the service's duplicate check is a read followed by a write and two
+    // concurrent registrations can both pass it. **The index is the guard**;
+    // the service's check only makes the ordinary path produce a clean 409.
+    it('should require names to be unique', async () => {
       const users = dataSource.getRepository(User);
 
       await users.insert({
@@ -103,7 +128,7 @@ describe('entry ownership', () => {
           name: 'habiba',
           createdAt: '2026-09-02T09:00:01.000Z',
         }),
-      ).resolves.toBeDefined();
+      ).rejects.toThrow(/UNIQUE constraint failed/);
     });
   });
 
@@ -251,6 +276,39 @@ describe('entry ownership', () => {
       const serialized = JSON.parse(JSON.stringify(found)) as object;
 
       expect(Object.keys(serialized)).toEqual(['id', 'content', 'createdAt']);
+    });
+  });
+
+  // Day 9 made the caller's id a required argument to `EntriesService.create`,
+  // so an authenticated write records its owner. Asserted against the column
+  // rather than against the returned entry, because `select: false` means a
+  // loaded entry never carries one — the value is in the database and not in
+  // any response body, which is exactly the arrangement Day 10 builds on.
+  describe('ownership on write', () => {
+    it('should record the caller as the owner of a new entry', async () => {
+      await dataSource.getRepository(User).insert({
+        id: 'owner-1',
+        name: 'the-owner',
+        createdAt: '2026-09-01T00:00:00.000Z',
+        passwordHash: null,
+      });
+
+      const service = new EntriesService(
+        new EntriesRepository(dataSource.getRepository(JournalEntry)),
+      );
+
+      const created = await service.create('an owned entry', 'owner-1');
+
+      // The column holds the owner...
+      const [row] = await dataSource.query<{ user_id: string | null }[]>(
+        `SELECT user_id FROM entries WHERE id = '${created.id}'`,
+      );
+      expect(row.user_id).toBe('owner-1');
+
+      // ...and the entry handed back to the caller does not, because nothing
+      // selected it. Both halves matter: the first is the feature, the second
+      // is the HTTP contract staying exactly as it was.
+      expect(created.userId).toBeUndefined();
     });
   });
 });

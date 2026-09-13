@@ -1,4 +1,20 @@
-import { DEFAULT_PORT, validate } from './env.validation';
+import {
+  DEFAULT_PORT,
+  loadMigrationEnvironment,
+  validate,
+} from './env.validation';
+
+// Day 9 made `JWT_SECRET` mandatory with no default, so `validate({})` now
+// throws for a reason none of the tests below are about. This supplies a valid
+// one and lets each test go on stating exactly one rule.
+//
+// A helper rather than a literal repeated ten times: when Day 11 adds another
+// required variable, the tests about `PORT` should not all have to be edited
+// again to keep saying what they already say.
+const withSecret = (config: Record<string, unknown> = {}) => ({
+  JWT_SECRET: 'a-valid-test-secret-of-more-than-32-characters',
+  ...config,
+});
 
 // `validate` is what `ConfigModule.forRoot({ validate })` runs at startup, so
 // "throws" and "the application refuses to boot" are the same claim: whatever
@@ -11,7 +27,7 @@ describe('validate', () => {
     // Absent means "I have no opinion, choose for me", and is the one case
     // where a default is the right answer (ADR-007).
     it('should default to 3000 when PORT is not set', () => {
-      expect(validate({}).PORT).toBe(DEFAULT_PORT);
+      expect(validate(withSecret()).PORT).toBe(DEFAULT_PORT);
     });
 
     // Returned as a number, not the string that came in. That is the whole
@@ -25,7 +41,7 @@ describe('validate', () => {
     ])(
       'should accept %s and return it as a number',
       (_label, raw, expected) => {
-        const port = validate({ PORT: raw }).PORT;
+        const port = validate(withSecret({ PORT: raw })).PORT;
 
         expect(port).toBe(expected);
         expect(typeof port).toBe('number');
@@ -52,14 +68,16 @@ describe('validate', () => {
       // The message must name the variable, not merely complain. Node's own
       // rejection says `options.port should be >= 0 and < 65536`, which never
       // mentions `PORT` and so never tells the reader what to go and fix.
-      expect(() => validate({ PORT: raw })).toThrow(/^PORT must be/);
+      expect(() => validate(withSecret({ PORT: raw }))).toThrow(
+        /^PORT must be/,
+      );
     });
 
     // Two claims about the message, stated separately from the table above
     // because a test that only says "it threw" is satisfied by a thrown
     // `undefined`.
     it('should name the variable and quote the value it rejected', () => {
-      expect(() => validate({ PORT: 'hello' })).toThrow(
+      expect(() => validate(withSecret({ PORT: 'hello' }))).toThrow(
         'PORT must be a whole number between 1 and 65535, received "hello"',
       );
     });
@@ -70,7 +88,7 @@ describe('validate', () => {
     // fine, and a strict rule becomes an infuriating one. Delete the quoting
     // from `env.validation.ts` and this is the test that goes red.
     it('should quote the value so that invisible characters stay visible', () => {
-      expect(() => validate({ PORT: ' 3000 ' })).toThrow(
+      expect(() => validate(withSecret({ PORT: ' 3000 ' }))).toThrow(
         'PORT must be a whole number between 1 and 65535, received " 3000 "',
       );
     });
@@ -78,15 +96,16 @@ describe('validate', () => {
 
   describe('DATABASE_PATH', () => {
     it('should refuse to boot for the empty string, naming the variable', () => {
-      expect(() => validate({ DATABASE_PATH: '' })).toThrow(
+      expect(() => validate(withSecret({ DATABASE_PATH: '' }))).toThrow(
         'DATABASE_PATH must be a non-empty path, received ""',
       );
     });
 
     it('should pass an explicit path through unchanged', () => {
-      expect(validate({ DATABASE_PATH: 'data/scratch.db' }).DATABASE_PATH).toBe(
-        'data/scratch.db',
-      );
+      expect(
+        validate(withSecret({ DATABASE_PATH: 'data/scratch.db' }))
+          .DATABASE_PATH,
+      ).toBe('data/scratch.db');
     });
 
     // No trimming here either. Whitespace decides validity at the boundary and
@@ -96,7 +115,9 @@ describe('validate', () => {
     it('should not trim surrounding whitespace from a path', () => {
       const padded = '  data/scratch.db  ';
 
-      expect(validate({ DATABASE_PATH: padded }).DATABASE_PATH).toBe(padded);
+      expect(
+        validate(withSecret({ DATABASE_PATH: padded })).DATABASE_PATH,
+      ).toBe(padded);
     });
 
     // Deliberately `in` rather than `toBeUndefined()`, because the two are not
@@ -107,7 +128,55 @@ describe('validate', () => {
     // variable reading "undefined", and the application opens a database file
     // by that name. `toBeUndefined()` passes in both worlds; this does not.
     it('should leave the key out entirely when DATABASE_PATH is not set', () => {
-      expect('DATABASE_PATH' in validate({})).toBe(false);
+      expect('DATABASE_PATH' in validate(withSecret())).toBe(false);
+    });
+  });
+
+  // The first variable with no default and no optional path. ADR-007 built
+  // this machinery before there was a secret to put through it; this is what it
+  // was for.
+  describe('JWT_SECRET', () => {
+    it('should refuse to boot when JWT_SECRET is not set', () => {
+      expect(() => validate({ PORT: '3000' })).toThrow(/^JWT_SECRET must be/);
+    });
+
+    it('should refuse to boot for the empty string', () => {
+      expect(() => validate({ JWT_SECRET: '' })).toThrow(/^JWT_SECRET must be/);
+    });
+
+    // The failure that actually happens: a short value copied from a tutorial.
+    // A length floor cannot measure entropy — nothing can, from one string —
+    // but it rules out `JWT_SECRET=secret`, which is in every wordlist.
+    it('should refuse a secret shorter than 32 characters', () => {
+      expect(() => validate({ JWT_SECRET: 'secret' })).toThrow(
+        /at least 32 characters/,
+      );
+    });
+
+    // Every other error here quotes what it received. This one must not: the
+    // value is a signing key, and printing it writes it into logs, terminal
+    // scrollback and CI output.
+    it('should never print the secret it rejected', () => {
+      const tooShort = 'abcdefgh';
+
+      // Caught and inspected rather than matched with `toThrow`, whose string
+      // form asserts *containment* — so it cannot express "and this substring
+      // is absent", which is the whole claim here.
+      let message = '';
+      try {
+        validate({ JWT_SECRET: tooShort });
+      } catch (error) {
+        message = (error as Error).message;
+      }
+
+      expect(message).toMatch(/^JWT_SECRET must be/);
+      expect(message).not.toContain(tooShort);
+    });
+
+    it('should pass a long enough secret through unchanged', () => {
+      const secret = 'a-valid-test-secret-of-more-than-32-characters';
+
+      expect(validate({ JWT_SECRET: secret }).JWT_SECRET).toBe(secret);
     });
   });
 
@@ -115,13 +184,56 @@ describe('validate', () => {
   // configuration surface of the application. Anything else in the environment
   // is not adopted by accident.
   it('should return only the variables it checks', () => {
-    const validated = validate({
-      PORT: '3000',
-      DATABASE_PATH: 'data/scratch.db',
-      HOME: '/home/somebody',
-      AWS_SECRET_ACCESS_KEY: 'not ours to carry around',
+    const validated = validate(
+      withSecret({
+        PORT: '3000',
+        DATABASE_PATH: 'data/scratch.db',
+        HOME: '/home/somebody',
+        AWS_SECRET_ACCESS_KEY: 'not ours to carry around',
+      }),
+    );
+
+    expect(Object.keys(validated)).toEqual([
+      'PORT',
+      'JWT_SECRET',
+      'DATABASE_PATH',
+    ]);
+  });
+
+  // The migration CLI checks the one variable it uses and no more. Day 9 made
+  // `JWT_SECRET` mandatory for the application; running that check here would
+  // mean a schema change could not be applied without a signing key no
+  // migration will ever use.
+  describe('loadMigrationEnvironment', () => {
+    const environmentBeforeThisTest = { ...process.env };
+
+    afterEach(() => {
+      process.env = { ...environmentBeforeThisTest };
     });
 
-    expect(Object.keys(validated)).toEqual(['PORT', 'DATABASE_PATH']);
+    it('should not require JWT_SECRET', () => {
+      delete process.env.JWT_SECRET;
+      process.env.DATABASE_PATH = 'data/scratch.db';
+
+      expect(loadMigrationEnvironment()).toEqual({
+        DATABASE_PATH: 'data/scratch.db',
+      });
+    });
+
+    // The same rule the server applies, through the same function, so the two
+    // cannot drift into disagreeing about what a valid path is.
+    it('should still reject an empty DATABASE_PATH', () => {
+      process.env.DATABASE_PATH = '';
+
+      expect(() => loadMigrationEnvironment()).toThrow(
+        /^DATABASE_PATH must be/,
+      );
+    });
+
+    it('should leave the key out entirely when DATABASE_PATH is not set', () => {
+      delete process.env.DATABASE_PATH;
+
+      expect(loadMigrationEnvironment()).toEqual({});
+    });
   });
 });

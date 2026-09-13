@@ -35,15 +35,29 @@ curl http://localhost:3000/entries
 
 ## Configuration
 
-The API reads exactly two environment variables. Both are optional, and both
-are checked once when the application starts — a value that is set but unusable
-stops the boot with a message naming the variable and quoting the value, rather
-than being quietly corrected.
+The API reads exactly three environment variables, all checked once when the
+application starts — a value that is set but unusable stops the boot with a
+message naming the variable, rather than being quietly corrected.
 
 | Variable        | Default                  | Rule                                                                                                |
 | --------------- | ------------------------ | --------------------------------------------------------------------------------------------------- |
 | `PORT`          | `3000`                   | A whole number from 1 to 65535. Empty, `0`, negative, above the range, text, or a number with stray spaces around it all refuse to boot. |
 | `DATABASE_PATH` | `apps/api/data/neuron.db` | Any non-empty path; empty refuses to boot. A relative path resolves from the directory the API was started in. If the file does not exist, the API warns and creates an empty one. |
+| `JWT_SECRET`    | **none — required**       | At least 32 characters. There is no default and no fallback: the application refuses to start without it. |
+
+**`JWT_SECRET` has no default on purpose.** It signs every access token, so a
+value committed to source would let anyone who can read this repository forge a
+token for any user — which is worse than having no secret, because it looks
+configured. Generating a random one at boot instead would silently invalidate
+every token in circulation on every restart. Generate one and put it in `.env`:
+
+```bash
+node -e "console.log(require('node:crypto').randomBytes(48).toString('base64url'))"
+```
+
+Note that the error for a rejected `JWT_SECRET` never quotes the value, unlike
+every other message here — printing a signing key would write it into logs,
+terminal scrollback and CI output.
 
 Copy [.env.example](.env.example) to `.env` to set them locally. `.env` is
 gitignored and is loaded by Node itself (`--env-file-if-exists`), so there is no
@@ -56,6 +70,55 @@ PORT=4242 pnpm dev
 
 See [ADR-007](docs/decisions/ADR-007-configuration-and-boot-validation.md) for
 why these are checked at boot rather than at first use.
+
+## The API
+
+Every `/entries` route requires a valid access token as of Day 9. Without one
+they answer `401` with the reason in a `WWW-Authenticate` header.
+
+| Method | Route            | Auth | What it does |
+| ------ | ---------------- | ---- | ------------ |
+| `POST` | `/auth/register` | —    | Creates a user. `201` with the user; `409` if the name is taken. |
+| `POST` | `/auth/login`    | —    | `200` with `{ accessToken, user }`; `401` for any failure. |
+| `GET`  | `/auth/me`       | ✅   | Returns the caller. |
+| `GET`  | `/entries`       | ✅   | The journal, newest first. `?word=` searches content. |
+| `POST` | `/entries`       | ✅   | Creates an entry owned by the caller. |
+| `GET`  | `/entries/count` | ✅   | `{ count }`. |
+| `GET`  | `/entries/:id`   | ✅   | One entry, or `404`. |
+| `PATCH`| `/entries/:id`   | ✅   | Updates content, or `404`. |
+| `DELETE`| `/entries/:id`  | ✅   | Deletes and returns it, or `404`. |
+
+```bash
+# register, then log in
+curl -X POST localhost:3000/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"you","password":"a-long-enough-password"}'
+
+TOKEN=$(curl -s -X POST localhost:3000/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"you","password":"a-long-enough-password"}' \
+  | node -pe "JSON.parse(require('fs').readFileSync(0)).accessToken")
+
+curl -H "Authorization: Bearer $TOKEN" localhost:3000/entries
+```
+
+**Login never says which half was wrong.** A name nobody has registered and a
+wrong password produce the same `401`, the same message, and — because an unknown
+name is charged the same hashing work — the same response time. Telling them
+apart would let anyone turn a list of names into a list of confirmed accounts,
+and for a private journal the fact that somebody *has* an account is itself
+sensitive. Registration does say when a name is taken, because the caller needs
+to pick another and the same fact is obtainable by trying to register. See
+[ADR-012](docs/decisions/ADR-012-authentication-endpoints.md).
+
+**Tokens last one hour and cannot be revoked.** A signed token carries its own
+authority, so there is no server-side session to delete and logging out cannot
+invalidate one. Expiry is the whole of revocation until refresh tokens arrive.
+See [ADR-009](docs/decisions/ADR-009-identity-jwt-and-ownership-model.md).
+
+**Authenticated is not yet authorized.** Every signed-in user can currently read
+every entry. New entries record their owner, and enforcing that owner on reads
+and writes is the next day's work.
 
 ## Data
 

@@ -8,7 +8,11 @@ import {
   Post,
   Param,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import type { AuthenticatedRequest } from '../auth/authenticated-request';
 import { EntriesService } from './entries.service';
 import { CreateEntryDto } from './create-entry.dto';
 import { FindEntriesQueryDto } from './find-entries-query.dto';
@@ -21,6 +25,18 @@ import type { JournalEntry } from './entry.entity';
 
 // HTTP only: routes, status codes, and response shapes. It knows nothing about
 // where data comes from (ADR-005).
+//
+// **Every route here requires a valid token as of Day 9.** Before today the
+// whole journal was readable by anyone who knew the URL. It is now readable by
+// anyone who has registered, which is still wrong and is strictly better — the
+// middle state of an honest staging. Day 10 is the day each user sees only
+// their own, and the roadmap names it exactly: *authenticated is not the same
+// as authorized*.
+//
+// The guard is applied to the class rather than to each method, so a route
+// added later is protected by default. Opting one out would then be a visible,
+// deliberate `@Public()` rather than a forgotten decorator.
+@UseGuards(JwtAuthGuard)
 @Controller('entries')
 export class EntriesController {
   constructor(private readonly entriesService: EntriesService) {}
@@ -40,8 +56,15 @@ export class EntriesController {
   // Returns the created entry: the server generates `id` and `createdAt`, so a
   // bare 201 would leave the client unable to learn either.
   @Post()
-  create(@Body() dto: CreateEntryDto): Promise<JournalEntry> {
-    return this.entriesService.create(dto.content);
+  create(
+    @Body() dto: CreateEntryDto,
+    @Req() request: AuthenticatedRequest,
+  ): Promise<JournalEntry> {
+    // The owner comes from the verified token, never from the body. A
+    // `userId` field on `CreateEntryDto` would let any caller write an entry
+    // into anybody's journal, and `forbidNonWhitelisted` is what currently
+    // makes sending one a 400 rather than an ignored field.
+    return this.entriesService.create(dto.content, request.user.id);
   }
 
   // `{ count }` rather than a bare number, which has nowhere to grow a second

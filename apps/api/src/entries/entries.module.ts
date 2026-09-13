@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from '../auth/auth.module';
 import { DatabaseModule } from '../database/database.module';
 import { EntriesController } from './entries.controller';
 import { EntriesRepository } from './entries.repository';
@@ -9,6 +10,8 @@ import { JournalEntry } from './entry.entity';
 @Module({
   imports: [
     DatabaseModule,
+    // For `JwtAuthGuard`, which every route in this module now sits behind.
+    AuthModule,
     // `forRoot` opens the connection; `forFeature` says which tables this
     // feature may reach. Both are needed, and omitting this one fails at boot
     // rather than at compile time.

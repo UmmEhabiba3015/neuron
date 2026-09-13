@@ -5,6 +5,7 @@ import {
   closeTestDataSource,
   createTestDataSource,
   seedEntries,
+  seedUser,
 } from '../../test/test-database';
 import { EntriesRepository } from './entries.repository';
 import { EntriesService } from './entries.service';
@@ -14,6 +15,16 @@ import { JournalEntry } from './entry.entity';
 // synchronous API, so `findAll()` returns a promise where it used to return an
 // array — `expect(await service.findAll()).toEqual([])` states exactly what
 // `expect(service.findAll()).toEqual([])` stated (ADR-010).
+// Day 9 made the owner a required argument to `create`, so an entry cannot be
+// written without one. A fixed id here keeps every test below saying what it
+// already said; what the stamp actually writes is asserted against the database
+// in `entry-ownership.spec.ts`.
+//
+// The id must belong to a real row: `entries.user_id` has a foreign key and
+// SQLite enforces it, so an entry naming a user that does not exist is refused
+// by the database. `seedUser` in `beforeEach` is what makes it real.
+const CALLER_ID = 'caller-id';
+
 describe('EntriesService', () => {
   let service: EntriesService;
   let dataSource: DataSource;
@@ -26,6 +37,7 @@ describe('EntriesService', () => {
     // test starts from a genuinely empty table. A service that constructed its
     // own DataSource would leave no way to do this.
     dataSource = await createTestDataSource();
+    await seedUser(dataSource, CALLER_ID);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -65,7 +77,10 @@ describe('EntriesService', () => {
     });
 
     it('should return an entry that was created', async () => {
-      const created = await service.create('a thought worth keeping');
+      const created = await service.create(
+        'a thought worth keeping',
+        CALLER_ID,
+      );
 
       expect(await service.findAll()).toContainEqual(created);
     });
@@ -101,6 +116,7 @@ describe('EntriesService', () => {
     it('should return the entry it stored, with a server-generated id and timestamp', async () => {
       const created = await service.create(
         'the client supplied only this text',
+        CALLER_ID,
       );
 
       expect(created.content).toBe('the client supplied only this text');
@@ -110,8 +126,8 @@ describe('EntriesService', () => {
     });
 
     it('should give each entry a distinct id', async () => {
-      const a = await service.create('same text');
-      const b = await service.create('same text');
+      const a = await service.create('same text', CALLER_ID);
+      const b = await service.create('same text', CALLER_ID);
 
       expect(a.id).not.toBe(b.id);
     });
@@ -122,7 +138,7 @@ describe('EntriesService', () => {
       // out. Concatenated into the SQL, it would have been executed.
       const hostile = `'); DROP TABLE entries; --`;
 
-      await service.create(hostile);
+      await service.create(hostile, CALLER_ID);
 
       expect((await service.findAll()).map((e) => e.content)).toEqual([
         hostile,
@@ -138,7 +154,7 @@ describe('EntriesService', () => {
     it('should store content verbatim, without trimming surrounding whitespace', async () => {
       const padded = '  spacing the user chose  ';
 
-      const created = await service.create(padded);
+      const created = await service.create(padded, CALLER_ID);
 
       expect(created.content).toBe(padded);
       expect((await service.findById(created.id))?.content).toBe(padded);
@@ -147,7 +163,7 @@ describe('EntriesService', () => {
 
   describe('findById', () => {
     it('should return the entry that was created', async () => {
-      const created = await service.create('findable by its id');
+      const created = await service.create('findable by its id', CALLER_ID);
 
       expect(await service.findById(created.id)).toEqual(created);
     });
@@ -315,7 +331,7 @@ describe('EntriesService', () => {
 
   describe('update', () => {
     it('should change the content and leave the entry findable', async () => {
-      const created = await service.create('the first draft');
+      const created = await service.create('the first draft', CALLER_ID);
 
       const updated = await service.update(created.id, 'the second draft');
 
@@ -329,7 +345,7 @@ describe('EntriesService', () => {
     // touched. Nothing displays or sorts by an edit time yet, so there is no
     // `updatedAt` either — see ADR-006.
     it('should not change id or createdAt', async () => {
-      const created = await service.create('written once');
+      const created = await service.create('written once', CALLER_ID);
 
       const updated = await service.update(created.id, 'edited later');
 
@@ -340,7 +356,7 @@ describe('EntriesService', () => {
     // Whitespace decides validity at the boundary and never rewrites the
     // value, on update exactly as on create.
     it('should store the new content verbatim, without trimming', async () => {
-      const created = await service.create('before');
+      const created = await service.create('before', CALLER_ID);
       const padded = '  the spacing the user chose  ';
 
       expect((await service.update(created.id, padded))?.content).toBe(padded);
@@ -362,7 +378,7 @@ describe('EntriesService', () => {
 
   describe('delete', () => {
     it('should return the deleted entry and remove it', async () => {
-      const created = await service.create('here for a moment');
+      const created = await service.create('here for a moment', CALLER_ID);
 
       expect(await service.delete(created.id)).toEqual(created);
       expect(await service.findById(created.id)).toBeUndefined();
@@ -370,8 +386,8 @@ describe('EntriesService', () => {
     });
 
     it('should leave other entries alone', async () => {
-      const doomed = await service.create('the one being removed');
-      const survivor = await service.create('the one that stays');
+      const doomed = await service.create('the one being removed', CALLER_ID);
+      const survivor = await service.create('the one that stays', CALLER_ID);
 
       await service.delete(doomed.id);
 
@@ -389,9 +405,9 @@ describe('EntriesService', () => {
     });
 
     it('should return the number of entries', async () => {
-      await service.create('one');
-      await service.create('two');
-      await service.create('three');
+      await service.create('one', CALLER_ID);
+      await service.create('two', CALLER_ID);
+      await service.create('three', CALLER_ID);
 
       expect(await service.countEntries()).toBe(3);
     });

@@ -5,7 +5,11 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import type { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
-import { closeTestDataSource, createTestDataSource } from './test-database';
+import {
+  authenticate,
+  closeTestDataSource,
+  createTestDataSource,
+} from './test-database';
 import type { JournalEntry } from './../src/entries/entry.entity';
 
 // `supertest` types `res.body` as `any`, so every field read off it is an
@@ -38,6 +42,30 @@ const messagesFrom = (res: request.Response): string[] =>
 describe('EntriesController (e2e)', () => {
   let app: INestApplication<App>;
   let dataSource: DataSource;
+  let authorization: string;
+
+  // Every route in this suite sits behind `JwtAuthGuard` as of Day 9, so each
+  // request needs a real token. `api()` is `request(app.getHttpServer())` with
+  // that header already attached — the alternative was `.set('Authorization',
+  // ...)` on forty-six calls, which would have buried what each test is
+  // actually claiming.
+  //
+  // The unauthenticated case is not lost by this: `auth.e2e-spec.ts` asserts
+  // that these same routes answer 401 without a token, which is the claim this
+  // helper would otherwise hide.
+  const api = () => {
+    const agent = request(app.getHttpServer());
+
+    return {
+      get: (url: string) => agent.get(url).set('Authorization', authorization),
+      post: (url: string) =>
+        agent.post(url).set('Authorization', authorization),
+      patch: (url: string) =>
+        agent.patch(url).set('Authorization', authorization),
+      delete: (url: string) =>
+        agent.delete(url).set('Authorization', authorization),
+    };
+  };
 
   beforeEach(async () => {
     dataSource = await createTestDataSource();
@@ -73,6 +101,8 @@ describe('EntriesController (e2e)', () => {
     // layer to make a request against.
     app = moduleFixture.createNestApplication();
     await app.init();
+
+    authorization = await authenticate(app.getHttpServer());
   });
 
   // A round trip, not a fixed count. `toHaveLength(2)` used to work only
@@ -83,7 +113,7 @@ describe('EntriesController (e2e)', () => {
     // `supertest` issues a real HTTP request against the running server and
     // asserts on the real response — headers, status, parsed body — instead of
     // inspecting a returned value in-process.
-    const created = await request(app.getHttpServer())
+    const created = await api()
       .post('/entries')
       .send({ content: 'written over HTTP' })
       .expect(201);
@@ -92,7 +122,7 @@ describe('EntriesController (e2e)', () => {
     // the handler returned, after a trip through JSON.
     expect(created.body).toMatchObject({ content: 'written over HTTP' });
 
-    await request(app.getHttpServer())
+    await api()
       .get('/entries')
       .expect(200)
       .expect((res) => {
@@ -118,7 +148,7 @@ describe('EntriesController (e2e)', () => {
   // deliberately edited on the day a response is *meant* to say who owns an
   // entry.
   it('/entries (POST) returns exactly id, content and createdAt', async () => {
-    const created = await request(app.getHttpServer())
+    const created = await api()
       .post('/entries')
       .send({ content: 'written over HTTP' })
       .expect(201);
@@ -129,9 +159,7 @@ describe('EntriesController (e2e)', () => {
       'createdAt',
     ]);
 
-    const [listed] = (
-      await request(app.getHttpServer()).get('/entries').expect(200)
-    ).body as object[];
+    const [listed] = (await api().get('/entries').expect(200)).body as object[];
 
     expect(Object.keys(listed)).toEqual(['id', 'content', 'createdAt']);
   });
@@ -176,10 +204,7 @@ describe('EntriesController (e2e)', () => {
     ])(
       'POST /entries rejects %s with 400 and says why',
       async (_label, body, message) => {
-        const rejected = await request(app.getHttpServer())
-          .post('/entries')
-          .send(body)
-          .expect(400);
+        const rejected = await api().post('/entries').send(body).expect(400);
 
         expect(messagesFrom(rejected)).toEqual([message]);
       },
@@ -190,7 +215,7 @@ describe('EntriesController (e2e)', () => {
     // alongside the string rule, answering one mistake with two sentences of
     // which one is noise (ADR-008, Decision 4).
     it('POST /entries answers a non-string content with one message', async () => {
-      const rejected = await request(app.getHttpServer())
+      const rejected = await api()
         .post('/entries')
         .send({ content: 42 })
         .expect(400);
@@ -207,40 +232,29 @@ describe('EntriesController (e2e)', () => {
       const padded = '  the spacing I chose  ';
 
       const created = entryFrom(
-        await request(app.getHttpServer())
-          .post('/entries')
-          .send({ content: padded })
-          .expect(201),
+        await api().post('/entries').send({ content: padded }).expect(201),
       );
 
       expect(created.content).toBe(padded);
 
       const reread = entryFrom(
-        await request(app.getHttpServer())
-          .get(`/entries/${created.id}`)
-          .expect(200),
+        await api().get(`/entries/${created.id}`).expect(200),
       );
 
       expect(reread.content).toBe(padded);
     });
 
     it('POST /entries accepts valid content with 201', async () => {
-      await request(app.getHttpServer())
-        .post('/entries')
-        .send({ content: 'real text' })
-        .expect(201);
+      await api().post('/entries').send({ content: 'real text' }).expect(201);
     });
 
     // Proves the rejections above were not merely reported — nothing was
     // written. A 400 that still stored the row would pass every test above.
     it('GET /entries is empty after only rejected writes', async () => {
-      await request(app.getHttpServer()).post('/entries').send({}).expect(400);
-      await request(app.getHttpServer())
-        .post('/entries')
-        .send({ content: '   ' })
-        .expect(400);
+      await api().post('/entries').send({}).expect(400);
+      await api().post('/entries').send({ content: '   ' }).expect(400);
 
-      await request(app.getHttpServer())
+      await api()
         .get('/entries')
         .expect(200)
         .expect((res) => {
@@ -249,18 +263,18 @@ describe('EntriesController (e2e)', () => {
     });
 
     it('GET /entries/:id returns 404 for an unknown id', async () => {
-      await request(app.getHttpServer()).get('/entries/nope').expect(404);
+      await api().get('/entries/nope').expect(404);
     });
 
     // 200 with an empty array, not 404 and not 500. "Nothing matched" is a
     // successful search that found nothing.
     it('GET /entries?word=… returns 200 and [] when nothing matches', async () => {
-      await request(app.getHttpServer())
+      await api()
         .post('/entries')
         .send({ content: 'quiet evening at home' })
         .expect(201);
 
-      await request(app.getHttpServer())
+      await api()
         .get('/entries')
         .query({ word: 'zzzzz' })
         .expect(200)
@@ -273,7 +287,7 @@ describe('EntriesController (e2e)', () => {
     // Both endpoints are listed because a body that is a 400 on one and a 201
     // on the other is the inconsistency ADR-006 set out to remove.
     it('POST /entries rejects an unrecognised field with 400', async () => {
-      const rejected = await request(app.getHttpServer())
+      const rejected = await api()
         .post('/entries')
         .send({ content: 'x', id: 'i-picked-this-myself' })
         .expect(400);
@@ -291,7 +305,7 @@ describe('EntriesController (e2e)', () => {
     // needs to be told which word was wrong, which is the entire reason
     // unrecognised fields are refused rather than ignored (ADR-006).
     it('POST /entries names the unrecognised field', async () => {
-      const rejected = await request(app.getHttpServer())
+      const rejected = await api()
         .post('/entries')
         .send({ content: 'x', contnet: 'y' })
         .expect(400);
@@ -303,13 +317,13 @@ describe('EntriesController (e2e)', () => {
 
     it('PATCH /entries/:id rejects an unrecognised field with 400', async () => {
       const created = entryFrom(
-        await request(app.getHttpServer())
+        await api()
           .post('/entries')
           .send({ content: 'the original text' })
           .expect(201),
       );
 
-      const rejected = await request(app.getHttpServer())
+      const rejected = await api()
         .patch(`/entries/${created.id}`)
         .send({ contnet: 'I fixed my typo' })
         .expect(400);
@@ -322,9 +336,7 @@ describe('EntriesController (e2e)', () => {
       // left alone — a server that rejected the request and edited the row
       // anyway would satisfy the line above.
       const reread = entryFrom(
-        await request(app.getHttpServer())
-          .get(`/entries/${created.id}`)
-          .expect(200),
+        await api().get(`/entries/${created.id}`).expect(200),
       );
 
       expect(reread.content).toBe('the original text');
@@ -334,9 +346,7 @@ describe('EntriesController (e2e)', () => {
     // the old handler searched for the text `a,b` and answered `200 []` —
     // "I found nothing" in place of "I could not read your request".
     it('GET /entries rejects a repeated word parameter with 400', async () => {
-      const rejected = await request(app.getHttpServer())
-        .get('/entries?word=a&word=b')
-        .expect(400);
+      const rejected = await api().get('/entries?word=a&word=b').expect(400);
 
       // Enforced by the library now rather than by `parseSearchTerm`, and the
       // sentence changed with it: `word may only be given once` became
@@ -355,9 +365,7 @@ describe('EntriesController (e2e)', () => {
     // to URLs, which is a real difference between a query string and a body
     // (ADR-008, Decision 6).
     it('GET /entries rejects an unrecognised query parameter with 400', async () => {
-      const rejected = await request(app.getHttpServer())
-        .get('/entries?werd=sister')
-        .expect(400);
+      const rejected = await api().get('/entries?werd=sister').expect(400);
 
       expect(messagesFrom(rejected)).toEqual([
         'property werd should not exist',
@@ -377,20 +385,20 @@ describe('EntriesController (e2e)', () => {
     // green and looking fine (ADR-008, Decision 7).
     it('GET /entries?word= finds nothing while GET /entries finds everything', async () => {
       const created = entryFrom(
-        await request(app.getHttpServer())
+        await api()
           .post('/entries')
           .send({ content: 'a quiet evening at home' })
           .expect(201),
       );
 
-      await request(app.getHttpServer())
+      await api()
         .get('/entries?word=')
         .expect(200)
         .expect((res) => {
           expect(res.body).toEqual([]);
         });
 
-      await request(app.getHttpServer())
+      await api()
         .get('/entries')
         .expect(200)
         .expect((res) => {
@@ -406,16 +414,16 @@ describe('EntriesController (e2e)', () => {
     // string is where such a character actually arrives, URL-encoded
     // (ADR-006).
     it('GET /entries?word=100%25 finds the entry containing 100%', async () => {
-      await request(app.getHttpServer())
+      await api()
         .post('/entries')
         .send({ content: '100% exhausted today' })
         .expect(201);
-      await request(app.getHttpServer())
+      await api()
         .post('/entries')
         .send({ content: 'an ordinary quiet evening' })
         .expect(201);
 
-      await request(app.getHttpServer())
+      await api()
         .get('/entries?word=100%25')
         .expect(200)
         .expect((res) => {
@@ -428,14 +436,14 @@ describe('EntriesController (e2e)', () => {
 
     it('PATCH /entries/:id returns 200 and the updated entry', async () => {
       const created = entryFrom(
-        await request(app.getHttpServer())
+        await api()
           .post('/entries')
           .send({ content: 'the first draft' })
           .expect(201),
       );
 
       const updated = entryFrom(
-        await request(app.getHttpServer())
+        await api()
           .patch(`/entries/${created.id}`)
           .send({ content: 'the second draft' })
           .expect(200),
@@ -449,7 +457,7 @@ describe('EntriesController (e2e)', () => {
     });
 
     it('PATCH /entries/:id returns 404 for an unknown id', async () => {
-      await request(app.getHttpServer())
+      await api()
         .patch('/entries/nope')
         .send({ content: 'anything' })
         .expect(404);
@@ -460,13 +468,10 @@ describe('EntriesController (e2e)', () => {
     // asks for no change is one the server cannot act on.
     it('PATCH /entries/:id returns 400 for an empty body', async () => {
       const created = entryFrom(
-        await request(app.getHttpServer())
-          .post('/entries')
-          .send({ content: 'unchanged' })
-          .expect(201),
+        await api().post('/entries').send({ content: 'unchanged' }).expect(201),
       );
 
-      const rejected = await request(app.getHttpServer())
+      const rejected = await api()
         .patch(`/entries/${created.id}`)
         .send({})
         .expect(400);
@@ -486,13 +491,10 @@ describe('EntriesController (e2e)', () => {
     // half the claim; the other half is that the entry was left alone.
     it('PATCH /entries/:id returns 400 for a content field of null', async () => {
       const created = entryFrom(
-        await request(app.getHttpServer())
-          .post('/entries')
-          .send({ content: 'unchanged' })
-          .expect(201),
+        await api().post('/entries').send({ content: 'unchanged' }).expect(201),
       );
 
-      const rejected = await request(app.getHttpServer())
+      const rejected = await api()
         .patch(`/entries/${created.id}`)
         .send({ content: null })
         .expect(400);
@@ -500,9 +502,7 @@ describe('EntriesController (e2e)', () => {
       expect(messagesFrom(rejected)).toEqual(['content must be a string']);
 
       const reread = entryFrom(
-        await request(app.getHttpServer())
-          .get(`/entries/${created.id}`)
-          .expect(200),
+        await api().get(`/entries/${created.id}`).expect(200),
       );
 
       expect(reread.content).toBe('unchanged');
@@ -516,21 +516,16 @@ describe('EntriesController (e2e)', () => {
     // fails downstream as a 500.
     it('PATCH /entries/:id returns 400 for a field named undefined', async () => {
       const created = entryFrom(
-        await request(app.getHttpServer())
-          .post('/entries')
-          .send({ content: 'unchanged' })
-          .expect(201),
+        await api().post('/entries').send({ content: 'unchanged' }).expect(201),
       );
 
-      await request(app.getHttpServer())
+      await api()
         .patch(`/entries/${created.id}`)
         .send({ undefined: 'x' })
         .expect(400);
 
       const reread = entryFrom(
-        await request(app.getHttpServer())
-          .get(`/entries/${created.id}`)
-          .expect(200),
+        await api().get(`/entries/${created.id}`).expect(200),
       );
 
       expect(reread.content).toBe('unchanged');
@@ -540,46 +535,39 @@ describe('EntriesController (e2e)', () => {
     // just removed, which is what makes an undo possible (ADR-006).
     it('DELETE /entries/:id returns 200 with the deleted entry, which is then gone', async () => {
       const created = entryFrom(
-        await request(app.getHttpServer())
+        await api()
           .post('/entries')
           .send({ content: 'here for a moment' })
           .expect(201),
       );
 
       const deleted = entryFrom(
-        await request(app.getHttpServer())
-          .delete(`/entries/${created.id}`)
-          .expect(200),
+        await api().delete(`/entries/${created.id}`).expect(200),
       );
 
       expect(deleted).toEqual(created);
 
-      await request(app.getHttpServer())
-        .get(`/entries/${created.id}`)
-        .expect(404);
+      await api().get(`/entries/${created.id}`).expect(404);
     });
 
     it('DELETE /entries/:id returns 404 for an unknown id', async () => {
-      await request(app.getHttpServer()).delete('/entries/nope').expect(404);
+      await api().delete('/entries/nope').expect(404);
     });
 
     // The shape matters as much as the status. Asserting the whole body rather
     // than just `body.count` is what would catch a regression back to a bare
     // number, since `5` and `{ count: 5 }` both satisfy a loose check.
     it('GET /entries/count returns 200 and { count }', async () => {
-      await request(app.getHttpServer())
+      await api()
         .get('/entries/count')
         .expect(200)
         .expect((res) => {
           expect(res.body).toEqual({ count: 0 });
         });
 
-      await request(app.getHttpServer())
-        .post('/entries')
-        .send({ content: 'one' })
-        .expect(201);
+      await api().post('/entries').send({ content: 'one' }).expect(201);
 
-      await request(app.getHttpServer())
+      await api()
         .get('/entries/count')
         .expect(200)
         .expect((res) => {

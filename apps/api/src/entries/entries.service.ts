@@ -12,7 +12,15 @@ export class EntriesService {
     return this.entriesRepository.findAll();
   }
 
-  async create(content: string): Promise<JournalEntry> {
+  // `userId` is required rather than optional, so a caller cannot write an
+  // ownerless entry by forgetting to pass one. Every route that reaches this
+  // method is behind `JwtAuthGuard` as of Day 9, so an authenticated caller
+  // always exists.
+  //
+  // This closes the set of NULL owners rather than growing it. The rows written
+  // before today stay NULL and are Day 10's to backfill; nothing written from
+  // now on joins them.
+  async create(content: string, userId: string): Promise<JournalEntry> {
     const entry: JournalEntry = {
       // Generated here rather than by the repository or the schema because
       // neither call touches the database, and `createdAt` is product data
@@ -20,11 +28,27 @@ export class EntriesService {
       id: crypto.randomUUID(),
       content,
       createdAt: new Date().toISOString(),
+      userId,
     };
 
     await this.entriesRepository.save(entry);
 
-    return entry;
+    // Read back rather than returning the in-memory object, and the reason is
+    // the one Day 8 wrote a test for. `userId` is `select: false`, which is a
+    // *read-path* guarantee: it keeps the column out of every SELECT, so a
+    // loaded entry has no owner on it. The object built above is not loaded —
+    // it is the one just handed to `insert`, and it carries `userId` — so
+    // returning it would put an owner in the 201 body and change the HTTP
+    // contract by adding a column.
+    //
+    // The same shape as `@Exclude()` on `User.passwordHash`: the write path is
+    // not covered by a protection that reads as total. Caught here by
+    // `app.e2e-spec.ts` asserting the exact key list rather than one field.
+    //
+    // The non-null assertion is safe: the row was inserted on the line above,
+    // and an `insert` that succeeded followed by a `findById` that finds
+    // nothing would mean the database lost a committed write.
+    return (await this.entriesRepository.findById(entry.id))!;
   }
 
   // `undefined` is passed through rather than raised as NotFoundException: a
