@@ -8,11 +8,10 @@ import {
   Post,
   Req,
   UnauthorizedException,
-  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import { Public } from './public.decorator';
 import { LoginDto } from './login.dto';
 import { RegisterDto } from './register.dto';
 import type { AuthenticatedRequest } from './authenticated-request';
@@ -26,6 +25,7 @@ export class AuthController {
     private readonly authService: AuthService,
   ) {}
 
+  @Public()
   @Post('register')
   async register(@Body() dto: RegisterDto): Promise<User> {
     const user = await this.usersService.register(dto.name, dto.password);
@@ -37,6 +37,7 @@ export class AuthController {
     return user;
   }
 
+  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() dto: LoginDto): Promise<AuthenticatedSession> {
@@ -50,7 +51,6 @@ export class AuthController {
   }
 
   @Get('me')
-  @UseGuards(JwtAuthGuard)
   me(@Req() request: AuthenticatedRequest): User {
     return request.user;
   }

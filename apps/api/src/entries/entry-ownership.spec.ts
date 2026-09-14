@@ -70,7 +70,7 @@ describe('entry ownership', () => {
   });
 
   describe('the user_id column on entries', () => {
-    it('should exist and be nullable', async () => {
+    it('should exist and require an owner', async () => {
       const userId = (await columnsOf('entries')).find(
         (column) => column.name === 'user_id',
       );
@@ -78,7 +78,7 @@ describe('entry ownership', () => {
       expect(userId).toBeDefined();
       expect(userId?.type).toBe('TEXT');
 
-      expect(userId?.notnull).toBe(0);
+      expect(userId?.notnull).toBe(1);
     });
 
     it('should be a foreign key pointing at users.id', async () => {
@@ -125,20 +125,16 @@ describe('entry ownership', () => {
       expect(stored).toEqual([{ id: 'entry-1', userId: 'user-1' }]);
     });
 
-    it('should store NULL when nothing says who owns the entry', async () => {
+    it('should refuse an entry with no owner', async () => {
       const entries = dataSource.getRepository(JournalEntry);
 
-      await entries.insert({
-        id: 'entry-1',
-        content: 'written the way every entry is written today',
-        createdAt: '2026-09-02T09:00:00.000Z',
-      });
-
-      const rows = await dataSource.query<{ user_id: string | null }[]>(
-        `SELECT user_id FROM entries`,
-      );
-
-      expect(rows).toEqual([{ user_id: null }]);
+      await expect(
+        entries.insert({
+          id: 'entry-1',
+          content: 'written with nobody to own it',
+          createdAt: '2026-09-02T09:00:00.000Z',
+        }),
+      ).rejects.toThrow(/NOT NULL constraint failed/);
     });
   });
 
@@ -146,11 +142,18 @@ describe('entry ownership', () => {
     it('should carry no owner, because nothing has asked for one', async () => {
       const entries = dataSource.getRepository(JournalEntry);
 
+      await dataSource.getRepository(User).insert({
+        id: 'owner-of-entry-1',
+        name: 'somebody',
+        createdAt: '2026-09-01T00:00:00.000Z',
+        passwordHash: null,
+      });
+
       await entries.insert({
         id: 'entry-1',
         content: 'anything',
         createdAt: '2026-09-02T09:00:00.000Z',
-        userId: null,
+        userId: 'owner-of-entry-1',
       });
 
       const [found] = await entries.find();

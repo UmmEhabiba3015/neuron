@@ -6,8 +6,8 @@ import { JournalEntry } from './entry.entity';
 export class EntriesService {
   constructor(private readonly entriesRepository: EntriesRepository) {}
 
-  findAll(): Promise<JournalEntry[]> {
-    return this.entriesRepository.findAll();
+  findAll(userId: string): Promise<JournalEntry[]> {
+    return this.entriesRepository.findAll(userId);
   }
 
   async create(content: string, userId: string): Promise<JournalEntry> {
@@ -20,30 +20,34 @@ export class EntriesService {
 
     await this.entriesRepository.save(entry);
 
-    return (await this.entriesRepository.findById(entry.id))!;
+    return (await this.entriesRepository.findById(entry.id, userId))!;
   }
 
-  findById(id: string): Promise<JournalEntry | undefined> {
-    return this.entriesRepository.findById(id);
+  findById(id: string, userId: string): Promise<JournalEntry | undefined> {
+    return this.entriesRepository.findById(id, userId);
   }
 
-  findByContent(word: string): Promise<JournalEntry[]> {
+  findByContent(word: string, userId: string): Promise<JournalEntry[]> {
     if (word === '') {
       return Promise.resolve([]);
     }
 
-    return this.entriesRepository.findByContent(word);
+    return this.entriesRepository.findByContent(word, userId);
   }
 
-  update(id: string, content: string): Promise<JournalEntry | undefined> {
-    return this.entriesRepository.update(id, content);
+  update(
+    id: string,
+    content: string,
+    userId: string,
+  ): Promise<JournalEntry | undefined> {
+    return this.entriesRepository.update(id, content, userId);
   }
 
-  delete(id: string): Promise<JournalEntry | undefined> {
-    return this.entriesRepository.delete(id);
+  delete(id: string, userId: string): Promise<JournalEntry | undefined> {
+    return this.entriesRepository.delete(id, userId);
   }
 
-  countEntries(): Promise<number> {
-    return this.entriesRepository.countEntries();
+  countEntries(userId: string): Promise<number> {
+    return this.entriesRepository.countEntries(userId);
   }
 }

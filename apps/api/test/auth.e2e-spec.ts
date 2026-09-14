@@ -423,4 +423,22 @@ describe('AuthController (e2e)', () => {
         .expect(401);
     });
   });
+
+  describe('the guard is the default, not an opt-in', () => {
+    it.each([['/entries'], ['/entries/count'], ['/auth/me']])(
+      'should answer 401 for %s with no token',
+      async (url) => {
+        await request(app.getHttpServer()).get(url).expect(401);
+      },
+    );
+
+    it.each([['/auth/register'], ['/auth/login']])(
+      'should leave %s reachable without a token',
+      async (url) => {
+        const response = await request(app.getHttpServer()).post(url).send({});
+
+        expect(response.status).not.toBe(401);
+      },
+    );
+  });
 });

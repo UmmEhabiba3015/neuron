@@ -9,9 +9,7 @@ import {
   Param,
   Query,
   Req,
-  UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import type { AuthenticatedRequest } from '../auth/authenticated-request';
 import { EntriesService } from './entries.service';
 import { CreateEntryDto } from './create-entry.dto';
@@ -20,18 +18,20 @@ import { UpdateEntryDto } from './update-entry.dto';
 
 import type { JournalEntry } from './entry.entity';
 
-@UseGuards(JwtAuthGuard)
 @Controller('entries')
 export class EntriesController {
   constructor(private readonly entriesService: EntriesService) {}
 
   @Get()
-  findAll(@Query() query: FindEntriesQueryDto): Promise<JournalEntry[]> {
+  findAll(
+    @Query() query: FindEntriesQueryDto,
+    @Req() request: AuthenticatedRequest,
+  ): Promise<JournalEntry[]> {
     if (query.word !== undefined) {
-      return this.entriesService.findByContent(query.word);
+      return this.entriesService.findByContent(query.word, request.user.id);
     }
 
-    return this.entriesService.findAll();
+    return this.entriesService.findAll(request.user.id);
   }
 
   @Post()
@@ -43,13 +43,18 @@ export class EntriesController {
   }
 
   @Get('count')
-  async countEntries(): Promise<{ count: number }> {
-    return { count: await this.entriesService.countEntries() };
+  async countEntries(
+    @Req() request: AuthenticatedRequest,
+  ): Promise<{ count: number }> {
+    return { count: await this.entriesService.countEntries(request.user.id) };
   }
 
   @Get(':id')
-  async findById(@Param('id') id: string): Promise<JournalEntry> {
-    const entry = await this.entriesService.findById(id);
+  async findById(
+    @Param('id') id: string,
+    @Req() request: AuthenticatedRequest,
+  ): Promise<JournalEntry> {
+    const entry = await this.entriesService.findById(id, request.user.id);
 
     if (!entry) {
       throw new NotFoundException(`Entry with ID ${id} not found`);
@@ -62,8 +67,13 @@ export class EntriesController {
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateEntryDto,
+    @Req() request: AuthenticatedRequest,
   ): Promise<JournalEntry> {
-    const updated = await this.entriesService.update(id, dto.content!);
+    const updated = await this.entriesService.update(
+      id,
+      dto.content!,
+      request.user.id,
+    );
 
     if (!updated) {
       throw new NotFoundException(`Entry with ID ${id} not found`);
@@ -73,8 +83,11 @@ export class EntriesController {
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string): Promise<JournalEntry> {
-    const deleted = await this.entriesService.delete(id);
+  async delete(
+    @Param('id') id: string,
+    @Req() request: AuthenticatedRequest,
+  ): Promise<JournalEntry> {
+    const deleted = await this.entriesService.delete(id, request.user.id);
 
     if (!deleted) {
       throw new NotFoundException(`Entry with ID ${id} not found`);

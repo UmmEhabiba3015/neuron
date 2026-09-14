@@ -116,9 +116,14 @@ authority, so there is no server-side session to delete and logging out cannot
 invalidate one. Expiry is the whole of revocation until refresh tokens arrive.
 See [ADR-009](docs/decisions/ADR-009-identity-jwt-and-ownership-model.md).
 
-**Authenticated is not yet authorized.** Every signed-in user can currently read
-every entry. New entries record their owner, and enforcing that owner on reads
-and writes is the next day's work.
+**Each user sees only their own entries.** Every query filters on `user_id` in
+its `WHERE` clause, so other people's rows never reach the application at all —
+lists, searches and the count are all scoped, and `PATCH`/`DELETE` match on owner
+as well as id.
+
+**Asking for somebody else's entry is a `404`, never a `403`.** "Does not exist"
+and "not yours" are deliberately indistinguishable: a caller walking ids would
+otherwise learn which ones are real.
 
 ## Data
 

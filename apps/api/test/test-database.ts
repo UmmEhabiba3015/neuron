@@ -29,8 +29,13 @@ export async function closeTestDataSource(dataSource: DataSource) {
 export async function seedEntries(
   dataSource: DataSource,
   entries: JournalEntry[],
+  userId?: string,
 ): Promise<void> {
-  await dataSource.getRepository(JournalEntry).insert(entries);
+  await dataSource
+    .getRepository(JournalEntry)
+    .insert(
+      userId === undefined ? entries : entries.map((e) => ({ ...e, userId })),
+    );
 }
 
 export async function authenticate(

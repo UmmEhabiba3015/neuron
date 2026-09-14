@@ -47,7 +47,7 @@ describe('EntriesService', () => {
 
   describe('findAll', () => {
     it('should return nothing for a fresh database', async () => {
-      expect(await service.findAll()).toEqual([]);
+      expect(await service.findAll(CALLER_ID)).toEqual([]);
     });
 
     it('should return an entry that was created', async () => {
@@ -56,27 +56,30 @@ describe('EntriesService', () => {
         CALLER_ID,
       );
 
-      expect(await service.findAll()).toContainEqual(created);
+      expect(await service.findAll(CALLER_ID)).toContainEqual(created);
     });
 
     it('should return entries newest first', async () => {
-      await seedEntries(dataSource, [
-        {
-          id: 'older',
-          content: 'written first',
-          createdAt: '2026-07-28T09:00:00.000Z',
-        },
-        {
-          id: 'newer',
-          content: 'written second',
-          createdAt: '2026-07-29T09:00:00.000Z',
-        },
-      ]);
+      await seedEntries(
+        dataSource,
+        [
+          {
+            id: 'older',
+            content: 'written first',
+            createdAt: '2026-07-28T09:00:00.000Z',
+          },
+          {
+            id: 'newer',
+            content: 'written second',
+            createdAt: '2026-07-29T09:00:00.000Z',
+          },
+        ],
+        CALLER_ID,
+      );
 
-      expect((await service.findAll()).map((entry) => entry.id)).toEqual([
-        'newer',
-        'older',
-      ]);
+      expect(
+        (await service.findAll(CALLER_ID)).map((entry) => entry.id),
+      ).toEqual(['newer', 'older']);
     });
   });
 
@@ -105,7 +108,7 @@ describe('EntriesService', () => {
 
       await service.create(hostile, CALLER_ID);
 
-      expect((await service.findAll()).map((e) => e.content)).toEqual([
+      expect((await service.findAll(CALLER_ID)).map((e) => e.content)).toEqual([
         hostile,
       ]);
     });
@@ -118,7 +121,9 @@ describe('EntriesService', () => {
       const created = await service.create(padded, CALLER_ID);
 
       expect(created.content).toBe(padded);
-      expect((await service.findById(created.id))?.content).toBe(padded);
+      expect((await service.findById(created.id, CALLER_ID))?.content).toBe(
+        padded,
+      );
     });
   });
 
@@ -126,39 +131,45 @@ describe('EntriesService', () => {
     it('should return the entry that was created', async () => {
       const created = await service.create('findable by its id', CALLER_ID);
 
-      expect(await service.findById(created.id)).toEqual(created);
+      expect(await service.findById(created.id, CALLER_ID)).toEqual(created);
     });
 
     it('should return undefined when the id does not exist', async () => {
-      expect(await service.findById('no-such-id')).toBeUndefined();
+      expect(await service.findById('no-such-id', CALLER_ID)).toBeUndefined();
     });
   });
 
   describe('findByContent', () => {
     const seed = () =>
-      seedEntries(dataSource, [
-        {
-          id: 'older-match',
-          content: 'felt overwhelmed at work',
-          createdAt: '2026-07-28T09:00:00.000Z',
-        },
-        {
-          id: 'no-match',
-          content: 'quiet evening at home',
-          createdAt: '2026-07-29T09:00:00.000Z',
-        },
-        {
-          id: 'newer-match',
-          content: 'back at work again',
-          createdAt: '2026-07-30T09:00:00.000Z',
-        },
-      ]);
+      seedEntries(
+        dataSource,
+        [
+          {
+            id: 'older-match',
+            content: 'felt overwhelmed at work',
+            createdAt: '2026-07-28T09:00:00.000Z',
+          },
+          {
+            id: 'no-match',
+            content: 'quiet evening at home',
+            createdAt: '2026-07-29T09:00:00.000Z',
+          },
+          {
+            id: 'newer-match',
+            content: 'back at work again',
+            createdAt: '2026-07-30T09:00:00.000Z',
+          },
+        ],
+        CALLER_ID,
+      );
 
     it('should return only the entries containing the word', async () => {
       await seed();
 
       expect(
-        (await service.findByContent('work')).map((entry) => entry.id).sort(),
+        (await service.findByContent('work', CALLER_ID))
+          .map((entry) => entry.id)
+          .sort(),
       ).toEqual(['newer-match', 'older-match']);
     });
 
@@ -166,55 +177,61 @@ describe('EntriesService', () => {
       await seed();
 
       expect(
-        (await service.findByContent('work')).map((entry) => entry.id),
+        (await service.findByContent('work', CALLER_ID)).map(
+          (entry) => entry.id,
+        ),
       ).toEqual(['newer-match', 'older-match']);
     });
 
     it('should return an empty array when nothing matches', async () => {
       await seed();
 
-      expect(await service.findByContent('zzz')).toEqual([]);
+      expect(await service.findByContent('zzz', CALLER_ID)).toEqual([]);
     });
 
     it('should return nothing for an empty search term', async () => {
       await seed();
 
-      expect((await service.findAll()).length).toBeGreaterThan(0);
-      expect(await service.findByContent('')).toEqual([]);
+      expect((await service.findAll(CALLER_ID)).length).toBeGreaterThan(0);
+      expect(await service.findByContent('', CALLER_ID)).toEqual([]);
     });
   });
 
   describe('findByContent with characters the search engine treats specially', () => {
     const seedSpecialCharacters = () =>
-      seedEntries(dataSource, [
-        {
-          id: 'has-percent',
-          content: '100% exhausted today',
-          createdAt: '2026-07-28T09:00:00.000Z',
-        },
-        {
-          id: 'has-underscore',
-          content: 'named the file snake_case',
-          createdAt: '2026-07-29T09:00:00.000Z',
-        },
+      seedEntries(
+        dataSource,
+        [
+          {
+            id: 'has-percent',
+            content: '100% exhausted today',
+            createdAt: '2026-07-28T09:00:00.000Z',
+          },
+          {
+            id: 'has-underscore',
+            content: 'named the file snake_case',
+            createdAt: '2026-07-29T09:00:00.000Z',
+          },
 
-        {
-          id: 'has-backslash',
-          content: 'the path was C:\\temp',
-          createdAt: '2026-07-30T09:00:00.000Z',
-        },
-        {
-          id: 'has-none',
-          content: 'an ordinary quiet evening',
-          createdAt: '2026-07-31T09:00:00.000Z',
-        },
-      ]);
+          {
+            id: 'has-backslash',
+            content: 'the path was C:\\temp',
+            createdAt: '2026-07-30T09:00:00.000Z',
+          },
+          {
+            id: 'has-none',
+            content: 'an ordinary quiet evening',
+            createdAt: '2026-07-31T09:00:00.000Z',
+          },
+        ],
+        CALLER_ID,
+      );
 
     it('should return only entries containing a literal percent sign', async () => {
       await seedSpecialCharacters();
 
       expect(
-        (await service.findByContent('%')).map((entry) => entry.id),
+        (await service.findByContent('%', CALLER_ID)).map((entry) => entry.id),
       ).toEqual(['has-percent']);
     });
 
@@ -222,7 +239,7 @@ describe('EntriesService', () => {
       await seedSpecialCharacters();
 
       expect(
-        (await service.findByContent('_')).map((entry) => entry.id),
+        (await service.findByContent('_', CALLER_ID)).map((entry) => entry.id),
       ).toEqual(['has-underscore']);
     });
 
@@ -230,7 +247,7 @@ describe('EntriesService', () => {
       await seedSpecialCharacters();
 
       expect(
-        (await service.findByContent('\\')).map((entry) => entry.id),
+        (await service.findByContent('\\', CALLER_ID)).map((entry) => entry.id),
       ).toEqual(['has-backslash']);
     });
 
@@ -238,7 +255,9 @@ describe('EntriesService', () => {
       await seedSpecialCharacters();
 
       expect(
-        (await service.findByContent('100%')).map((entry) => entry.id),
+        (await service.findByContent('100%', CALLER_ID)).map(
+          (entry) => entry.id,
+        ),
       ).toEqual(['has-percent']);
     });
   });
@@ -247,10 +266,14 @@ describe('EntriesService', () => {
     it('should change the content and leave the entry findable', async () => {
       const created = await service.create('the first draft', CALLER_ID);
 
-      const updated = await service.update(created.id, 'the second draft');
+      const updated = await service.update(
+        created.id,
+        'the second draft',
+        CALLER_ID,
+      );
 
       expect(updated?.content).toBe('the second draft');
-      expect((await service.findById(created.id))?.content).toBe(
+      expect((await service.findById(created.id, CALLER_ID))?.content).toBe(
         'the second draft',
       );
     });
@@ -258,7 +281,11 @@ describe('EntriesService', () => {
     it('should not change id or createdAt', async () => {
       const created = await service.create('written once', CALLER_ID);
 
-      const updated = await service.update(created.id, 'edited later');
+      const updated = await service.update(
+        created.id,
+        'edited later',
+        CALLER_ID,
+      );
 
       expect(updated?.id).toBe(created.id);
       expect(updated?.createdAt).toBe(created.createdAt);
@@ -268,18 +295,24 @@ describe('EntriesService', () => {
       const created = await service.create('before', CALLER_ID);
       const padded = '  the spacing the user chose  ';
 
-      expect((await service.update(created.id, padded))?.content).toBe(padded);
-      expect((await service.findById(created.id))?.content).toBe(padded);
+      expect(
+        (await service.update(created.id, padded, CALLER_ID))?.content,
+      ).toBe(padded);
+      expect((await service.findById(created.id, CALLER_ID))?.content).toBe(
+        padded,
+      );
     });
 
     it('should return undefined when the id does not exist', async () => {
-      expect(await service.update('no-such-id', 'anything')).toBeUndefined();
+      expect(
+        await service.update('no-such-id', 'anything', CALLER_ID),
+      ).toBeUndefined();
     });
 
     it('should not create an entry for an id that does not exist', async () => {
-      await service.update('no-such-id', 'anything');
+      await service.update('no-such-id', 'anything', CALLER_ID);
 
-      expect(await service.countEntries()).toBe(0);
+      expect(await service.countEntries(CALLER_ID)).toBe(0);
     });
   });
 
@@ -287,28 +320,28 @@ describe('EntriesService', () => {
     it('should return the deleted entry and remove it', async () => {
       const created = await service.create('here for a moment', CALLER_ID);
 
-      expect(await service.delete(created.id)).toEqual(created);
-      expect(await service.findById(created.id)).toBeUndefined();
-      expect(await service.countEntries()).toBe(0);
+      expect(await service.delete(created.id, CALLER_ID)).toEqual(created);
+      expect(await service.findById(created.id, CALLER_ID)).toBeUndefined();
+      expect(await service.countEntries(CALLER_ID)).toBe(0);
     });
 
     it('should leave other entries alone', async () => {
       const doomed = await service.create('the one being removed', CALLER_ID);
       const survivor = await service.create('the one that stays', CALLER_ID);
 
-      await service.delete(doomed.id);
+      await service.delete(doomed.id, CALLER_ID);
 
-      expect(await service.findAll()).toEqual([survivor]);
+      expect(await service.findAll(CALLER_ID)).toEqual([survivor]);
     });
 
     it('should return undefined when the id does not exist', async () => {
-      expect(await service.delete('no-such-id')).toBeUndefined();
+      expect(await service.delete('no-such-id', CALLER_ID)).toBeUndefined();
     });
   });
 
   describe('countEntries', () => {
     it('should return zero for a fresh database', async () => {
-      expect(await service.countEntries()).toBe(0);
+      expect(await service.countEntries(CALLER_ID)).toBe(0);
     });
 
     it('should return the number of entries', async () => {
@@ -316,7 +349,7 @@ describe('EntriesService', () => {
       await service.create('two', CALLER_ID);
       await service.create('three', CALLER_ID);
 
-      expect(await service.countEntries()).toBe(3);
+      expect(await service.countEntries(CALLER_ID)).toBe(3);
     });
   });
 });

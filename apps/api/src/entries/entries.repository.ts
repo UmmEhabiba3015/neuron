@@ -10,17 +10,24 @@ export class EntriesRepository {
     private readonly entries: Repository<JournalEntry>,
   ) {}
 
-  findAll(): Promise<JournalEntry[]> {
-    return this.entries.find({ order: { createdAt: 'DESC' } });
+  findAll(userId: string): Promise<JournalEntry[]> {
+    return this.entries.find({
+      where: { userId },
+      order: { createdAt: 'DESC' },
+    });
   }
 
-  async findById(id: string): Promise<JournalEntry | undefined> {
-    return (await this.entries.findOneBy({ id })) ?? undefined;
+  async findById(
+    id: string,
+    userId: string,
+  ): Promise<JournalEntry | undefined> {
+    return (await this.entries.findOneBy({ id, userId })) ?? undefined;
   }
 
-  findByContent(word: string): Promise<JournalEntry[]> {
+  findByContent(word: string, userId: string): Promise<JournalEntry[]> {
     return this.entries.find({
       where: {
+        userId,
         content: Raw(
           (alias) => `${alias} LIKE :pattern ESCAPE '${LIKE_ESCAPE_CHARACTER}'`,
           { pattern: `%${escapeLikePattern(word)}%` },
@@ -30,32 +37,40 @@ export class EntriesRepository {
     });
   }
 
-  countEntries(): Promise<number> {
-    return this.entries.count();
+  countEntries(userId: string): Promise<number> {
+    return this.entries.count({ where: { userId } });
   }
 
   async save(entry: JournalEntry): Promise<void> {
     await this.entries.insert(entry);
   }
 
-  async update(id: string, content: string): Promise<JournalEntry | undefined> {
-    const result = await this.entries.update({ id }, { content });
+  async update(
+    id: string,
+    content: string,
+    userId: string,
+  ): Promise<JournalEntry | undefined> {
+    const result = await this.entries.update({ id, userId }, { content });
 
     if (result.affected === 0) {
       return undefined;
     }
 
-    return this.findById(id);
+    return this.findById(id, userId);
   }
 
-  async delete(id: string): Promise<JournalEntry | undefined> {
-    const existing = await this.findById(id);
+  async delete(id: string, userId: string): Promise<JournalEntry | undefined> {
+    const existing = await this.findById(id, userId);
 
     if (!existing) {
       return undefined;
     }
 
-    await this.entries.delete({ id });
+    const result = await this.entries.delete({ id, userId });
+
+    if (result.affected === 0) {
+      return undefined;
+    }
 
     return existing;
   }

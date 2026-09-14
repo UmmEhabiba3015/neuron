@@ -12,10 +12,10 @@ export class JournalEntry {
   @Column({ name: 'created_at', type: 'text' })
   createdAt: string;
 
-  @Column({ name: 'user_id', type: 'text', nullable: true, select: false })
-  userId?: string | null;
+  @Column({ name: 'user_id', type: 'text', select: false })
+  userId?: string;
 
-  @ManyToOne(() => User, { nullable: true })
+  @ManyToOne(() => User)
   @JoinColumn({ name: 'user_id' })
   user?: User;
 }

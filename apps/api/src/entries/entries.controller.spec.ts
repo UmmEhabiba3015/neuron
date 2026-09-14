@@ -64,7 +64,7 @@ describe('EntriesController', () => {
         caller,
       );
 
-      const result = await controller.findAll({});
+      const result = await controller.findAll({}, caller);
 
       expect(result.length).toBeGreaterThan(0);
 
@@ -100,7 +100,7 @@ describe('EntriesController', () => {
         caller,
       );
 
-      expect(await controller.findAll({})).toContainEqual(created);
+      expect(await controller.findAll({}, caller)).toContainEqual(created);
     });
 
     it('should store valid content verbatim, without trimming', async () => {
@@ -121,11 +121,11 @@ describe('EntriesController', () => {
         caller,
       );
 
-      expect(await controller.findById(created.id)).toEqual(created);
+      expect(await controller.findById(created.id, caller)).toEqual(created);
     });
 
     it('should throw NotFoundException when the id does not exist', async () => {
-      await expect(controller.findById('no-such-id')).rejects.toThrow(
+      await expect(controller.findById('no-such-id', caller)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -135,7 +135,7 @@ describe('EntriesController', () => {
     it('should return an empty array when nothing matches', async () => {
       await controller.create({ content: 'quiet evening at home' }, caller);
 
-      expect(await controller.findAll({ word: 'zzzzz' })).toEqual([]);
+      expect(await controller.findAll({ word: 'zzzzz' }, caller)).toEqual([]);
     });
 
     it('should list everything for an absent word and nothing for an empty one', async () => {
@@ -146,8 +146,8 @@ describe('EntriesController', () => {
         caller,
       );
 
-      expect(await controller.findAll({})).toEqual([created]);
-      expect(await controller.findAll({ word: '' })).toEqual([]);
+      expect(await controller.findAll({}, caller)).toEqual([created]);
+      expect(await controller.findAll({ word: '' }, caller)).toEqual([]);
     });
   });
 
@@ -158,12 +158,16 @@ describe('EntriesController', () => {
         caller,
       );
 
-      const updated = await controller.update(created.id, {
-        content: 'the second draft',
-      });
+      const updated = await controller.update(
+        created.id,
+        {
+          content: 'the second draft',
+        },
+        caller,
+      );
 
       expect(updated.content).toBe('the second draft');
-      expect((await controller.findById(created.id)).content).toBe(
+      expect((await controller.findById(created.id, caller)).content).toBe(
         'the second draft',
       );
     });
@@ -174,16 +178,20 @@ describe('EntriesController', () => {
         caller,
       );
 
-      const updated = await controller.update(created.id, {
-        content: 'edited later',
-      });
+      const updated = await controller.update(
+        created.id,
+        {
+          content: 'edited later',
+        },
+        caller,
+      );
 
       expect(updated.createdAt).toBe(created.createdAt);
     });
 
     it('should throw NotFoundException when the id does not exist', async () => {
       await expect(
-        controller.update('no-such-id', { content: 'anything' }),
+        controller.update('no-such-id', { content: 'anything' }, caller),
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -195,14 +203,14 @@ describe('EntriesController', () => {
         caller,
       );
 
-      expect(await controller.delete(created.id)).toEqual(created);
-      await expect(controller.findById(created.id)).rejects.toThrow(
+      expect(await controller.delete(created.id, caller)).toEqual(created);
+      await expect(controller.findById(created.id, caller)).rejects.toThrow(
         NotFoundException,
       );
     });
 
     it('should throw NotFoundException when the id does not exist', async () => {
-      await expect(controller.delete('no-such-id')).rejects.toThrow(
+      await expect(controller.delete('no-such-id', caller)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -213,9 +221,9 @@ describe('EntriesController', () => {
         caller,
       );
 
-      await controller.delete(created.id);
+      await controller.delete(created.id, caller);
 
-      await expect(controller.delete(created.id)).rejects.toThrow(
+      await expect(controller.delete(created.id, caller)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -223,12 +231,12 @@ describe('EntriesController', () => {
 
   describe('countEntries', () => {
     it('should return the count wrapped in an object', async () => {
-      expect(await controller.countEntries()).toEqual({ count: 0 });
+      expect(await controller.countEntries(caller)).toEqual({ count: 0 });
 
       await controller.create({ content: 'one' }, caller);
       await controller.create({ content: 'two' }, caller);
 
-      expect(await controller.countEntries()).toEqual({ count: 2 });
+      expect(await controller.countEntries(caller)).toEqual({ count: 2 });
     });
   });
 });
