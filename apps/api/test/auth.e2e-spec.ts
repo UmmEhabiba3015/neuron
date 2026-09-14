@@ -47,18 +47,6 @@ describe('AuthController (e2e)', () => {
       expect(typeof body.id).toBe('string');
     });
 
-    // **The claim this whole block exists for**, and it is deliberately stated
-    // as a fact about the response body rather than about `@Exclude()` or about
-    // `ClassSerializerInterceptor`. Either of those could be renamed, removed
-    // or bypassed and this test would still be the thing that notices.
-    //
-    // It is written as an exact key list rather than
-    // `expect(body.passwordHash).toBeUndefined()`, for the reason Day 8's
-    // ownership work established: checking one absent field passes for a body
-    // that leaked a different one. `password`, `passwordHash` and
-    // `password_hash` are three separate spellings a future change could
-    // introduce, and only "these keys and no others" rules out all of them at
-    // once.
     it('should never put a credential in the response body', async () => {
       const response = await request(app.getHttpServer())
         .post('/auth/register')
@@ -71,9 +59,6 @@ describe('AuthController (e2e)', () => {
         'name',
       ]);
 
-      // The same claim again, against the raw text rather than the parsed
-      // object. A hash nested inside some future wrapper field would survive
-      // the key check above and would not survive this.
       expect(JSON.stringify(response.body)).not.toContain('$argon2');
     });
 
@@ -91,15 +76,10 @@ describe('AuthController (e2e)', () => {
 
       expect(stored.passwordHash).not.toBe(password);
       expect(stored.passwordHash).not.toContain(password);
-      // The PHC string from ADR-011: algorithm, version, parameters, salt and
-      // hash in one column.
+
       expect(stored.passwordHash).toMatch(/^\$argon2id\$/);
     });
 
-    // Two users, the same password, different stored hashes. The whole of why
-    // a salt is per-user: identical hashes would tell an attacker reading the
-    // table which accounts share a password, and would make one precomputed
-    // table crack all of them at once.
     it('should store different hashes for two users with the same password', async () => {
       const password = 'the-very-same-password';
 
@@ -197,8 +177,6 @@ describe('AuthController (e2e)', () => {
       expect(body.user.name).toBe('umer');
     });
 
-    // 200, not 201. Logging in creates nothing; the token describes an account
-    // that already exists.
     it('should answer 200 rather than 201', async () => {
       await registerUser();
 
@@ -208,9 +186,6 @@ describe('AuthController (e2e)', () => {
         .expect(200);
     });
 
-    // A JWT is signed, not encrypted — anyone holding one can base64url-decode
-    // the payload without the secret. So the claim worth making is not "the
-    // token is safe" but "there is nothing sensitive in it".
     it('should put no credential in the token payload', async () => {
       await registerUser();
 
@@ -247,15 +222,6 @@ describe('AuthController (e2e)', () => {
       expect(JSON.stringify(response.body)).not.toContain(credentials.password);
     });
 
-    // **The enumeration claim, and the reason this block exists.** A wrong
-    // password and a name nobody has registered must be indistinguishable from
-    // outside: same status, same message, same body. Anything that separates
-    // them turns one request per address into a verified membership list, and
-    // for a private journal membership is itself the sensitive fact.
-    //
-    // Asserted as an equality between the two responses rather than as two
-    // separate `.expect(401)` calls. Two tests that each check a status would
-    // both pass while the messages differed, which is exactly the leak.
     it('should answer identically for a wrong password and an unknown name', async () => {
       await registerUser();
 
@@ -273,15 +239,6 @@ describe('AuthController (e2e)', () => {
       expect(JSON.stringify(wrongPassword.body)).not.toContain('umer');
     });
 
-    // The other half of the same defence, and the one that is easy to omit.
-    // Identical messages leak nothing; a fast answer for an unknown name and a
-    // slow one for a wrong password leak the same fact through a stopwatch,
-    // because argon2 is ~60ms of deliberate work that an early return skips.
-    //
-    // The bound is loose on purpose. This is a timing assertion on a shared CI
-    // machine, and a tight one would be flaky without being more true: the leak
-    // worth catching is an order-of-magnitude difference — 1ms versus 60ms —
-    // not a few milliseconds of noise.
     it('should take comparable time for a wrong password and an unknown name', async () => {
       await registerUser();
 
@@ -301,9 +258,6 @@ describe('AuthController (e2e)', () => {
     });
 
     it('should reject a login for a user whose password was never set', async () => {
-      // A row from before credentials existed: registered by the Day 8 schema,
-      // with a null hash. It must not be loggable-into, and it must fail the
-      // same way everything else does.
       await dataSource.getRepository(User).insert({
         id: 'legacy-user',
         name: 'legacy',
@@ -344,7 +298,6 @@ describe('AuthController (e2e)', () => {
       return `Bearer ${(response.body as { accessToken: string }).accessToken}`;
     };
 
-    // The day's claim, stated as one assertion: the server can name its caller.
     it('should name the caller for a valid token', async () => {
       const authorization = await login();
 
@@ -371,9 +324,6 @@ describe('AuthController (e2e)', () => {
       ]);
     });
 
-    // Each of these is a different way the guard can be reached, and all four
-    // must answer 401 with an identical body. Only the `WWW-Authenticate`
-    // header distinguishes them, and only for expiry.
     it.each([
       ['no Authorization header', undefined],
       ['an empty Authorization header', ''],
@@ -391,9 +341,6 @@ describe('AuthController (e2e)', () => {
       await call.expect(401);
     });
 
-    // A token this server would have accepted, signed by something that is not
-    // this server. The signature is the whole of what stops a client editing
-    // `sub` to say somebody else.
     it('should reject a token signed with a different secret', async () => {
       const { JwtService } = await import('@nestjs/jwt');
       const forged = await new JwtService({
@@ -406,8 +353,6 @@ describe('AuthController (e2e)', () => {
         .expect(401);
     });
 
-    // The distinction that is safe to make, made where a client looks for it.
-    // The body stays identical; the header says which.
     it('should say invalid_token in WWW-Authenticate without saying so in the body', async () => {
       const response = await request(app.getHttpServer())
         .get('/auth/me')
@@ -418,13 +363,6 @@ describe('AuthController (e2e)', () => {
       expect(JSON.stringify(response.body)).not.toContain('invalid_token');
     });
 
-    // Expiry is the one distinction the guard makes, and it is safe to make
-    // because the requester already holds the token — being told it aged out is
-    // a fact about an object in their own hand, and confirms no account and
-    // exposes nobody else. A client needs it to tell "refresh and retry" from
-    // "send the user to log in".
-    //
-    // Signed here with a negative lifetime rather than by waiting an hour.
     it('should distinguish an expired token in the header, not the body', async () => {
       const { JwtService } = await import('@nestjs/jwt');
       const expired = await new JwtService({
@@ -438,9 +376,6 @@ describe('AuthController (e2e)', () => {
 
       expect(response.headers['www-authenticate']).toContain('expired');
 
-      // The body is the same one every other failure gets. Only the header
-      // differs, so anything that logs or displays a response body leaks
-      // nothing.
       const valid = await request(app.getHttpServer())
         .get('/auth/me')
         .set('Authorization', 'Bearer not-a-token')
@@ -449,9 +384,6 @@ describe('AuthController (e2e)', () => {
       expect(response.body).toEqual(valid.body);
     });
 
-    // The user is loaded on every request rather than read off the token, so a
-    // token outliving its account stops working immediately rather than in an
-    // hour. Deleting a journal account is somebody saying "I want out, now".
     it('should reject a valid token whose user no longer exists', async () => {
       const authorization = await login();
 
@@ -464,9 +396,6 @@ describe('AuthController (e2e)', () => {
     });
   });
 
-  // The claim the `api()` helper in `app.e2e-spec.ts` would otherwise hide:
-  // those routes really are closed without a token. Before Day 9 every one of
-  // them answered to anybody who knew the URL.
   describe('the entries routes require a token', () => {
     it.each([
       ['GET', '/entries'],
@@ -487,10 +416,6 @@ describe('AuthController (e2e)', () => {
       await call().expect(401);
     });
 
-    // Validation runs *after* the guard, which is the correct order: an
-    // unauthenticated caller should not be told whether their body was
-    // well-formed. A 400 here would confirm the route exists and say what it
-    // expects, to somebody with no credential at all.
     it('should answer 401 rather than 400 for a malformed body without a token', async () => {
       await request(app.getHttpServer())
         .post('/entries')

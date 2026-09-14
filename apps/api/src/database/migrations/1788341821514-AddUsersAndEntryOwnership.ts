@@ -1,19 +1,5 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-// `users`, and the column on `entries` that points at it. Nothing checks it
-// yet (ADR-009).
-//
-// `user_id` is nullable deliberately: no user can exist until registration
-// arrives on Day 9, so NOT NULL today would need a fictional placeholder owner
-// or the deletion of every existing row. This is the expand step of expand,
-// backfill, contract; Day 10 contracts it.
-//
-// Generated SQL, left exactly as generated. It rebuilds the table twice rather
-// than altering it because SQLite cannot add a FOREIGN KEY to an existing
-// table — the constraint is part of the stored CREATE TABLE text. The rebuild
-// is only safe because TypeORM issues `PRAGMA foreign_keys = OFF` around
-// migrations. Do not hand-edit to save the second pass.
-
 export class AddUsersAndEntryOwnership1788341821514 implements MigrationInterface {
   name = 'AddUsersAndEntryOwnership1788341821514';
 

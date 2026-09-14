@@ -6,13 +6,6 @@ import { AddUniqueUserName1789295560638 } from './1789295560638-AddUniqueUserNam
 
 type Migration = new () => MigrationInterface;
 
-// Listed by hand rather than by glob: a glob resolves differently under ts-node
-// and compiled `dist/`, picks up emitted `.d.ts` files, and when wrong reports
-// a database with no migrations to run instead of failing.
-//
-// Order is this array's order, not the filename's. TypeORM only runs names it
-// has not recorded, so a migration inserted above an already-applied one is
-// skipped in silence.
 export const migrations: Migration[] = [
   InitialSchema1788262448946,
   AddUsersAndEntryOwnership1788341821514,
