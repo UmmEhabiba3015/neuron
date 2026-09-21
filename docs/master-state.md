@@ -16,19 +16,20 @@ the recovery cost most of a working session.
 
 ---
 
-**Last updated:** 2026-09-04, after a maintenance pass requested by the project
-owner's husband.
+**Last updated:** 2026-09-21, after Days 9 and 10 shipped and were pushed.
 
-**Current day:** Day 8 is **complete and merged**. Day 9 has not started.
+**Current day:** Days 9 and 10 are **complete, merged and pushed**. Day 11 has
+not started.
 
-**Current branch:** `main`, at commit `3a52694` — Day 8 merged through pull
-request #8. Four merged branches still exist locally and on the remote
-(`day-02-persistence`, `day-06-configuration`, `day-07-validation`,
-`day-08-identity`); they were deliberately left rather than deleted.
+**Current branch:** `main`, at commit `4401cda`. Days 9 and 10 were committed
+straight to `main` rather than through pull requests. Four older merged branches
+still exist locally and on the remote (`day-02-persistence`,
+`day-06-configuration`, `day-07-validation`, `day-08-identity`); they were
+deliberately left rather than deleted.
 
-**Verified on 2026-09-04, by re-running rather than by reading a report:**
+**Verified on 2026-09-21, by re-running rather than by reading a report:**
 `pnpm lint`, `pnpm typecheck` and `pnpm build` all pass. `pnpm test` passes with
-108 tests. `pnpm test:e2e` passes with 35 tests.
+131 tests. `pnpm test:e2e` passes with 86 tests.
 
 ### What changed in the 2026-09-04 maintenance pass
 
@@ -66,56 +67,74 @@ outside the repository and is not carried by git.
 
 ## Next Session Starts Here
 
-### Day 9 is done and did not split ✅
+### Days 9 and 10 are done, merged and pushed ✅
 
-Password storage and identity, finished in one session on 2026-09-13. The
-roadmap allowed a split at "a user exists" / "a request is identified" with Day
-20 as slack; it was not needed.
+Both finished in single sessions on 2026-09-13 and 2026-09-14, pushed
+2026-09-21. `main` is at `4401cda`. 131 unit tests, 86 end-to-end.
 
-**What exists now.** `POST /auth/register`, `POST /auth/login`, `GET /auth/me`,
-and `JwtAuthGuard` on every `/entries` route. Passwords are argon2id hashes in
-one `password_hash` column. `JWT_SECRET` is required with no default and the
-application refuses to boot without it. New entries record their owner.
+**Day 9 — identity exists.** `POST /auth/register`, `POST /auth/login`,
+`GET /auth/me`. Passwords are argon2id hashes in one `password_hash` column.
+`JWT_SECRET` is required with no default and the application refuses to boot
+without it. ADR-011 and ADR-012.
 
-**ADR-011** (password storage) and **ADR-012** (endpoints) carry the reasoning,
-including the arguments that lost.
+**Day 10 — ownership is enforced.** Every query filters on `user_id` in its
+`WHERE` clause, so other people's rows never enter the process. 404 never 403.
+`user_id` is `NOT NULL`. The guard is `APP_GUARD` with `@Public()` as the
+opt-out, so a new route is closed by default. ADR-013.
 
-**Two things she worked out that are worth not re-teaching.** She reached
-credential stuffing herself — that the blast radius is set by the user's *other*
-accounts, not by how important Neuron is — and her own summary of why encryption
-fails was *"for a password, recoverable is the problem."* She also produced the
-correct frame for the registration race without prompting: *"the pre-check is no
-longer the guard — it's an optimization. The guard is the insert failing."*
+The full per-block step-tracking is in `docs/learning/day-09/report.md` and
+`docs/learning/day-10/report.md`, both now tracked in git by a narrow gitignore
+exception. **Read those before teaching anything that builds on this code** —
+they say which details she derived and which were given to her.
 
-**One decision she made and then reversed**, which is the interesting one:
-bcrypt first, on the grounds that it is conventional, then argon2id once the
-OWASP position was on the table. The reversal was right and the reasoning was
-hers.
+### What she should not be re-taught
 
-### ⚠️ Before Day 10 — the database is still un-baselined
+She reached these unprompted and they are recorded with her own wording in the
+reports: credential stuffing and why the blast radius is set by the user's
+*other* accounts; *"for a password, recoverable is the problem"*; that password
+cracking is an **offline** problem so rate limits are irrelevant; that a rainbow
+table makes scale irrelevant because lookup is O(1); the login enumeration
+oracle and what membership alone reveals for a journal specifically; and
+*"the pre-check is not the guard"*, which she then re-applied on Day 10 without
+being reminded.
 
-`apps/api/data/neuron.db` predates migrations and has no `migrations` table, so
-`pnpm migration:run` against it fails with `table "entries" already exists`. It
-was demonstrated on a copy during the Day 8 study session and has not been
-repaired, because altering her real journal is not a side effect a session should
-have. **Day 9 added two migrations**, so this now blocks anything that touches
-her actual data. The repair is one row, in the README under *A database created
-before migrations existed*.
+Two structural proposals were hers and both shipped: **`@Exclude()` over a
+response DTO**, because it is declared at the source and covers the endpoint
+nobody has written yet; and **`APP_GUARD` + `@Public()`**, because
+`AuthenticatedRequest`'s `user: User` was *"a conditional truth stated
+unconditionally"*.
 
-### Then Day 10 — authenticated is not authorized
+### ⚠️ Day 9's code walkthrough is partly owed
 
-The middle state Day 9 deliberately shipped: **every signed-in user can read
-every entry.** That is strictly better than the anonymous free-for-all before it
-and still wrong, and the roadmap names the day that fixes it.
+Run 2026-09-14 at her request. Two topics covered, both at step 1 — the
+guard-vs-pipe ordering, and what `request.user` is.
 
-Three things are already in place for it. `entries.user_id` is recorded on every
-new write, so the set of ownerless rows is closed rather than growing. The old
-rows are still NULL and need a decision — backfill to a user, or delete. And
-`select: false` means the ownership check has to ask for the column **by name**:
-she has now seen on her own data that a query which does not select it produces
-a *constant* rather than a check, so a test asserting "Bob cannot read Alice's
-entry" passes because the check denies everybody. Re-test that rather than
-re-explaining it.
+**Still owed:** the three services and why they are separate, the DTOs and
+`forbidNonWhitelisted`, and what each test layer can see that the others cannot.
+She asked to move on and that was honoured. It is narrower than Day 8's debt was
+— these are wiring questions, not concepts — but it is open, and the
+debt-blocks-days direction applies to it.
+
+### Her database was changed on Day 10
+
+Three things happened to `apps/api/data/neuron.db`: it was **baselined**,
+**migrated** through all four migrations, and its **five Day 3 entries were
+deleted** because they had no owner and every query now filters on one. A backup
+sits beside it at `data/neuron.db.backup-20260914-132206` (gitignored). That also
+closed ADR-010 amendment 6 on the real file.
+
+### Then Day 11 — where her own objection gets answered
+
+The roadmap names it: *tokens don't expire, and logging out does nothing.*
+
+This is the day ADR-009's recorded objection gets addressed in code. On Day 8 she
+argued, unprompted, that a stolen JWT stays cryptographically valid after logout
+and the server has no way to revoke it — and she was right. Day 9 shipped a
+one-hour expiry as the only mitigation available, and ADR-012 records that expiry
+is the whole of revocation until this day.
+
+**Open the day by reminding her it was her objection.** It is the clearest case
+so far of a finding of hers driving a roadmap item.
 
 ### ⚠️ Day 7's "document" third was not done — carried to Day 14
 

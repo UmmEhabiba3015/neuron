@@ -335,15 +335,20 @@ comprehension is.
 
 ### Currently open
 
-**Day 8's TypeORM debt is repaid, and Day 9 is unblocked.** The owner's
-direction of 2026-09-04 — that the debt is repaid before the next day starts —
-was carried out on 2026-09-05/06. The study session ran all seven topics against
-the real repository and the per-topic record is in
-`docs/learning/day-08/report.md` under *Study session: TypeORM*.
+**Day 8's TypeORM debt is repaid** (2026-09-05/06, seven topics, all step 1).
+
+**Day 9's code walkthrough is partly owed.** Run 2026-09-14 at her request: the
+guard-vs-pipe ordering and `request.user` were covered, both at step 1, and one
+of her answers there — `APP_GUARD` + `@Public()` — shipped as part of Day 10.
+Still owed: the three services and why they are separate, the DTOs and
+`forbidNonWhitelisted`, and what each test layer can see. She asked to move on
+and that was honoured. Narrower than Day 8's debt — wiring rather than concepts
+— but open.
 
 
 | Concept | Introduced | Status |
 |---|---|---|
+| Day 9 wiring — the three services, the DTOs, the test layers | Day 9 | 🟡 **Partly paid.** Guard ordering and `request.user` closed at step 1 on 2026-09-14; the rest deferred at her request. |
 | `transform: true` on the validation pipe | Day 7 | 🟡 **Offered and declined.** Logged rather than forgotten. Worth picking up on Day 14. |
 | Where validation belongs — boundary vs service | Day 4 | 🟡 **Partial.** She reasoned it out, got it wrong, and accepted the argument; the distinction was given to her rather than derived. **Re-test on Day 10**, when ownership checks arrive and the same question returns in a harder form. |
 | Reading and judging a whole suite unprompted | Day 4 | 🟡 **Partial.** She has found real gaps when handed cases one at a time. Doing it across an entire suite without prompting is the remaining step. |

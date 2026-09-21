@@ -1,7 +1,7 @@
 # Handoff — starting a new Master Thread
 
 **Written:** 2026-09-04, after the maintenance pass and before the machine move.
-**Updated:** 2026-09-06, after the Day 8 TypeORM study session closed the debt.
+**Updated:** 2026-09-21, after Days 9 and 10 shipped and were pushed.
 **Read this after** `master-prompt.md`, `constitution.md`, `roadmap.md` and
 `master-state.md`, in that order. This file says what to do first; those four
 say who you are and where the project stands.
@@ -10,53 +10,45 @@ say who you are and where the project stands.
 
 ## The state in four sentences
 
-Day 8 is complete and merged. Day 9 has not started. The working tree is clean,
-and the last three commits are a maintenance pass that changed no behaviour.
-Everything verified on 2026-09-04 by re-running rather than by reading a report:
-lint, typecheck and build clean, 108 unit tests, 35 end-to-end tests.
+Days 9 and 10 are complete, merged and pushed; `main` is at `4401cda`. Day 11
+has not started. The working tree is clean. Everything verified on 2026-09-21 by
+re-running rather than by reading a report: lint, typecheck and build clean, 131
+unit tests, 86 end-to-end tests.
 
-**Branch note.** The maintenance work has since been merged; `main` is at
-`95ec3db`, which is that commit. Nothing is waiting on a merge.
+Identity and ownership both exist now. A user registers, logs in, receives a
+one-hour token, and sees only their own entries — enforced in the `WHERE` clause
+rather than after the fetch. ADR-011, ADR-012 and ADR-013 carry the reasoning.
+
+**Branch note.** Nothing is waiting on a merge. Work goes straight to `main`
+on this project, and merging remains a human action.
 
 ---
 
 ## The first thing you do
 
-**Day 8's TypeORM debt is repaid ✅ and Day 9 is unblocked.** The session ran on
-2026-09-05/06 from `docs/learning/day-08/study-typeorm.md`, against the real
-repository, on copies of the database. **All seven topics were answered at step
-1** — no topic needed teaching before she produced the mechanism. The per-topic
-record, with the misses written down, is in `docs/learning/day-08/report.md`
-under *Study session: TypeORM*. Read it before teaching anything that builds on
-TypeORM, because it says exactly which details she has seen run and which she
-has only read.
+**Read `docs/learning/day-09/report.md` and `docs/learning/day-10/report.md`**
+before teaching anything that builds on this code. They record, per block, which
+step she answered at and — more usefully — which details she *derived* versus
+which were given to her. Both are tracked in git by a narrow gitignore
+exception; the Day 4–7 reports are still local-only, pending the Day 14 decision.
 
-**Do this before Day 9 needs a migration.** `apps/api/data/neuron.db` predates
-migrations and is **not baselined**. The next `pnpm migration:run` against it
-fails with `table "entries" already exists` — demonstrated on a copy during the
-study session, exit code 1, transaction rolled back, no data lost. Day 9 adds a
-credential column, which means a migration, so this will be hit. The repair is
-one row and is documented in the README under *A database created before
-migrations existed*. It was deliberately not run during a study session, because
-altering her actual journal is not a side effect a teaching session should have.
+**Day 9's walkthrough is partly owed, and the debt-blocks-days direction applies
+to it.** Covered on 2026-09-14: guard-vs-pipe ordering, and what `request.user`
+is. Still owed: the three services and why they are separate, the DTOs and
+`forbidNonWhitelisted`, and what each test layer can see that the others cannot.
+She asked to move on and that was honoured — it is wiring rather than concepts,
+and much narrower than Day 8's debt was.
 
-**Three corrections found while running the session**, all still unfixed and
-none urgent:
+**Do not re-teach what she already derived.** The reports carry her own wording.
+The short list: credential stuffing and why the blast radius is the user's
+*other* accounts; that password cracking is an offline problem; the rainbow-table
+O(1) argument; the login enumeration oracle; *"the pre-check is not the guard"*;
+and *"the read is for the payload, not for the authorization"*.
 
-- `docs/learning/day-08/study-typeorm.md`'s topic-2 premise is **wrong**. It
-  claims the ownership check `entry.userId !== callerId → deny` "passes for
-  everybody and hands every journal to every user". With `callerId` guaranteed
-  to be a string, `undefined !== callerId` is pinned to `true`, so it denies
-  everybody. She caught this and defended it against two rounds of pressure
-  toward the prompt's answer. The real danger is subtler and worth rewriting the
-  section around: the check does not invert, it **stops being a check**, and a
-  test asserting "Bob cannot read Alice's entry" passes for the wrong reason.
-- The comment on `userId` in `entry.entity.ts` says the property is "simply
-  absent" from loaded entities. It is **present, holding `undefined`** —
-  `'userId' in loaded` is `true`. No behavioural consequence; it is why
-  `JSON.stringify` still omits it.
-- The study prompt refers to `entry.interface.ts`, renamed to `entry.entity.ts`
-  in `95ec3db`.
+**Her database was changed on Day 10** — baselined, migrated, and its five Day 3
+entries deleted because they had no owner. Backup at
+`apps/api/data/neuron.db.backup-20260914-132206`, gitignored. ADR-010's amendment
+6 is now closed on the real file.
 
 **Also still open, and lighter:** `transform: true` from Day 7 was offered and
 declined. It is worth ten minutes on Day 14, not a day of its own.

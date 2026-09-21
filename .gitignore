@@ -48,3 +48,5 @@ docs/learning/**/worker-report-*.md
 # its place for the rest of the reports is a Day 14 decision, and this does not
 # pre-empt it.
 !docs/learning/day-08/report.md
+!docs/learning/day-09/report.md
+!docs/learning/day-10/report.md
