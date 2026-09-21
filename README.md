@@ -79,7 +79,11 @@ they answer `401` with the reason in a `WWW-Authenticate` header.
 | Method | Route            | Auth | What it does |
 | ------ | ---------------- | ---- | ------------ |
 | `POST` | `/auth/register` | —    | Creates a user. `201` with the user; `409` if the name is taken. |
-| `POST` | `/auth/login`    | —    | `200` with `{ accessToken, user }`; `401` for any failure. |
+| `POST` | `/auth/login`    | —    | `200` with `{ accessToken, refreshToken, user }`; `401` for any failure. |
+| `POST` | `/auth/refresh`  | —    | Exchanges a refresh token for a new pair. `401` if revoked, expired or already rotated. |
+| `POST` | `/auth/logout`   | ✅   | Revokes this session. `204`. |
+| `POST` | `/auth/logout-everywhere` | ✅ | Revokes every session for the caller. `204`. |
+| `GET`  | `/auth/sessions` | ✅   | The caller's active sessions. |
 | `GET`  | `/auth/me`       | ✅   | Returns the caller. |
 | `GET`  | `/entries`       | ✅   | The journal, newest first. `?word=` searches content. |
 | `POST` | `/entries`       | ✅   | Creates an entry owned by the caller. |
@@ -111,10 +115,19 @@ sensitive. Registration does say when a name is taken, because the caller needs
 to pick another and the same fact is obtainable by trying to register. See
 [ADR-012](docs/decisions/ADR-012-authentication-endpoints.md).
 
-**Tokens last one hour and cannot be revoked.** A signed token carries its own
-authority, so there is no server-side session to delete and logging out cannot
-invalidate one. Expiry is the whole of revocation until refresh tokens arrive.
-See [ADR-009](docs/decisions/ADR-009-identity-jwt-and-ownership-model.md).
+**Access tokens last 15 minutes; refresh tokens last 30 days.** The access
+token goes on every request; the refresh token goes only to `/auth/refresh`,
+which is what makes a database check on it affordable.
+
+**Logging out works, immediately.** Each login creates a session row, and the
+guard checks it on every request — so revoking a session locks out its access
+token at once rather than when it expires. `logout-everywhere` does the same for
+every device, which is the stolen-laptop case.
+
+**Refresh tokens rotate on every use.** Using one invalidates it, so a stolen
+refresh token is a race rather than a 30-day credential. Replaying an
+already-rotated token is treated as evidence of theft and revokes every session
+for that user. See [ADR-014](docs/decisions/ADR-014-sessions-and-revocation.md).
 
 **Each user sees only their own entries.** Every query filters on `user_id` in
 its `WHERE` clause, so other people's rows never reach the application at all —

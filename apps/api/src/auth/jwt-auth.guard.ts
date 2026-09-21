@@ -7,6 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import type { Request, Response } from 'express';
 import { UsersService } from '../users/users.service';
+import { SessionsRepository } from './sessions.repository';
 import { TokenService } from './token.service';
 import { IS_PUBLIC } from './public.decorator';
 import type { AuthenticatedRequest } from './authenticated-request';
@@ -16,6 +17,7 @@ export class JwtAuthGuard implements CanActivate {
   constructor(
     private readonly tokenService: TokenService,
     private readonly usersService: UsersService,
+    private readonly sessionsRepository: SessionsRepository,
     private readonly reflector: Reflector,
   ) {}
 
@@ -58,6 +60,20 @@ export class JwtAuthGuard implements CanActivate {
           );
     }
 
+    const session = await this.sessionsRepository.findById(payload.sid);
+
+    if (
+      !session ||
+      session.revokedAt ||
+      session.expiresAt <= new Date().toISOString()
+    ) {
+      throw unauthorized(
+        response,
+        'invalid_token',
+        'The session is no longer active',
+      );
+    }
+
     const user = await this.usersService.findById(payload.sub);
 
     if (!user) {
@@ -68,7 +84,9 @@ export class JwtAuthGuard implements CanActivate {
       );
     }
 
-    (request as AuthenticatedRequest).user = user;
+    const authenticated = request as AuthenticatedRequest;
+    authenticated.user = user;
+    authenticated.session = { id: session.id };
 
     return true;
   }

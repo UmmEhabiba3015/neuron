@@ -5,6 +5,7 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import type { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
+import { Session } from './../src/auth/session.entity';
 import { User } from './../src/users/user.entity';
 import { closeTestDataSource, createTestDataSource } from './test-database';
 
@@ -204,6 +205,7 @@ describe('AuthController (e2e)', () => {
         'exp',
         'iat',
         'name',
+        'sid',
         'sub',
       ]);
       expect(JSON.stringify(payload)).not.toContain(credentials.password);
@@ -387,7 +389,12 @@ describe('AuthController (e2e)', () => {
     it('should reject a valid token whose user no longer exists', async () => {
       const authorization = await login();
 
-      await dataSource.getRepository(User).delete({ name: 'umer' });
+      const user = await dataSource
+        .getRepository(User)
+        .findOneByOrFail({ name: 'umer' });
+
+      await dataSource.getRepository(Session).delete({ userId: user.id });
+      await dataSource.getRepository(User).delete({ id: user.id });
 
       await request(app.getHttpServer())
         .get('/auth/me')

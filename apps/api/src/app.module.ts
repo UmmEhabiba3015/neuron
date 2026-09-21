@@ -18,8 +18,8 @@ import { EntriesModule } from './entries/entries.module';
       ignoreEnvFile: true,
       validate,
     }),
-    EntriesModule,
     AuthModule,
+    EntriesModule,
   ],
 
   providers: [

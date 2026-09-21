@@ -16,10 +16,10 @@ the recovery cost most of a working session.
 
 ---
 
-**Last updated:** 2026-09-21, after Days 9 and 10 shipped and were pushed.
+**Last updated:** 2026-09-21, after Day 11.
 
-**Current day:** Days 9 and 10 are **complete, merged and pushed**. Day 11 has
-not started.
+**Current day:** Days 9, 10 and 11 are **complete and merged**. Day 12 has not
+started.
 
 **Current branch:** `main`, at commit `4401cda`. Days 9 and 10 were committed
 straight to `main` rather than through pull requests. Four older merged branches
@@ -29,7 +29,7 @@ deliberately left rather than deleted.
 
 **Verified on 2026-09-21, by re-running rather than by reading a report:**
 `pnpm lint`, `pnpm typecheck` and `pnpm build` all pass. `pnpm test` passes with
-131 tests. `pnpm test:e2e` passes with 86 tests.
+131 tests. `pnpm test:e2e` passes with 102 tests.
 
 ### What changed in the 2026-09-04 maintenance pass
 
@@ -130,18 +130,39 @@ they were Day 3 test data — an empty string, a single space, `"23.0"`.
 The database is now empty and fully migrated: three tables, four migrations
 applied, no entries and no users.
 
-### Then Day 11 — where her own objection gets answered
+### Day 11 is done ✅ — her objection is answered
 
-The roadmap names it: *tokens don't expire, and logging out does nothing.*
+Sessions, refresh tokens and real revocation, 2026-09-21. **All three decision
+blocks at step 1** — the first day needing no narrowing question on any
+conceptual block. ADR-014. Record in `docs/learning/day-11/report.md`.
 
-This is the day ADR-009's recorded objection gets addressed in code. On Day 8 she
-argued, unprompted, that a stolen JWT stays cryptographically valid after logout
-and the server has no way to revoke it — and she was right. Day 9 shipped a
-one-hour expiry as the only mitigation available, and ADR-012 records that expiry
-is the whole of revocation until this day.
+The sentence the day turned on is hers: *"The guard can no longer determine
+accept/reject using only information contained in the JWT itself."* And her
+reframing of whether Day 8 was wrong — *"the interesting question is whether its
+requirements were complete"* — is now the ADR's own framing.
 
-**Open the day by reminding her it was her objection.** It is the clearest case
-so far of a finding of hers driving a roadmap item.
+**One deliberate departure from the conventional design.** The guard checks the
+session on every request rather than letting the access token die on its own
+within 15 minutes, so revocation is immediate. That costs one indexed lookup per
+request and it is the first thing to reconsider under load — noted as a revisit
+condition in ADR-014.
+
+**Named rather than hidden:** the `sessions` table grows one row per login and
+nothing removes expired rows yet. The rule is decided (*"delete state once the
+credential it is protecting can no longer be valid anyway"* — hers); only the
+mechanism is missing.
+
+### Then Day 12 — the design review
+
+The roadmap's Day 12 is **no implementation at all**: the frontend designs are
+shared, the API is checked against what the screens actually need, and both the
+roadmap and the designs are amended. It is the first day in this phase that is
+not code.
+
+Worth knowing before it starts: the API now has four auth endpoints beyond
+login and register (`refresh`, `logout`, `logout-everywhere`, `sessions`), and
+whether the screens need all four — a device list in particular — is exactly the
+kind of question that day exists to settle.
 
 ### ⚠️ Day 7's "document" third was not done — carried to Day 14
 

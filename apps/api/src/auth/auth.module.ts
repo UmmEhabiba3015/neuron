@@ -11,19 +11,22 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { PasswordService } from './password.service';
+import { RefreshTokenService } from './refresh-token.service';
+import { Session } from './session.entity';
+import { SessionsRepository } from './sessions.repository';
 import { TokenService } from './token.service';
 
 @Module({
   imports: [
     DatabaseModule,
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Session]),
 
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService<EnvironmentVariables, true>) => ({
         secret: config.get('JWT_SECRET', { infer: true }),
         signOptions: {
-          expiresIn: '1h',
+          expiresIn: '15m',
         },
       }),
     }),
@@ -35,10 +38,18 @@ import { TokenService } from './token.service';
     UsersRepository,
     PasswordService,
     TokenService,
+    RefreshTokenService,
+    SessionsRepository,
     AuthService,
     JwtAuthGuard,
   ],
 
-  exports: [UsersService, PasswordService, TokenService, JwtAuthGuard],
+  exports: [
+    UsersService,
+    PasswordService,
+    TokenService,
+    SessionsRepository,
+    JwtAuthGuard,
+  ],
 })
 export class AuthModule {}
