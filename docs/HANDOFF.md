@@ -32,12 +32,8 @@ step she answered at and — more usefully — which details she *derived* versu
 which were given to her. Both are tracked in git by a narrow gitignore
 exception; the Day 4–7 reports are still local-only, pending the Day 14 decision.
 
-**Day 9's walkthrough is partly owed, and the debt-blocks-days direction applies
-to it.** Covered on 2026-09-14: guard-vs-pipe ordering, and what `request.user`
-is. Still owed: the three services and why they are separate, the DTOs and
-`forbidNonWhitelisted`, and what each test layer can see that the others cannot.
-She asked to move on and that was honoured — it is wiring rather than concepts,
-and much narrower than Day 8's debt was.
+**No learning debt is open.** Day 9's walkthrough was repaid across two sittings
+(2026-09-14 and 2026-09-21): nine topics, eight at step 1. Day 11 starts clean.
 
 **Do not re-teach what she already derived.** The reports carry her own wording.
 The short list: credential stuffing and why the blast radius is the user's
@@ -46,9 +42,9 @@ O(1) argument; the login enumeration oracle; *"the pre-check is not the guard"*;
 and *"the read is for the payload, not for the authorization"*.
 
 **Her database was changed on Day 10** — baselined, migrated, and its five Day 3
-entries deleted because they had no owner. Backup at
-`apps/api/data/neuron.db.backup-20260914-132206`, gitignored. ADR-010's amendment
-6 is now closed on the real file.
+entries deleted because they had no owner. ADR-010's amendment 6 is now closed on
+the real file. The backup was deleted on 2026-09-21; the database is empty and
+fully migrated.
 
 **Also still open, and lighter:** `transform: true` from Day 7 was offered and
 declined. It is worth ten minutes on Day 14, not a day of its own.

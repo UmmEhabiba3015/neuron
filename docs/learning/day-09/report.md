@@ -212,10 +212,94 @@ was meant — verified), and then proposed the structural fix unprompted:
 
 **That shipped in Day 10.**
 
-**Still owed, and she asked to move on:** the three services and why they are
-separate, the DTOs and `forbidNonWhitelisted`, and what each test layer can see.
-Two corrections to the teacher's ordering were given rather than derived
-(`ClassSerializerInterceptor` runs after the handler, and runs twice), and the
-question about what `request.user` carries in memory — the argon2 hash, since
-`@Exclude()` governs serialisation and not selection — was answered by the
-teacher rather than by her.
+**Completed 2026-09-21**, in a second sitting after Days 9 and 10 were pushed.
+
+| Topic | Step |
+|---|---|
+| The three services, and what a wrapper buys | **1** |
+| The DTOs, and `forbidNonWhitelisted` | **1** |
+| The test layers, and what a green suite proves | **1** |
+
+### The services
+
+Asked why `PasswordService` exists when it is seventeen lines of one-line
+wrappers, she gave the framing the file is actually for:
+
+> PasswordService isn't valuable because argon2.verify() is hard to call. It's
+> valuable because it translates infrastructure/library behavior into your
+> application's vocabulary.
+
+Then went past the question. Asked what the wrapper buys when cost parameters
+rise, she named parameter centralisation and then produced the **rehash-on-login
+migration strategy** unprompted — verify an old-format hash, rehash with the new
+one after a successful login, callers unchanged. That is the strongest argument
+for the file existing and it was not put to her.
+
+**One correction.** She said `TokenService`'s design decided that `undefined`
+means "no". That is where it is implemented, not where it was decided — the rule
+is ADR-005's and dates from Day 3, and the `?? undefined` in
+`EntriesRepository.findById` and `UsersRepository.findByName` is the same
+translation. Shown rather than argued:
+
+```
+TypeORM      null   → undefined     (repositories, Day 3)
+argon2       throws → false         (PasswordService)
+@nestjs/jwt  throws → undefined     (TokenService)
+```
+
+`TokenService` is the fourth application of an existing rule rather than a new
+decision.
+
+### The DTOs
+
+On why `LoginDto` has no `@MinLength(8)`, she gave the account-lockout half at
+step 1 — a policy that changes would reject existing short passwords before
+verification ever runs, and login checks credentials rather than creating them.
+
+**The half she did not name** is the information leak, and it is the same shape
+as the enumeration oracle she *did* derive in block 5: a 4-character attempt
+would answer 400 *"password must be longer than or equal to 8 characters"* while
+a wrong 12-character one answers 401. Different status, different timing, and no
+argon2 work done on the short one. Given rather than derived.
+
+On `forbidNonWhitelisted`, step 1 and complete. She had `whitelist` stripping
+unknown fields silently, `forbidNonWhitelisted` rejecting them with a 400, and
+the reason the second is safer:
+
+> If unexpected fields aren't rejected, you're relying on every downstream layer
+> to correctly ignore dangerous properties.
+
+Her summary — **fail closed at the API boundary** — is the right name for it.
+
+### The test layers
+
+All three at step 1. She named what only e2e can catch (routing, guard
+registration, JWT configuration, header extraction, `request.user` being
+attached at all) and gave the general rule in her own words: *"Unit tests verify
+a component in isolation. E2E tests verify that the components work together
+through the application's real external interface."*
+
+The third question was the uncomfortable one — the suite was fully green during
+the entire period when every signed-in user could read every other user's
+journal — and she did not soften the conclusion:
+
+> A green test suite does not prove "the application is correct." It proves "the
+> application satisfies the scenarios that we actually tested."
+
+And the durable version, which is better than the question asked for:
+
+> Test coverage isn't just "how many lines/functions are exercised?" It's also
+> "which security and business invariants have actually been challenged?"
+
+Worth recording that the tenancy bug was **not** a line-coverage gap. `findAll`,
+`findById`, `update` and `delete` were all heavily exercised. What was missing
+was a second user in the room — a scenario, not a code path.
+
+---
+
+## Final tally
+
+Nine topics across two sittings. **Eight at step 1, one at step 2.** Two
+corrections were given rather than derived: where the `undefined` convention was
+decided, and the `LoginDto` information leak. Two of her answers shipped as
+code — `@Exclude()` over a response DTO, and `APP_GUARD` + `@Public()`.

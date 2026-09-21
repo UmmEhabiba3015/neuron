@@ -104,24 +104,31 @@ nobody has written yet; and **`APP_GUARD` + `@Public()`**, because
 `AuthenticatedRequest`'s `user: User` was *"a conditional truth stated
 unconditionally"*.
 
-### ⚠️ Day 9's code walkthrough is partly owed
+### Day 9's code walkthrough is repaid ✅
 
-Run 2026-09-14 at her request. Two topics covered, both at step 1 — the
-guard-vs-pipe ordering, and what `request.user` is.
+Two sittings, 2026-09-14 and 2026-09-21. Nine topics, **eight at step 1**. The
+record is in `docs/learning/day-09/report.md`.
 
-**Still owed:** the three services and why they are separate, the DTOs and
-`forbidNonWhitelisted`, and what each test layer can see that the others cannot.
-She asked to move on and that was honoured. It is narrower than Day 8's debt was
-— these are wiring questions, not concepts — but it is open, and the
-debt-blocks-days direction applies to it.
+Two of her answers shipped as code — `@Exclude()` over a response DTO, and
+`APP_GUARD` + `@Public()`. Two things were given to her rather than derived, and
+are worth re-testing rather than re-explaining: that `undefined` as this
+application's "no" is ADR-005's decision from Day 3 rather than `TokenService`'s
+own, and that `LoginDto` omitting `@MinLength(8)` prevents an information leak
+as well as an account lockout.
+
+**No learning debt is currently open.**
 
 ### Her database was changed on Day 10
 
 Three things happened to `apps/api/data/neuron.db`: it was **baselined**,
 **migrated** through all four migrations, and its **five Day 3 entries were
-deleted** because they had no owner and every query now filters on one. A backup
-sits beside it at `data/neuron.db.backup-20260914-132206` (gitignored). That also
-closed ADR-010 amendment 6 on the real file.
+deleted** because they had no owner and every query now filters on one. That
+closed ADR-010 amendment 6 on the real file. The backup taken at the time was
+deleted on 2026-09-21 at her request; the five entries are gone for good, and
+they were Day 3 test data — an empty string, a single space, `"23.0"`.
+
+The database is now empty and fully migrated: three tables, four migrations
+applied, no entries and no users.
 
 ### Then Day 11 — where her own objection gets answered
 
