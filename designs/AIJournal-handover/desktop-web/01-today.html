@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journal / Today / desktop web 1440 / Pro, settled day</title>
+
+<!-- ==========================================================================
+     MOTION . desktop web 1440 . 01-today.html
+     The motion system is in the BASE at lock.css revision 49, so this screen
+     animates because the product does. There is no variant class, no review
+     hatch and nothing here that a build has to strip.
+
+     WHAT MOVES ON THIS SCREEN
+       the date is written, the glance line types, the waveform draws, the composer rises
+     WHAT IS DELIBERATELY STILL
+       the whole journal, the header, both shut notes until you open one
+
+     THE RECORD NEVER MOVES AND THE HEADER NEVER ARRIVES, on every screen in
+     the product. Only the four things the product itself does can move: a date
+     being written, the product's own line typing, a waveform drawing and the
+     composer rising. Everything else is at full opacity at the first paint.
+     ========================================================================== -->
+
+<!-- ==========================================================================
+     STAGE 4 . DESKTOP WEB 1440 . SCREEN 1 . TODAY, route /
+     Tier: Pro. State: a settled day holding all three object types. The same
+     screen as mobile-web/01-today.html and tablet-web/01-today.html, in the
+     same state, so the three can be read side by side.
+
+     THIS FILE REPLACES THE FIRST DESKTOP SHELL, WHICH WAS REJECTED.
+     That one held the tablet page at 560 and widened the margins, and the
+     verdict on it was that it reframed the tablet rather than designing for
+     the platform. Ten candidates were then drawn across two rounds. V5 Field
+     was chosen out of round one; round two drew five ways of composing its
+     right hand side and all five were rejected on optical balance, which was
+     the right call: each of them arranged the emptiness rather than removing
+     it. This is V5 with the three fixes that came back with that verdict.
+
+     THE SHELL, WHICH IS V5 AND IS NOT BEING CHANGED
+     No page card. The graph bleeds to the right edge of the window and the
+     binding sits at the far left, where a notebook on a desk actually sits.
+     The masthead, the destinations, the date and the glance line are not on
+     the page at all: they are a TITLE BLOCK down the left, the way a drawing
+     or a field sheet carries its own. No tab bar, no row of boxes, no chrome
+     above the content, so the record gets the whole height of a window that
+     is 784 tall against the tablet's 1120.
+
+     FIX 1. THE FIRST ENTRY STARTS ON THE DATE'S LINE. MEASURED AT 0.0px.
+     The sheet takes a top margin equal to everything above the date box in
+     the title block: --s7 of padding, the wordmark at --t-mast on a flat line
+     height, and the --s6 beneath it. 68px today, and DERIVED rather than
+     typed, so it follows if any of the three ever move. Probed: keybox top
+     68.0, sheet top 68.0, delta 0.0.
+
+     FIX 2. THE FORM FILLS THE PAGE AND THE BLANK GRAPH IS GONE.
+     The sheet was a 504px column standing on a 1056px field, with 510px of
+     ruled paper beside it that read as a page nobody had written on. It now
+     runs the width of the page: 426 to 1398, 972 wide, with the page's own
+     42px gutter either side. THE RULED FORM IS THE PAGE.
+
+     FIX 2b. THE ENTRIES FILL THE ROW. CLIENT REVIEW, AND I HAD IT WRONG.
+     This screen first shipped with prose held at 416px on the argument that
+     the measure must not follow the width. Measured on the built page, that
+     put the user's own words at 47% OF THE COLUMN THEY SIT IN: every entry
+     stopped just under halfway across a row whose fill and rules run the full
+     width. That is revision 25's fault at a bigger scale, and it reads as
+     text that failed to load rather than as a measure.
+     THE ARITHMETIC I DEFENDED 416 WITH WAS RIGHT ABOUT LONG-FORM AND WRONG
+     ABOUT THIS. The 45 to 75 character band exists because return-sweep error
+     compounds over many lines. These entries are two to four lines: the
+     longest in the whole sample set is 175 characters, which is TWO LINES at
+     full width. The cost that band prices in is not being paid here, and I
+     was applying a rule without checking whether its reason was present.
+     THE NOTE AND THE SUMMARY ARE RELEASED WITH IT. 3.2 is a ceiling, and a
+     note narrower than the writing above it is precisely what revision 25 was
+     written to stop. All three fill the same column, which is the same
+     relationship they hold at 390 and 834 rather than a new one.
+     Measured: writing 884 of 884, and the first line holds 128 characters over
+     2 lines. THIS READ 156 UNTIL SESSION 8 AND WAS WRONG, on this file, in
+     direction-lock.md 13.11 and in lock.css section 5 alike. Re-measured on all
+     three entries of this screen with a Range over each line's own ink: longest
+     lines 128, 124 and 89 characters, column capacity 126 to 130. The argument
+     is untouched, because 175 characters is still two lines at this width, but
+     the figure was about 22% high and it was carried rather than measured.
+     direction-lock.md 3.2 is now written in characters per line for that reason.
+
+     FIX 2c. THE COLLAPSED NOTE ROW WAS OFF CENTRE IN BOTH COLUMNS.
+     Client review, and both were measurable. On the shut row, 54px tall:
+       the printed key sat 14 above and 0.0 BELOW, so it was 7px high and
+         touching the hairline under it. .said .tcol carries padding-top --s6
+         and padding-bottom 0, which is right for an open note where the key
+         labels from the top and wrong for a shut one where the row is only as
+         tall as the key.
+       the summary sat 3 above and 7 below, 2px high, because .said .ccol
+         carries --s1 top against --s2 bottom.
+     Symmetric padding on the key, and the shut column centres its own
+     summary. Now 14 and 14 on the key, 12.5 and 11.5 on the summary, in a row
+     that is 68 tall. THE EXPANDED STATE IS NOT TOUCHED: the fix is scoped to
+     :not(.open), because a key labelling a long note should stay at its top.
+
+     THE SAME OFF-CENTRING EXISTED AT 390 AND 834. Same rule, same markup. It
+     is fixed on every platform now, in the BASE, at lock.css revision 48.
+
+     FIX 3. THE INPUT BOX CENTRES ON THE JOURNAL. MEASURED AT 912 AND 912.
+     The composer's rule still spans the page, which is what a foot does, and
+     its content now sits on the sheet's own vertical axis instead of against
+     the sheet's left edge. 700px wide, because a 504 box centred under a 972
+     sheet reads as a small object adrift rather than as the place you write.
+
+     THE WAVEFORM IS RE-AUTHORED AND IT IS NOT OPTIONAL.
+     .wave is preserveAspectRatio="none", so widening its row is a change to
+     its tick weight, and this row went from 378.3px to 846.3px. Carried
+     unchanged, the 428 unit viewBox would have drawn this recording at 3.95px
+     ticks against the canonical 1.769, more than twice the weight of the same
+     recording on every other screen in the product. Same pitch of 7, same 2
+     unit bars, the pattern extended by mirroring about its own end so it reads
+     as more of the same recording rather than as a tile.
+     THEN THE ROW GAVE 58px BACK, AND THE PROSE HERE DID NOT FOLLOW IT UNTIL
+     SESSION 8. Closing 9.12 at session 6 gave every recording head its own
+     58px time column, which took the row from 846.3px to 788.3px and the
+     viewBox from 957 to 891. This comment went on describing the geometry the
+     markup no longer had, which is 9.15 item 3: NOTHING RENDERED WRONG AND THE
+     DOCUMENTATION WAS FALSE, and a header comment is part of the deliverable.
+     Re-measured on the file at session 8 rather than taken from the record:
+     row 788.30px, viewBox 891, TICK 1.7695 against the canonical 1.769.
+     direction-lock.md 12.7.
+
+     MEASURED AT A TRUE 1440, NOT ESTIMATED
+       title block   0 to 360, on cream, unruled
+       binding       360 to 384
+       graph         384 to 1440, full bleed, no right margin
+       page gutter   --s9, three modules
+       sheet         426 to 1398, 972 wide. THE FORM IS THE PAGE
+       date box top  68        first entry top  68     delta 0.0
+       the writing   884px, the full column. 128 characters on the first line,
+                     2 lines. capacity 126 to 130. was recorded as 156 until
+                     session 8; see 3.2
+       the note      884px, and its summary too. the same as the writing
+       shut note row 68 tall. key 14 above and 14 below, off centre 0.0
+                     summary 12.5 above and 11.5 below, off centre 0.5
+       recording     788.3px of waveform, viewBox 891, tick 1.7695
+                     (846.3 and 957 before the head took its 58px time column)
+       mood chip     183.6 each, five of them sharing the row
+       composer      700px centred, its centre 912, the sheet's centre 912
+       page height   784, which is 1440 by 900 less a desktop browser's own
+                     furniture. 56 graph modules.
+
+     WHAT DID NOT CHANGE, AND IS NOT ALLOWED TO
+     Palette, type scale, spacing scale, radii, rule weights, component
+     identity, information hierarchy, and the sample content set in
+     direction-lock.md section 8. No new colour, no new content, no new
+     component. The hand appears exactly twice, in the date box and the mood
+     question, both above 20px.
+
+     RULE 7.6 RESTATED FOR THIS SHELL. The masthead is not at the top of the
+     page here, so the rule becomes a claim about the title block: it composes
+     identically on all four destinations, so nothing moves when you switch.
+     That has to be MEASURED on all four before this ships, exactly as it was
+     at 834, and it cannot be measured from one screen.
+
+     CONTRAST, UNCHANGED FROM MOBILE AND TABLET BECAUSE THE PALETTE IS
+       user's words       --ink on --paper-2        13.24
+       printed labels     --rule on --paper          6.85
+       the note           --rule on --paper          6.85
+       time column        --rule-2 on --paper-2      4.97
+       note summary       --rule-2 on --paper        4.61
+       Private mark       --rule-2 on --paper        4.61
+       date box key       --paper on --rule          6.85
+       current dest       --paper on --block         8.89
+       duration           --block on --block-2       5.23
+       glance line        --rule on --paper          6.85
+     Every tap target 44px or larger. No information carried by colour alone.
+
+     SIGNED OFF, AND THE .f CLASS IS GONE. lock.css section 5d merged into
+     section 5 at revision 35, and 5b, 5c, 5e and 5f were deleted with the ten
+     selection comps and the two review variants. Three things came in with the
+     merge and none of them is the shell:
+       FIX 3 WAS RESCUED FROM SECTION 5f, where it had been written as
+         .app.f .composer rather than .app.f.ia and would have been deleted by
+         the sign-off itself, taking the composer off the sheet's axis. It
+         rendered correctly and probed at the right number the whole time, so
+         no check on this screen could have found it.
+       THE white-space:nowrap CAME OFF THE DATE. At 200% type it was clipping
+         "Sun 9 Aug '26" mid glyph, keybox clientW 288 against scrollW 451.
+         direction-lock.md 3.3 is binding. Re-measured at 200%: the box grows
+         50 to 193, wraps to three lines, 288 against 288, no overflow.
+       TWO OF THE FOUR CROSS-PLATFORM DEFECTS ARE FIXED HERE,
+         DESKTOP ONLY, BY CLIENT DECISION, and two more are fixed in this
+         file's markup: the mood chips and the out-of-memory option now carry
+         aria-pressed, and the wordmark is the h1. The mood question and the
+         wordmark take an explicit weight 400 in the lock, because the type
+         scale has no weight axis and an h1 and an h2 are bold by default.
+         THE CONSEQUENCE, STATED RATHER THAN LEFT TO BE FOUND: the mood
+         question renders at 400 here and at 700 at 390 and 834, so the one
+         hand-set object in the product is two different objects across the
+         three web platforms until 9.14 is closed everywhere.
+       STILL NOT FIXED ANYWHERE: the time column is a bare string rather than
+         <time datetime>, and the composer's placeholder is its only label,
+         which is correct in a comp where the field is a div and a build
+         obligation where it is an input.
+
+     FONTS. Constantia, Segoe UI, Ink Free. Locally installed, no network
+     request from this file or from lock.css.
+     Production substitutes: Recoleta or Freight Text Pro, a grotesk with
+     real small caps, Caveat.
+     ========================================================================== -->
+
+<link rel="stylesheet" href="../lock.css">
+</head>
+<body>
+
+<div class="device d">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+
+  <div class="app">
+    <div class="rail" aria-hidden="true"></div>
+
+    <div class="title">
+      <h1 class="wordmark">Journal</h1>
+      <div class="keybox">
+        <span class="k">Day</span>
+        <span class="v">Sun 9 Aug '26</span>
+      </div>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#" aria-current="page">Today</a>
+        <a href="#">Timeline</a>
+        <a href="#">Ask</a>
+        <a href="#">You</a>
+      </nav>
+      <p class="glance"><span class="gline">Sleep has come up on four of the last six days.</span></p>
+    </div>
+
+    <div class="page">
+
+      <main class="sheet">
+
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-09T09:20">09:20</time></div>
+          <div class="ccol">
+            <p class="prose">The flat people said Tuesday, and it's Sunday, so I've
+              decided not to think about it until Tuesday. That lasted about an hour.
+              I keep opening the email to check I read it right.</p>
+          </div>
+        </div>
+
+        <aside class="said" aria-label="From your record">
+          <div class="tcol">From your record</div>
+          <div class="ccol">
+            <details>
+              <summary>
+                <span class="lblbox"><span class="lbl shut">Read the note</span>
+                <span class="lbl open">Hide the note</span></span>
+                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </summary>
+              <div class="note">
+                <p>You wrote something close to this in March, about the job. That you'd
+                   decided not to think about it until Thursday.</p>
+                <div class="said-foot">
+                  <a class="cite" href="#">12 March</a>
+                  <button class="wrong" type="button">That's not right</button>
+                </div>
+              </div>
+            </details>
+          </div>
+        </aside>
+
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"><time datetime="2026-08-09T14:05">14:05</time></div>
+            <div class="ccol">
+              <button class="play" type="button"
+                      aria-label="Play recording, 2 minutes 41 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/>
+                </svg>
+              </button>
+              <svg class="wave" viewBox="0 0 891 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="18" width="2" height="8"/><rect x="7" y="15" width="2" height="14"/><rect x="14" y="13" width="2" height="18"/><rect x="21" y="8" width="2" height="28"/><rect x="28" y="4" width="2" height="36"/><rect x="35" y="10" width="2" height="24"/><rect x="42" y="15" width="2" height="14"/><rect x="49" y="17" width="2" height="10"/><rect x="56" y="19" width="2" height="6"/><rect x="63" y="14" width="2" height="16"/><rect x="70" y="7" width="2" height="30"/><rect x="77" y="11" width="2" height="22"/><rect x="84" y="16" width="2" height="12"/><rect x="91" y="9" width="2" height="26"/><rect x="98" y="2" width="2" height="40"/><rect x="105" y="7" width="2" height="30"/><rect x="112" y="12" width="2" height="20"/><rect x="119" y="16" width="2" height="12"/><rect x="126" y="19" width="2" height="6"/><rect x="133" y="13" width="2" height="18"/><rect x="140" y="8" width="2" height="28"/><rect x="147" y="12" width="2" height="20"/><rect x="154" y="16" width="2" height="12"/><rect x="161" y="11" width="2" height="22"/><rect x="168" y="5" width="2" height="34"/><rect x="175" y="12" width="2" height="20"/><rect x="182" y="18" width="2" height="8"/><rect x="189" y="15" width="2" height="14"/><rect x="196" y="12" width="2" height="20"/><rect x="203" y="7" width="2" height="30"/><rect x="210" y="3" width="2" height="38"/><rect x="217" y="11" width="2" height="22"/><rect x="224" y="19" width="2" height="6"/><rect x="231" y="16" width="2" height="12"/><rect x="238" y="14" width="2" height="16"/><rect x="245" y="11" width="2" height="22"/><rect x="252" y="8" width="2" height="28"/><rect x="259" y="13" width="2" height="18"/><rect x="266" y="18" width="2" height="8"/><rect x="273" y="14" width="2" height="16"/><rect x="280" y="11" width="2" height="22"/><rect x="287" y="6" width="2" height="32"/><rect x="294" y="2" width="2" height="40"/><rect x="301" y="9" width="2" height="26"/><rect x="308" y="16" width="2" height="12"/><rect x="315" y="18" width="2" height="8"/><rect x="322" y="19" width="2" height="6"/><rect x="329" y="15" width="2" height="14"/><rect x="336" y="12" width="2" height="20"/><rect x="343" y="9" width="2" height="26"/><rect x="350" y="6" width="2" height="32"/><rect x="357" y="12" width="2" height="20"/><rect x="364" y="18" width="2" height="8"/><rect x="371" y="16" width="2" height="12"/><rect x="378" y="14" width="2" height="16"/><rect x="385" y="9" width="2" height="26"/><rect x="392" y="4" width="2" height="36"/><rect x="399" y="12" width="2" height="20"/><rect x="406" y="19" width="2" height="6"/><rect x="413" y="16" width="2" height="12"/><rect x="420" y="13" width="2" height="18"/><rect x="427" y="16" width="2" height="12"/><rect x="434" y="19" width="2" height="6"/><rect x="441" y="12" width="2" height="20"/><rect x="448" y="4" width="2" height="36"/><rect x="455" y="9" width="2" height="26"/><rect x="462" y="14" width="2" height="16"/><rect x="469" y="16" width="2" height="12"/><rect x="476" y="18" width="2" height="8"/><rect x="483" y="12" width="2" height="20"/><rect x="490" y="6" width="2" height="32"/><rect x="497" y="9" width="2" height="26"/><rect x="504" y="12" width="2" height="20"/><rect x="511" y="15" width="2" height="14"/><rect x="518" y="19" width="2" height="6"/><rect x="525" y="18" width="2" height="8"/><rect x="532" y="16" width="2" height="12"/><rect x="539" y="9" width="2" height="26"/><rect x="546" y="2" width="2" height="40"/><rect x="553" y="6" width="2" height="32"/><rect x="560" y="11" width="2" height="22"/><rect x="567" y="14" width="2" height="16"/><rect x="574" y="18" width="2" height="8"/><rect x="581" y="13" width="2" height="18"/><rect x="588" y="8" width="2" height="28"/><rect x="595" y="11" width="2" height="22"/><rect x="602" y="14" width="2" height="16"/><rect x="609" y="16" width="2" height="12"/><rect x="616" y="19" width="2" height="6"/><rect x="623" y="11" width="2" height="22"/><rect x="630" y="3" width="2" height="38"/><rect x="637" y="7" width="2" height="30"/><rect x="644" y="12" width="2" height="20"/><rect x="651" y="15" width="2" height="14"/><rect x="658" y="18" width="2" height="8"/><rect x="665" y="12" width="2" height="20"/><rect x="672" y="5" width="2" height="34"/><rect x="679" y="11" width="2" height="22"/><rect x="686" y="16" width="2" height="12"/><rect x="693" y="12" width="2" height="20"/><rect x="700" y="8" width="2" height="28"/><rect x="707" y="13" width="2" height="18"/><rect x="714" y="19" width="2" height="6"/><rect x="721" y="16" width="2" height="12"/><rect x="728" y="12" width="2" height="20"/><rect x="735" y="7" width="2" height="30"/><rect x="742" y="2" width="2" height="40"/><rect x="749" y="9" width="2" height="26"/><rect x="756" y="16" width="2" height="12"/><rect x="763" y="11" width="2" height="22"/><rect x="770" y="7" width="2" height="30"/><rect x="777" y="14" width="2" height="16"/><rect x="784" y="19" width="2" height="6"/><rect x="791" y="17" width="2" height="10"/><rect x="798" y="15" width="2" height="14"/><rect x="805" y="10" width="2" height="24"/><rect x="812" y="4" width="2" height="36"/><rect x="819" y="8" width="2" height="28"/><rect x="826" y="13" width="2" height="18"/><rect x="833" y="15" width="2" height="14"/><rect x="840" y="18" width="2" height="8"/><rect x="847" y="15" width="2" height="14"/><rect x="854" y="13" width="2" height="18"/><rect x="861" y="8" width="2" height="28"/><rect x="868" y="4" width="2" height="36"/><rect x="875" y="10" width="2" height="24"/><rect x="882" y="15" width="2" height="14"/><rect x="889" y="17" width="2" height="10"/><rect x="896" y="19" width="2" height="6"/><rect x="903" y="14" width="2" height="16"/><rect x="910" y="7" width="2" height="30"/><rect x="917" y="11" width="2" height="22"/><rect x="924" y="16" width="2" height="12"/><rect x="931" y="9" width="2" height="26"/><rect x="938" y="2" width="2" height="40"/><rect x="945" y="7" width="2" height="30"/><rect x="952" y="12" width="2" height="20"/>
+                </g>
+              </svg>
+              <span class="dur">2:41</span>
+            </div>
+          </div>
+          <div class="body">
+            <div class="tcol"></div>
+            <div class="ccol">
+              <p class="prose">Walked the canal as far as the second bridge and back.
+                Didn't listen to anything. There were two swans that have been there
+                all summer and I've never once seen them move.</p>
+            </div>
+          </div>
+        </div>
+
+        <aside class="said" aria-label="From your record">
+          <div class="tcol">From your record</div>
+          <div class="ccol">
+            <details>
+              <summary>
+                <span class="lblbox"><span class="lbl shut">Read the note</span>
+                <span class="lbl open">Hide the note</span></span>
+                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </summary>
+              <div class="note">
+                <p>That stretch of canal is in your entry from 3 July too. What keeps
+                   taking you there?</p>
+                <div class="said-foot">
+                  <a class="cite" href="#">3 July</a>
+                  <button class="wrong" type="button">That's not right</button>
+                </div>
+              </div>
+            </details>
+          </div>
+        </aside>
+
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-09T21:40">21:40</time></div>
+          <div class="ccol">
+            <p class="prose">Priya rang. We talked for an hour about nothing. I'd
+              forgotten that's a thing you can do.</p>
+            <span class="mark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   aria-hidden="true">
+                <rect x="5" y="11" width="14" height="10" rx="1"/>
+                <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+              </svg>
+              Private, out of memory
+            </span>
+          </div>
+        </div>
+
+        <section class="moodrow">
+          <h2>How was today?</h2>
+          <div class="chips">
+            <button type="button" aria-pressed="false">Hard</button>
+            <button type="button" aria-pressed="false">Low</button>
+            <button type="button" aria-pressed="false">Even</button>
+            <button type="button" aria-pressed="false">Good</button>
+            <button type="button" aria-pressed="false">Light</button>
+          </div>
+        </section>
+
+      </main>
+
+      <div class="composer">
+        <div class="crow">
+          <div class="field placeholder">Add to today</div>
+          <button class="mic" type="button" aria-label="Record">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="2.5" width="6" height="11.5" rx="3"/>
+              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/>
+            </svg>
+          </button>
+        </div>
+        <button class="opt" type="button" aria-pressed="false">
+          <span class="tick" aria-hidden="true"></span> Keep this out of memory
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<p class="caption d"><b>Today . desktop web 1440 . Pro, settled day</b><br>
+V5 Field with five fixes. This replaces the first desktop shell, which reframed the tablet,
+and it supersedes the five round two refinements, all of which arranged the empty space rather
+than removing it.<br>
+<b>1. The first entry starts on the date's line.</b> The sheet takes a top margin equal to
+everything above the date box in the title block, derived from the tokens rather than typed,
+so it follows if any of them move. <b>Probed: date box top 68.0, first entry top 68.0,
+delta 0.0.</b><br>
+<b>2. The form fills the page and the blank graph is gone.</b> The sheet runs 426 to 1398,
+972 wide, with the page's own 42px gutter either side.<br>
+<b>2b. The entries fill the row, and I had this wrong first time.</b> Held at 416 the writing
+filled <b>47% of the column it sits in</b>, stopping just under halfway across a row whose
+fill runs the full width, which is revision 25's fault at a bigger scale. The 45 to 75
+character band exists because return-sweep error compounds over many lines; <b>these entries
+are two to four lines</b>, and the longest in the whole sample set is two lines at full width.
+I was applying a rule without checking whether its reason was present. The note and its
+summary are released with it, because a note narrower than the writing is what revision 25
+was written to stop.<br>
+<b>2c. The collapsed note row was off centre in both columns.</b> The printed key sat 14 above
+and <b>0.0 below</b>, touching the hairline under it; the summary sat 3 above and 7 below.
+Now 14 and 14, and 12.5 and 11.5, in a row of 68. <b>The expanded state is untouched</b>: the
+fix is scoped to the shut row, because a key labelling a long note belongs at its top. The
+same off-centring existed at 390 and 834 and is fixed everywhere now, in the base, at revision 48.<br>
+<b>3. The input box centres on the journal.</b> The composer's rule still spans the page,
+which is what a foot does, and its content sits on the sheet's axis. <b>Measured: composer
+centre 912, sheet centre 912.</b> 700px wide, because a 504 box centred under a 972 sheet
+reads as adrift rather than as the place you write.<br>
+<b>The waveform is re-authored, and it had to be.</b> The row went from 378.3px to 846.3px,
+so the old viewBox would have drawn this recording at more than twice the tick weight of the
+same recording everywhere else. It then gave <b>58px back</b> when the recording head took its
+own time column at session 6, so the row is <b>788.3px</b> and the viewBox <b>891</b>.
+<b>Re-measured at session 8: tick 1.7695</b> against the canonical 1.769. This caption and the
+header both said 846.3 and 957 until then, which is the documentation drifting from the markup
+while nothing rendered wrong.</p>
+
+<p class="caption d"><b>Motion . desktop web 1440 . 01-today.html</b><br>
+<b>What moves:</b> the date is written, the glance line types, the waveform draws, the composer rises.<br>
+<b>What is still:</b> the whole journal, the header, both shut notes until you open one.
+</p>
+</body>
+</html>

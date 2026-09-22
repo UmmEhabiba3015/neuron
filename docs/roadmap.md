@@ -83,9 +83,13 @@ A retrieval feature with no interface is a feature nobody can judge.
 **In the core path:** journaling, mood, search, memory chat (RAG), weekly
 insights, auth, a real frontend, deployment.
 
-**Explicitly deferred:** habit tracking, notifications, calendar view,
-file and image attachments, monthly insights, rich-text editing, analytics
-dashboards.
+**Explicitly deferred:** habit tracking, notifications, monthly insights,
+rich-text editing, analytics dashboards, tiers and the paywall, guest sessions.
+
+~~calendar view~~, ~~file and image attachments~~ — **both amended on Day 12.**
+The calendar is a zoom level of the one timeline rather than a second screen,
+and voice memos are the brief's primary input mode and the commercial model.
+Photo and file attachments stay deferred. ADR-016.
 
 Deferred does not mean bad. It means these features teach concepts the core
 path already teaches, so they cost time without buying understanding. If a day
@@ -153,8 +157,8 @@ to someone.**
 | 9 | Storing a password is a liability — and there is still no way to create a user at all. | **Done, and it did not split.** Hashing vs encryption, why the answer is one-way, and why argon2 is deliberately slow (measured: SHA-256 at 578,000 guesses/sec against argon2id at 30). Registration, login, token issuing and verifying, `GET /auth/me`, and `JwtAuthGuard` on every `/entries` route. ADR-011 (password storage) and ADR-012 (endpoints). **bcrypt was chosen and then reversed** in favour of argon2id on the OWASP position. 128 unit tests, 71 e2e. |
 | 10 | Authenticated is not the same as authorized. | **Done.** Ownership enforced in the `WHERE` clause rather than after the fetch — the controller-side check was demonstrated to be a *constant*, because `select: false` makes `entry.userId` `undefined` and `undefined !== anything` denies everybody including the owner. 404 never 403, so "not yours" and "does not exist" are indistinguishable. `user_id` is now `NOT NULL`, and the guard is `APP_GUARD` with `@Public()` — a new route is closed by default. ADR-013. 131 unit, 86 e2e. |
 | 11 | Tokens don't expire, and logging out does nothing. | **Done.** Her Day 8 objection answered in code: a sessions table, 15-minute access tokens, 30-day rotating refresh tokens, and a guard that checks the session on every request so revocation is *immediate* rather than bounded by expiry. `logout`, `logout-everywhere`, `sessions`. Refresh-token reuse revokes every session for that user. ADR-014. 131 unit, 102 e2e. |
-| 12 | **Design review. The screens exist; the API was built without seeing them.** | See the section below. This is where the frontend designs are shared, the API is checked against what the screens actually need, and both the roadmap and the designs are amended. **No implementation on this day.** |
-| 13 | Mood is part of the product but isn't modeled. | Data modeling for a second entity. Relationships. A migration on a live schema. Easier than it would have been, because Day 8 already built all three mechanisms. |
+| 12 | **Design review. The screens exist; the API was built without seeing them.** | **Done.** 40 screens reviewed against the API. The API models entries; the designs model days, and the day ends at 4am — ADR-015. Two contradictions settled: email login, and voice memos in scope — ADR-016. See the section below. **No implementation on this day.** |
+| 13 | Mood is part of the product but isn't modeled — and neither is the thing mood belongs to. | Data modeling for a second entity. Relationships. A migration on a live schema, with a backfill. **Re-aimed by Day 12: the entity is the `days` table, not a mood column on `entries`** (ADR-015). Also `name` to `email` (ADR-016), and the day-range and pagination work pulled forward from Day 29. |
 | 14 | **Review day.** Audit, refactor, document. | The handbook entries for Phase 2. This is also where the Phase 1 documentation debt gets paid. |
 
 **Why identity comes before AI:** a retrieval system that leaks another user's
@@ -311,6 +315,68 @@ arrives on Day 13 and analytics are explicitly deferred. If the designs contain
 either, that is a scope conversation for Day 12 rather than a surprise on
 Day 30.
 
+### What the review found — 2026-09-23
+
+The designs are in `designs/AIJournal-handover/`: 40 screens, three
+breakpoints, and three binding documents. **The API supports roughly one of the
+ten routes they describe.**
+
+**The finding that mattered:** the API models *entries*; the designs model
+*days*. `/d/{date}`, the calendar zoom, mood, the monotonic total, export
+granularity and citations all hang off a day with a **4am boundary**, and
+nothing in the API could express one. ADR-015 settles it. **Day 13 was going to
+hang mood off entries and would have been wrong by Day 15.**
+
+**Two contradictions, both settled by the owner:**
+
+- **Auth.** Designs said email + code or passkey; the API built name +
+  password. **Email + password wins** — codes and passkeys deferred. ADR-016.
+- **Voice memos.** Deferred by this roadmap as "attachments"; they are the
+  brief's primary input mode *and* the commercial model. **In scope.** ADR-016.
+
+**The ten predictions, scored:** four confirmed as designed (empty states,
+search no-results, showing the search term, edit-does-not-change-date), four
+misaligned, two answered by the designs in the API's favour. Detail in ADR-016.
+
+- **Prediction 4 was right.** Validation errors return an array; the designs
+  have **no error state drawn anywhere**, and PROJECT.md §0.2 rule 7 forbids
+  disabled controls — so every failure must become a sentence in place.
+- **Prediction 7 was wrong in the other direction.** Delete returns the entry
+  for an undo that no screen draws.
+- **Prediction 9 could not be scored.** `/in`, `/new` and `/restore` are in the
+  route table and **are not among the 12 drawn screens.** The most heavily
+  tested part of the API has no interface designed for it.
+- **Prediction 2 came up empty, which is a good result.** Every field the API
+  returns is used by a screen.
+
+### Where the design's features land
+
+Recorded so "follow the designs" does not become "build all of it now." The
+roadmap's ordering principle holds: Day 22's embeddings are only interesting
+because Day 21's `LIKE` visibly fails.
+
+| Design surface | Day | Note |
+|---|---|---|
+| Days, mood, 4am boundary, timezone | **13** | ADR-015. Re-aimed, not added |
+| Email login | **13** | ADR-016 |
+| Date-range filter, pagination, day-summary for the calendar | **13–14** | **Pulled forward from Day 29.** The frontend cannot paint a calendar without it |
+| Draft / autosave | 18 | Designs answered it: persist on every keystroke |
+| Voice memo capture, storage, playback | **18–19** | ADR-016. Object storage arrives before Day 31 |
+| Search snippets, passage anchors `#p{n}` | 21 | |
+| Transcription | 24 | Async, external, failure-prone. Belongs with the queue work |
+| `/ask/{id}`, citations, reflections | 25–28 | The whole Pro surface |
+| Tiers, paywall, guest sessions | — | Deferred, deliberately. ADR-016 §3 |
+
+### Amendments owed to the designs
+
+The design of record is allowed to move on this day, and three things in it
+need to change:
+
+1. **Draw `/in`, `/new`, `/restore`** with an email and password field.
+2. **Draw a validation error state** — a sentence in place, no disabled control.
+3. **Decide delete's undo:** draw it, or the API stops returning the entry.
+
+
 ### What to bring
 
 The designs themselves, at whatever fidelity they exist, and a note of which
@@ -454,8 +520,14 @@ the explanation happens.
   the contract step is unscheduled. Day 10 is the natural home.
 - **Where does the token live in the browser?** Day 15, and it is a security
   decision rather than a convenience one.
-- Rich text versus plain text for entries — deferred until the data model
-  forces it, most likely Day 18.
+- ~~Rich text versus plain text for entries?~~ **Resolved by the designs** —
+  the brief cut markdown outright ("journal writing is prose") and no screen
+  renders formatted text. Plain text stands.
+- **Does an entry move if the user changes timezone?** ADR-015 says no, by
+  resolving the day at write time. First support question about an entry on
+  the wrong day is the revisit trigger.
+- **Where does audio live, and when?** Object storage, and it arrives around
+  Day 18 rather than Day 31. ADR-016.
 - Which AI provider, and does that decision need to be reversible? Phase 4.
 - `better-sqlite3@13.0.3` sits outside `typeorm`'s `^12.0.0` peer range. It
   works and is pinned. It dissolves on Day 31 when Postgres arrives, so it is

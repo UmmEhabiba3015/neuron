@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journal / Talk / mobile web / listening, and the two outcomes</title>
+
+<!-- ==========================================================================
+     MOTION . mobile web 390 . 03-talk.html
+     The motion system is in the BASE at lock.css revision 49, so this screen
+     animates because the product does. There is no variant class, no review
+     hatch and nothing here that a build has to strip.
+
+     WHAT MOVES ON THIS SCREEN
+       two row waveforms and the capture waveform draw
+     WHAT IS DELIBERATELY STILL
+       all six states otherwise, and every one of the six printed date boxes, because printed prose is not written by a hand
+
+     THE RECORD NEVER MOVES AND THE HEADER NEVER ARRIVES, on every screen in
+     the product. Only the four things the product itself does can move: a date
+     being written, the product's own line typing, a waveform drawing and the
+     composer rising. Everything else is at full opacity at the first paint.
+     ========================================================================== -->
+
+<!-- ==========================================================================
+     STAGE 3 . MOBILE WEB . SCREEN 3 OF 12 . VOICE CAPTURE, route /talk
+     Both tiers. Six states: listening, kept, transcribing, and the three
+     microphone permission states.
+
+     ONE JOB, FULL SCREEN
+     A centred waveform and nothing competing. No destination row, because
+     this is a pushed page and not a place you navigate to sideways. Back is
+     the only way out and it STOPS AND KEEPS. It never discards. On Free that
+     rule is load-bearing: there is no transcript to recover a lost recording
+     from.
+
+     THE THING YOU ARE MAKING LOOKS LIKE THE THING YOU MADE
+     The capture surface is the same toned block, the same waveform mark and
+     the same colour as a recording row on Today and Timeline. That is the
+     strongest argument available for --block marking audio and only audio: a
+     recording in progress and a recording at rest are visibly one object at
+     two moments.
+
+     WHERE THE TIERS SEPARATE, AND WHERE THEY DO NOT
+     Recording is identical on both tiers. The difference arrives after Stop,
+     and it is stated as a fact rather than a restriction. Free gets one line,
+     said once and never repeated: kept as audio, Pro turns it into text.
+     There is no lock, no blur, no grey, no countdown, no upgrade button on
+     this screen. Selling into the moment someone has just spoken is exactly
+     what the paywall rules forbid.
+
+     THE FREE LINE IS SHOWN ON THE FIRST RECORDING ONLY. A CONDITION, NOT A
+     LAYOUT. The flow says it is "stated once and never nagging", and a static
+     comp can only draw one state, so it is drawn present. In the build it
+     appears under a user's FIRST recording and never again. Drawing it on
+     every capture screen, which is what these comps look like in a row, is
+     the difference between a fact and a nag.
+
+     THE PRO STATE IS A LINE OF TEXT
+     Transcribing. Plain, static, never animated dots. The flow is explicit
+     that thinking is a line of text and never an animation, and this is the
+     same rule one screen earlier.
+
+     THE KEPT STATE IS A TRANSIENT, NOT A ROUTE. Decided after the flow walk.
+     Stopping returns to Today, where the memo row is already in the day list,
+     and the row appearing is the confirmation. 00-flow.md section 3.1 says
+     exactly that: they talk, stop, the memo appears on /. The kept stage below
+     is kept as a DRAWING of what a just-finished recording looks like in the
+     half second before the return, and it is not somewhere you can navigate
+     to. Making it a route cost a third tap on a path the flow caps at two.
+
+     THE PERMISSION STATES WERE MISSING UNTIL THE FLOW WALK FOUND THEM, and
+     they sit at the second tap of the entire product. Denied is the hard one:
+     on the web there is no way to re-prompt, so the screen has to explain a
+     recovery it cannot perform and then get out of the way.
+
+     TRADE-OFF TAKEN
+     Stop and keep is a keyline button rather than a filled one, and the
+     record control stays the only filled control on the screen. That reads
+     slightly quieter than a primary action normally would. It is deliberate:
+     while recording, the loudest object should be the recording, not the
+     button that ends it. Both controls clear 44px and Stop is first in
+     source order, so keyboard and screen reader users reach it first.
+
+     CONTRAST, MEASURED
+       elapsed readout    --rule on --paper          6.85
+       waveform           --block on --block-2        5.23
+       the free line      --rule on --paper-2        7.40
+       Stop and keep      --rule on --paper-2        7.40
+       Pause              --rule on --paper-2        7.40
+       back               --rule over the graph      5.66 worst case
+       Transcribing       --rule on --paper-2        7.40
+     Record control 50x50, Stop 44 minimum, Pause 44 minimum, back 44 minimum.
+
+     FONTS. Constantia, Segoe UI, Ink Free. Locally installed, no network.
+     Production substitutes: Recoleta or Freight Text Pro, a grotesk with real
+     small caps, Caveat.
+     ========================================================================== -->
+
+<link rel="stylesheet" href="../lock.css">
+</head>
+<body>
+
+<!-- ============================ LISTENING ============================ -->
+<div class="device">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+
+  <div class="app">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+
+      <header class="mast">
+        <a class="back" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/></svg>
+          Today
+        </a>
+      </header>
+
+      <main class="stack">
+
+        <div class="keybox">
+          <span class="k">Recording</span>
+          <h1 class="v printed">Sun 9 Aug, 21:58</h1>
+        </div>
+
+        <div class="recrow">
+          <div class="head col">
+            <svg class="wave big" viewBox="0 0 300 96" preserveAspectRatio="none" aria-hidden="true">
+              <g fill="currentColor">
+                <rect x="0" y="40" width="3" height="16"/><rect x="9" y="30" width="3" height="36"/>
+                <rect x="18" y="14" width="3" height="68"/><rect x="27" y="36" width="3" height="24"/>
+                <rect x="36" y="44" width="3" height="8"/><rect x="45" y="20" width="3" height="56"/>
+                <rect x="54" y="34" width="3" height="28"/><rect x="63" y="6" width="3" height="84"/>
+                <rect x="72" y="28" width="3" height="40"/><rect x="81" y="43" width="3" height="10"/>
+                <rect x="90" y="18" width="3" height="60"/><rect x="99" y="35" width="3" height="26"/>
+                <rect x="108" y="10" width="3" height="76"/><rect x="117" y="41" width="3" height="14"/>
+                <rect x="126" y="26" width="3" height="44"/><rect x="135" y="4" width="3" height="88"/>
+                <rect x="144" y="42" width="3" height="12"/><rect x="153" y="31" width="3" height="34"/>
+                <rect x="162" y="16" width="3" height="64"/><rect x="171" y="39" width="3" height="18"/>
+                <rect x="180" y="24" width="3" height="48"/><rect x="189" y="8" width="3" height="80"/>
+                <rect x="198" y="37" width="3" height="22"/><rect x="207" y="44" width="3" height="8"/>
+                <rect x="216" y="29" width="3" height="38"/><rect x="225" y="12" width="3" height="72"/>
+                <rect x="234" y="40" width="3" height="16"/><rect x="243" y="33" width="3" height="30"/>
+                <rect x="252" y="22" width="3" height="52"/><rect x="261" y="43" width="3" height="10"/>
+                <rect x="270" y="27" width="3" height="42"/><rect x="279" y="17" width="3" height="62"/>
+                <rect x="288" y="38" width="3" height="20"/>
+              </g>
+            </svg>
+            <span class="dur">Listening</span>
+          </div>
+        </div>
+
+        <p class="readout">0:47</p>
+
+        <div class="row">
+          <button class="btn keyline" type="button">Stop and keep</button>
+          <button class="btn keyline" type="button">Pause</button>
+        </div>
+
+      </main>
+
+      <div class="notice">Kept as audio. Pro turns your recordings into text you
+        can read and search.</div>
+
+    </div>
+  </div>
+</div>
+
+<p class="caption"><b>Talk . listening . both tiers</b><br>
+One job, full screen. No destination row, because this is a pushed page.
+<b>Back stops and keeps.</b> It never discards, which is load-bearing on Free
+where there is no transcript to recover a lost recording from.<br>
+The capture surface is the same toned block, waveform and colour as a recording
+row on Today. A recording in progress and a recording at rest are one object at
+two moments.</p>
+
+<!-- ========================= KEPT . FREE ============================= -->
+<div class="device">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+
+  <div class="app">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+
+      <header class="mast">
+        <a class="back" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/></svg>
+          Today
+        </a>
+      </header>
+
+      <main class="stack">
+
+        <div class="keybox">
+          <span class="k">Kept</span>
+          <h1 class="v printed">Sun 9 Aug, 21:58</h1>
+        </div>
+
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"><time datetime="2026-08-09T21:58">21:58</time></div>
+            <div class="ccol">
+              <button class="play" type="button"
+                      aria-label="Play this recording, 1 minute 12 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/></svg>
+              </button>
+              <svg class="wave" viewBox="0 0 177 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="18" width="2" height="8"/><rect x="7" y="13" width="2" height="18"/><rect x="14" y="4" width="2" height="36"/><rect x="21" y="15" width="2" height="14"/><rect x="28" y="19" width="2" height="6"/><rect x="35" y="7" width="2" height="30"/><rect x="42" y="16" width="2" height="12"/><rect x="49" y="2" width="2" height="40"/><rect x="56" y="12" width="2" height="20"/><rect x="63" y="19" width="2" height="6"/><rect x="70" y="8" width="2" height="28"/><rect x="77" y="16" width="2" height="12"/><rect x="84" y="5" width="2" height="34"/><rect x="91" y="18" width="2" height="8"/><rect x="98" y="12" width="2" height="20"/><rect x="105" y="3" width="2" height="38"/><rect x="112" y="19" width="2" height="6"/><rect x="119" y="14" width="2" height="16"/><rect x="126" y="8" width="2" height="28"/><rect x="133" y="18" width="2" height="8"/><rect x="140" y="11" width="2" height="22"/><rect x="147" y="2" width="2" height="40"/><rect x="154" y="16" width="2" height="12"/><rect x="161" y="19" width="2" height="6"/><rect x="168" y="12" width="2" height="20"/><rect x="175" y="6" width="2" height="32"/><rect x="182" y="18" width="2" height="8"/><rect x="189" y="14" width="2" height="16"/><rect x="196" y="4" width="2" height="36"/><rect x="203" y="19" width="2" height="6"/><rect x="210" y="13" width="2" height="18"/><rect x="217" y="9" width="2" height="26"/><rect x="224" y="17" width="2" height="10"/><rect x="231" y="6" width="2" height="32"/>
+                </g>
+              </svg>
+              <span class="dur">1:12</span>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="row">
+          <a class="btn keyline" href="#">Back to today</a>
+        </div>
+
+      </main>
+
+      <div class="notice">Kept as audio. Pro turns your recordings into text you
+        can read and search.</div>
+
+    </div>
+  </div>
+</div>
+
+<p class="caption"><b>Talk . kept . Free . A TRANSIENT, NOT A ROUTE</b><br>
+<b>You cannot navigate here.</b> Stopping returns to Today, where the memo row is
+already present, and the row appearing is the confirmation. This is drawn to fix
+what a just-finished recording looks like, not to add a screen. Making it a route
+cost a third tap on a path the flow caps at two.<br>
+Record, stop, kept as a memo. No transcript, no reply, no processing, and
+nothing asking for money at the moment someone has just spoken. The one factual
+line is stated once and never nags.<br>
+<b>Nothing here is locked, blurred or greyed.</b> The recording is complete and
+playable. Transcription is work nobody has paid for, which is a different thing
+from a feature being withheld, and the copy has to say exactly that.</p>
+
+<!-- ====================== TRANSCRIBING . PRO ========================= -->
+<div class="device">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+
+  <div class="app">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+
+      <header class="mast">
+        <a class="back" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/></svg>
+          Today
+        </a>
+      </header>
+
+      <main class="stack">
+
+        <div class="keybox">
+          <span class="k">Kept</span>
+          <h1 class="v printed">Sun 9 Aug, 21:58</h1>
+        </div>
+
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"><time datetime="2026-08-09T21:58">21:58</time></div>
+            <div class="ccol">
+              <button class="play" type="button"
+                      aria-label="Play this recording, 1 minute 12 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/></svg>
+              </button>
+              <svg class="wave" viewBox="0 0 177 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="18" width="2" height="8"/><rect x="7" y="13" width="2" height="18"/><rect x="14" y="4" width="2" height="36"/><rect x="21" y="15" width="2" height="14"/><rect x="28" y="19" width="2" height="6"/><rect x="35" y="7" width="2" height="30"/><rect x="42" y="16" width="2" height="12"/><rect x="49" y="2" width="2" height="40"/><rect x="56" y="12" width="2" height="20"/><rect x="63" y="19" width="2" height="6"/><rect x="70" y="8" width="2" height="28"/><rect x="77" y="16" width="2" height="12"/><rect x="84" y="5" width="2" height="34"/><rect x="91" y="18" width="2" height="8"/><rect x="98" y="12" width="2" height="20"/><rect x="105" y="3" width="2" height="38"/><rect x="112" y="19" width="2" height="6"/><rect x="119" y="14" width="2" height="16"/><rect x="126" y="8" width="2" height="28"/><rect x="133" y="18" width="2" height="8"/><rect x="140" y="11" width="2" height="22"/><rect x="147" y="2" width="2" height="40"/><rect x="154" y="16" width="2" height="12"/><rect x="161" y="19" width="2" height="6"/><rect x="168" y="12" width="2" height="20"/><rect x="175" y="6" width="2" height="32"/><rect x="182" y="18" width="2" height="8"/><rect x="189" y="14" width="2" height="16"/><rect x="196" y="4" width="2" height="36"/><rect x="203" y="19" width="2" height="6"/><rect x="210" y="13" width="2" height="18"/><rect x="217" y="9" width="2" height="26"/><rect x="224" y="17" width="2" height="10"/><rect x="231" y="6" width="2" height="32"/>
+                </g>
+              </svg>
+              <span class="dur">1:12</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="notice">Transcribing.</div>
+
+      </main>
+
+    </div>
+  </div>
+</div>
+
+<p class="caption"><b>Talk . transcribing . Pro</b><br>
+One word, set as plain text. <b>Never animated dots.</b> The flow is explicit that
+thinking is a line of text rather than an animation, and this is that rule one
+screen earlier.<br>
+The Free line is absent here, because on Pro it is not true.</p>
+
+<!-- ================ PERMISSION NOT YET GRANTED ====================== -->
+<div class="device">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+  <div class="app">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <a class="back" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/></svg>
+          Today
+        </a>
+      </header>
+      <main class="stack">
+        <div class="keybox">
+          <span class="k">Microphone</span>
+          <h1 class="v printed">Not yet allowed</h1>
+        </div>
+        <div class="card">
+          <h2>Before the browser asks</h2>
+          <p>Your browser will ask before anything is recorded.</p>
+          <p>Nothing is sent anywhere. Recordings are kept on your account and, on
+            free, are never read by anything.</p>
+        </div>
+        <div class="row">
+          <button class="btn solid" type="button">Allow the microphone</button>
+          <a class="btn keyline" href="#">Write instead</a>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+
+<p class="caption"><b>Talk . permission not yet granted . both tiers</b><br>
+<b>The second tap of the entire product</b>, and the moment most likely to end a first
+session. The browser will not grant the microphone without a user gesture, so this
+cannot be pre-cleared and cannot be skipped.<br>
+One sentence before the prompt, saying what will happen and what is not happening.
+<b>It answers the question the browser dialog raises and cannot answer itself</b>, which
+is where the audio goes. On free the honest answer is that nothing reads it.<br>
+<b>Write instead is present and fully legible</b>, not greyed and not hidden, because
+someone who does not want to grant a microphone has not failed at anything.</p>
+
+<!-- ==================== PERMISSION DENIED =========================== -->
+<div class="device">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+  <div class="app">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <a class="back" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/></svg>
+          Today
+        </a>
+      </header>
+      <main class="stack">
+        <div class="keybox">
+          <span class="k">Microphone</span>
+          <h1 class="v printed">Blocked</h1>
+        </div>
+        <div class="card">
+          <h2>Blocked by your browser</h2>
+          <p>Your browser is blocking the microphone for this site.</p>
+          <p>We cannot turn it back on from here. It is in your browser's settings for
+            this site, usually behind the icon next to the address.</p>
+          <p>You can still write, and nothing about your account needs a microphone.</p>
+        </div>
+        <div class="row">
+          <a class="btn solid" href="#">Write instead</a>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+
+<p class="caption"><b>Talk . permission denied . both tiers</b><br>
+<b>The hardest state in the product, and the reason it should not have been improvised.</b>
+On the web there is no way to re-prompt: once blocked, the fix lives in browser settings
+that the product cannot open. So this screen has to explain a recovery it cannot perform,
+say so plainly, and then get out of the way.<br>
+<b>Nothing here is red, and nothing is an error.</b> It states a fact about the browser,
+points at roughly where the setting lives without pretending to know the reader's browser,
+and then makes writing the loud path. The last sentence is the important one: the account
+is complete without a microphone, and the user should not feel they have broken the
+product.<br>
+<b>Write instead is the filled control here</b>, unlike the state above, because there is
+now only one thing that will work.</p>
+
+<!-- ====================== NO MICROPHONE ============================= -->
+<div class="device">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+  <div class="app clip">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <a class="back" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/></svg>
+          Today
+        </a>
+      </header>
+      <main class="stack">
+        <div class="keybox">
+          <span class="k">Microphone</span>
+          <h1 class="v printed">None found</h1>
+        </div>
+        <div class="card">
+          <h2>No microphone on this device</h2>
+          <p>No microphone found on this device.</p>
+          <p>You can still write, and everything else works.</p>
+        </div>
+        <div class="row">
+          <a class="btn solid" href="#">Write instead</a>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+
+<p class="caption"><b>Talk . no microphone . both tiers</b><br>
+The shortest screen in the product, and deliberately so. Two sentences, one action, no
+troubleshooting, no diagnostics, no help link. <b>There is nothing the user can do about
+missing hardware</b>, so there is nothing to offer them but the other way in.</p>
+
+<p class="caption"><b>Motion . mobile web 390 . 03-talk.html</b><br>
+<b>What moves:</b> two row waveforms and the capture waveform draw.<br>
+<b>What is still:</b> all six states otherwise, and every one of the six printed date boxes, because printed prose is not written by a hand.
+</p>
+</body>
+</html>

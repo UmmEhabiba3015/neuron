@@ -1,0 +1,1239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journal / Clickable prototype / tablet web 834</title>
+
+<!-- ==========================================================================
+     MOTION . tablet web 834 . 00-prototype.html
+     The motion system is in the BASE at lock.css revision 49. This file is the
+     walk with it running. There is no variant class and no review hatch: the
+     screens animate because the product does.
+
+     THE CONTENT HERE IS THE PROTOTYPE'S OWN AND IS THINNER THAN THE NUMBERED
+     FILES. This walk draws a narrower window onto the record than 02-timeline
+     does, so it carries five waveforms across all 22 screens rather than four
+     on one. The captions below say what THIS file does rather than repeating
+     what the numbered screens do, which is the distinction 9.15 item 3 was
+     about.
+
+     WHAT WALKING IT SHOWS THAT A SINGLE SCREEN CANNOT
+     A screen is display:none until its hash targets it, and AN ELEMENT GOING
+     FROM display:none TO display:block STARTS ITS ANIMATIONS. So arriving at a
+     screen plays that screen's load: tap TIMELINE and its recording's waveform
+     draws, tap YOU and the widest date in the product is written, and a screen
+     carrying none of the four objects arrives completely still. That is the
+     closest this project can get to the product, and it is the only place the
+     system can be judged as a sequence of arrivals rather than as separate
+     stills.
+
+     ========================================================================== -->
+
+<!-- ==========================================================================
+     STAGE 4 . TABLET WEB 834 . CLICKABLE PROTOTYPE
+     Twenty two screens in one file, wired to each other, walkable. The
+     twenty second is f-today-saved, which is Today one state later: the commit
+     control lands there so that saving does not replay Today's entrance.
+
+     NO JAVASCRIPT. Navigation is :target, which means every tap writes a real
+     hash into history, so THE BROWSER BACK BUTTON GENUINELY WORKS. That is
+     deliberate: back behaviour is the part of the flow most worth testing and
+     the part a static comp cannot show. Walk it and press back.
+
+     WHAT THIS IS NOT
+     Not a comp. Not the deliverable. The twelve numbered files remain the
+     design of record. This exists to answer one question: does moving through
+     this product feel natural. Where it disagrees with a numbered file, the
+     numbered file wins.
+
+     TWO JOURNEYS, KEPT SEPARATE
+     Free and Pro are different products and mixing them mid-walk is the
+     fastest way to misjudge both. Each journey is internally consistent: the
+     Free screens never show a note or a glance line, and the Pro screens never
+     show the unread clause, because on Pro nothing is unread.
+
+     THE FIVE TRACED PATHS FROM THE FLOW ARE ALL WALKABLE
+       3.1 First run      start > first run > talk > kept > today
+       3.2 Conversion     free timeline > the number > plan
+       3.3 Daily          today > mic > talk > stop > today
+       3.4 Return         return after three silent weeks
+       3.5 Ask            free ask, then the Pro answer
+
+     THE ONE COMPROMISE, STATED
+     The waveform here is authored at a coarser pitch than the numbered files,
+     to keep a seventeen screen file readable. Everything else is the locked
+     components, unmodified.
+
+     THE TABLET REFLOW. See direction-lock.md section 12 for the argument.
+     Page 560, exactly 40 graph modules, centred with the binding welded to it
+     and 125 of cream each side. Paper margin 28. Masthead one row rather than
+     two, destination row at 80 rather than 124. Same seventeen screens, same
+     markup, same content as mobile-web/00-prototype.html.
+
+     WALK IT FOR THE THING A STILL COMP CANNOT SHOW
+     The masthead being the same height on every destination is a claim about
+     what happens BETWEEN screens, so it cannot be checked on a single comp.
+     Tap Today, Timeline, Ask, You in turn and watch the row under the wordmark:
+     it must not move. It sits at 80px on all four, measured, and this file is
+     the only place you can see that it holds.
+
+     WHY THE LAYOUT SWITCHES HERE WITHOUT A MEDIA QUERY
+     lock.css section 4 is a CONTAINER query keyed to .app, not a media query
+     keyed to the window. That is what lets this file and the mobile prototype
+     sit in the same folder tree, link the same stylesheet, and each render its
+     own platform no matter how wide the reader's window is. Open the mobile
+     prototype maximised and it is still mobile. Open this one narrow and it is
+     still 834, because the device says so.
+
+     STYLE BLOCK: this file carries one, for the :target machinery only. It
+     contains no colour and no measurement, and the same allowance already
+     covers compare pages. Every colour still comes from lock.css.
+     ========================================================================== -->
+
+<link rel="stylesheet" href="../lock.css">
+<style>
+/* prototype navigation only. no colour, no type, no spacing decisions. */
+.screen{display:none;scroll-margin-top:64px}
+.screen:target{display:flex}
+body:not(:has(.screen:target)) #start{display:flex}
+/* margin-inline:auto because lock.css revision 30 made the stage left-anchor
+   rather than centre, so every stage child now centres itself. max-width:none
+   for the same reason .device.t drops it: this row is the width of the device
+   it indexes, and shrinking it under a narrow window was half of the lie. */
+.jump{width:834px;max-width:none;margin:14px auto 0;display:flex;flex-wrap:wrap;gap:4px}
+.jump a{font:400 10px/1 var(--f-label);letter-spacing:.06em;text-transform:uppercase;
+        color:var(--paper);background:var(--rule);text-decoration:none;
+        padding:7px 8px;border-radius:var(--r)}
+.jump a.pro{background:var(--block)}
+.jump b{width:100%;font:600 10px/1.6 var(--f-label);letter-spacing:.14em;
+        text-transform:uppercase;color:var(--grid)}
+</style>
+</head>
+<body>
+
+<div class="device t">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+
+  <!-- ================= START ================= -->
+  <div class="app screen" id="start">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <h1 class="wordmark">Journal</h1>
+        <div class="keybox"><span class="k">Prototype</span><span class="v">Sun 9 Aug '26</span></div>
+      </header>
+      <p class="empty">Two journeys. Free is the whole product for someone who never
+        pays. Pro is the same product once it can read.</p>
+      <main class="sheet">
+        <h2 class="shead">Walk it as a free user</h2>
+        <a class="srowlink" href="#f-first">
+          <span class="lab">First run<span class="why">Cold, logged out. Then talk,
+            keep it, and land back on today.</span></span>
+          <span class="val">Start</span>
+        </a>
+        <a class="srowlink" href="#f-timeline">
+          <span class="lab">The conversion moment<span class="why">A number on your own
+            timeline, then one page about it.</span></span>
+          <span class="val">Start</span>
+        </a>
+        <a class="srowlink" href="#f-return">
+          <span class="lab">Back after three silent weeks<span class="why">The most
+            important user in the product.</span></span>
+          <span class="val">Start</span>
+        </a>
+        <h2 class="shead">Walk it as a Pro user</h2>
+        <a class="srowlink" href="#p-progress">
+          <span class="lab">The upgrade moment<span class="why">The backlog transcribing,
+            then the only demonstration the product ever gets.</span></span>
+          <span class="val">Start</span>
+        </a>
+        <a class="srowlink" href="#p-today">
+          <span class="lab">A settled day<span class="why">The day, the notes, the
+            recording with its transcript.</span></span>
+          <span class="val">Start</span>
+        </a>
+        <a class="srowlink" href="#p-ask">
+          <span class="lab">Ask your own history<span class="why">Your words first,
+            the synthesis second.</span></span>
+          <span class="val">Start</span>
+        </a>
+      </main>
+      <p class="foot">Press the browser back button anywhere. It works.</p>
+    </div>
+  </div>
+
+  <!-- ================= FREE . FIRST RUN ================= -->
+  <div class="app screen" id="f-first">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <h1 class="wordmark">Journal</h1>
+        <div class="keybox"><span class="k">Day</span><span class="v">Sun 9 Aug '26</span></div>
+      </header>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#f-first" aria-current="page">Today</a><a href="#f-timeline-empty">Timeline</a>
+        <a href="#f-ask-empty">Ask</a><a href="#f-you">You</a>
+      </nav>
+      <p class="empty">A private journal. Write it, or say it out loud. Pro reads it
+        back to you.</p>
+      <div class="notice">Bringing a journal with you?
+        <a class="btn quiet" href="#f-first">Import it</a></div>
+      <div class="composer">
+        <div class="crow">
+          <a class="field placeholder" href="#f-typing">What's today been like?</a>
+          <a class="mic" href="#f-talk" aria-label="Record">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="2.5" width="6" height="11.5" rx="3"/>
+              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/></svg>
+          </a>
+        </div>
+        <button class="opt" type="button" aria-pressed="false"><span class="tick" aria-hidden="true"></span>
+          Keep this out of memory</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FREE . TALK, LISTENING ================= -->
+  <div class="app screen" id="f-talk">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <a class="back" href="#f-today">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/></svg>
+          Today
+        </a>
+      </header>
+      <main class="stack">
+        <div class="keybox"><span class="k">Recording</span>
+          <span class="v printed">Sun 9 Aug, 21:58</span></div>
+        <div class="recrow">
+          <div class="head col">
+            <svg class="wave big" viewBox="0 0 466 96" preserveAspectRatio="none" aria-hidden="true">
+              <g fill="currentColor">
+                <rect x="0" y="40" width="4" height="16"/><rect x="14" y="30" width="4" height="36"/>
+                <rect x="28" y="14" width="4" height="68"/><rect x="42" y="36" width="4" height="24"/>
+                <rect x="56" y="20" width="4" height="56"/><rect x="70" y="6" width="4" height="84"/>
+                <rect x="84" y="28" width="4" height="40"/><rect x="98" y="43" width="4" height="10"/>
+                <rect x="112" y="18" width="4" height="60"/><rect x="126" y="35" width="4" height="26"/>
+                <rect x="140" y="10" width="4" height="76"/><rect x="154" y="41" width="4" height="14"/>
+                <rect x="168" y="26" width="4" height="44"/><rect x="182" y="4" width="4" height="88"/>
+                <rect x="196" y="42" width="4" height="12"/><rect x="210" y="31" width="4" height="34"/>
+                <rect x="224" y="16" width="4" height="64"/><rect x="238" y="39" width="4" height="18"/>
+                <rect x="252" y="24" width="4" height="48"/><rect x="266" y="8" width="4" height="80"/>
+                <rect x="280" y="37" width="4" height="22"/><rect x="294" y="44" width="4" height="8"/>
+              </g>
+            
+              <g fill="currentColor" transform="translate(606 0) scale(-1 1)">
+                <rect x="0" y="40" width="4" height="16"/><rect x="14" y="30" width="4" height="36"/>
+                <rect x="28" y="14" width="4" height="68"/><rect x="42" y="36" width="4" height="24"/>
+                <rect x="56" y="20" width="4" height="56"/><rect x="70" y="6" width="4" height="84"/>
+                <rect x="84" y="28" width="4" height="40"/><rect x="98" y="43" width="4" height="10"/>
+                <rect x="112" y="18" width="4" height="60"/><rect x="126" y="35" width="4" height="26"/>
+                <rect x="140" y="10" width="4" height="76"/><rect x="154" y="41" width="4" height="14"/>
+                <rect x="168" y="26" width="4" height="44"/><rect x="182" y="4" width="4" height="88"/>
+                <rect x="196" y="42" width="4" height="12"/><rect x="210" y="31" width="4" height="34"/>
+                <rect x="224" y="16" width="4" height="64"/><rect x="238" y="39" width="4" height="18"/>
+                <rect x="252" y="24" width="4" height="48"/><rect x="266" y="8" width="4" height="80"/>
+                <rect x="280" y="37" width="4" height="22"/><rect x="294" y="44" width="4" height="8"/>
+              </g>
+            </svg>
+            <span class="dur">Listening</span>
+          </div>
+        </div>
+        <p class="readout">0:47</p>
+        <div class="row">
+          <a class="btn keyline" href="#f-today">Stop and keep</a>
+          <a class="btn keyline" href="#f-talk">Pause</a>
+        </div>
+      </main>
+      <div class="notice">Kept as audio. Pro turns your recordings into text you can
+        read and search.</div>
+    </div>
+  </div>
+
+  <!-- ================= FREE . TODAY ================= -->
+  <div class="app screen" id="f-today">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <h1 class="wordmark">Journal</h1>
+        <div class="keybox"><span class="k">Day</span><span class="v">Sun 9 Aug '26</span></div>
+      </header>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#f-today" aria-current="page">Today</a><a href="#f-timeline">Timeline</a>
+        <a href="#f-ask">Ask</a><a href="#f-you">You</a>
+      </nav>
+      <main class="sheet">
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-09T09:20">09:20</time></div>
+          <div class="ccol"><p class="prose">The flat people said Tuesday, and it's
+            Sunday, so I've decided not to think about it until Tuesday.</p></div>
+        </div>
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"><time datetime="2026-08-09T21:58">21:58</time></div>
+            <div class="ccol">
+              <a class="play" href="#f-today" aria-label="Play recording, 1 minute 12 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/></svg>
+              </a>
+              <svg class="wave" viewBox="0 0 366 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="18" width="3" height="8"/><rect x="11" y="13" width="3" height="18"/><rect x="22" y="4" width="3" height="36"/><rect x="33" y="15" width="3" height="14"/><rect x="44" y="19" width="3" height="6"/><rect x="55" y="7" width="3" height="30"/><rect x="66" y="16" width="3" height="12"/><rect x="77" y="2" width="3" height="40"/><rect x="88" y="12" width="3" height="20"/><rect x="99" y="19" width="3" height="6"/><rect x="110" y="8" width="3" height="28"/><rect x="121" y="16" width="3" height="12"/><rect x="132" y="5" width="3" height="34"/><rect x="143" y="18" width="3" height="8"/><rect x="154" y="12" width="3" height="20"/><rect x="165" y="3" width="3" height="38"/><rect x="176" y="19" width="3" height="6"/><rect x="187" y="14" width="3" height="16"/><rect x="198" y="8" width="3" height="28"/><rect x="209" y="18" width="3" height="8"/><rect x="220" y="11" width="3" height="22"/><rect x="231" y="6" width="3" height="32"/>
+                </g>
+                <g fill="currentColor" transform="translate(476 0) scale(-1 1)">
+                  <rect x="0" y="18" width="3" height="8"/><rect x="11" y="13" width="3" height="18"/><rect x="22" y="4" width="3" height="36"/><rect x="33" y="15" width="3" height="14"/><rect x="44" y="19" width="3" height="6"/><rect x="55" y="7" width="3" height="30"/><rect x="66" y="16" width="3" height="12"/><rect x="77" y="2" width="3" height="40"/><rect x="88" y="12" width="3" height="20"/><rect x="99" y="19" width="3" height="6"/><rect x="110" y="8" width="3" height="28"/><rect x="121" y="16" width="3" height="12"/><rect x="132" y="5" width="3" height="34"/><rect x="143" y="18" width="3" height="8"/><rect x="154" y="12" width="3" height="20"/><rect x="165" y="3" width="3" height="38"/><rect x="176" y="19" width="3" height="6"/><rect x="187" y="14" width="3" height="16"/><rect x="198" y="8" width="3" height="28"/><rect x="209" y="18" width="3" height="8"/><rect x="220" y="11" width="3" height="22"/><rect x="231" y="6" width="3" height="32"/>
+                </g>
+              </svg>
+              <span class="dur">1:12</span>
+            </div>
+          </div>
+        </div>
+        <section class="moodrow">
+          <h2>How was today?</h2>
+          <div class="chips">
+            <button type="button" aria-pressed="false">Hard</button><button type="button" aria-pressed="false">Low</button>
+            <button type="button" aria-pressed="false">Even</button><button type="button" aria-pressed="false">Good</button>
+            <button type="button" aria-pressed="false">Light</button>
+          </div>
+        </section>
+      </main>
+      <div class="composer">
+        <div class="crow">
+          <a class="field placeholder" href="#f-typing">Add to today</a>
+          <a class="mic" href="#f-talk" aria-label="Record">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="2.5" width="6" height="11.5" rx="3"/>
+              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/></svg>
+          </a>
+        </div>
+        <button class="opt" type="button" aria-pressed="false"><span class="tick" aria-hidden="true"></span>
+          Keep this out of memory</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- the same screen after Save. Reached only from the commit control, so
+       its composer is already in place and does not enter again. -->
+  <div class="app restate screen" id="f-today-saved">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <h1 class="wordmark">Journal</h1>
+        <div class="keybox"><span class="k">Day</span><span class="v">Sun 9 Aug '26</span></div>
+      </header>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#f-today" aria-current="page">Today</a><a href="#f-timeline">Timeline</a>
+        <a href="#f-ask">Ask</a><a href="#f-you">You</a>
+      </nav>
+      <main class="sheet">
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-09T09:20">09:20</time></div>
+          <div class="ccol"><p class="prose">The flat people said Tuesday, and it's
+            Sunday, so I've decided not to think about it until Tuesday.</p></div>
+        </div>
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"><time datetime="2026-08-09T21:58">21:58</time></div>
+            <div class="ccol">
+              <a class="play" href="#f-today" aria-label="Play recording, 1 minute 12 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/></svg>
+              </a>
+              <svg class="wave" viewBox="0 0 366 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="18" width="3" height="8"/><rect x="11" y="13" width="3" height="18"/><rect x="22" y="4" width="3" height="36"/><rect x="33" y="15" width="3" height="14"/><rect x="44" y="19" width="3" height="6"/><rect x="55" y="7" width="3" height="30"/><rect x="66" y="16" width="3" height="12"/><rect x="77" y="2" width="3" height="40"/><rect x="88" y="12" width="3" height="20"/><rect x="99" y="19" width="3" height="6"/><rect x="110" y="8" width="3" height="28"/><rect x="121" y="16" width="3" height="12"/><rect x="132" y="5" width="3" height="34"/><rect x="143" y="18" width="3" height="8"/><rect x="154" y="12" width="3" height="20"/><rect x="165" y="3" width="3" height="38"/><rect x="176" y="19" width="3" height="6"/><rect x="187" y="14" width="3" height="16"/><rect x="198" y="8" width="3" height="28"/><rect x="209" y="18" width="3" height="8"/><rect x="220" y="11" width="3" height="22"/><rect x="231" y="6" width="3" height="32"/>
+                </g>
+                <g fill="currentColor" transform="translate(476 0) scale(-1 1)">
+                  <rect x="0" y="18" width="3" height="8"/><rect x="11" y="13" width="3" height="18"/><rect x="22" y="4" width="3" height="36"/><rect x="33" y="15" width="3" height="14"/><rect x="44" y="19" width="3" height="6"/><rect x="55" y="7" width="3" height="30"/><rect x="66" y="16" width="3" height="12"/><rect x="77" y="2" width="3" height="40"/><rect x="88" y="12" width="3" height="20"/><rect x="99" y="19" width="3" height="6"/><rect x="110" y="8" width="3" height="28"/><rect x="121" y="16" width="3" height="12"/><rect x="132" y="5" width="3" height="34"/><rect x="143" y="18" width="3" height="8"/><rect x="154" y="12" width="3" height="20"/><rect x="165" y="3" width="3" height="38"/><rect x="176" y="19" width="3" height="6"/><rect x="187" y="14" width="3" height="16"/><rect x="198" y="8" width="3" height="28"/><rect x="209" y="18" width="3" height="8"/><rect x="220" y="11" width="3" height="22"/><rect x="231" y="6" width="3" height="32"/>
+                </g>
+              </svg>
+              <span class="dur">1:12</span>
+            </div>
+          </div>
+        </div>
+        <section class="moodrow">
+          <h2>How was today?</h2>
+          <div class="chips">
+            <button type="button" aria-pressed="false">Hard</button><button type="button" aria-pressed="false">Low</button>
+            <button type="button" aria-pressed="false">Even</button><button type="button" aria-pressed="false">Good</button>
+            <button type="button" aria-pressed="false">Light</button>
+          </div>
+        </section>
+      </main>
+      <div class="composer">
+        <div class="crow">
+          <a class="field placeholder" href="#f-typing">Add to today</a>
+          <a class="mic" href="#f-talk" aria-label="Record">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="2.5" width="6" height="11.5" rx="3"/>
+              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/></svg>
+          </a>
+        </div>
+        <button class="opt" type="button" aria-pressed="false"><span class="tick" aria-hidden="true"></span>
+          Keep this out of memory</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FREE . TYPING ================= -->
+  <div class="app restate screen" id="f-typing">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <h1 class="wordmark">Journal</h1>
+        <div class="keybox"><span class="k">Day</span><span class="v">Sun 9 Aug '26</span></div>
+      </header>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#f-typing" aria-current="page">Today</a><a href="#f-timeline">Timeline</a>
+        <a href="#f-ask">Ask</a><a href="#f-you">You</a>
+      </nav>
+      <main class="sheet">
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-09T09:20">09:20</time></div>
+          <div class="ccol"><p class="prose">The flat people said Tuesday, and it's
+            Sunday, so I've decided not to think about it until Tuesday.</p></div>
+        </div>
+      </main>
+      <div class="composer">
+        <div class="crow">
+          <div class="field">Priya rang. We talked for an hour about nothing.</div>
+          <a class="send" href="#f-today-saved">Save</a>
+        </div>
+        <button class="opt" type="button" aria-pressed="false"><span class="tick" aria-hidden="true"></span>
+          Keep this out of memory</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FREE . RETURN AFTER A GAP ================= -->
+  <div class="app screen" id="f-return">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <h1 class="wordmark">Journal</h1>
+        <div class="keybox"><span class="k">Day</span><span class="v">Sun 9 Aug '26</span></div>
+      </header>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#f-return" aria-current="page">Today</a><a href="#f-timeline">Timeline</a>
+        <a href="#f-ask">Ask</a><a href="#f-you">You</a>
+      </nav>
+      <main class="sheet">
+        <h2 class="shead">Last time</h2>
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-07-17">Fri 17 Jul</time></div>
+          <div class="ccol"><p class="lede">Last day before the shutdown. Everyone left
+            early and the building went quiet by three.</p></div>
+        </div>
+      </main>
+      <div class="composer">
+        <div class="crow">
+          <a class="field placeholder" href="#f-typing">Add to today</a>
+          <a class="mic" href="#f-talk" aria-label="Record">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="2.5" width="6" height="11.5" rx="3"/>
+              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/></svg>
+          </a>
+        </div>
+        <button class="opt" type="button" aria-pressed="false"><span class="tick" aria-hidden="true"></span>
+          Keep this out of memory</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FREE . TIMELINE, EMPTY ================= -->
+  <div class="app screen" id="f-timeline-empty">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <h1 class="wordmark">Timeline</h1>
+        <div class="seg" role="group" aria-label="Zoom">
+          <button type="button" aria-pressed="true">List</button>
+          <button type="button" aria-pressed="false">Calendar</button>
+        </div>
+      </header>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#f-first">Today</a><a href="#f-timeline-empty" aria-current="page">Timeline</a>
+        <a href="#f-ask-empty">Ask</a><a href="#f-you">You</a>
+      </nav>
+      <p class="empty">Nothing here yet. What you write and record will collect here,
+        newest first.</p>
+    </div>
+  </div>
+
+  <!-- ================= FREE . TIMELINE, LIST ================= -->
+  <div class="app screen" id="f-timeline">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <h1 class="wordmark">Timeline</h1>
+        <div class="seg" role="group" aria-label="Zoom">
+          <a href="#f-timeline" aria-current="page">List</a>
+          <a href="#f-cal">Calendar</a>
+        </div>
+      </header>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#f-today">Today</a><a href="#f-timeline" aria-current="page">Timeline</a>
+        <a href="#f-ask">Ask</a><a href="#f-you">You</a>
+      </nav>
+      <p class="total"><span class="gline">148 entries, 31 recordings,
+        <a href="#f-plan">4h 12m not yet read</a>.</span></p>
+      <main class="sheet">
+        <h2 class="shead">August 2026</h2>
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-08-09">Sun 9</time></div>
+          <div class="ccol"><p class="lede">The flat people said Tuesday, and it's
+            Sunday, so I've decided not to think about it until Tuesday.</p></div>
+        </div>
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"></div>
+            <div class="ccol">
+              <a class="play" href="#f-timeline" aria-label="Play recording from 9 August, 2 minutes 41 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/></svg>
+              </a>
+              <svg class="wave" viewBox="0 0 365 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="18" width="3" height="8"/><rect x="11" y="13" width="3" height="18"/>
+                  <rect x="22" y="4" width="3" height="36"/><rect x="33" y="15" width="3" height="14"/>
+                  <rect x="44" y="19" width="3" height="6"/><rect x="55" y="7" width="3" height="30"/>
+                  <rect x="66" y="16" width="3" height="12"/><rect x="77" y="2" width="3" height="40"/>
+                  <rect x="88" y="12" width="3" height="20"/><rect x="99" y="19" width="3" height="6"/>
+                  <rect x="110" y="8" width="3" height="28"/><rect x="121" y="16" width="3" height="12"/>
+                  <rect x="132" y="5" width="3" height="34"/><rect x="143" y="18" width="3" height="8"/>
+                  <rect x="154" y="12" width="3" height="20"/><rect x="165" y="3" width="3" height="38"/>
+                  <rect x="176" y="19" width="3" height="6"/><rect x="187" y="14" width="3" height="16"/>
+                  <rect x="198" y="8" width="3" height="28"/><rect x="209" y="18" width="3" height="8"/>
+                  <rect x="220" y="11" width="3" height="22"/><rect x="231" y="6" width="3" height="32"/>
+                </g>
+            
+                <g fill="currentColor" transform="translate(476 0) scale(-1 1)">
+                  <rect x="0" y="18" width="3" height="8"/><rect x="11" y="13" width="3" height="18"/>
+                  <rect x="22" y="4" width="3" height="36"/><rect x="33" y="15" width="3" height="14"/>
+                  <rect x="44" y="19" width="3" height="6"/><rect x="55" y="7" width="3" height="30"/>
+                  <rect x="66" y="16" width="3" height="12"/><rect x="77" y="2" width="3" height="40"/>
+                  <rect x="88" y="12" width="3" height="20"/><rect x="99" y="19" width="3" height="6"/>
+                  <rect x="110" y="8" width="3" height="28"/><rect x="121" y="16" width="3" height="12"/>
+                  <rect x="132" y="5" width="3" height="34"/><rect x="143" y="18" width="3" height="8"/>
+                  <rect x="154" y="12" width="3" height="20"/><rect x="165" y="3" width="3" height="38"/>
+                  <rect x="176" y="19" width="3" height="6"/><rect x="187" y="14" width="3" height="16"/>
+                  <rect x="198" y="8" width="3" height="28"/><rect x="209" y="18" width="3" height="8"/>
+                  <rect x="220" y="11" width="3" height="22"/><rect x="231" y="6" width="3" height="32"/>
+                </g>
+              </svg>
+              <span class="dur">2:41</span>
+            </div>
+          </div>
+        </div>
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-08-06">Thu 6</time></div>
+          <div class="ccol"><p class="lede">Slept badly again. I've stopped counting
+            which night this is.</p></div>
+        </div>
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-08-03">Mon 3</time></div>
+          <div class="ccol"><p class="lede">Went in early to avoid the heat. Nobody
+            else in the office until ten.</p></div>
+        </div>
+      </main>
+      <p class="foot">Since March 2026</p>
+    </div>
+  </div>
+
+  <!-- ================= FREE . TIMELINE, CALENDAR ================= -->
+  <div class="app screen" id="f-cal">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <h1 class="wordmark">Timeline</h1>
+        <div class="seg" role="group" aria-label="Zoom">
+          <a href="#f-timeline">List</a>
+          <a href="#f-cal" aria-current="page">Calendar</a>
+        </div>
+      </header>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#f-today">Today</a><a href="#f-cal" aria-current="page">Timeline</a>
+        <a href="#f-ask">Ask</a><a href="#f-you">You</a>
+      </nav>
+      <p class="total"><span class="gline">148 entries, 31 recordings,
+        <a href="#f-plan">4h 12m not yet read</a>.</span></p>
+      <main class="sheet"><h2 class="shead">August 2026</h2></main>
+      <div class="cal" role="grid" aria-label="August 2026">
+        <div class="dow">M</div><div class="dow">T</div><div class="dow">W</div>
+        <div class="dow">T</div><div class="dow">F</div><div class="dow">S</div><div class="dow">S</div>
+        <div class="day out">27</div><div class="day out">28</div><div class="day out">29</div>
+        <div class="day out">30</div><div class="day out">31</div>
+        <a class="day has audio" href="#f-timeline" aria-label="1 August">1</a><div class="day">2</div>
+        <a class="day has" href="#f-timeline" aria-label="3 August">3</a><div class="day">4</div>
+        <a class="day has audio" href="#f-timeline" aria-label="5 August">5</a>
+        <a class="day has" href="#f-timeline" aria-label="6 August">6</a><div class="day">7</div>
+        <a class="day has audio" href="#f-timeline" aria-label="8 August">8</a>
+        <a class="day has audio" href="#f-timeline" aria-label="9 August">9</a>
+        <div class="day">10</div><div class="day">11</div><div class="day">12</div>
+        <div class="day">13</div><div class="day">14</div><div class="day">15</div><div class="day">16</div>
+        <div class="day">17</div><div class="day">18</div><div class="day">19</div>
+        <div class="day">20</div><div class="day">21</div><div class="day">22</div><div class="day">23</div>
+        <div class="day">24</div><div class="day">25</div><div class="day">26</div>
+        <div class="day">27</div><div class="day">28</div><div class="day">29</div><div class="day">30</div>
+        <div class="day">31</div>
+      </div>
+      <p class="foot">Since March 2026</p>
+    </div>
+  </div>
+
+  <!-- ================= FREE . PLAN ================= -->
+  <div class="app screen" id="f-plan">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <a class="back" href="#f-timeline">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/></svg>
+          Timeline
+        </a>
+        <h1 class="wordmark">Plan</h1>
+        <div class="keybox"><span class="k">Not yet read</span><span class="v">4h 12m</span></div>
+      </header>
+      <main class="sheet">
+        <div class="srow"><div class="ccol">
+          <p class="prose">You have 4 hours 12 minutes of recordings that have never
+            been read.</p></div></div>
+        <h2 class="shead">What Pro does with it</h2>
+        <div class="srow"><div class="ccol">
+          <p class="prose">Pro turns all of it into text you can search, including
+            everything you recorded before you upgraded.</p></div></div>
+        <h2 class="shead">What it costs</h2>
+        <div class="srow"><div class="ccol">
+          <div class="keybox"><span class="k">Pro</span>
+            <span class="v printed">$9.99 a month, or $99 a year</span></div></div></div>
+        <h2 class="shead">What else, stated plainly</h2>
+        <div class="srow"><div class="ccol">
+          <p class="lede">Pro also holds a conversation, reads across your whole record,
+            and writes one reflection a week. None of that can be shown to you before
+            you pay for it, so it is listed here rather than demonstrated.</p></div></div>
+      </main>
+      <div class="notice">Prices are lower where incomes are lower. If money is the
+        reason you cannot, take the reduced rate. There is no form and nobody is told.</div>
+      <div class="notice">Export stays free forever, including after you cancel.</div>
+      <div class="actions">
+        <a class="btn solid" href="#p-progress">Upgrade</a>
+        <a href="#f-timeline">Not now</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FREE . ASK, EMPTY ================= -->
+  <div class="app screen" id="f-ask-empty">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <h1 class="wordmark">Ask</h1>
+        <div class="keybox">
+          <span class="k">Day</span>
+          <span class="v">Sun 9 Aug '26</span>
+        </div>
+      </header>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#f-first">Today</a><a href="#f-timeline-empty">Timeline</a>
+        <a href="#f-ask-empty" aria-current="page">Ask</a><a href="#f-you">You</a>
+      </nav>
+
+      <div class="crow find"><a class="field placeholder" href="#f-ask-empty">Search what
+          you have written</a></div>
+      <p class="empty">Nothing to search yet. Write something and it will be findable
+        here.</p>
+    </div>
+  </div>
+
+  <!-- ================= FREE . ASK, RESULTS ================= -->
+  <div class="app screen" id="f-ask">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <h1 class="wordmark">Ask</h1>
+        <div class="keybox">
+          <span class="k">Day</span>
+          <span class="v">Sun 9 Aug '26</span>
+        </div>
+      </header>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#f-today">Today</a><a href="#f-timeline">Timeline</a>
+        <a href="#f-ask" aria-current="page">Ask</a><a href="#f-you">You</a>
+      </nav>
+
+      <div class="crow find"><a class="field" href="#f-ask">swans</a></div>
+      <main class="sheet">
+        <h2 class="shead">3 entries match</h2>
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-08-09">Sun 9 Aug</time></div>
+          <div class="ccol"><p class="lede">Walked the canal as far as the second
+            bridge and back. There were two swans that have been there all summer and
+            I've never once seen them move.</p></div>
+        </div>
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-07-03">Fri 3 Jul</time></div>
+          <div class="ccol"><p class="lede">Walked to the canal after work. The swans
+            were exactly where they always are.</p></div>
+        </div>
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-06-14">Sun 14 Jun</time></div>
+          <div class="ccol"><p class="lede">Took the long way round past the water. Two
+            swans and a heron that left before I got close.</p></div>
+        </div>
+      </main>
+      <div class="notice">31 recordings are not searchable. Pro turns them into text,
+        and reads across your entries rather than matching words in them.
+        <a class="btn quiet" href="#f-plan">What Pro costs</a></div>
+    </div>
+  </div>
+
+  <!-- ================= FREE . YOU ================= -->
+  <div class="app screen" id="f-you">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <h1 class="wordmark">You</h1>
+        <div class="keybox"><span class="k">Keeping</span><span class="v">Since March '26</span></div>
+      </header>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#f-today">Today</a><a href="#f-timeline">Timeline</a>
+        <a href="#f-ask">Ask</a><a href="#f-you" aria-current="page">You</a>
+      </nav>
+      <main class="sheet">
+        <h2 class="shead">What this costs</h2>
+        <a class="srowlink" href="#f-plan">
+          <span class="lab">Plan<span class="why">Free. Writing and recording, kept
+            forever.</span></span><span class="val">Free</span>
+        </a>
+        <h2 class="shead">What is private</h2>
+        <a class="srowlink" href="#f-you">
+          <span class="lab">What the model can see<span class="why">Nothing. No model
+            runs on your account.</span></span><span class="val">Nothing</span>
+        </a>
+        <a class="srowlink" href="#f-you">
+          <span class="lab">Privacy<span class="why">What leaves this device, who reads
+            it, how long it is kept.</span></span><span class="val">Read it</span>
+        </a>
+        <h2 class="shead">What is yours</h2>
+        <a class="srowlink" href="#f-you">
+          <span class="lab">Your data<span class="why">Import, export everything, or
+            delete all of it.</span></span><span class="val">148 and 31</span>
+        </a>
+        <a class="srowlink" href="#f-you">
+          <span class="lab">Notifications<span class="why">Two, both optional, both
+            Pro. Free sends none.</span></span><span class="val">Pro</span>
+        </a>
+      </main>
+      <p class="foot">Since March 2026</p>
+    </div>
+  </div>
+
+  <!-- ============ PRO . TRANSCRIBING THE BACKLOG ============ -->
+  <div class="app screen" id="p-progress">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <h1 class="wordmark">Journal</h1>
+        <div class="keybox"><span class="k">Transcribing</span>
+          <span class="v printed">19 of 31</span></div>
+      </header>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#p-progress" aria-current="page">Today</a><a href="#p-timeline">Timeline</a>
+        <a href="#p-ask-field">Ask</a><a href="#f-you">You</a>
+      </nav>
+      <div class="progress">
+        <progress class="bar" value="19" max="31"></progress>
+        <p class="cap">Reading your recordings. 19 of 31 done.</p>
+      </div>
+      <div class="notice">Most recent first. You can leave this and come back, and it
+        keeps going. <a class="btn quiet" href="#p-first">See it finished</a></div>
+      <main class="sheet">
+        <h2 class="shead">Today</h2>
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-09T09:20">09:20</time></div>
+          <div class="ccol"><p class="prose">The flat people said Tuesday, and it's
+            Sunday, so I've decided not to think about it until Tuesday.</p></div>
+        </div>
+      </main>
+      <div class="composer">
+        <div class="crow">
+          <a class="field placeholder" href="#f-typing">Add to today</a>
+          <a class="mic" href="#f-talk" aria-label="Record">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="2.5" width="6" height="11.5" rx="3"/>
+              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/></svg>
+          </a>
+        </div>
+        <button class="opt" type="button" aria-pressed="false"><span class="tick" aria-hidden="true"></span>
+          Keep this out of memory</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PRO . THE FIRST SESSION ============ -->
+  <div class="app screen" id="p-first">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <h1 class="wordmark">Journal</h1>
+        <div class="keybox"><span class="k">Transcribed</span>
+          <span class="v printed">31 recordings</span></div>
+      </header>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#p-first" aria-current="page">Today</a><a href="#p-timeline">Timeline</a>
+        <a href="#p-ask-field">Ask</a><a href="#f-you">You</a>
+      </nav>
+      <main class="sheet">
+        <h2 class="shead">From your recordings, now readable</h2>
+        <div class="excerpt">
+          <p>I keep saying I'll ring Priya and then not doing it. I think I'm
+            frightened she's moved on and will be polite about it.</p>
+          <a class="when" href="#p-day">Recorded 12 March</a>
+        </div>
+        <aside class="said" aria-label="From your record">
+          <div class="tcol">From your record</div>
+          <div class="ccol open"><div class="note">
+            <p>You recorded that in March and have never read it back. Priya is in nine
+              entries since.</p>
+            <div class="said-foot">
+              <a class="cite" href="#p-day">12 March</a>
+              <button class="wrong" type="button">That's not right</button>
+            </div>
+          </div></div>
+        </aside>
+        <h2 class="shead">What changed on your timeline</h2>
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"><time datetime="2026-08-08">Sat 8</time></div>
+            <div class="ccol">
+              <a class="play" href="#p-first" aria-label="Play recording from 8 August, 5 minutes 8 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/></svg>
+              </a>
+              <svg class="wave" viewBox="0 0 362 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="15" width="3" height="14"/><rect x="11" y="8" width="3" height="28"/>
+                  <rect x="22" y="17" width="3" height="10"/><rect x="33" y="5" width="3" height="34"/>
+                  <rect x="44" y="13" width="3" height="18"/><rect x="55" y="19" width="3" height="6"/>
+                  <rect x="66" y="9" width="3" height="26"/><rect x="77" y="16" width="3" height="12"/>
+                  <rect x="88" y="3" width="3" height="38"/><rect x="99" y="18" width="3" height="8"/>
+                  <rect x="110" y="12" width="3" height="20"/><rect x="121" y="6" width="3" height="32"/>
+                  <rect x="132" y="19" width="3" height="6"/><rect x="143" y="14" width="3" height="16"/>
+                  <rect x="154" y="4" width="3" height="36"/><rect x="165" y="17" width="3" height="10"/>
+                  <rect x="176" y="11" width="3" height="22"/><rect x="187" y="2" width="3" height="40"/>
+                  <rect x="198" y="18" width="3" height="8"/><rect x="209" y="13" width="3" height="18"/>
+                  <rect x="220" y="7" width="3" height="30"/><rect x="231" y="16" width="3" height="12"/>
+                </g>
+              
+                <g fill="currentColor" transform="translate(476 0) scale(-1 1)">
+                  <rect x="0" y="15" width="3" height="14"/><rect x="11" y="8" width="3" height="28"/>
+                  <rect x="22" y="17" width="3" height="10"/><rect x="33" y="5" width="3" height="34"/>
+                  <rect x="44" y="13" width="3" height="18"/><rect x="55" y="19" width="3" height="6"/>
+                  <rect x="66" y="9" width="3" height="26"/><rect x="77" y="16" width="3" height="12"/>
+                  <rect x="88" y="3" width="3" height="38"/><rect x="99" y="18" width="3" height="8"/>
+                  <rect x="110" y="12" width="3" height="20"/><rect x="121" y="6" width="3" height="32"/>
+                  <rect x="132" y="19" width="3" height="6"/><rect x="143" y="14" width="3" height="16"/>
+                  <rect x="154" y="4" width="3" height="36"/><rect x="165" y="17" width="3" height="10"/>
+                  <rect x="176" y="11" width="3" height="22"/><rect x="187" y="2" width="3" height="40"/>
+                  <rect x="198" y="18" width="3" height="8"/><rect x="209" y="13" width="3" height="18"/>
+                  <rect x="220" y="7" width="3" height="30"/><rect x="231" y="16" width="3" height="12"/>
+                </g>
+              </svg>
+              <span class="dur">5:08</span>
+            </div>
+          </div>
+          <div class="body">
+            <div class="tcol"></div>
+            <div class="ccol"><p class="prose">Got the tram out to the end of the line
+              for no reason and walked back along the water.</p></div>
+          </div>
+        </div>
+      </main>
+      <div class="composer">
+        <div class="crow">
+          <a class="field placeholder" href="#f-typing">Add to today</a>
+          <a class="mic" href="#f-talk" aria-label="Record">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="2.5" width="6" height="11.5" rx="3"/>
+              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/></svg>
+          </a>
+        </div>
+        <button class="opt" type="button" aria-pressed="false"><span class="tick" aria-hidden="true"></span>
+          Keep this out of memory</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PRO . TODAY ================= -->
+  <div class="app screen" id="p-today">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <h1 class="wordmark">Journal</h1>
+        <div class="keybox"><span class="k">Day</span><span class="v">Sun 9 Aug '26</span></div>
+      </header>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#p-today" aria-current="page">Today</a><a href="#p-timeline">Timeline</a>
+        <a href="#p-ask-field">Ask</a><a href="#f-you">You</a>
+      </nav>
+      <p class="glance"><span class="gline">Sleep has come up on four of the last six days.</span></p>
+      <main class="sheet">
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-09T09:20">09:20</time></div>
+          <div class="ccol"><p class="prose">The flat people said Tuesday, and it's
+            Sunday, so I've decided not to think about it until Tuesday. That lasted
+            about an hour.</p></div>
+        </div>
+        <aside class="said" aria-label="From your record">
+          <div class="tcol">From your record</div>
+          <div class="ccol">
+            <details>
+              <summary><span class="lblbox"><span class="lbl shut">Read the note</span>
+                <span class="lbl open">Hide the note</span></span>
+                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </summary>
+              <div class="note">
+                <p>You wrote something close to this in March, about the job. That
+                  you'd decided not to think about it until Thursday.</p>
+                <div class="said-foot">
+                  <a class="cite" href="#p-day">12 March</a>
+                  <button class="wrong" type="button">That's not right</button>
+                </div>
+              </div>
+            </details>
+          </div>
+        </aside>
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"><time datetime="2026-08-09T14:05">14:05</time></div>
+            <div class="ccol">
+              <a class="play" href="#p-today" aria-label="Play recording, 2 minutes 41 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/></svg>
+              </a>
+              <svg class="wave" viewBox="0 0 362 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="18" width="3" height="8"/><rect x="11" y="13" width="3" height="18"/>
+                  <rect x="22" y="4" width="3" height="36"/><rect x="33" y="15" width="3" height="14"/>
+                  <rect x="44" y="19" width="3" height="6"/><rect x="55" y="7" width="3" height="30"/>
+                  <rect x="66" y="16" width="3" height="12"/><rect x="77" y="2" width="3" height="40"/>
+                  <rect x="88" y="12" width="3" height="20"/><rect x="99" y="19" width="3" height="6"/>
+                  <rect x="110" y="8" width="3" height="28"/><rect x="121" y="16" width="3" height="12"/>
+                  <rect x="132" y="5" width="3" height="34"/><rect x="143" y="18" width="3" height="8"/>
+                  <rect x="154" y="12" width="3" height="20"/><rect x="165" y="3" width="3" height="38"/>
+                  <rect x="176" y="19" width="3" height="6"/><rect x="187" y="14" width="3" height="16"/>
+                  <rect x="198" y="8" width="3" height="28"/><rect x="209" y="18" width="3" height="8"/>
+                  <rect x="220" y="11" width="3" height="22"/><rect x="231" y="6" width="3" height="32"/>
+                </g>
+              
+                <g fill="currentColor" transform="translate(476 0) scale(-1 1)">
+                  <rect x="0" y="18" width="3" height="8"/><rect x="11" y="13" width="3" height="18"/>
+                  <rect x="22" y="4" width="3" height="36"/><rect x="33" y="15" width="3" height="14"/>
+                  <rect x="44" y="19" width="3" height="6"/><rect x="55" y="7" width="3" height="30"/>
+                  <rect x="66" y="16" width="3" height="12"/><rect x="77" y="2" width="3" height="40"/>
+                  <rect x="88" y="12" width="3" height="20"/><rect x="99" y="19" width="3" height="6"/>
+                  <rect x="110" y="8" width="3" height="28"/><rect x="121" y="16" width="3" height="12"/>
+                  <rect x="132" y="5" width="3" height="34"/><rect x="143" y="18" width="3" height="8"/>
+                  <rect x="154" y="12" width="3" height="20"/><rect x="165" y="3" width="3" height="38"/>
+                  <rect x="176" y="19" width="3" height="6"/><rect x="187" y="14" width="3" height="16"/>
+                  <rect x="198" y="8" width="3" height="28"/><rect x="209" y="18" width="3" height="8"/>
+                  <rect x="220" y="11" width="3" height="22"/><rect x="231" y="6" width="3" height="32"/>
+                </g>
+              </svg>
+              <span class="dur">2:41</span>
+            </div>
+          </div>
+          <div class="body">
+            <div class="tcol"></div>
+            <div class="ccol"><p class="prose">Walked the canal as far as the second
+              bridge and back. There were two swans that have been there all summer and
+              I've never once seen them move.</p></div>
+          </div>
+        </div>
+        <section class="moodrow">
+          <h2>How was today?</h2>
+          <div class="chips">
+            <button type="button" aria-pressed="false">Hard</button><button type="button" aria-pressed="false">Low</button>
+            <button type="button" aria-pressed="false">Even</button><button type="button" aria-pressed="false">Good</button>
+            <button type="button" aria-pressed="false">Light</button>
+          </div>
+        </section>
+      </main>
+      <div class="composer">
+        <div class="crow">
+          <a class="field placeholder" href="#p-today">Add to today</a>
+          <a class="mic" href="#f-talk" aria-label="Record">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="2.5" width="6" height="11.5" rx="3"/>
+              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/></svg>
+          </a>
+        </div>
+        <button class="opt" type="button" aria-pressed="false"><span class="tick" aria-hidden="true"></span>
+          Keep this out of memory</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PRO . TIMELINE ================= -->
+  <div class="app screen" id="p-timeline">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <h1 class="wordmark">Timeline</h1>
+        <div class="seg" role="group" aria-label="Zoom">
+          <a href="#p-timeline" aria-current="page">List</a>
+          <a href="#f-cal">Calendar</a>
+        </div>
+      </header>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#p-today">Today</a><a href="#p-timeline" aria-current="page">Timeline</a>
+        <a href="#p-ask-field">Ask</a><a href="#f-you">You</a>
+      </nav>
+      <p class="total"><span class="gline">148 entries, 31 recordings.</span></p>
+      <main class="sheet">
+        <h2 class="shead">August 2026</h2>
+        <a class="srowlink" href="#p-reflection">
+          <span class="lab">Week 32<span class="why">Your reflection for 3 to 9
+            August.</span></span><span class="val">Reflection</span>
+        </a>
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-08-09">Sun 9</time></div>
+          <div class="ccol"><p class="lede">The flat people said Tuesday, and it's
+            Sunday, so I've decided not to think about it until Tuesday.</p></div>
+        </div>
+        <a class="srowlink" href="#p-day">
+          <span class="lab">Thu 6<span class="why">Slept badly again. I've stopped
+            counting which night this is.</span></span><span class="val">Open</span>
+        </a>
+      </main>
+      <p class="foot">Since March 2026</p>
+    </div>
+  </div>
+
+  <!-- ================= PRO . A PAST DAY ================= -->
+  <div class="app screen" id="p-day">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <a class="back" href="#p-timeline">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/></svg>
+          Timeline
+        </a>
+        <div class="keybox"><span class="k">Day</span><span class="v">Thu 6 Aug '26</span></div>
+      </header>
+      <main class="sheet">
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-06T22:10">22:10</time></div>
+          <div class="ccol"><p class="prose">Slept badly again. I've stopped counting
+            which night this is.</p></div>
+        </div>
+        <aside class="said" aria-label="From your record">
+          <div class="tcol">From your record</div>
+          <div class="ccol open"><div class="note">
+            <p>You said something like this on the second. That week you put it down to
+              the heat.</p>
+            <div class="said-foot">
+              <a class="cite" href="#p-day">2 August</a>
+              <button class="wrong" type="button">That's not right</button>
+            </div>
+          </div></div>
+        </aside>
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-06T22:14">22:14</time></div>
+          <div class="ccol"><p class="prose">Maybe. It was cooler last night and I was
+            still awake at three.</p></div>
+        </div>
+        <aside class="said" aria-label="The product asked">
+          <div class="tcol">Asked</div>
+          <div class="ccol open"><div class="note">
+            <p>What were you awake about?</p>
+          </div></div>
+        </aside>
+        <section class="moodrow">
+          <h2>How was today?</h2>
+          <div class="chips">
+            <button type="button" aria-pressed="false">Hard</button>
+            <button type="button" aria-pressed="true">Low</button>
+            <button type="button" aria-pressed="false">Even</button><button type="button" aria-pressed="false">Good</button>
+            <button type="button" aria-pressed="false">Light</button>
+          </div>
+        </section>
+      </main>
+      <p class="foot">Mood can be changed here, and only here.</p>
+    </div>
+  </div>
+
+  <!-- ================= PRO . REFLECTION ================= -->
+  <div class="app screen" id="p-reflection">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <a class="back" href="#p-timeline">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/></svg>
+          Timeline
+        </a>
+        <h1 class="wordmark">Reflection</h1>
+        <div class="keybox"><span class="k">Week 32</span><span class="v">3 to 9 Aug</span></div>
+      </header>
+      <main class="sheet">
+        <h2 class="shead">The week</h2>
+        <aside class="said" aria-label="From your record">
+          <div class="tcol">From your record</div>
+          <div class="ccol open"><div class="note">
+            <p>You wrote on three of the seven days, and recorded on three.</p>
+          </div></div>
+        </aside>
+        <aside class="said" aria-label="From your record">
+          <div class="tcol">From your record</div>
+          <div class="ccol open"><div class="note">
+            <p>Sleep came up on Thursday. It has come up on four of the last six days.</p>
+            <div class="said-foot"><a class="cite" href="#p-day">6 August</a></div>
+          </div></div>
+        </aside>
+        <aside class="said" aria-label="From your record">
+          <div class="tcol">From your record</div>
+          <div class="ccol open"><div class="note">
+            <p>Your longest recording this week was Wednesday, at 11 minutes 47. Is it
+              the sleep you're writing about, or the hour you're writing at?</p>
+            <div class="said-foot">
+              <a class="cite" href="#p-day">5 August</a>
+              <button class="wrong" type="button">That's not right</button>
+            </div>
+          </div></div>
+        </aside>
+      </main>
+      <div class="notice">You asked for this once a week, on Sunday evenings.
+        <a class="btn quiet" href="#f-you">Change that</a></div>
+    </div>
+  </div>
+
+  <!-- ================= PRO . ASK FIELD ================= -->
+  <div class="app screen" id="p-ask-field">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <h1 class="wordmark">Ask</h1>
+        <div class="keybox">
+          <span class="k">Day</span>
+          <span class="v">Sun 9 Aug '26</span>
+        </div>
+      </header>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#p-today">Today</a><a href="#p-timeline">Timeline</a>
+        <a href="#p-ask-field" aria-current="page">Ask</a><a href="#f-you">You</a>
+      </nav>
+
+      <div class="crow find"><a class="field placeholder" href="#p-ask">Ask anything about
+          your record</a></div>
+      <main class="sheet">
+        <h2 class="shead">From what you have written</h2>
+        <a class="srowlink" href="#p-ask">
+          <span class="lab">What do I write about when I can't sleep?</span>
+          <span class="val">Ask</span>
+        </a>
+        <a class="srowlink" href="#p-ask">
+          <span class="lab">What keeps taking me back to the canal?</span>
+          <span class="val">Ask</span>
+        </a>
+        <a class="srowlink" href="#p-ask">
+          <span class="lab">How often does Priya come up?</span>
+          <span class="val">Ask</span>
+        </a>
+      </main>
+      <p class="foot">Or type your own. Everything is searchable, including your
+        recordings.</p>
+    </div>
+  </div>
+
+  <!-- ================= PRO . AN ANSWER ================= -->
+  <div class="app screen" id="p-ask">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+      <header class="mast">
+        <a class="back" href="#p-ask-field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/></svg>
+          Ask
+        </a>
+      </header>
+      <p class="glance">What do I write about when I can't sleep?</p>
+      <main class="sheet">
+        <h2 class="shead">Your own words</h2>
+        <div class="excerpt">
+          <p>Slept badly again. I've stopped counting which night this is.</p>
+          <a class="when" href="#p-day">Thu 6 August</a>
+        </div>
+        <div class="excerpt">
+          <p>Awake again at three. I've started reading rather than pretending.</p>
+          <a class="when" href="#p-day">Wed 24 June</a>
+        </div>
+        <aside class="said" aria-label="From your record">
+          <div class="tcol">From your record</div>
+          <div class="ccol open"><div class="note">
+            <p>Sleep is in eleven of your entries since June. Nine of the eleven were
+              written after ten at night. Is it the sleep you're writing about, or the
+              hour?</p>
+            <div class="said-foot">
+              <button class="wrong" type="button">That's not right</button>
+            </div>
+          </div></div>
+        </aside>
+      </main>
+      <div class="notice">4 entries were kept out of memory and were not read.</div>
+    </div>
+  </div>
+
+</div>
+
+<nav class="jump" aria-label="Jump to any screen">
+  <b>Start</b>
+  <a href="#start">Index</a>
+  <b>Free</b>
+  <a href="#f-first">First run</a><a href="#f-talk">Talk</a>
+  <a href="#f-today">Today</a><a href="#f-typing">Typing</a><a href="#f-return">Return</a>
+  <a href="#f-timeline-empty">Timeline empty</a><a href="#f-timeline">Timeline</a>
+  <a href="#f-cal">Calendar</a><a href="#f-ask-empty">Ask empty</a><a href="#f-ask">Ask</a>
+  <a href="#f-plan">Plan</a><a href="#f-you">You</a>
+  <b>Pro</b>
+  <a class="pro" href="#p-progress">Transcribing</a><a class="pro" href="#p-first">First session</a><a class="pro" href="#p-today">Today</a><a class="pro" href="#p-timeline">Timeline</a>
+  <a class="pro" href="#p-day">A past day</a><a class="pro" href="#p-reflection">Reflection</a>
+  <a class="pro" href="#p-ask-field">Ask</a><a class="pro" href="#p-ask">An answer</a>
+</nav>
+
+<p class="caption t"><b>Clickable prototype . tablet 834 . 22 screens . no JavaScript</b><br>
+<b>Switch between Today, Timeline, Ask and You and watch the destination row.</b>
+It must not move. It sits at 80px on all four, and a claim about what happens
+between screens is one a still comp cannot make.<br>
+Navigation is <b>:target</b>, so every tap writes a real hash into history and the
+<b>browser back button works</b>. Walk a journey, then press back repeatedly.<br>
+Two journeys kept separate, because Free and Pro are different products and mixing
+them mid-walk is the fastest way to misjudge both. The Free screens never show a
+note or a glance line; the Pro screens never show the unread clause.<br>
+<b>Not the deliverable.</b> The twelve numbered files remain the design of record.
+Where this disagrees with one of them, the numbered file wins.</p>
+
+<p class="caption t"><b>Motion . tablet web 834 . the prototype</b><br>
+<b>Going back replays it</b>, which the built product must not do. A screen is display:none
+until its hash targets it, and display is the only mechanism a prototype with no script has.
+</p>
+</body>
+</html>

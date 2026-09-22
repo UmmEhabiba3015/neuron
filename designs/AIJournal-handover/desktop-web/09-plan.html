@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journal / Plan and upgrade / desktop web 1440 / the only place Pro is explained</title>
+
+<!-- ==========================================================================
+     MOTION . desktop web 1440 . 09-plan.html
+     The motion system is in the BASE at lock.css revision 49, so this screen
+     animates because the product does. There is no variant class, no review
+     hatch and nothing here that a build has to strip.
+
+     WHAT MOVES ON THIS SCREEN
+       the date is written
+     WHAT IS DELIBERATELY STILL
+       the backlog figure, the price, the paragraphs and both buttons. THE PRICE IS A PRINTED VALUE and does not write
+
+     THE RECORD NEVER MOVES AND THE HEADER NEVER ARRIVES, on every screen in
+     the product. Only the four things the product itself does can move: a date
+     being written, the product's own line typing, a waveform drawing and the
+     composer rising. Everything else is at full opacity at the first paint.
+     ========================================================================== -->
+
+<!-- ==========================================================================
+     STAGE 4 . DESKTOP WEB 1440 . SCREEN 9 OF 12 . PLAN AND UPGRADE, route
+     /you/plan. Same content as the mobile and tablet files, verbatim.
+
+     THE SCREEN MOST AT RISK FROM A WIDER PAGE, AND THE RISK IS NOT LAYOUT.
+     This is the only place Pro is ever explained, to a user who has never seen
+     it work. 972px of page is enough for a three column tier grid, a
+     comparison table, a most popular badge and a strike through price, and the
+     reason none of them is here is not that they would not fit. It is that
+     00-flow.md section 3.2 sells Pro on a fact rather than a claim, and every
+     one of those devices is a claim. Six stacked rows and two buttons, at
+     1440 exactly as at 390.
+
+     IT LEADS WITH THEIR NUMBER, in their own units, about their own archive.
+     Then what happens to it. The price is third. Feature bullets do not appear
+     at all. The keybox in the title block carries 4h 12m, which is the same
+     figure Timeline's total carries and the same figure the transcribing state
+     counts down from on screen 12, and all three were checked against each
+     other rather than against section 8 alone.
+
+     THE PARAGRAPH THAT ADMITS THERE IS NO DEMONSTRATION IS THE ONE THAT HAS TO
+     SURVIVE THE WIDTH. "None of that can be shown to you before you pay for
+     it, so it is listed here rather than demonstrated" is 195 characters. At
+     390 it is six lines and unmissable. At 972 it sets in two, which is
+     quieter, and that is the honest consequence of the platform rather than a
+     softening of the sentence: it is still the fourth object on the page, in
+     the same order, in the same words. Measured: 886px, 2 lines, 153
+     characters on the first.
+
+     THE HARDSHIP CONTROL SITS BELOW ITS SENTENCE, NOT INSIDE IT, and that was
+     fix 1 of the tablet review walk. .btn.quiet carries min-height --tap, so
+     inline it inflates its own line box: the paragraph set at 32.5px between
+     its two lines against the 21px every other paragraph uses. The same
+     .card-foot pattern the guest panel already used. It is markup rather than
+     CSS, so it carries forward here for free, and this file is drawn with it
+     from the start rather than acquiring it in a review.
+
+     NO COUNTDOWN, NO LIMITED TIME, NO STRIKE THROUGH, NO MOST POPULAR BADGE,
+     NO COMPARISON TABLE, no urgency in copy or colour. Hardship is something
+     you take, not something you apply for, and there is no form and nobody is
+     told. Export is free forever, said on the page that asks for money.
+
+     THE ACTION BAR IS E9 .actions RATHER THAN THE COMPOSER, because the
+     composer is not allowed to leave Today. It spans the page and its two
+     controls sit at the left of it, which is where the end of a page you
+     scrolled puts them. It is deliberately NOT centred on the sheet's axis the
+     way the composer is: fix 3 centres the place you WRITE, and this is the
+     end of a page rather than a control that follows you.
+
+     MEASURED AT A TRUE 1440
+       back / wordmark / keybox   top 20 / 78 / 126
+       sheet                      426 to 1398, 972 wide, top 126
+       the prose rows             886px
+       the admission paragraph    886px, 2 lines
+       the action bar             1056 wide, its rule spanning the page
+       page height                784, 56 graph modules
+
+     CONTRAST, MEASURED
+       the backlog sentence  --ink on --paper-2       13.24
+       section headings      --rule on --paper         6.85
+       the price             --rule on --paper-2       7.40
+       the admission         --ink on --paper-2       13.24
+       the two notices       --rule on --paper-2       7.40
+       Take the reduced rate --rule on --paper-2       7.40
+       Upgrade               --paper on --rule         6.85
+       Not now               --rule on --paper-2       7.40
+     Every tap target 44px or larger.
+
+     FONTS. Constantia, Segoe UI, Ink Free. Locally installed, no network.
+     Production substitutes: Recoleta or Freight Text Pro, a grotesk with real
+     small caps, Caveat.
+     ========================================================================== -->
+
+<link rel="stylesheet" href="../lock.css">
+</head>
+<body>
+
+<div class="device d">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+
+  <div class="app">
+    <div class="rail" aria-hidden="true"></div>
+
+    <div class="title">
+      <a class="back" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6"/></svg>
+        Timeline
+      </a>
+      <h1 class="wordmark">Plan</h1>
+      <div class="keybox">
+        <span class="k">Not yet read</span>
+        <span class="v">4h 12m</span>
+      </div>
+    </div>
+
+    <div class="page pushed">
+
+      <main class="sheet">
+
+        <div class="srow">
+          <div class="ccol">
+            <p class="prose">You have 4 hours 12 minutes of recordings that have
+              never been read.</p>
+          </div>
+        </div>
+
+        <h2 class="shead">What Pro does with it</h2>
+
+        <div class="srow">
+          <div class="ccol">
+            <p class="prose">Pro turns all of it into text you can search,
+              including everything you recorded before you upgraded.</p>
+          </div>
+        </div>
+
+        <h2 class="shead">What it costs</h2>
+
+        <div class="srow">
+          <div class="ccol">
+            <div class="keybox">
+              <span class="k">Pro</span>
+              <span class="v printed">$9.99 a month, or $99 a year</span>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="shead">What else, stated plainly</h2>
+
+        <div class="srow">
+          <div class="ccol">
+            <p class="lede">Pro also holds a conversation, reads across your whole
+              record, and writes one reflection a week. None of that can be shown
+              to you before you pay for it, so it is listed here rather than
+              demonstrated.</p>
+          </div>
+        </div>
+
+      </main>
+
+      <!-- THE CONTROL SITS BELOW THE SENTENCE, NOT INSIDE IT. Fix 1 of the
+           tablet review walk, carried here as markup rather than re-derived.
+           .btn.quiet is min-height --tap, so inline it inflates its line box
+           and opens the paragraph's leading on the one screen that asks for
+           money. Same .card-foot pattern the guest panel uses. -->
+      <div class="notice">
+        <p>Prices are lower where incomes are lower. If money is the reason you
+          cannot, take the reduced rate. There is no form and nobody is told.</p>
+        <div class="card-foot">
+          <button class="btn quiet" type="button">Take the reduced rate</button>
+        </div>
+      </div>
+
+      <div class="notice">Export stays free forever, including after you cancel.
+        Nothing you wrote is ever locked, hidden or held.</div>
+
+      <div class="actions">
+        <a class="btn solid" href="#">Upgrade</a>
+        <a class="btn keyline" href="#">Not now</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<p class="caption d"><b>Plan and upgrade . the only place Pro is ever explained . desktop web 1440</b><br>
+<b>The screen most at risk from a wider page, and the risk is not layout.</b> 972px is
+enough for a tier grid, a comparison table, a most popular badge and a strike through price,
+and the reason none of them is here is not that they would not fit. Pro is sold on a fact
+rather than a claim, and every one of those devices is a claim. <b>Six stacked rows and two
+buttons, at 1440 exactly as at 390.</b><br>
+<b>It leads with their number</b>, in their own units, about their own archive. Then what
+happens to it. The price is third. Feature bullets do not appear at all. The 4h 12m in the
+title block is the same figure Timeline's total carries and the same figure the transcribing
+state counts down from.<br>
+<b>The paragraph that admits there is no demonstration sets in two lines here against six at
+390.</b> That is quieter, and it is the honest consequence of the platform rather than a
+softening: same order, same words, same fourth position.<br>
+<b>The hardship control sits below its sentence rather than inside it</b>, which was fix 1 of
+the tablet review walk: inline, a 44px control inflates the line box it lands in and opens
+the paragraph's leading to 32.5px on the one screen that asks for money.<br>
+<b>The action bar is not centred on the sheet's axis the way the composer is.</b> Fix 3
+centres the place you write; this is the end of a page you scrolled.</p>
+
+<p class="caption d"><b>Motion . desktop web 1440 . 09-plan.html</b><br>
+<b>What moves:</b> the date is written.<br>
+<b>What is still:</b> the backlog figure, the price, the paragraphs and both buttons. THE PRICE IS A PRINTED VALUE and does not write.
+</p>
+</body>
+</html>

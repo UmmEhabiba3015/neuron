@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journal / States pack / desktop web 1440 / ten states</title>
+
+<!-- ==========================================================================
+     MOTION . desktop web 1440 . 11-states.html
+     The motion system is in the BASE at lock.css revision 49, so this screen
+     animates because the product does. There is no variant class, no review
+     hatch and nothing here that a build has to strip.
+
+     WHAT MOVES ON THIS SCREEN
+       four date boxes are written, the day seven total types, two waveforms draw, one composer rises, one shut note can be opened
+     WHAT IS DELIBERATELY STILL
+       every other state, and the crisis card, which 15.5 forbids motion on outright
+
+     THE RECORD NEVER MOVES AND THE HEADER NEVER ARRIVES, on every screen in
+     the product. Only the four things the product itself does can move: a date
+     being written, the product's own line typing, a waveform drawing and the
+     composer rising. Everything else is at full opacity at the first paint.
+     ========================================================================== -->
+
+<!-- ==========================================================================
+     STAGE 4 . DESKTOP WEB 1440 . SCREEN 11 OF 12 . THE STATES PACK. Ten
+     states, each cropped to the object it is about. Same content as the mobile
+     and tablet files with ONE deliberate difference, which is state 2 and is
+     written up below.
+
+     THIS FILE HAD TO FOLLOW THE TIMELINE RESTRUCTURE, WHICH IS WHY IT WAS
+     FLAGGED BEFORE THE SESSION STARTED. State 2 draws a Timeline, and at 390
+     and 834 a Timeline carries a .seg to switch between two zooms. At 1440
+     both zooms fit, so the list is the record and the calendar is an index
+     into it, .seg has nothing left to switch and is not on the screen, and the
+     second-row slot takes the same date box the other three destinations
+     carry. direction-lock.md 13.12.
+
+     STATE 2 DRAWS A ROW THE OTHER TWO PLATFORMS DO NOT, AND IT IS A CONTENT
+     FAULT ON THEM RATHER THAN AN ADDITION HERE. READ THIS BEFORE CHANGING IT.
+     The day seven state's total reads "3 entries, 1 recording, 5m 08s not yet
+     read." At 390 and 834 the list under it holds THREE WRITTEN ROWS AND NO
+     RECORDING. On those platforms the contradiction is invisible, because a
+     list is a window onto a record and an undrawn row is ordinarily just a row
+     you have not scrolled to. It is not invisible here and it is not
+     ordinary: this is day seven of an account that has existed for a week, so
+     the list IS the whole record, and the calendar index has to mark the days
+     that have something in them. An index that tones no audio day, beside a
+     total that counts a recording, is one screen giving two accounts of the
+     record. That is exactly the fault revision 31 fixed on Timeline.
+     direction-lock.md 8.0 settles it without inventing anything: "Day seven,
+     thin: Since March 2026 with FOUR ROWS AND THREE UNMARKED DAYS." Four rows
+     is three entries plus one recording, and the recording is Saturday the
+     8th's 5:08, which is the same recording the total's own 5m 08s counts and
+     the same one section 8 gives that date everywhere else in the product.
+     Drawn that way the week reads: Mon 3, Wed 5, Sat 8 and Sun 9 marked, and
+     Tue 4, Thu 6 and Fri 7 unmarked. Three unmarked days, exactly as 8.0 says.
+     THE OTHER TWO PLATFORMS DRAW IT TOO. They were reported rather than changed
+     when this was found and were corrected at session 8. This is the fifth time
+     reading content against content has caught something no mechanical check
+     can see.
+
+     WHAT THE CROPPED STATES DO ABOUT THE TITLE BLOCK, AND WHY .page.bare
+     EXISTS. Five of the ten states are cropped to a sheet with no chrome at
+     all, exactly as they are at 390 and 834. On this shell the page's first
+     object is aligned to the title block's second object, and a state with no
+     title block has nothing to align to, so it takes .page.bare and a lead of
+     zero. It is presentation furniture on the same footing as .app.clip and no
+     shipped screen uses it.
+
+     THE GUEST PANEL FOUND A REAL BUG, AND IT IS THE THIRD TIME THE SAME ONE
+     HAS APPEARED. .panel is absolutely positioned and its containing block is
+     .app, because .page is not positioned. At 390 left:--rail and right:0 land
+     exactly on the page. At 834 revision 22 had to put the tablet's centring
+     arithmetic into it. At 1440 that same arithmetic computes 452 and 428 for
+     a page that runs 384 to 1440, so the panel sat 68px inside the page on one
+     side and 428px short on the other. lock.css revision 44. "Treat anything
+     positioned against .app as suspect at every new platform" is in the
+     handoff as a lesson, and it earned its place again.
+
+     THE WAVEFORMS ARE THE SIGNED PATTERNS AT THE SIGNED WIDTHS, NOT NEW ONES.
+     State 4's 2:41 sits in a full width sheet, which is the row 01-today
+     already measured at 788.3 with a viewBox of 891, so it is that file's
+     pattern verbatim. State 2's 5:08 sits in the list column of a split page,
+     which is the row 02-timeline already measured at 376.3 with a viewBox of
+     425, so it is that file's pattern verbatim. Both measured on this file
+     rather than assumed: 1.7695 and 1.7708.
+
+     THE TEN STATES
+       1  empty today, day one          6  the crisis resource
+       2  day seven, thin, with index   7  offline
+       3  return after three weeks      8  guest, and the keep this moment
+       4  a recording on free           9  Ask on free, a real question
+       5  the note, open               10  the composer, mid-draft
+
+     CONTRAST, MEASURED. Every pair on this page is one of the eight already
+     recorded in direction-lock.md 2.1. Nothing new is introduced by a state.
+     Every tap target 44px or larger except .total, the documented exception,
+     which appears once in state 2.
+
+     FONTS. Constantia, Segoe UI, Ink Free. Locally installed, no network.
+     Production substitutes: Recoleta or Freight Text Pro, a grotesk with real
+     small caps, Caveat.
+     ========================================================================== -->
+
+<link rel="stylesheet" href="../lock.css">
+</head>
+<body>
+
+<!-- ===================== 1. EMPTY TODAY, DAY ONE ===================== -->
+<div class="device d">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+  <div class="app clip">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="title">
+      <h1 class="wordmark">Journal</h1>
+      <div class="keybox"><span class="k">Day</span><span class="v">Sun 9 Aug '26</span></div>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#" aria-current="page">Today</a><a href="#">Timeline</a>
+        <a href="#">Ask</a><a href="#">You</a>
+      </nav>
+    </div>
+    <div class="page">
+      <p class="empty">What's today been like?</p>
+      <div class="composer">
+        <div class="crow">
+          <div class="field placeholder">Add to today</div>
+          <button class="mic" type="button" aria-label="Record">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="2.5" width="6" height="11.5" rx="3"/>
+              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/></svg>
+          </button>
+        </div>
+        <button class="opt" type="button" aria-pressed="false"><span class="tick" aria-hidden="true"></span>
+          Keep this out of memory</button>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="caption d"><b>1 . Empty today . desktop web 1440</b><br>
+Never a bare box. One line from a fixed, human written prompt set that rotates by day. Costs
+nothing and needs no model, which matters because on free no model ever runs. No
+illustration, no encouragement, nothing asking to be filled in.<br>
+<b>The prompt line starts on the date box's line</b>, at 68, because on this shell the page's
+first object follows the title block's second object and here that object is the opening
+line rather than a sheet.</p>
+
+<!-- ================= 2. DAY SEVEN, THIN TIMELINE ===================== -->
+<div class="device d">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+  <div class="app clip">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="title">
+      <h1 class="wordmark">Timeline</h1>
+      <div class="keybox"><span class="k">Day</span><span class="v">Sun 9 Aug '26</span></div>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#">Today</a><a href="#" aria-current="page">Timeline</a>
+        <a href="#">Ask</a><a href="#">You</a>
+      </nav>
+      <p class="total"><span class="gline">3 entries, 1 recording, <a href="#">5m 08s not yet read</a>.</span></p>
+    </div>
+    <div class="page split">
+      <main class="sheet">
+        <h2 class="shead">August 2026</h2>
+        <div class="dayrow" id="d-2026-08-09">
+          <div class="tcol"><time datetime="2026-08-09">Sun 9</time></div>
+          <div class="ccol"><p class="lede">Tried again with the flat people. No answer,
+            which I have decided is not an answer.</p></div>
+        </div>
+        <div class="recrow" id="d-2026-08-08">
+          <div class="head dated">
+            <div class="tcol"><time datetime="2026-08-08">Sat 8</time></div>
+            <div class="ccol">
+              <button class="play" type="button"
+                      aria-label="Play recording from Saturday 8 August, 5 minutes 8 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/></svg>
+              </button>
+              <svg class="wave" viewBox="0 0 459 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="15" width="2" height="14"/><rect x="7" y="8" width="2" height="28"/><rect x="14" y="17" width="2" height="10"/><rect x="21" y="5" width="2" height="34"/><rect x="28" y="13" width="2" height="18"/><rect x="35" y="19" width="2" height="6"/><rect x="42" y="9" width="2" height="26"/><rect x="49" y="16" width="2" height="12"/><rect x="56" y="3" width="2" height="38"/><rect x="63" y="18" width="2" height="8"/><rect x="70" y="12" width="2" height="20"/><rect x="77" y="6" width="2" height="32"/><rect x="84" y="19" width="2" height="6"/><rect x="91" y="14" width="2" height="16"/><rect x="98" y="4" width="2" height="36"/><rect x="105" y="17" width="2" height="10"/><rect x="112" y="11" width="2" height="22"/><rect x="119" y="2" width="2" height="40"/><rect x="126" y="18" width="2" height="8"/><rect x="133" y="13" width="2" height="18"/><rect x="140" y="7" width="2" height="30"/><rect x="147" y="19" width="2" height="6"/><rect x="154" y="12" width="2" height="20"/><rect x="161" y="5" width="2" height="34"/><rect x="168" y="16" width="2" height="12"/><rect x="175" y="18" width="2" height="8"/><rect x="182" y="9" width="2" height="26"/><rect x="189" y="15" width="2" height="14"/><rect x="196" y="3" width="2" height="38"/><rect x="203" y="17" width="2" height="10"/><rect x="210" y="11" width="2" height="22"/><rect x="217" y="6" width="2" height="32"/><rect x="224" y="19" width="2" height="6"/><rect x="231" y="13" width="2" height="18"/>
+                </g>
+                <g fill="currentColor" transform="translate(471 0) scale(-1 1)">
+                  <rect x="0" y="15" width="2" height="14"/><rect x="7" y="8" width="2" height="28"/><rect x="14" y="17" width="2" height="10"/><rect x="21" y="5" width="2" height="34"/><rect x="28" y="13" width="2" height="18"/><rect x="35" y="19" width="2" height="6"/><rect x="42" y="9" width="2" height="26"/><rect x="49" y="16" width="2" height="12"/><rect x="56" y="3" width="2" height="38"/><rect x="63" y="18" width="2" height="8"/><rect x="70" y="12" width="2" height="20"/><rect x="77" y="6" width="2" height="32"/><rect x="84" y="19" width="2" height="6"/><rect x="91" y="14" width="2" height="16"/><rect x="98" y="4" width="2" height="36"/><rect x="105" y="17" width="2" height="10"/><rect x="112" y="11" width="2" height="22"/><rect x="119" y="2" width="2" height="40"/><rect x="126" y="18" width="2" height="8"/><rect x="133" y="13" width="2" height="18"/><rect x="140" y="7" width="2" height="30"/><rect x="147" y="19" width="2" height="6"/><rect x="154" y="12" width="2" height="20"/><rect x="161" y="5" width="2" height="34"/><rect x="168" y="16" width="2" height="12"/><rect x="175" y="18" width="2" height="8"/><rect x="182" y="9" width="2" height="26"/><rect x="189" y="15" width="2" height="14"/><rect x="196" y="3" width="2" height="38"/><rect x="203" y="17" width="2" height="10"/><rect x="210" y="11" width="2" height="22"/><rect x="217" y="6" width="2" height="32"/><rect x="224" y="19" width="2" height="6"/><rect x="231" y="13" width="2" height="18"/>
+                </g>
+              </svg>
+              <span class="dur">5:08</span>
+            </div>
+          </div>
+        </div>
+        <div class="dayrow" id="d-2026-08-05">
+          <div class="tcol"><time datetime="2026-08-05">Wed 5</time></div>
+          <div class="ccol"><p class="lede">Nothing much. Wrote this so there would be
+            something here.</p></div>
+        </div>
+        <div class="dayrow" id="d-2026-08-03">
+          <div class="tcol"><time datetime="2026-08-03">Mon 3</time></div>
+          <div class="ccol"><p class="lede">First proper go at this. Felt strange talking
+            to a page.</p></div>
+        </div>
+      </main>
+
+      <nav class="cal" aria-label="August 2026, an index into the record">
+        <span class="dow" aria-hidden="true">M</span><span class="dow" aria-hidden="true">T</span>
+        <span class="dow" aria-hidden="true">W</span><span class="dow" aria-hidden="true">T</span>
+        <span class="dow" aria-hidden="true">F</span><span class="dow" aria-hidden="true">S</span>
+        <span class="dow" aria-hidden="true">S</span>
+        <span class="day out">27</span><span class="day out">28</span><span class="day out">29</span>
+        <span class="day out">30</span><span class="day out">31</span><span class="day out">1</span>
+        <span class="day out">2</span>
+        <a class="day has" href="#d-2026-08-03">3</a><span class="day">4</span>
+        <a class="day has" href="#d-2026-08-05">5</a><span class="day">6</span>
+        <span class="day">7</span>
+        <a class="day has audio" href="#d-2026-08-08">8</a>
+        <a class="day has" href="#d-2026-08-09">9</a>
+        <span class="day">10</span><span class="day">11</span><span class="day">12</span>
+        <span class="day">13</span><span class="day">14</span><span class="day">15</span>
+        <span class="day">16</span>
+        <span class="day">17</span><span class="day">18</span><span class="day">19</span>
+        <span class="day">20</span><span class="day">21</span><span class="day">22</span>
+        <span class="day">23</span>
+        <span class="day">24</span><span class="day">25</span><span class="day">26</span>
+        <span class="day">27</span><span class="day">28</span><span class="day">29</span>
+        <span class="day">30</span>
+        <span class="day">31</span><span class="day out">1</span><span class="day out">2</span>
+        <span class="day out">3</span><span class="day out">4</span><span class="day out">5</span>
+        <span class="day out">6</span>
+      </nav>
+
+      <p class="foot">Since 3 August 2026</p>
+    </div>
+  </div>
+</div>
+<p class="caption d"><b>2 . Day seven, already with a gap . AND IT DRAWS A ROW THE OTHER PLATFORMS DO NOT</b><br>
+<b>The weakest week in the product.</b> Four rows in seven days, three days with nothing. The
+silent days are not rows, are not counted, and have no language attached to them anywhere. In
+the index they are a number and nothing else: no box, no dot, no dimming that reads as
+failure, and no tap target, because there is nothing to go to.<br>
+<b>The fourth row is Saturday's recording, and its absence at 390 and 834 is a content
+fault.</b> The total says 3 entries and 1 recording; the list on the other two platforms shows
+three written rows and no recording at all. That is invisible there and impossible here,
+because the index has to mark the days that have something in them, and an index toning no
+audio day beside a total counting a recording is one screen giving two accounts of the
+record. Section 8.0 specifies this state as <b>four rows and three unmarked days</b>, which is
+exactly what is drawn: 3, 5, 8 and 9 marked, 4, 6 and 7 unmarked. <b>Reported on the signed
+platforms rather than changed there.</b><br>
+The total is small and it is still only rising. No streak, no percentage, no prompt to do
+better, no red. This state has to feel like a thin notebook rather than a failed one.</p>
+
+<!-- ================= 3. RETURN AFTER THREE WEEKS ===================== -->
+<div class="device d">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+  <div class="app clip">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="title">
+      <h1 class="wordmark">Journal</h1>
+      <div class="keybox"><span class="k">Day</span><span class="v">Sun 9 Aug '26</span></div>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#" aria-current="page">Today</a><a href="#">Timeline</a>
+        <a href="#">Ask</a><a href="#">You</a>
+      </nav>
+    </div>
+    <div class="page">
+      <main class="sheet">
+        <h2 class="shead">Last time</h2>
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-07-17">Fri 17 Jul</time></div>
+          <div class="ccol"><p class="lede">Last day before the shutdown. Everyone left
+            early and the building went quiet by three.</p></div>
+        </div>
+      </main>
+      <div class="composer">
+        <div class="crow">
+          <div class="field placeholder">Add to today</div>
+          <button class="mic" type="button" aria-label="Record">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="2.5" width="6" height="11.5" rx="3"/>
+              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/></svg>
+          </button>
+        </div>
+        <button class="opt" type="button" aria-pressed="false"><span class="tick" aria-hidden="true"></span>
+          Keep this out of memory</button>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="caption d"><b>3 . Return after three silent weeks . Free</b><br>
+<b>The most important user in the product.</b> The screen opens exactly as always. No
+interstitial, no re-onboarding, no welcome back, no day count, no reset counter, no red.<br>
+<b>A verbatim echo, not a synthesis.</b> The date and opening line of the last thing written,
+exactly as written. It is a database read that costs nothing, and it is arguably more honest
+than a generated line: it is what they said, not an interpretation of it. Nothing anywhere
+says it's been a while.</p>
+
+<!-- ============ 4. FREE RECORDING, NO TRANSCRIPT ===================== -->
+<div class="device d">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+  <div class="app clip">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page bare">
+      <main class="sheet">
+        <h2 class="shead">Today, on free</h2>
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-09T09:20">09:20</time></div>
+          <div class="ccol"><p class="prose">The flat people said Tuesday, and it's
+            Sunday, so I've decided not to think about it until Tuesday.</p></div>
+        </div>
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"><time datetime="2026-08-09T14:05">14:05</time></div>
+            <div class="ccol">
+              <button class="play" type="button" aria-label="Play recording, 2 minutes 41 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/></svg>
+              </button>
+              <svg class="wave" viewBox="0 0 891 44" preserveAspectRatio="none" aria-hidden="true">
+<g fill="currentColor">
+                  <rect x="0" y="18" width="2" height="8"/><rect x="7" y="15" width="2" height="14"/><rect x="14" y="13" width="2" height="18"/><rect x="21" y="8" width="2" height="28"/><rect x="28" y="4" width="2" height="36"/><rect x="35" y="10" width="2" height="24"/><rect x="42" y="15" width="2" height="14"/><rect x="49" y="17" width="2" height="10"/><rect x="56" y="19" width="2" height="6"/><rect x="63" y="14" width="2" height="16"/><rect x="70" y="7" width="2" height="30"/><rect x="77" y="11" width="2" height="22"/><rect x="84" y="16" width="2" height="12"/><rect x="91" y="9" width="2" height="26"/><rect x="98" y="2" width="2" height="40"/><rect x="105" y="7" width="2" height="30"/><rect x="112" y="12" width="2" height="20"/><rect x="119" y="16" width="2" height="12"/><rect x="126" y="19" width="2" height="6"/><rect x="133" y="13" width="2" height="18"/><rect x="140" y="8" width="2" height="28"/><rect x="147" y="12" width="2" height="20"/><rect x="154" y="16" width="2" height="12"/><rect x="161" y="11" width="2" height="22"/><rect x="168" y="5" width="2" height="34"/><rect x="175" y="12" width="2" height="20"/><rect x="182" y="18" width="2" height="8"/><rect x="189" y="15" width="2" height="14"/><rect x="196" y="12" width="2" height="20"/><rect x="203" y="7" width="2" height="30"/><rect x="210" y="3" width="2" height="38"/><rect x="217" y="11" width="2" height="22"/><rect x="224" y="19" width="2" height="6"/><rect x="231" y="16" width="2" height="12"/><rect x="238" y="14" width="2" height="16"/><rect x="245" y="11" width="2" height="22"/><rect x="252" y="8" width="2" height="28"/><rect x="259" y="13" width="2" height="18"/><rect x="266" y="18" width="2" height="8"/><rect x="273" y="14" width="2" height="16"/><rect x="280" y="11" width="2" height="22"/><rect x="287" y="6" width="2" height="32"/><rect x="294" y="2" width="2" height="40"/><rect x="301" y="9" width="2" height="26"/><rect x="308" y="16" width="2" height="12"/><rect x="315" y="18" width="2" height="8"/><rect x="322" y="19" width="2" height="6"/><rect x="329" y="15" width="2" height="14"/><rect x="336" y="12" width="2" height="20"/><rect x="343" y="9" width="2" height="26"/><rect x="350" y="6" width="2" height="32"/><rect x="357" y="12" width="2" height="20"/><rect x="364" y="18" width="2" height="8"/><rect x="371" y="16" width="2" height="12"/><rect x="378" y="14" width="2" height="16"/><rect x="385" y="9" width="2" height="26"/><rect x="392" y="4" width="2" height="36"/><rect x="399" y="12" width="2" height="20"/><rect x="406" y="19" width="2" height="6"/><rect x="413" y="16" width="2" height="12"/><rect x="420" y="13" width="2" height="18"/><rect x="427" y="16" width="2" height="12"/><rect x="434" y="19" width="2" height="6"/><rect x="441" y="12" width="2" height="20"/><rect x="448" y="4" width="2" height="36"/><rect x="455" y="9" width="2" height="26"/><rect x="462" y="14" width="2" height="16"/><rect x="469" y="16" width="2" height="12"/><rect x="476" y="18" width="2" height="8"/><rect x="483" y="12" width="2" height="20"/><rect x="490" y="6" width="2" height="32"/><rect x="497" y="9" width="2" height="26"/><rect x="504" y="12" width="2" height="20"/><rect x="511" y="15" width="2" height="14"/><rect x="518" y="19" width="2" height="6"/><rect x="525" y="18" width="2" height="8"/><rect x="532" y="16" width="2" height="12"/><rect x="539" y="9" width="2" height="26"/><rect x="546" y="2" width="2" height="40"/><rect x="553" y="6" width="2" height="32"/><rect x="560" y="11" width="2" height="22"/><rect x="567" y="14" width="2" height="16"/><rect x="574" y="18" width="2" height="8"/><rect x="581" y="13" width="2" height="18"/><rect x="588" y="8" width="2" height="28"/><rect x="595" y="11" width="2" height="22"/><rect x="602" y="14" width="2" height="16"/><rect x="609" y="16" width="2" height="12"/><rect x="616" y="19" width="2" height="6"/><rect x="623" y="11" width="2" height="22"/><rect x="630" y="3" width="2" height="38"/><rect x="637" y="7" width="2" height="30"/><rect x="644" y="12" width="2" height="20"/><rect x="651" y="15" width="2" height="14"/><rect x="658" y="18" width="2" height="8"/><rect x="665" y="12" width="2" height="20"/><rect x="672" y="5" width="2" height="34"/><rect x="679" y="11" width="2" height="22"/><rect x="686" y="16" width="2" height="12"/><rect x="693" y="12" width="2" height="20"/><rect x="700" y="8" width="2" height="28"/><rect x="707" y="13" width="2" height="18"/><rect x="714" y="19" width="2" height="6"/><rect x="721" y="16" width="2" height="12"/><rect x="728" y="12" width="2" height="20"/><rect x="735" y="7" width="2" height="30"/><rect x="742" y="2" width="2" height="40"/><rect x="749" y="9" width="2" height="26"/><rect x="756" y="16" width="2" height="12"/><rect x="763" y="11" width="2" height="22"/><rect x="770" y="7" width="2" height="30"/><rect x="777" y="14" width="2" height="16"/><rect x="784" y="19" width="2" height="6"/><rect x="791" y="17" width="2" height="10"/><rect x="798" y="15" width="2" height="14"/><rect x="805" y="10" width="2" height="24"/><rect x="812" y="4" width="2" height="36"/><rect x="819" y="8" width="2" height="28"/><rect x="826" y="13" width="2" height="18"/><rect x="833" y="15" width="2" height="14"/><rect x="840" y="18" width="2" height="8"/><rect x="847" y="15" width="2" height="14"/><rect x="854" y="13" width="2" height="18"/><rect x="861" y="8" width="2" height="28"/><rect x="868" y="4" width="2" height="36"/><rect x="875" y="10" width="2" height="24"/><rect x="882" y="15" width="2" height="14"/><rect x="889" y="17" width="2" height="10"/><rect x="896" y="19" width="2" height="6"/><rect x="903" y="14" width="2" height="16"/><rect x="910" y="7" width="2" height="30"/><rect x="917" y="11" width="2" height="22"/><rect x="924" y="16" width="2" height="12"/><rect x="931" y="9" width="2" height="26"/><rect x="938" y="2" width="2" height="40"/><rect x="945" y="7" width="2" height="30"/><rect x="952" y="12" width="2" height="20"/>
+                </g>
+              </svg>
+              <span class="dur">2:41</span>
+            </div>
+          </div>
+        </div>
+      </main>
+      <div class="notice">Kept as audio. Pro turns your recordings into text you can
+        read and search.</div>
+    </div>
+  </div>
+</div>
+<p class="caption d"><b>4 . A recording on free, with no transcript</b><br>
+The head alone: time, play, waveform, duration. <b>Nothing is blurred, greyed, locked or
+padlocked</b>, and there is no upgrade button on the row.<br>
+<b>The head carries its time on both tiers</b>, which closed section 9.12 at session 6 and is
+rule 4: times in a fixed 58px left column. This state is the one that raised it, because Free
+has no transcript body for the time to sit in, and the row was carrying no time at all while
+every entry around it did. <b>And it draws today's recording, 14:05 and 2:41</b>: it used to
+draw a 5:08, which is Saturday the 8th's, on a sheet headed Today.<br>
+This is the single most important restraint in the product. An untranscribed memo is not a
+feature being withheld, it is work nobody has paid for, and the moment this row is drawn as a
+locked object the entire free tier becomes a demo.</p>
+
+<!-- ==================== 5. THE NOTE, OPEN =========================== -->
+<div class="device d">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+  <div class="app clip">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page bare">
+      <main class="sheet">
+        <h2 class="shead">The note, opened</h2>
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-09T09:20">09:20</time></div>
+          <div class="ccol"><p class="prose">The flat people said Tuesday, and it's
+            Sunday, so I've decided not to think about it until Tuesday.</p></div>
+        </div>
+        <aside class="said" aria-label="From your record">
+          <div class="tcol">From your record</div>
+          <div class="ccol">
+            <details open>
+              <summary>
+                <span class="lblbox"><span class="lbl shut">Read the note</span>
+                <span class="lbl open">Hide the note</span></span>
+                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </summary>
+              <div class="note">
+                <p>You wrote something close to this in March, about the job. That
+                  you'd decided not to think about it until Thursday.</p>
+                <div class="said-foot">
+                  <a class="cite" href="#">12 March</a>
+                  <button class="wrong" type="button">That's not right</button>
+                </div>
+              </div>
+            </details>
+          </div>
+        </aside>
+      </main>
+    </div>
+  </div>
+</div>
+<p class="caption d"><b>5 . The product's note, open</b><br>
+Shut everywhere else. Open, the label swaps to Hide the note, the chevron flips, and the
+claim appears below a dotted rule with its citation and a way to mark it wrong.<br>
+<b>Built with details and summary, so it needs no script</b>, and keyboard operation, focus
+and expanded state all come from the browser rather than from anything reimplemented.<br>
+<b>The open state is not the state fix 2c touched.</b> That fix centres the printed key and
+the summary in a SHUT row, which is only as tall as the key itself; here the key labels a
+long block from its top, which is what the padding was written for.</p>
+
+<!-- ==================== 6. THE CRISIS CARD ========================== -->
+<div class="device d">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+  <div class="app clip">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page bare">
+      <main class="sheet">
+        <h2 class="shead">After an entry is complete</h2>
+        <div class="srow">
+          <div class="tcol"><time datetime="01:40">01:40</time></div>
+          <div class="ccol"><p class="prose">I don't really see the point of any of it
+            tonight. Everyone would be fine.</p></div>
+        </div>
+      </main>
+      <div class="card">
+        <h3>If you want to talk to someone</h3>
+        <p>Samaritans are open all night, every night, on 116 123. Calling is free
+          and they will not ask your name.</p>
+        <div class="card-foot">
+          <button class="wrong" type="button">That isn't what this was</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="caption d"><b>6 . The crisis resource</b><br>
+Appears <b>after</b> the entry is complete. Never mid composition, never on open, never as a
+push, never in the timeline, <b>never paywalled at any tier</b>.<br>
+The same keyline card as every other static card. No colour, no icon, no alarm, no legal
+register. A warm thing that abruptly becomes a red banner is abandonment at the exact moment
+it matters most. It carries a way to say that isn't what this was, because false positives on
+grief, venting and fiction are guaranteed.<br>
+<b>Documented shortfall, not a solved problem:</b> on free this is a curated phrase list with
+no model behind it, and it does not cover voice memos at all.</p>
+
+<!-- ======================= 7. OFFLINE =============================== -->
+<div class="device d">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+  <div class="app clip">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page bare">
+      <main class="sheet">
+        <h2 class="shead">No connection</h2>
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-09T14:05">14:05</time></div>
+          <div class="ccol">
+            <p class="prose">Walked the canal as far as the second bridge and back.</p>
+            <span class="mark">Saved on this device</span>
+          </div>
+        </div>
+      </main>
+      <div class="notice">Saved on this device. It will upload when you are back
+        online.</div>
+      <div class="composer">
+        <div class="crow">
+          <div class="field placeholder">Add to today</div>
+          <button class="mic" type="button" aria-label="Record">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="2.5" width="6" height="11.5" rx="3"/>
+              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/></svg>
+          </button>
+        </div>
+        <button class="opt" type="button" aria-pressed="false"><span class="tick" aria-hidden="true"></span>
+          Keep this out of memory</button>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="caption d"><b>7 . Offline</b><br>
+<b>Not an error.</b> The composer and the recorder are fully functional, the entry is saved,
+and the mark says where it is rather than what went wrong. Nothing is disabled, nothing is
+red, and there is no retry button, because there is nothing for the user to retry.</p>
+
+<!-- ================== 8. GUEST, AND KEEP THIS ======================= -->
+<div class="device d">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+  <div class="app">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="title">
+      <h1 class="wordmark">Journal</h1>
+      <div class="keybox"><span class="k">Day</span><span class="v">Sun 9 Aug '26</span></div>
+    </div>
+    <div class="page">
+      <div class="notice">Kept in this browser until 16 August.</div>
+      <main class="sheet">
+        <div class="srow">
+          <div class="tcol"><time datetime="21:58">21:58</time></div>
+          <div class="ccol"><p class="prose">First go at this. Felt strange talking to
+            a page, then less strange.</p></div>
+        </div>
+      </main>
+      <div class="panel" role="dialog" aria-labelledby="pt">
+        <h2 id="pt">This is kept in this browser only</h2>
+        <p class="lede">It will go if you clear your browser or switch devices.
+          Everything you have written carries over intact.</p>
+        <div class="card-foot">
+          <a class="btn solid" href="#">Keep it</a>
+          <button class="btn quiet" type="button">Not yet</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="caption d"><b>8 . Guest, and the keep this moment . AND THE THIRD APPEARANCE OF ONE BUG</b><br>
+<b>Not on arrival.</b> The panel appears only after the first thing is written, so the user is
+being offered to keep something that exists rather than to insure an empty house.<br>
+A panel, not a modal: it pushes a history entry and Back closes it. Not yet is a quiet control
+and stays fully legible, because there is no disabled state and no guilt copy anywhere in this
+product.<br>
+<b>This state found the same bug for the third time.</b> The panel is positioned against the
+app rather than the page, which is invisible at 390 where the two are the same rectangle,
+needed the tablet's centring arithmetic at 834, and put the panel 68px inside one edge of the
+page and 428px short of the other at 1440. lock.css revision 44. <b>Anything positioned
+against .app is suspect at every new platform</b>, and this is now the third platform to prove
+it.</p>
+
+<!-- ============ 9. ASK, FREE, THE HONEST POOR RESULT ================ -->
+<div class="device d">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+  <div class="app clip">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="title">
+      <h1 class="wordmark">Ask</h1>
+      <div class="keybox"><span class="k">Day</span><span class="v">Sun 9 Aug '26</span></div>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#">Today</a><a href="#">Timeline</a>
+        <a href="#" aria-current="page">Ask</a><a href="#">You</a>
+      </nav>
+    </div>
+    <div class="page">
+      <div class="crow find"><div class="field">have I felt like this before</div></div>
+      <main class="sheet">
+        <h2 class="shead">No entries match those words</h2>
+        <div class="srow">
+          <div class="ccol"><p class="lede">Search looks for the words you type.
+            Nothing you have written uses these ones.</p></div>
+        </div>
+      </main>
+      <div class="notice">31 recordings are not searchable. Pro turns them into text,
+        and reads across your entries rather than matching words in them.</div>
+    </div>
+  </div>
+</div>
+<p class="caption d"><b>9 . Ask on free, asked a real question</b><br>
+<b>The honest demonstration.</b> Keyword matching against have I felt like this before returns
+nothing, and that poverty is a more persuasive argument for Pro than any copy would be.<br>
+So the screen does not editorialise. It explains what a search box is, in one sentence, and
+states the two facts. No blur, no lock, no teaser, and no attempt to dress a genuine
+limitation as a feature preview.</p>
+
+<!-- ============ 10. THE COMPOSER, MID-DRAFT ======================== -->
+<div class="device d">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+  <div class="app clip">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page bare">
+      <main class="sheet">
+        <h2 class="shead">Something is typed</h2>
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-09T09:20">09:20</time></div>
+          <div class="ccol"><p class="prose">The flat people said Tuesday, and it's
+            Sunday, so I've decided not to think about it until Tuesday.</p></div>
+        </div>
+      </main>
+      <div class="composer">
+        <div class="crow">
+          <div class="field">Priya rang. We talked for an hour about nothing.</div>
+          <button class="send" type="button">Save</button>
+        </div>
+        <button class="opt" type="button" aria-pressed="false"><span class="tick" aria-hidden="true"></span>
+          Keep this out of memory</button>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="caption d"><b>10 . The composer, mid-draft</b><br>
+<b>This state did not exist until the flow walk found that the typed path could not be
+completed.</b> The composer was a field, a record control and the out-of-memory option, with no
+way to commit what you had typed.<br>
+<b>One control, two states.</b> The single filled control is the record control while the
+field is empty and the commit control the moment it is not. Same height, same fill.<br>
+<b>The commit control is a word, not a glyph.</b> It was drawn first as an arrow onto a
+baseline and the first person to look at it read it as <i>download</i>, which is the one thing
+it must not mean. An icon that has to be decoded is worse than a word that cannot be, and this
+product already speaks in printed labels: Upgrade, Export, Not now.<br>
+The field also stops being a placeholder here, so the text is ink rather than the quieter
+printed grey. <b>The cost, accepted:</b> the mic is unreachable mid-draft, so someone who
+starts typing and then wants to record has to clear the field.</p>
+
+<p class="caption d"><b>Motion . desktop web 1440 . 11-states.html</b><br>
+<b>What moves:</b> four date boxes are written, the day seven total types, two waveforms draw, one composer rises, one shut note can be opened.<br>
+<b>What is still:</b> every other state, and the crisis card, which 15.5 forbids motion on outright.
+</p>
+</body>
+</html>

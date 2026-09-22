@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journal / Privacy and what is visible / tablet web 834</title>
+
+<!-- ==========================================================================
+     MOTION . tablet web 834 . 10-settings-privacy.html
+     The motion system is in the BASE at lock.css revision 49, so this screen
+     animates because the product does. There is no variant class, no review
+     hatch and nothing here that a build has to strip.
+
+     WHAT MOVES ON THIS SCREEN
+       nothing
+     WHAT IS DELIBERATELY STILL
+       all four pushed pages, entirely
+
+     THE RECORD NEVER MOVES AND THE HEADER NEVER ARRIVES, on every screen in
+     the product. Only the four things the product itself does can move: a date
+     being written, the product's own line typing, a waveform drawing and the
+     composer rising. Everything else is at full opacity at the first paint.
+     ========================================================================== -->
+
+<!-- ==========================================================================
+     STAGE 4 . TABLET WEB 834 . SCREEN 10 OF 12
+     Routes /you/privacy and /you/visible, plus /you/data.
+     Three stages: privacy in plain sentences, what the model can see on both
+     tiers, and the data screen where export and delete live together.
+
+     THE REFLOW. See direction-lock.md section 12 for the argument.
+     Page 560, exactly 40 graph modules, centred with the binding welded to it.
+     Paper margin 28. Same markup as mobile-web/10-settings-privacy.html.
+
+     THE DIALOG NOW CENTRES ON THE PAGE RATHER THAN ON THE APP
+     The delete dialog is the only blocking dialog in the product and it lives
+     here. Its scrim covers everything, which is right for a modal, but it was
+     centring its card on .app's padding box and landing 12px left of the page's
+     axis. Invisible at 390, where the two are the same line. Corrected in
+     lock.css revision 24 by adding the rail's width back as left padding, so
+     the card sits on the page's centre, which is where the panel sits too.
+     Measured: card centre 482, page centre 482.
+
+     THE CARD MUST NOT STRETCH, AND FOR ONE TURN IT DID
+     .dialog is a grid with place-items:center, so this card is sized to its own
+     content rather than to its container. Every other .card in the product is a
+     block that fills what it is given. When lock.css revision 25 released the
+     subordinate prose caps, this one card had nothing left bounding it: the
+     paragraph set on a single line and the card grew to 706px, past the page's
+     own edges, on the one screen in the product that must never feel loose.
+     Restored as the single exception in revision 25, and the reason is
+     FUNCTIONAL rather than typographic. A confirmation has to stay compact so
+     that Export instead and Delete everything stay near each other. A long
+     throw between the safe button and the destructive one is exactly the
+     arrangement that produces a mis-tap on the irreversible one.
+     Measured: the card is 317px at 390 and 317px at 834, and its centre now
+     sits on the page's centre rather than 12px left of it.
+
+     THE SPECIFICITY IS UNCHANGED, AND HAS TO BE. Every number on these three
+     screens is the same number: 148 entries, 31 recordings, 4 held out of
+     memory, 144 of 148 readable. Nothing here was regenerated for a new
+     platform, because the whole argument of the privacy screens is that they
+     state exact facts rather than reassuring ones.
+
+     SPECIFICITY IS THE FEATURE. A PADLOCK ICON IS NOT.
+     Private plus sent to a language model is a contradiction users notice and
+     resent. The answer is not reassurance, it is naming the thing: what
+     leaves the device, who processes it, whether it trains anything, how long
+     it is kept, and what delete actually does. Five questions, five
+     sentences, no legal register and no defensive hedging.
+
+     THE SENTENCES ARE SHORT ON PURPOSE
+     A privacy page nobody finishes reading is a privacy page that has failed,
+     however complete it is. Each row is a question in the label and an answer
+     in one sentence. Someone can read the whole policy in under a minute,
+     which is the only version of this page that does any good.
+
+     WHAT THE MODEL CAN SEE IS A SEPARATE SCREEN, AND IT IS A LIST
+     Not a promise about what is seen, but an enumeration of it. On free the
+     answer is Nothing, once, in the same type as everything else, because no
+     model runs at all. On Pro it is everything except the entries held out of
+     memory, with the count, so the opt out is visibly working rather than
+     merely claimed.
+
+     THE PER ENTRY OPT OUT HAS TO BE VISIBLE OR IT IS NOT AN OPT OUT
+     The composer carries Keep this out of memory, excluded entries carry a
+     mark in place on Today and Timeline, and this screen counts them. Three
+     surfaces, one fact. Without the third, a user has no way to confirm the
+     first two ever worked.
+
+     EXPORT AND DELETE SHARE A SCREEN, DELIBERATELY
+     The screen that offers to destroy everything is also the screen offering
+     to save it first, and export is directly above delete rather than
+     somewhere else in settings. Export is free forever, to guests, to free
+     accounts, to Pro accounts, and after cancelling, including every
+     transcript Pro ever made.
+
+     THE ONE BLOCKING DIALOG IN THE PRODUCT
+     Delete everything is the only one. It names the real counts, says plainly
+     that it cannot be undone, and offers export from inside itself. Its
+     confirming action is a keyline button and Export instead is filled,
+     which inverts the usual emphasis on purpose: the safe path should be the
+     loud one on the only irreversible screen in the product.
+
+     TRADE-OFF TAKEN
+     Three routes are drawn in one file. They are genuinely three screens, not
+     one, and a stricter reading of one design per screen would split them.
+     They are together because they are one argument: here is what we do with
+     your writing, here is what is visible, here is how you take it back.
+     Reviewing them apart would hide whether the three agree with each other.
+
+     CONTRAST, MEASURED
+       row labels        --ink on --paper-2        13.24
+       row answers       --rule on --paper-2        7.40
+       row values        --rule-2 on --paper-2      4.97
+       section headings  --rule on --paper          6.85
+       dialog body       --rule on --paper-2        7.40
+       Export instead    --paper on --rule          6.85
+       Delete everything --rule on --paper-2        7.40
+       scrim             derived from --ink at 55 percent
+
+     FONTS. Constantia, Segoe UI, Ink Free. Locally installed, no network.
+     Production substitutes: Recoleta or Freight Text Pro, a grotesk with real
+     small caps, Caveat.
+     ========================================================================== -->
+
+<link rel="stylesheet" href="../lock.css">
+</head>
+<body>
+
+<!-- ========================== PRIVACY ================================ -->
+<div class="device t">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+
+  <div class="app clip">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+
+      <header class="mast">
+        <a class="back" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/></svg>
+          You
+        </a>
+        <h1 class="wordmark">Privacy</h1>
+      </header>
+
+      <main class="sheet">
+
+        <div class="srowlink">
+          <span class="lab">What leaves this device
+            <span class="why">On free, nothing. No model runs on your account, so
+              there is nothing to send.</span>
+          </span>
+        </div>
+
+        <div class="srowlink">
+          <span class="lab">Who processes it
+            <span class="why">On Pro, Anthropic, to answer you. Nobody else, and
+              never for anything but answering you.</span>
+          </span>
+        </div>
+
+        <div class="srowlink">
+          <span class="lab">Training
+            <span class="why">Your writing is never used to train anything, on any
+              tier, at any time.</span>
+          </span>
+        </div>
+
+        <div class="srowlink">
+          <span class="lab">How long it is kept
+            <span class="why">Until you delete it. Then it is gone, not hidden.</span>
+          </span>
+        </div>
+
+        <div class="srowlink">
+          <span class="lab">Who else can read it
+            <span class="why">Nobody. There is no sharing anywhere in this product
+              and no link that works for anyone but you.</span>
+          </span>
+        </div>
+
+      </main>
+
+      <p class="foot">Last changed 2 March 2026</p>
+
+    </div>
+  </div>
+</div>
+
+<p class="caption t"><b>Privacy . plain sentences . tablet 834</b><br>
+<b>The delete dialog now centres on the page rather than the app</b>, 12px that were invisible at 390. The card itself is the same width at both, because a delete confirmation that grows puts its two buttons too far apart.<br>
+<b>Specificity is the feature; a padlock icon is not.</b> Five questions, five
+answers, no legal register and no defensive hedging.<br>
+Short on purpose. A privacy page nobody finishes is a privacy page that has
+failed, however complete it is. The whole policy reads in under a minute, which
+is the only version of it that does any good.</p>
+
+<!-- ================= WHAT THE MODEL CAN SEE . FREE =================== -->
+<div class="device t">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+
+  <div class="app clip">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+
+      <header class="mast">
+        <a class="back" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/></svg>
+          You
+        </a>
+        <h1 class="wordmark">What it sees</h1>
+      </header>
+
+      <main class="sheet">
+        <h2 class="shead">On your account</h2>
+        <div class="srow">
+          <div class="ccol">
+            <p class="prose">Nothing. No model runs on your account.</p>
+          </div>
+        </div>
+      </main>
+
+      <div class="notice">Your 148 entries and 31 recordings are stored and
+        indexed for search on your own device and in your account. None of it is
+        read by a model on free.</div>
+
+    </div>
+  </div>
+</div>
+
+<p class="caption t"><b>What the model can see . Free</b><br>
+Not a promise about what is seen, but an enumeration of it. <b>On free the answer
+is one word</b>, set in the user's own body type rather than in reassurance copy.
+It is the most reassuring thing this product will ever say and it is true.</p>
+
+<!-- ================= WHAT THE MODEL CAN SEE . PRO ==================== -->
+<div class="device t">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+
+  <div class="app clip">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+
+      <header class="mast">
+        <a class="back" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/></svg>
+          You
+        </a>
+        <h1 class="wordmark">What it sees</h1>
+      </header>
+
+      <main class="sheet">
+
+        <h2 class="shead">It can read</h2>
+        <div class="srowlink">
+          <span class="lab">Your entries
+            <span class="why">144 of 148. Four are held out of memory.</span>
+          </span>
+          <span class="val">144</span>
+        </div>
+        <div class="srowlink">
+          <span class="lab">Your recordings
+            <span class="why">All 31, as the text they were turned into.</span>
+          </span>
+          <span class="val">31</span>
+        </div>
+        <div class="srowlink">
+          <span class="lab">Your moods
+            <span class="why">The five state answer, on the days you gave one.</span>
+          </span>
+          <span class="val">96</span>
+        </div>
+
+        <h2 class="shead">It cannot read</h2>
+        <div class="srowlink">
+          <span class="lab">Entries you kept out of memory
+            <span class="why">Never sent, never indexed, never cited. You can see
+              them marked wherever they appear.</span>
+          </span>
+          <span class="val">4</span>
+        </div>
+        <div class="srowlink">
+          <span class="lab">Your audio itself
+            <span class="why">Only the text it was turned into. The recordings
+              stay yours.</span>
+          </span>
+          <span class="val">None</span>
+        </div>
+
+      </main>
+
+      <div class="notice">Every one of these can be changed, and changing it
+        applies to everything already written, not only to what comes next.</div>
+
+    </div>
+  </div>
+</div>
+
+<p class="caption t"><b>What the model can see . Pro</b><br>
+An enumeration with counts, not a promise. <b>The four held out of memory are
+counted here</b>, which is what makes the per entry opt out real: the composer
+offers it, the entry carries a mark in place, and this screen proves both worked.
+Without the third surface a user has no way to confirm the first two ever did
+anything.</p>
+
+<!-- ===================== YOUR DATA, AND DELETE ======================= -->
+<div class="device t">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+
+  <div class="app">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+
+      <header class="mast">
+        <a class="back" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/></svg>
+          You
+        </a>
+        <h1 class="wordmark">Your data</h1>
+      </header>
+
+      <main class="sheet">
+
+        <h2 class="shead">Bring it in</h2>
+        <a class="srowlink" href="#">
+          <span class="lab">Import
+            <span class="why">Day One, Apple Notes, plain text, or a folder of
+              files.</span>
+          </span>
+          <span class="val">Choose</span>
+        </a>
+
+        <h2 class="shead">Take it out</h2>
+        <a class="srowlink" href="#">
+          <span class="lab">Export everything
+            <span class="why">Markdown, JSON, and your recordings as audio files.
+              One tap, no email, free forever, including after you cancel.</span>
+          </span>
+          <span class="val">148 and 31</span>
+        </a>
+
+        <h2 class="shead">End it</h2>
+        <a class="srowlink" href="#">
+          <span class="lab">Delete everything
+            <span class="why">A hard delete on every device. Export is directly
+              above this for a reason.</span>
+          </span>
+          <span class="val">Permanent</span>
+        </a>
+
+      </main>
+
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dt">
+        <div class="card">
+          <h3 id="dt">Delete everything?</h3>
+          <p>This removes 148 entries and 31 recordings from every device. It
+            cannot be undone. Export first if you want a copy.</p>
+          <div class="card-foot">
+            <a class="btn solid" href="#">Export instead</a>
+            <button class="btn keyline" type="button">Delete everything</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<p class="caption t"><b>Your data, and the one blocking dialog in the product</b><br>
+Export sits directly above delete, so the screen offering to destroy everything is
+also the one offering to save it first.<br>
+<b>Delete everything is the only blocking dialog that exists.</b> It names the real
+counts, says plainly that it cannot be undone, and offers export from inside
+itself. <b>Export instead is the filled button and Delete everything is the
+keyline one</b>, which inverts the usual emphasis on purpose: on the only
+irreversible screen in the product, the safe path should be the loud one.</p>
+
+<p class="caption t"><b>Motion . tablet web 834 . 10-settings-privacy.html</b><br>
+<b>What moves:</b> nothing.<br>
+<b>What is still:</b> all four pushed pages, entirely.
+</p>
+</body>
+</html>

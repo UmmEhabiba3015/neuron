@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journal / Timeline / tablet web 834 / Free, both zoom levels</title>
+
+<!-- ==========================================================================
+     MOTION . tablet web 834 . 02-timeline.html
+     The motion system is in the BASE at lock.css revision 49, so this screen
+     animates because the product does. There is no variant class, no review
+     hatch and nothing here that a build has to strip.
+
+     WHAT MOVES ON THIS SCREEN
+       the total types, and four waveforms draw. The total starts at once, because there is no date box on this screen and so no second pen to wait for
+     WHAT IS DELIBERATELY STILL
+       every row of the record, the month headings and the calendar
+
+     THE RECORD NEVER MOVES AND THE HEADER NEVER ARRIVES, on every screen in
+     the product. Only the four things the product itself does can move: a date
+     being written, the product's own line typing, a waveform drawing and the
+     composer rising. Everything else is at full opacity at the first paint.
+     ========================================================================== -->
+
+<!-- ==========================================================================
+     STAGE 4 . TABLET WEB 834 . SCREEN 2 OF 12 . TIMELINE, route /timeline
+     Tier: Free. State: dense, month six. Both zoom levels.
+
+     THE REFLOW. See direction-lock.md section 12 for the argument.
+     Page 560, exactly 40 graph modules, centred with the binding welded to it
+     and 125 of cream each side. Paper margin 28. Masthead one row, destination
+     row at 80. Same markup as mobile-web/02-timeline.html, same content.
+
+     THE CALENDAR IS WHERE THIS SCREEN CHANGES MOST, AND THE CONSTRAINT INVERTS
+     At 390 the seven columns cleared the 44px floor with 0.3px to spare, which
+     is why .cal's padding and gap are pinned values in the lock rather than
+     free choices. At 834 the cells measure 67.7 x 67.7. The floor stops being
+     the question and a different one appears: is a 68px square holding an 11px
+     number too airy?
+     Answered by leaving it alone. H2 is explicit that a day with nothing in it
+     is a number and nothing else, so there is nothing that may be put in the
+     cell to fill it, and inventing something would be new content at a new
+     platform, which is exactly what tablet is not allowed. A month you can
+     actually hit with a thumb is the whole gain, and the empty days reading as
+     more space is the design working rather than failing.
+
+     EVERY RECORDING ROW NOW CARRIES THE 58px DATE COLUMN. lock.css revision 31.
+     00-flow.md section 1 specifies a memo row as "date, duration, waveform,
+     play control", and this screen is drawn at Free, so there is no transcript
+     body and there was nowhere the date was being shown. The file's own
+     convention is that an undated row continues the day above, which put
+     Saturday the 8th's recording under Sunday the 9th and Wednesday the 5th's
+     under Thursday the 6th, contradicting the calendar zoom lower down this
+     same file. Sat 8 and Wed 5 now carry their dates; the Sun 9 and Sat 1
+     recordings carry an EMPTY column, because those two really do continue the
+     day above and an empty column is not the same as an absent one.
+
+     THE WAVEFORMS FOLLOW THE COLUMN, AND THAT IS NOT OPTIONAL. .wave is
+     preserveAspectRatio="none", so taking 59px out of the row rescales every
+     tick. Rows go 378.3px to 320.3 (313.5 for the five-character duration), so
+     each viewBox is re-authored to hold the tick where section 12.7 puts it.
+     Each is still extended by mirroring its own pattern about its end, which
+     reads as more of the same recording rather than a tile, and the join lands
+     on the pattern's own pitch; the viewBox now stops earlier, so fewer of the
+     mirrored ticks are visible. Measured, not assumed: ticks land at 1.770 and
+     1.771px against mobile's canonical 1.769.
+
+     THE ONE SUB-44 TARGET IS STILL .total a, at 116.7 x 17, and it is still
+     deliberate: the unread clause is a link inside a body sentence and cannot
+     become a button without breaking the rule that the number is body text.
+     direction-lock.md section 6, the one deliberate tap-target exception.
+
+     WHY BOTH ZOOMS ARE IN ONE FILE
+     The flow is explicit that this is ONE screen at two zoom levels, not two
+     screens. Switching does not push a history entry, because a zoom level is
+     a view preference and not a place. Drawing them as two files would have
+     quietly contradicted that. Two stages, one screen, one masthead, one
+     number.
+
+     WHY FREE
+     The unread clause only exists on Free, and it is the entire conversion
+     mechanism. On Pro the clause is simply absent, because nothing is unread.
+
+     THE ONLY NUMBER IN THE PRODUCT
+     148 entries, 31 recordings, 4h 12m not yet read. Body text, the same
+     weight as everything around it. No badge, no colour, no countdown, no
+     offer language, no urgency. It has been there since recording one and it
+     only rises. The last clause is a link to /you/plan and nothing else about
+     it is styled as a pitch.
+
+     AN EMPTY DAY DOES NOT EXIST
+     In the list zoom it is not a row. In the calendar zoom it is a number and
+     nothing else: no box, no dot, no dimming that reads as failure, no tap
+     target. A long silence is fewer marks and more unmarked space, with no
+     language attached anywhere. August 10 onward is the future and is drawn
+     exactly the same way as an unwritten past day, which is the point.
+
+     MEMO ROWS READ DIFFERENTLY FROM ENTRY ROWS
+     A duration and a waveform where an entry shows its opening line. On Free
+     that difference is honest rather than punitive: it is a recording nobody
+     has read, not a locked feature. Nothing is blurred, greyed or held.
+
+     TRADE-OFF TAKEN
+     The calendar marks a day with audio in --block-2 with a --block keyline,
+     and a day with writing only in a --rule keyline on the sheet fill. That is
+     a tone-versus-keyline distinction, so it survives greyscale, but it is
+     still a two-state legend the user has to learn. The list zoom is the readable view and the calendar is the
+     scanning view; neither is asked to do the other's job.
+
+     CONTRAST, MEASURED
+       the number         --ink over the graph      10.14 worst case
+       the link clause    --rule over the graph      5.66 worst case
+       month headings     --rule on --paper          6.85
+       date column        --rule-2 on --paper-2      4.97
+       opening lines      --ink on --paper-2        13.24
+       duration           --block on --block-2        5.23
+       calendar days      --ink on --paper-2        13.24
+       out of month       --rule-2 on --paper-2      4.97
+       day with audio     --ink on --block-2          7.22
+     Calendar cells are 44.3px at 390, which clears the floor with nothing to
+     spare, so .cal padding and gap are fixed values and not free choices.
+
+     FONTS. Constantia, Segoe UI, Ink Free. Locally installed, no network.
+     Production substitutes: Recoleta or Freight Text Pro, a grotesk with real
+     small caps, Caveat.
+     ========================================================================== -->
+
+<link rel="stylesheet" href="../lock.css">
+</head>
+<body>
+
+<!-- ============================ LIST ZOOM ============================ -->
+<div class="device t">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+
+  <div class="app">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+
+      <header class="mast">
+        <h1 class="wordmark">Timeline</h1>
+        <div class="seg" role="group" aria-label="Zoom">
+          <button type="button" aria-pressed="true">List</button>
+          <button type="button" aria-pressed="false">Calendar</button>
+        </div>
+      </header>
+
+      <nav class="dest" aria-label="Destinations">
+        <a href="#">Today</a>
+        <a href="#" aria-current="page">Timeline</a>
+        <a href="#">Ask</a>
+        <a href="#">You</a>
+      </nav>
+
+      <p class="total"><span class="gline">148 entries, 31 recordings,
+        <a href="#">4h 12m not yet read</a>.</span></p>
+
+      <main class="sheet">
+
+        <h2 class="shead">August 2026</h2>
+
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-08-09">Sun 9</time></div>
+          <div class="ccol">
+            <p class="lede">The flat people said Tuesday, and it's Sunday, so I've
+              decided not to think about it until Tuesday.</p>
+          </div>
+        </div>
+
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"></div>
+            <div class="ccol">
+              <button class="play" type="button"
+                      aria-label="Play recording from Sunday 9 August, 2 minutes 41 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/></svg>
+              </button>
+              <svg class="wave" viewBox="0 0 362 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="18" width="2" height="8"/><rect x="7" y="13" width="2" height="18"/>
+                  <rect x="14" y="4" width="2" height="36"/><rect x="21" y="15" width="2" height="14"/>
+                  <rect x="28" y="19" width="2" height="6"/><rect x="35" y="7" width="2" height="30"/>
+                  <rect x="42" y="16" width="2" height="12"/><rect x="49" y="2" width="2" height="40"/>
+                  <rect x="56" y="12" width="2" height="20"/><rect x="63" y="19" width="2" height="6"/>
+                  <rect x="70" y="8" width="2" height="28"/><rect x="77" y="16" width="2" height="12"/>
+                  <rect x="84" y="5" width="2" height="34"/><rect x="91" y="18" width="2" height="8"/>
+                  <rect x="98" y="12" width="2" height="20"/><rect x="105" y="3" width="2" height="38"/>
+                  <rect x="112" y="19" width="2" height="6"/><rect x="119" y="14" width="2" height="16"/>
+                  <rect x="126" y="8" width="2" height="28"/><rect x="133" y="18" width="2" height="8"/>
+                  <rect x="140" y="11" width="2" height="22"/><rect x="147" y="2" width="2" height="40"/>
+                  <rect x="154" y="16" width="2" height="12"/><rect x="161" y="19" width="2" height="6"/>
+                  <rect x="168" y="12" width="2" height="20"/><rect x="175" y="6" width="2" height="32"/>
+                  <rect x="182" y="18" width="2" height="8"/><rect x="189" y="14" width="2" height="16"/>
+                  <rect x="196" y="4" width="2" height="36"/><rect x="203" y="19" width="2" height="6"/>
+                  <rect x="210" y="13" width="2" height="18"/><rect x="217" y="9" width="2" height="26"/>
+                  <rect x="224" y="17" width="2" height="10"/><rect x="231" y="6" width="2" height="32"/>
+                </g>
+          
+                <g fill="currentColor" transform="translate(471 0) scale(-1 1)">
+                  <rect x="0" y="18" width="2" height="8"/><rect x="7" y="13" width="2" height="18"/>
+                  <rect x="14" y="4" width="2" height="36"/><rect x="21" y="15" width="2" height="14"/>
+                  <rect x="28" y="19" width="2" height="6"/><rect x="35" y="7" width="2" height="30"/>
+                  <rect x="42" y="16" width="2" height="12"/><rect x="49" y="2" width="2" height="40"/>
+                  <rect x="56" y="12" width="2" height="20"/><rect x="63" y="19" width="2" height="6"/>
+                  <rect x="70" y="8" width="2" height="28"/><rect x="77" y="16" width="2" height="12"/>
+                  <rect x="84" y="5" width="2" height="34"/><rect x="91" y="18" width="2" height="8"/>
+                  <rect x="98" y="12" width="2" height="20"/><rect x="105" y="3" width="2" height="38"/>
+                  <rect x="112" y="19" width="2" height="6"/><rect x="119" y="14" width="2" height="16"/>
+                  <rect x="126" y="8" width="2" height="28"/><rect x="133" y="18" width="2" height="8"/>
+                  <rect x="140" y="11" width="2" height="22"/><rect x="147" y="2" width="2" height="40"/>
+                  <rect x="154" y="16" width="2" height="12"/><rect x="161" y="19" width="2" height="6"/>
+                  <rect x="168" y="12" width="2" height="20"/><rect x="175" y="6" width="2" height="32"/>
+                  <rect x="182" y="18" width="2" height="8"/><rect x="189" y="14" width="2" height="16"/>
+                  <rect x="196" y="4" width="2" height="36"/><rect x="203" y="19" width="2" height="6"/>
+                  <rect x="210" y="13" width="2" height="18"/><rect x="217" y="9" width="2" height="26"/>
+                  <rect x="224" y="17" width="2" height="10"/><rect x="231" y="6" width="2" height="32"/>
+                </g>
+              </svg>
+              <span class="dur">2:41</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- third item of the same day. the date column is PRESENT AND EMPTY,
+             because the date is a property of the day and this is not a new
+             one. It used to be omitted entirely, which pulled this entry 58px
+             left of every other entry on the screen and broke the vertical
+             rule that runs down the column. Empty is not the same as absent.
+             The Private mark belongs to this entry and to no other. -->
+        <div class="dayrow">
+          <div class="tcol"></div>
+          <div class="ccol">
+            <p class="lede">Priya rang. We talked for an hour about nothing. I'd
+              forgotten that's a thing you can do.</p>
+            <span class="mark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="1"/>
+                <path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+              Private, out of memory
+            </span>
+          </div>
+        </div>
+
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"><time datetime="2026-08-08">Sat 8</time></div>
+            <div class="ccol">
+              <button class="play" type="button"
+                      aria-label="Play recording from Saturday 8 August, 5 minutes 8 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/></svg>
+              </button>
+              <svg class="wave" viewBox="0 0 362 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="15" width="2" height="14"/><rect x="7" y="8" width="2" height="28"/>
+                  <rect x="14" y="17" width="2" height="10"/><rect x="21" y="5" width="2" height="34"/>
+                  <rect x="28" y="13" width="2" height="18"/><rect x="35" y="19" width="2" height="6"/>
+                  <rect x="42" y="9" width="2" height="26"/><rect x="49" y="16" width="2" height="12"/>
+                  <rect x="56" y="3" width="2" height="38"/><rect x="63" y="18" width="2" height="8"/>
+                  <rect x="70" y="12" width="2" height="20"/><rect x="77" y="6" width="2" height="32"/>
+                  <rect x="84" y="19" width="2" height="6"/><rect x="91" y="14" width="2" height="16"/>
+                  <rect x="98" y="4" width="2" height="36"/><rect x="105" y="17" width="2" height="10"/>
+                  <rect x="112" y="11" width="2" height="22"/><rect x="119" y="2" width="2" height="40"/>
+                  <rect x="126" y="18" width="2" height="8"/><rect x="133" y="13" width="2" height="18"/>
+                  <rect x="140" y="7" width="2" height="30"/><rect x="147" y="19" width="2" height="6"/>
+                  <rect x="154" y="12" width="2" height="20"/><rect x="161" y="5" width="2" height="34"/>
+                  <rect x="168" y="16" width="2" height="12"/><rect x="175" y="18" width="2" height="8"/>
+                  <rect x="182" y="9" width="2" height="26"/><rect x="189" y="15" width="2" height="14"/>
+                  <rect x="196" y="3" width="2" height="38"/><rect x="203" y="17" width="2" height="10"/>
+                  <rect x="210" y="11" width="2" height="22"/><rect x="217" y="6" width="2" height="32"/>
+                  <rect x="224" y="19" width="2" height="6"/><rect x="231" y="13" width="2" height="18"/>
+                </g>
+          
+                <g fill="currentColor" transform="translate(471 0) scale(-1 1)">
+                  <rect x="0" y="15" width="2" height="14"/><rect x="7" y="8" width="2" height="28"/>
+                  <rect x="14" y="17" width="2" height="10"/><rect x="21" y="5" width="2" height="34"/>
+                  <rect x="28" y="13" width="2" height="18"/><rect x="35" y="19" width="2" height="6"/>
+                  <rect x="42" y="9" width="2" height="26"/><rect x="49" y="16" width="2" height="12"/>
+                  <rect x="56" y="3" width="2" height="38"/><rect x="63" y="18" width="2" height="8"/>
+                  <rect x="70" y="12" width="2" height="20"/><rect x="77" y="6" width="2" height="32"/>
+                  <rect x="84" y="19" width="2" height="6"/><rect x="91" y="14" width="2" height="16"/>
+                  <rect x="98" y="4" width="2" height="36"/><rect x="105" y="17" width="2" height="10"/>
+                  <rect x="112" y="11" width="2" height="22"/><rect x="119" y="2" width="2" height="40"/>
+                  <rect x="126" y="18" width="2" height="8"/><rect x="133" y="13" width="2" height="18"/>
+                  <rect x="140" y="7" width="2" height="30"/><rect x="147" y="19" width="2" height="6"/>
+                  <rect x="154" y="12" width="2" height="20"/><rect x="161" y="5" width="2" height="34"/>
+                  <rect x="168" y="16" width="2" height="12"/><rect x="175" y="18" width="2" height="8"/>
+                  <rect x="182" y="9" width="2" height="26"/><rect x="189" y="15" width="2" height="14"/>
+                  <rect x="196" y="3" width="2" height="38"/><rect x="203" y="17" width="2" height="10"/>
+                  <rect x="210" y="11" width="2" height="22"/><rect x="217" y="6" width="2" height="32"/>
+                  <rect x="224" y="19" width="2" height="6"/><rect x="231" y="13" width="2" height="18"/>
+                </g>
+              </svg>
+              <span class="dur">5:08</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-08-06">Thu 6</time></div>
+          <div class="ccol">
+            <p class="lede">Slept badly again. I've stopped counting which night this is.</p>
+          </div>
+        </div>
+
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"><time datetime="2026-08-05">Wed 5</time></div>
+            <div class="ccol">
+              <button class="play" type="button"
+                      aria-label="Play recording from Wednesday 5 August, 11 minutes 47 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/></svg>
+              </button>
+              <svg class="wave" viewBox="0 0 354 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="12" width="2" height="20"/><rect x="7" y="18" width="2" height="8"/>
+                  <rect x="14" y="6" width="2" height="32"/><rect x="21" y="16" width="2" height="12"/>
+                  <rect x="28" y="3" width="2" height="38"/><rect x="35" y="19" width="2" height="6"/>
+                  <rect x="42" y="13" width="2" height="18"/><rect x="49" y="8" width="2" height="28"/>
+                  <rect x="56" y="17" width="2" height="10"/><rect x="63" y="5" width="2" height="34"/>
+                  <rect x="70" y="15" width="2" height="14"/><rect x="77" y="19" width="2" height="6"/>
+                  <rect x="84" y="10" width="2" height="24"/><rect x="91" y="4" width="2" height="36"/>
+                  <rect x="98" y="16" width="2" height="12"/><rect x="105" y="12" width="2" height="20"/>
+                  <rect x="112" y="2" width="2" height="40"/><rect x="119" y="18" width="2" height="8"/>
+                  <rect x="126" y="14" width="2" height="16"/><rect x="133" y="7" width="2" height="30"/>
+                  <rect x="140" y="19" width="2" height="6"/><rect x="147" y="11" width="2" height="22"/>
+                  <rect x="154" y="5" width="2" height="34"/><rect x="161" y="17" width="2" height="10"/>
+                  <rect x="168" y="13" width="2" height="18"/><rect x="175" y="3" width="2" height="38"/>
+                  <rect x="182" y="16" width="2" height="12"/><rect x="189" y="9" width="2" height="26"/>
+                  <rect x="196" y="18" width="2" height="8"/><rect x="203" y="14" width="2" height="16"/>
+                  <rect x="210" y="6" width="2" height="32"/><rect x="217" y="19" width="2" height="6"/>
+                  <rect x="224" y="12" width="2" height="20"/><rect x="231" y="8" width="2" height="28"/>
+                </g>
+          
+                <g fill="currentColor" transform="translate(471 0) scale(-1 1)">
+                  <rect x="0" y="12" width="2" height="20"/><rect x="7" y="18" width="2" height="8"/>
+                  <rect x="14" y="6" width="2" height="32"/><rect x="21" y="16" width="2" height="12"/>
+                  <rect x="28" y="3" width="2" height="38"/><rect x="35" y="19" width="2" height="6"/>
+                  <rect x="42" y="13" width="2" height="18"/><rect x="49" y="8" width="2" height="28"/>
+                  <rect x="56" y="17" width="2" height="10"/><rect x="63" y="5" width="2" height="34"/>
+                  <rect x="70" y="15" width="2" height="14"/><rect x="77" y="19" width="2" height="6"/>
+                  <rect x="84" y="10" width="2" height="24"/><rect x="91" y="4" width="2" height="36"/>
+                  <rect x="98" y="16" width="2" height="12"/><rect x="105" y="12" width="2" height="20"/>
+                  <rect x="112" y="2" width="2" height="40"/><rect x="119" y="18" width="2" height="8"/>
+                  <rect x="126" y="14" width="2" height="16"/><rect x="133" y="7" width="2" height="30"/>
+                  <rect x="140" y="19" width="2" height="6"/><rect x="147" y="11" width="2" height="22"/>
+                  <rect x="154" y="5" width="2" height="34"/><rect x="161" y="17" width="2" height="10"/>
+                  <rect x="168" y="13" width="2" height="18"/><rect x="175" y="3" width="2" height="38"/>
+                  <rect x="182" y="16" width="2" height="12"/><rect x="189" y="9" width="2" height="26"/>
+                  <rect x="196" y="18" width="2" height="8"/><rect x="203" y="14" width="2" height="16"/>
+                  <rect x="210" y="6" width="2" height="32"/><rect x="217" y="19" width="2" height="6"/>
+                  <rect x="224" y="12" width="2" height="20"/><rect x="231" y="8" width="2" height="28"/>
+                </g>
+              </svg>
+              <span class="dur">11:47</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-08-03">Mon 3</time></div>
+          <div class="ccol">
+            <p class="lede">Went in early to avoid the heat. Nobody else in the office
+              until ten.</p>
+          </div>
+        </div>
+
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-08-01">Sat 1</time></div>
+          <div class="ccol">
+            <p class="lede">Bank holiday. Did nothing on purpose and it took most of the
+              day to stop feeling odd about it.</p>
+          </div>
+        </div>
+
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"></div>
+            <div class="ccol">
+              <button class="play" type="button"
+                      aria-label="Play recording from Saturday 1 August, 3 minutes 26 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/></svg>
+              </button>
+              <svg class="wave" viewBox="0 0 362 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="17" width="2" height="10"/><rect x="7" y="10" width="2" height="24"/>
+                  <rect x="14" y="19" width="2" height="6"/><rect x="21" y="4" width="2" height="36"/>
+                  <rect x="28" y="14" width="2" height="16"/><rect x="35" y="8" width="2" height="28"/>
+                  <rect x="42" y="18" width="2" height="8"/><rect x="49" y="12" width="2" height="20"/>
+                  <rect x="56" y="2" width="2" height="40"/><rect x="63" y="16" width="2" height="12"/>
+                  <rect x="70" y="19" width="2" height="6"/><rect x="77" y="9" width="2" height="26"/>
+                  <rect x="84" y="13" width="2" height="18"/><rect x="91" y="5" width="2" height="34"/>
+                  <rect x="98" y="18" width="2" height="8"/><rect x="105" y="11" width="2" height="22"/>
+                  <rect x="112" y="15" width="2" height="14"/><rect x="119" y="3" width="2" height="38"/>
+                  <rect x="126" y="17" width="2" height="10"/><rect x="133" y="12" width="2" height="20"/>
+                  <rect x="140" y="6" width="2" height="32"/><rect x="147" y="19" width="2" height="6"/>
+                  <rect x="154" y="14" width="2" height="16"/><rect x="161" y="7" width="2" height="30"/>
+                  <rect x="168" y="18" width="2" height="8"/><rect x="175" y="10" width="2" height="24"/>
+                  <rect x="182" y="4" width="2" height="36"/><rect x="189" y="16" width="2" height="12"/>
+                  <rect x="196" y="19" width="2" height="6"/><rect x="203" y="13" width="2" height="18"/>
+                  <rect x="210" y="8" width="2" height="28"/><rect x="217" y="15" width="2" height="14"/>
+                  <rect x="224" y="2" width="2" height="40"/><rect x="231" y="17" width="2" height="10"/>
+                </g>
+          
+                <g fill="currentColor" transform="translate(471 0) scale(-1 1)">
+                  <rect x="0" y="17" width="2" height="10"/><rect x="7" y="10" width="2" height="24"/>
+                  <rect x="14" y="19" width="2" height="6"/><rect x="21" y="4" width="2" height="36"/>
+                  <rect x="28" y="14" width="2" height="16"/><rect x="35" y="8" width="2" height="28"/>
+                  <rect x="42" y="18" width="2" height="8"/><rect x="49" y="12" width="2" height="20"/>
+                  <rect x="56" y="2" width="2" height="40"/><rect x="63" y="16" width="2" height="12"/>
+                  <rect x="70" y="19" width="2" height="6"/><rect x="77" y="9" width="2" height="26"/>
+                  <rect x="84" y="13" width="2" height="18"/><rect x="91" y="5" width="2" height="34"/>
+                  <rect x="98" y="18" width="2" height="8"/><rect x="105" y="11" width="2" height="22"/>
+                  <rect x="112" y="15" width="2" height="14"/><rect x="119" y="3" width="2" height="38"/>
+                  <rect x="126" y="17" width="2" height="10"/><rect x="133" y="12" width="2" height="20"/>
+                  <rect x="140" y="6" width="2" height="32"/><rect x="147" y="19" width="2" height="6"/>
+                  <rect x="154" y="14" width="2" height="16"/><rect x="161" y="7" width="2" height="30"/>
+                  <rect x="168" y="18" width="2" height="8"/><rect x="175" y="10" width="2" height="24"/>
+                  <rect x="182" y="4" width="2" height="36"/><rect x="189" y="16" width="2" height="12"/>
+                  <rect x="196" y="19" width="2" height="6"/><rect x="203" y="13" width="2" height="18"/>
+                  <rect x="210" y="8" width="2" height="28"/><rect x="217" y="15" width="2" height="14"/>
+                  <rect x="224" y="2" width="2" height="40"/><rect x="231" y="17" width="2" height="10"/>
+                </g>
+              </svg>
+              <span class="dur">3:26</span>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="shead">July 2026</h2>
+
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-07-21">Tue 21</time></div>
+          <div class="ccol">
+            <p class="lede">The flat viewing. Smaller than the photos, better light.</p>
+            <span class="mark">Day One</span>
+          </div>
+        </div>
+
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-07-17">Fri 17</time></div>
+          <div class="ccol">
+            <p class="lede">Last day before the shutdown. Everyone left early and the
+              building went quiet by three.</p>
+          </div>
+        </div>
+
+      </main>
+
+      <p class="foot">Since March 2026</p>
+
+    </div>
+  </div>
+</div>
+
+<p class="caption t"><b>Timeline . list zoom . Free . tablet 834</b><br>
+<b>The calendar is where the constraint inverts.</b> At 390 seven columns cleared the 44px floor with 0.3px to spare; here the cells measure 67.7 square. Nothing was added to fill them, because an empty day is a number and nothing else.<br>
+Dense, month six. Entries and recordings interleaved as one record. A recording
+shows a duration and a waveform where an entry shows its opening line, which is
+the honest difference between the two objects and the product's quietest upgrade
+argument.<br>
+<b>The only number in the product</b> sits between two rules in body text. It only
+rises. The unread clause links to the plan page and is never coloured, badged or
+counted down. On Pro that clause is absent.</p>
+
+<!-- ========================== CALENDAR ZOOM ========================== -->
+<div class="device t">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+
+  <div class="app">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+
+      <header class="mast">
+        <h1 class="wordmark">Timeline</h1>
+        <div class="seg" role="group" aria-label="Zoom">
+          <button type="button" aria-pressed="false">List</button>
+          <button type="button" aria-pressed="true">Calendar</button>
+        </div>
+      </header>
+
+      <nav class="dest" aria-label="Destinations">
+        <a href="#">Today</a>
+        <a href="#" aria-current="page">Timeline</a>
+        <a href="#">Ask</a>
+        <a href="#">You</a>
+      </nav>
+
+      <p class="total"><span class="gline">148 entries, 31 recordings,
+        <a href="#">4h 12m not yet read</a>.</span></p>
+
+      <main class="sheet">
+        <h2 class="shead">August 2026</h2>
+      </main>
+
+      <div class="cal" role="grid" aria-label="August 2026">
+        <div class="dow">M</div><div class="dow">T</div><div class="dow">W</div>
+        <div class="dow">T</div><div class="dow">F</div><div class="dow">S</div>
+        <div class="dow">S</div>
+
+        <div class="day out">27</div><div class="day out">28</div>
+        <div class="day out">29</div><div class="day out">30</div>
+        <div class="day out">31</div>
+        <a class="day has audio" href="#" aria-label="1 August, writing and a recording">1</a>
+        <div class="day">2</div>
+
+        <a class="day has" href="#" aria-label="3 August, writing">3</a>
+        <div class="day">4</div>
+        <a class="day has audio" href="#" aria-label="5 August, a recording">5</a>
+        <a class="day has" href="#" aria-label="6 August, writing">6</a>
+        <div class="day">7</div>
+        <a class="day has audio" href="#" aria-label="8 August, a recording">8</a>
+        <a class="day has audio" href="#" aria-label="9 August, writing and a recording">9</a>
+
+        <div class="day">10</div><div class="day">11</div><div class="day">12</div>
+        <div class="day">13</div><div class="day">14</div><div class="day">15</div>
+        <div class="day">16</div>
+
+        <div class="day">17</div><div class="day">18</div><div class="day">19</div>
+        <div class="day">20</div><div class="day">21</div><div class="day">22</div>
+        <div class="day">23</div>
+
+        <div class="day">24</div><div class="day">25</div><div class="day">26</div>
+        <div class="day">27</div><div class="day">28</div><div class="day">29</div>
+        <div class="day">30</div>
+
+        <div class="day">31</div>
+        <div class="day out">1</div><div class="day out">2</div><div class="day out">3</div>
+        <div class="day out">4</div><div class="day out">5</div><div class="day out">6</div>
+      </div>
+
+      <p class="foot">Since March 2026</p>
+
+    </div>
+  </div>
+</div>
+
+<p class="caption t"><b>Timeline . calendar zoom . Free</b><br>
+The same screen, the same masthead, the same number. Switching zoom does not push
+a history entry, because a zoom level is a view preference and not a place. The
+control is a segmented box in the masthead and never looks like navigation.<br>
+<b>An empty day is a number and nothing else.</b> No box, no dot, no dimming that
+reads as failure, no tap target. The rest of August, which has not happened yet,
+is drawn exactly like an unwritten past day. A keyline marks a day you wrote on;
+a toned block marks a day with a recording in it, which is the only place
+audio colour appears.</p>
+
+<p class="caption t"><b>Motion . tablet web 834 . 02-timeline.html</b><br>
+<b>What moves:</b> the total types, and four waveforms draw. The total starts at once, because there is no date box on this screen and so no second pen to wait for.<br>
+<b>What is still:</b> every row of the record, the month headings and the calendar.
+</p>
+</body>
+</html>

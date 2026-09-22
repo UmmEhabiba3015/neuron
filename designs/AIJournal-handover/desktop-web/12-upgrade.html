@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journal / The upgrade moment / desktop web 1440 / progress, then the first Pro session</title>
+
+<!-- ==========================================================================
+     MOTION . desktop web 1440 . 12-upgrade.html
+     The motion system is in the BASE at lock.css revision 49, so this screen
+     animates because the product does. There is no variant class, no review
+     hatch and nothing here that a build has to strip.
+
+     WHAT MOVES ON THIS SCREEN
+       one waveform draws
+     WHAT IS DELIBERATELY STILL
+       the progress bar, which F4 forbids motion on in the component inventory itself, and both printed date boxes
+
+     THE RECORD NEVER MOVES AND THE HEADER NEVER ARRIVES, on every screen in
+     the product. Only the four things the product itself does can move: a date
+     being written, the product's own line typing, a waveform drawing and the
+     composer rising. Everything else is at full opacity at the first paint.
+     ========================================================================== -->
+
+<!-- ==========================================================================
+     STAGE 4 . DESKTOP WEB 1440 . SCREEN 12 OF 12 . THE UPGRADE MOMENT.
+     Two states: the backlog transcribing, and the first Pro session. Same
+     content as the mobile and tablet files, verbatim. 00-flow.md section 3.2
+     steps 4 and 5, and the flow's own words about the second one: this is the
+     only demonstration in the product and it has to be the best screen in it.
+
+     BOTH STATES ARE DESTINATIONS, NOT PUSHED PAGES, and that is the point of
+     them. You do not navigate to your upgrade; you upgrade, and Today is
+     different when you get back. So the title block composes exactly as
+     Today's does, with the second-row object carrying the one thing that has
+     changed: Transcribing 19 of 31, then Transcribed 31 recordings.
+
+     THE FIRST STATE IS NOT A SPINNER AND NOT A WALL.
+     Real counts, most recent first, and it says plainly that leaving is fine.
+     The composer is right there: someone who upgraded in order to write today
+     is not made to watch a bar. THE BAR IS 1056px WIDE HERE against 504 at 834
+     and 338 at 390, and a wider bar is a more convincing invitation to put a
+     percentage on it. There still is not one, and there is no estimate and no
+     colour. It fills in rust like every other mark in the product rather than
+     in a progress green that would mean nothing here.
+     It is a native <progress>, so the value is data rather than a hardcoded
+     width and assistive technology announces 19 of 31 without an aria-label.
+
+     THE SECOND STATE LEADS WITH THEIR OWN WORDS, LITERALLY.
+     A sentence they spoke in March and have never read back, in ink at body
+     size, dated. The observation comes second, smaller, in rust, in a labelled
+     row, with its citation and a way to mark it wrong.
+     THE OBVIOUS MOVE IS TO OPEN WITH WHAT THE PRODUCT NOTICED, because that is
+     the capability being sold, and it is wrong. Leading with the observation
+     makes the moment about the product; leading with their voice makes it
+     about them, which is the thesis of the whole brief.
+     AND IT STAYS UNEXCITED. No confetti, no welcome to Pro, no you're all set,
+     no exclamation mark. The register that makes this safe to open at 1am does
+     not get suspended because money changed hands.
+
+     THE INTEGRITY CHECK THAT ALMOST FAILED, RESTATED HERE BECAUSE IT IS THE
+     ONE THING ABOUT THIS SCREEN THAT COULD BREAK THE PRODUCT'S ONLY PROMISE.
+     The natural next sentence for that note is that they rang Priya today. It
+     cannot be written, because the 21:40 entry on 9 August is marked out of
+     memory and the model cannot have read it. A synthesis that cites an
+     excluded entry would break the one promise /you/visible makes, on the
+     first screen the user sees after paying. Every observation is checked
+     against what the model is allowed to have seen, not only against what is
+     in the record.
+
+     THE WAVEFORM IS RE-AUTHORED AND IT IS THE TIMELINE PATTERN, NOT A NEW ONE.
+     This is Saturday the 8th's 5:08, the same recording Timeline draws, so it
+     is the same authored pattern: 12.7's own conclusion is that tick weight is
+     part of component identity ACROSS SCREENS and not only across platforms,
+     and this file is where that was first broken and fixed. The row went 320.3
+     at tablet to 788.3 here, so the viewBox goes 362 to 891. Measured 1.7695
+     against the canonical 1.769, and against Timeline's own 1.7708 on the same
+     recording one screen earlier.
+     The transcript body carries the opening line, which is the proof the
+     archive changed: the row that showed a duration on Timeline now shows what
+     was said.
+
+     MEASURED AT A TRUE 1440
+       wordmark / second-row / destinations   top 20 / 68 / 138
+       the progress bar                       1056 wide, its rule the page's
+       sheet                                  426 to 1398, 972 wide
+       the excerpt                            886px
+       the recording row                      wave 788.3, viewBox 891, 1.7695
+       composer                               700px, centre 912
+       page height                            784, 56 graph modules
+
+     CONTRAST, MEASURED
+       the passage         --ink on --paper-2        13.24
+       Recorded 12 March   --rule on --paper-2        7.40
+       the note            --rule on --paper          6.85
+       the citation        --rule on --paper          6.85
+       the progress fill   --rule on --paper-2        7.40
+       the caption line    --rule on --paper          6.85
+       waveform            --block on --block-2       5.23
+       the transcript      --ink on --paper-2        13.24
+     Every tap target 44px or larger.
+
+     FONTS. Constantia, Segoe UI, Ink Free. Locally installed, no network.
+     Production substitutes: Recoleta or Freight Text Pro, a grotesk with real
+     small caps, Caveat.
+     ========================================================================== -->
+
+<link rel="stylesheet" href="../lock.css">
+</head>
+<body>
+
+<!-- ================= TRANSCRIBING THE BACKLOG ======================== -->
+<div class="device d">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+
+  <div class="app">
+    <div class="rail" aria-hidden="true"></div>
+
+    <div class="title">
+      <h1 class="wordmark">Journal</h1>
+      <div class="keybox">
+        <span class="k">Transcribing</span>
+        <span class="v printed">19 of 31</span>
+      </div>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#" aria-current="page">Today</a>
+        <a href="#">Timeline</a>
+        <a href="#">Ask</a>
+        <a href="#">You</a>
+      </nav>
+    </div>
+
+    <div class="page">
+
+      <div class="progress">
+        <progress class="bar" value="19" max="31"></progress>
+        <p class="cap">Reading your recordings. 19 of 31 done.</p>
+      </div>
+
+      <div class="notice">Most recent first. You can leave this and come back, and it
+        keeps going.</div>
+
+      <main class="sheet">
+        <h2 class="shead">Today</h2>
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-09T09:20">09:20</time></div>
+          <div class="ccol"><p class="prose">The flat people said Tuesday, and it's
+            Sunday, so I've decided not to think about it until Tuesday.</p></div>
+        </div>
+      </main>
+
+      <div class="composer">
+        <div class="crow">
+          <div class="field placeholder">Add to today</div>
+          <button class="mic" type="button" aria-label="Record">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="2.5" width="6" height="11.5" rx="3"/>
+              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/></svg>
+          </button>
+        </div>
+        <button class="opt" type="button" aria-pressed="false">
+          <span class="tick" aria-hidden="true"></span> Keep this out of memory
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<p class="caption d"><b>1 . Transcribing the backlog . desktop web 1440</b><br>
+<b>A destination, not a pushed page.</b> You do not navigate to your upgrade; you upgrade,
+and Today is different when you get back. The title block composes exactly as Today's does,
+with the second-row object carrying the one thing that changed.<br>
+<b>The bar is 1056px here against 504 at 834 and 338 at 390</b>, and a wider bar is a more
+convincing invitation to put a percentage on it. There still is not one, no estimate, no
+colour. It fills in rust like every other mark rather than in a progress green.<br>
+<b>Not a spinner and not a wall.</b> Real counts, most recent first, and it says plainly that
+leaving is fine. The composer is right there: someone who upgraded in order to write today is
+not made to watch a bar.<br>
+It is a native progress element, so the value is data rather than a hardcoded width, and
+assistive technology announces 19 of 31 without an aria-label bolted on.</p>
+
+<!-- ==================== THE FIRST PRO SESSION ======================== -->
+<div class="device d">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+
+  <div class="app">
+    <div class="rail" aria-hidden="true"></div>
+
+    <div class="title">
+      <h1 class="wordmark">Journal</h1>
+      <div class="keybox">
+        <span class="k">Transcribed</span>
+        <span class="v printed">31 recordings</span>
+      </div>
+      <nav class="dest" aria-label="Destinations">
+        <a href="#" aria-current="page">Today</a>
+        <a href="#">Timeline</a>
+        <a href="#">Ask</a>
+        <a href="#">You</a>
+      </nav>
+    </div>
+
+    <div class="page">
+
+      <main class="sheet">
+
+        <h2 class="shead">From your recordings, now readable</h2>
+
+        <div class="excerpt">
+          <p>I keep saying I'll ring Priya and then not doing it. I think I'm
+            frightened she's moved on and will be polite about it.</p>
+          <a class="when" href="#">Recorded 12 March</a>
+        </div>
+
+        <aside class="said" aria-label="From your record">
+          <div class="tcol">From your record</div>
+          <div class="ccol open">
+            <div class="note">
+              <p>You recorded that in March and have never read it back. Priya is in
+                nine entries since.</p>
+              <div class="said-foot">
+                <a class="cite" href="#">12 March</a>
+                <button class="wrong" type="button">That's not right</button>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <h2 class="shead">What changed on your timeline</h2>
+
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"><time datetime="2026-08-08">Sat 8</time></div>
+            <div class="ccol">
+              <button class="play" type="button"
+                      aria-label="Play recording from Saturday 8 August, 5 minutes 8 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/></svg>
+              </button>
+              <svg class="wave" viewBox="0 0 891 44" preserveAspectRatio="none" aria-hidden="true">
+  <g fill="currentColor">
+    <rect x="0" y="15" width="2" height="14"/><rect x="7" y="8" width="2" height="28"/><rect x="14" y="17" width="2" height="10"/><rect x="21" y="5" width="2" height="34"/><rect x="28" y="13" width="2" height="18"/><rect x="35" y="19" width="2" height="6"/><rect x="42" y="9" width="2" height="26"/><rect x="49" y="16" width="2" height="12"/><rect x="56" y="3" width="2" height="38"/><rect x="63" y="18" width="2" height="8"/><rect x="70" y="12" width="2" height="20"/><rect x="77" y="6" width="2" height="32"/><rect x="84" y="19" width="2" height="6"/><rect x="91" y="14" width="2" height="16"/><rect x="98" y="4" width="2" height="36"/><rect x="105" y="17" width="2" height="10"/><rect x="112" y="11" width="2" height="22"/><rect x="119" y="2" width="2" height="40"/><rect x="126" y="18" width="2" height="8"/><rect x="133" y="13" width="2" height="18"/><rect x="140" y="7" width="2" height="30"/><rect x="147" y="19" width="2" height="6"/><rect x="154" y="12" width="2" height="20"/><rect x="161" y="5" width="2" height="34"/><rect x="168" y="16" width="2" height="12"/><rect x="175" y="18" width="2" height="8"/><rect x="182" y="9" width="2" height="26"/><rect x="189" y="15" width="2" height="14"/><rect x="196" y="3" width="2" height="38"/><rect x="203" y="17" width="2" height="10"/><rect x="210" y="11" width="2" height="22"/><rect x="217" y="6" width="2" height="32"/><rect x="224" y="19" width="2" height="6"/><rect x="231" y="13" width="2" height="18"/>
+  </g>
+  <g fill="currentColor" transform="translate(471 0) scale(-1 1)">
+    <rect x="0" y="15" width="2" height="14"/><rect x="7" y="8" width="2" height="28"/><rect x="14" y="17" width="2" height="10"/><rect x="21" y="5" width="2" height="34"/><rect x="28" y="13" width="2" height="18"/><rect x="35" y="19" width="2" height="6"/><rect x="42" y="9" width="2" height="26"/><rect x="49" y="16" width="2" height="12"/><rect x="56" y="3" width="2" height="38"/><rect x="63" y="18" width="2" height="8"/><rect x="70" y="12" width="2" height="20"/><rect x="77" y="6" width="2" height="32"/><rect x="84" y="19" width="2" height="6"/><rect x="91" y="14" width="2" height="16"/><rect x="98" y="4" width="2" height="36"/><rect x="105" y="17" width="2" height="10"/><rect x="112" y="11" width="2" height="22"/><rect x="119" y="2" width="2" height="40"/><rect x="126" y="18" width="2" height="8"/><rect x="133" y="13" width="2" height="18"/><rect x="140" y="7" width="2" height="30"/><rect x="147" y="19" width="2" height="6"/><rect x="154" y="12" width="2" height="20"/><rect x="161" y="5" width="2" height="34"/><rect x="168" y="16" width="2" height="12"/><rect x="175" y="18" width="2" height="8"/><rect x="182" y="9" width="2" height="26"/><rect x="189" y="15" width="2" height="14"/><rect x="196" y="3" width="2" height="38"/><rect x="203" y="17" width="2" height="10"/><rect x="210" y="11" width="2" height="22"/><rect x="217" y="6" width="2" height="32"/><rect x="224" y="19" width="2" height="6"/><rect x="231" y="13" width="2" height="18"/>
+  </g>
+  <g fill="currentColor" transform="translate(476 0)">
+    <rect x="0" y="15" width="2" height="14"/><rect x="7" y="8" width="2" height="28"/><rect x="14" y="17" width="2" height="10"/><rect x="21" y="5" width="2" height="34"/><rect x="28" y="13" width="2" height="18"/><rect x="35" y="19" width="2" height="6"/><rect x="42" y="9" width="2" height="26"/><rect x="49" y="16" width="2" height="12"/><rect x="56" y="3" width="2" height="38"/><rect x="63" y="18" width="2" height="8"/><rect x="70" y="12" width="2" height="20"/><rect x="77" y="6" width="2" height="32"/><rect x="84" y="19" width="2" height="6"/><rect x="91" y="14" width="2" height="16"/><rect x="98" y="4" width="2" height="36"/><rect x="105" y="17" width="2" height="10"/><rect x="112" y="11" width="2" height="22"/><rect x="119" y="2" width="2" height="40"/><rect x="126" y="18" width="2" height="8"/><rect x="133" y="13" width="2" height="18"/><rect x="140" y="7" width="2" height="30"/><rect x="147" y="19" width="2" height="6"/><rect x="154" y="12" width="2" height="20"/><rect x="161" y="5" width="2" height="34"/><rect x="168" y="16" width="2" height="12"/><rect x="175" y="18" width="2" height="8"/><rect x="182" y="9" width="2" height="26"/><rect x="189" y="15" width="2" height="14"/><rect x="196" y="3" width="2" height="38"/><rect x="203" y="17" width="2" height="10"/><rect x="210" y="11" width="2" height="22"/><rect x="217" y="6" width="2" height="32"/><rect x="224" y="19" width="2" height="6"/><rect x="231" y="13" width="2" height="18"/>
+  </g>
+  <g fill="currentColor" transform="translate(947 0) scale(-1 1)">
+    <rect x="0" y="15" width="2" height="14"/><rect x="7" y="8" width="2" height="28"/><rect x="14" y="17" width="2" height="10"/><rect x="21" y="5" width="2" height="34"/><rect x="28" y="13" width="2" height="18"/><rect x="35" y="19" width="2" height="6"/><rect x="42" y="9" width="2" height="26"/><rect x="49" y="16" width="2" height="12"/><rect x="56" y="3" width="2" height="38"/><rect x="63" y="18" width="2" height="8"/><rect x="70" y="12" width="2" height="20"/><rect x="77" y="6" width="2" height="32"/><rect x="84" y="19" width="2" height="6"/><rect x="91" y="14" width="2" height="16"/><rect x="98" y="4" width="2" height="36"/><rect x="105" y="17" width="2" height="10"/><rect x="112" y="11" width="2" height="22"/><rect x="119" y="2" width="2" height="40"/><rect x="126" y="18" width="2" height="8"/><rect x="133" y="13" width="2" height="18"/><rect x="140" y="7" width="2" height="30"/><rect x="147" y="19" width="2" height="6"/><rect x="154" y="12" width="2" height="20"/><rect x="161" y="5" width="2" height="34"/><rect x="168" y="16" width="2" height="12"/><rect x="175" y="18" width="2" height="8"/><rect x="182" y="9" width="2" height="26"/><rect x="189" y="15" width="2" height="14"/><rect x="196" y="3" width="2" height="38"/><rect x="203" y="17" width="2" height="10"/><rect x="210" y="11" width="2" height="22"/><rect x="217" y="6" width="2" height="32"/><rect x="224" y="19" width="2" height="6"/><rect x="231" y="13" width="2" height="18"/>
+  </g>
+              </svg>
+              <span class="dur">5:08</span>
+            </div>
+          </div>
+          <div class="body">
+            <div class="tcol"></div>
+            <div class="ccol">
+              <p class="prose">Got the tram out to the end of the line for no reason
+                and walked back along the water.</p>
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+      <div class="composer">
+        <div class="crow">
+          <div class="field placeholder">Add to today</div>
+          <button class="mic" type="button" aria-label="Record">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="2.5" width="6" height="11.5" rx="3"/>
+              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/></svg>
+          </button>
+        </div>
+        <button class="opt" type="button" aria-pressed="false">
+          <span class="tick" aria-hidden="true"></span> Keep this out of memory
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<p class="caption d"><b>2 . The first Pro session . the only demonstration in the product</b><br>
+<b>It leads with their own words.</b> A sentence they spoke in March, never read back, in ink
+at body size, dated. The observation comes second, smaller, in rust, in a labelled row, with
+its citation and a way to mark it wrong.<br>
+The obvious move is to open with what the product noticed, because that is the capability
+being sold. <b>It is wrong.</b> Leading with the observation makes the moment about the
+product; leading with their voice makes it about them, which is the thesis of the whole
+brief.<br>
+<b>And it stays unexcited.</b> No confetti, no welcome to Pro, no you're all set, no
+exclamation mark. The register that makes this safe to open at 1am does not get suspended
+because money changed hands. The product just starts doing what it said.<br>
+<b>The waveform is the Timeline pattern, not a new one.</b> This is Saturday the 8th's 5:08,
+the same recording Timeline draws, and 12.7's conclusion is that tick weight is part of
+component identity across screens and not only across platforms. Row 320.3 at tablet to 788.3
+here, viewBox 362 to 891, <b>measured 1.7695</b>.<br>
+<b>The integrity check that almost failed:</b> the natural next sentence is that they rang
+Priya today. It cannot be written, because that entry is marked out of memory and the model
+cannot have read it. Citing an excluded entry here would break the only promise
+<b>/you/visible</b> makes, on the first screen after payment.</p>
+
+<p class="caption d"><b>Motion . desktop web 1440 . 12-upgrade.html</b><br>
+<b>What moves:</b> one waveform draws.<br>
+<b>What is still:</b> the progress bar, which F4 forbids motion on in the component inventory itself, and both printed date boxes.
+</p>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journal / A past day / desktop web 1440 / Pro, a conversation</title>
+
+<!-- ==========================================================================
+     MOTION . desktop web 1440 . 06-conversation.html
+     The motion system is in the BASE at lock.css revision 49, so this screen
+     animates because the product does. There is no variant class, no review
+     hatch and nothing here that a build has to strip.
+
+     WHAT MOVES ON THIS SCREEN
+       the date is written
+     WHAT IS DELIBERATELY STILL
+       the whole conversation, both notes and the selected mood
+
+     THE RECORD NEVER MOVES AND THE HEADER NEVER ARRIVES, on every screen in
+     the product. Only the four things the product itself does can move: a date
+     being written, the product's own line typing, a waveform drawing and the
+     composer rising. Everything else is at full opacity at the first paint.
+     ========================================================================== -->
+
+<!-- ==========================================================================
+     STAGE 4 . DESKTOP WEB 1440 . SCREEN 6 OF 12 . A PAST DAY, route
+     /d/2026-08-06. Pro, a conversation. Same content as the mobile and tablet
+     files, verbatim, including the 22:21 turn and the selected Low mood, which
+     were invented in place during Stage 3 and are now recorded in
+     direction-lock.md section 8.0 where they belong.
+
+     THE DAY IS ITS OWN TITLE, SO THERE IS NO WORDMARK AND THE PAGE STARTS AT
+     78 RATHER THAN 126. This is the same composition /talk and an answer use:
+     back, then the object that names the page. On a day that object is the
+     date box, which is exactly what 7.6 calls the masthead's second row, so
+     the keybox top and the sheet top are the same line. Measured 78 and 78,
+     delta 0.00, which is fix 1 holding on a pushed page rather than fix 1
+     being reinterpreted.
+     THE DATE BOX BECOMES THE h1 for the same reason: 9.14 defect 3 wants an h1
+     in every document, this page has no wordmark, and the value in the date
+     box is the page's name. lock.css revision 42 declares the weight on the
+     object rather than the element, so the hand cannot render in synthesised
+     bold the way the mood question did for three platforms.
+
+     THE ONE SCREEN WHERE THE TWO VOICES ALTERNATE DOWN A SINGLE COLUMN, AND
+     THE WIDTH IS WHAT MAKES IT WORTH LOOKING AT AGAIN.
+     Read down the page the user's turns are continuous prose and the product's
+     are marginalia against them. Both run the full 886px content column here,
+     as both run 416 at 834 and about 245 at 390. The two voices have always
+     shared a measure: the distinction is 16.5px against 14px, ink against
+     rust, and a labelled row with its own printed key. Three signals, none of
+     them width, and that is 12.4 stated once and applied at a third platform.
+
+     SAME RULED FORM AS TODAY. THE COMPOSER IS GONE, because this day is over,
+     and the mood row is editable, which is the one place mood changes after
+     the fact. That is why this screen exists at all rather than being a read
+     only echo of Today.
+
+     THE CONVERSATION IS THE JOURNAL. What was typed at 22:10 is an entry on
+     Timeline, a turn here, and a citable passage in an answer: one object,
+     three readings, no second content type. The answer screen built one file
+     earlier opens THIS day in its right hand column, and the two files were
+     checked against each other rather than against section 8 alone.
+
+     ONE REPLY CITES AND ONE DOES NOT, and that is the confidence tier rather
+     than an omission. "You said something like this on the second" is a claim
+     about the past and carries its evidence and a way to mark it wrong. "What
+     were you awake about?" is a question about what was just said, which is
+     not a claim about anything, so there is nothing to cite and nothing to
+     correct.
+
+     THE MOOD ROW IS DRAWN SELECTED, WHICH NO OTHER SCREEN IN THE PRODUCT DOES.
+     Low is pressed: aria-pressed="true", a --rule fill and an inverted label.
+     Three signals, one of which is not colour. The other four chips carry
+     aria-pressed="false", which is 9.14 defect 1, fixed on desktop by client
+     decision and reported at 390 and 834.
+
+     MEASURED AT A TRUE 1440
+       back / keybox        top 20 / 78
+       sheet                426 to 1398, 972 wide, top 78. delta to keybox 0.00
+       the user's turns     886px
+       the product's turns  886px, the same column
+       mood chip            183.6 each, five sharing the row
+       page height          784, 56 graph modules
+
+     CONTRAST, MEASURED
+       the user's turns    --ink on --paper-2        13.24
+       the product's       --rule on --paper          6.85
+       time column         --rule-2 on --paper-2      4.97
+       printed keys        --rule-2 on --paper        4.61
+       the citation        --rule on --paper          6.85
+       mood chip, at rest  --rule on --paper          6.85
+       mood chip, pressed  --paper on --rule          6.85
+     Every tap target 44px or larger.
+
+     FONTS. Constantia, Segoe UI, Ink Free. Locally installed, no network.
+     Production substitutes: Recoleta or Freight Text Pro, a grotesk with real
+     small caps, Caveat.
+     ========================================================================== -->
+
+<link rel="stylesheet" href="../lock.css">
+</head>
+<body>
+
+<div class="device d">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+
+  <div class="app">
+    <div class="rail" aria-hidden="true"></div>
+
+    <div class="title">
+      <a class="back" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6"/></svg>
+        Timeline
+      </a>
+      <div class="keybox">
+        <span class="k">Day</span>
+        <h1 class="v">Thu 6 Aug '26</h1>
+      </div>
+    </div>
+
+    <div class="page pushed untitled">
+
+      <main class="sheet">
+
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-06T22:10">22:10</time></div>
+          <div class="ccol">
+            <p class="prose">Slept badly again. I've stopped counting which night
+              this is.</p>
+          </div>
+        </div>
+
+        <aside class="said" aria-label="From your record">
+          <div class="tcol">From your record</div>
+          <div class="ccol open">
+            <div class="note">
+              <p>You said something like this on the second. That week you put it
+                down to the heat.</p>
+              <div class="said-foot">
+                <a class="cite" href="#">2 August</a>
+                <button class="wrong" type="button">That's not right</button>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-06T22:14">22:14</time></div>
+          <div class="ccol">
+            <p class="prose">Maybe. It was cooler last night and I was still awake
+              at three.</p>
+          </div>
+        </div>
+
+        <aside class="said" aria-label="The product asked">
+          <div class="tcol">Asked</div>
+          <div class="ccol open">
+            <div class="note">
+              <p>What were you awake about?</p>
+            </div>
+          </div>
+        </aside>
+
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-06T22:21">22:21</time></div>
+          <div class="ccol">
+            <p class="prose">The flat, mostly. And whether I'd have said yes to it
+              if the light had been worse.</p>
+          </div>
+        </div>
+
+        <section class="moodrow">
+          <h2>How was today?</h2>
+          <div class="chips">
+            <button type="button" aria-pressed="false">Hard</button>
+            <button type="button" aria-pressed="true">Low</button>
+            <button type="button" aria-pressed="false">Even</button>
+            <button type="button" aria-pressed="false">Good</button>
+            <button type="button" aria-pressed="false">Light</button>
+          </div>
+        </section>
+
+      </main>
+
+      <p class="foot">Mood can be changed here, and only here.</p>
+
+    </div>
+  </div>
+</div>
+
+<p class="caption d"><b>A past day . Pro . a conversation . desktop web 1440</b><br>
+<b>The day is its own title, so there is no wordmark and the sheet starts at 78 rather than
+126.</b> The date box is the object that names this page, which is what rule 7.6 calls the
+masthead's second row, so it and the first entry sit on one line. Measured 78 and 78.<br>
+<b>The one screen where the two voices alternate down a single column.</b> Both run the full
+886px here, as both run 416 at 834 and about 245 at 390. The two voices have always shared a
+measure; the distinction is size, colour and the labelled row.<br>
+Same ruled form as Today. The composer is gone, because this day is over, and the mood row
+is editable, which is the one place mood changes after the fact.<br>
+<b>The conversation is the journal.</b> What was typed at 22:10 is an entry on Timeline, a
+turn here, and a citable passage in an answer. One object, three readings, no second content
+type, and the answer screen opens this exact day in its right hand column.<br>
+<b>One reply cites and one does not</b>, because a question about what was just said is not
+a claim about the past. Nothing to cite, nothing to correct.</p>
+
+<p class="caption d"><b>Motion . desktop web 1440 . 06-conversation.html</b><br>
+<b>What moves:</b> the date is written.<br>
+<b>What is still:</b> the whole conversation, both notes and the selected mood.
+</p>
+</body>
+</html>

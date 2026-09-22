@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journal / Today / mobile app 390x844 iOS / Pro, settled day</title>
+
+<!-- ==========================================================================
+     MOTION . mobile app 390x844 . 01-today.html
+     The motion system is in the BASE at lock.css revision 49, so this screen
+     animates because the product does. Motion is component behaviour, so it
+     lands on all five platforms rather than in a platform block.
+
+     WHAT MOVES ON THIS SCREEN
+       the date is written, the glance line types, the waveform draws, the composer rises
+     WHAT IS DELIBERATELY STILL
+       the whole journal, the large title, the tab bar, both shut notes
+
+     THE SCROLL TUCK DOES NOT RUN HERE, and that is correct rather than missing.
+     g-tuck is driven by a scroll timeline and the second device is a MEASURED
+     292px offset rather than a real scroll position, so there is no scroll for
+     it to read. On the built app it runs exactly as it does on the web.
+     ========================================================================== -->
+
+<!-- ==========================================================================
+     STAGE 5 . MOBILE APP, 390x844, iOS . SCREEN 1 OF 12 . TODAY, route /
+     Tier: Pro. State: a settled day holding all three object types, drawn at
+     two scroll positions because a phone screen is a frame rather than a
+     document.
+
+     DRAWN LIGHT. Dark mode is direction-lock section 9 and PROJECT.md 7.1, it is
+     DEFERRED rather than open, the client has not lifted the deferral, and
+     Stage 5 draws light exactly as Stages 3 and 4 did.
+
+     WHY THIS SCREEN IS FIRST, FOR THE FOURTH TIME
+     Every other native screen inherits this one's shell: the status bar inset,
+     the large title, the tab bar, the binding that now stops short of it, and
+     the page that is the screen rather than the document. At a new platform the
+     shell IS the argument.
+
+     ------------------------------------------------------------------------
+     THE ONE REAL DESIGN PROBLEM OF NATIVE TODAY, AND THE ANSWER
+
+     00-flow.md section 2 put the four destinations at the TOP on mobile web,
+     and gave two reasons: the bottom of Today belongs to the composer and the
+     mic, and a nav bar stacked under them inside a browser that has already
+     taken 100px of vertical is how you end up with a 45%-tall content area.
+     The native delta in the same paragraph then makes that row a real UITabBar,
+     which is at the BOTTOM. The composer and the tab bar want the same edge.
+
+     The second reason is void here: there is no browser chrome. The first is
+     not: the composer still wants the foot. So the collision is real and it is
+     the thing this screen had to answer rather than inherit.
+
+     IT RESOLVES BY ARITHMETIC. The destination row is 58px and it is INSIDE the
+     scrolling page on mobile web. Natively it stops being page content and
+     becomes the tab bar, so the page gets those 58px back. Measured on the
+     built files, at rest, at the top of the same day:
+
+       mobile web   app 764    mast 124, dest 58, glance 37.56, margin 14,
+                               composer 135        SHEET VISIBLE  395.44
+       mobile app   page 714   mast 124, glance 37.56, margin 14,
+                               composer 135        SHEET VISIBLE  403.44
+
+     THE NATIVE SCREEN SHOWS EIGHT MORE PIXELS OF THE DAY THAN THE WEB ONE while
+     carrying a permanent tab bar the web one does not have. The tab bar costs
+     83; the destination row it replaces cost 58 in the page, and the browser
+     furniture it does not have cost 80 against the 47 of status bar native
+     still pays. 58 plus 33 is 91 against 83.
+
+     AND THE OTHER HALF, WHICH IS A COST. Once you scroll, mobile web pays
+     nothing at the top because its masthead scrolls away, while native pays a
+     44px collapsed bar and an 83px tab bar forever: 535 of reading area against
+     629, which is 94 less. Native is better at the top of the day and worse
+     down it. WHAT THE 94px BUYS IS A SENTENCE THE FLOW HAS ASSERTED SINCE STAGE
+     0 AND NO PLATFORM HAS HONOURED: section 2 says the four destinations are
+     "one tap from anywhere". At 390 web this day is 1168 tall in a 764 window,
+     so from its foot the destination row is a 404px scroll and THEN a tap. The
+     tab bar is what makes that sentence literally true for the first time.
+
+     ------------------------------------------------------------------------
+     WHAT IS GENUINELY NATIVE HERE, AND WHAT NEEDED NOTHING
+
+     1. A REAL TAB BAR. Four destinations, always four, same order, at the foot,
+        fixed, 49px of items over 34px of home indicator. It is B1 with a
+        variant class, so no component is added. The current destination keeps
+        its --block fill and inverted label rather than taking iOS's tint,
+        because a tint is colour alone and rule 2.4 forbids that outright. THIS
+        IS THE ONE PLACE THIS PASS DECLINES A PLATFORM CONVENTION, and it
+        declines it on a binding rule rather than on taste. No icons: the
+        standing rule is to reach for a printed word first, and four invented
+        marks for four destinations is four chances to be read wrongly.
+
+     2. A LARGE TITLE THAT COLLAPSES. Device two is the same screen scrolled.
+        The wordmark leaves the page and returns as an inline title in a 44px
+        bar that stays, and the date box, the glance line and the sheet scroll
+        UNDER it. Nothing on a web page here is fixed except the composer, so
+        this is behaviour the web build cannot have.
+
+     3. THE MASTHEAD NEEDED NO DECLARATION AT ALL, AND THAT IS THE FINDING
+        RATHER THAN A GAP. The wordmark is already --t-mast at 34px, flush left,
+        with the date box beneath it, and 34px is iOS's own large-title size. AT
+        REST THE MOBILE WEB MASTHEAD IS ALREADY A LARGE TITLE. The whole of the
+        delta is the collapsed state.
+
+     4. THE ACCESSIBILITY FLOOR NEEDED NOTHING EITHER. --tap has been 44px since
+        the Stage 2 lock, chosen off WCAG; iOS specifies 44pt. Three platforms of
+        work already met the native platform's own number.
+
+     5. THE BINDING STOPS AT THE TAB BAR. .rail is absolutely positioned in .app
+        at bottom:0, which was right for three platforms because .app and the
+        page ended on the same line. They no longer do. The spiral binds the
+        PAPER; a tab bar is the system's furniture under the notebook. This is
+        the .app trap arriving on its fourth platform, after revisions 22 at
+        tablet and 44 at desktop, and it is the same object every time.
+
+     WHAT IS NOT HERE, BECAUSE IT IS NOT THIS SCREEN. The system permission
+     sheet, background audio and "recording continued while you were in another
+     app" are all /talk, which is screen 3. The navigation stack and interactive
+     swipe-back are pushed pages, and Today is a destination.
+
+     ------------------------------------------------------------------------
+     WHY THE DAY IS CUT, AND WHY THAT IS THE HONEST DRAWING
+
+     Every web comp in this project draws the whole day, because a web page is a
+     document and a document is as long as it is. A phone is not: the screen is
+     844, the nav bar is fixed and the tab bar is fixed. Drawing this day at its
+     full 1138, measured rather than estimated, would put the tab bar 1138px down
+     the page, which is nowhere it ever is, and would hide the whole vertical
+     argument above. So the page is
+     held to the screen and the day is cut exactly where the screen cuts it,
+     and the second device is the second scroll position. The settled Pro day is
+     taller than the window on every platform in this product; that is
+     flow-review finding 6 and it is a watch-item, not a defect.
+
+     ------------------------------------------------------------------------
+     THE FOUR CROSS-PLATFORM DEFECTS: THIS COMP DRAWS ON THE FIXED SIDE
+
+     The four cross-platform defects are fixed at 1440 only, by client decision,
+     and 390 and 834 web keep them. A native comp cannot be both. It draws
+     fixed, and not as a preference: the client's decision was about retrofitting
+     two SIGNED platforms, which is a change to approved deliverables; building a
+     NEW file is not a retrofit. Three of the four are accessibility failures
+     against a floor the engagement rules make binding on every file.
+       1 aria-pressed on all six toggles      markup, here
+       2 .moodrow h2 at weight 400            lock.css section 6
+       3 the wordmark is the h1, at 400       markup, here, plus the weight
+       4 the collapsed note row centres       lock.css section 6
+     VISIBLE CONSEQUENCE: the mood question renders at 400 at 1440 and here, and
+     at 700 at 390 and 834 web. Two platforms against two.
+     DELIBERATELY NOT DONE: <time datetime> on the time column. It is the other
+     item from the same review, it costs nothing, and it has NO decision behind
+     it on ANY platform. Fixing it here alone would be taking a decision rather
+     than following one. Reported, not taken.
+
+     ------------------------------------------------------------------------
+     CONTENT IS direction-lock SECTION 8, VERBATIM AND UNEXTENDED. Same three
+     entries, same two notes, same recording, same glance line, same date, same
+     mood row as mobile web. No new colour, no new content, no new component, and
+     the hand still appears twice. The status bar reads 21:58, which is not
+     product content but is the hour section 8.0 already gives this evening on
+     /talk, so it agrees with the record rather than inventing an hour.
+
+     THE WAVEFORM IS CARRIED, NOT RE-AUTHORED, AND THAT WAS CHECKED RATHER THAN
+     ASSUMED. Section 12.7 makes any change to a waveform row's width a change
+     to its tick weight. The page is 366 here and 366 at 390 web, the sheet 338
+     and 338, so the row does not move and the 174-unit viewBox is the mobile
+     file's verbatim. MEASURED ON THIS FILE: row 154.3, tick 1.7735 against the
+     canonical 1.769, identical to the same recording at 390 web.
+
+     CONTRAST, MEASURED FOR THIS PALETTE, NOT CARRIED OVER
+       user's words        --ink on --paper-2       13.24
+       printed labels      --rule on --paper         6.85
+       the note            --rule on --paper         6.85
+       time column         --rule-2 on --paper-2     4.97
+       note summary        --rule-2 on --paper       4.61
+       Private mark        --rule-2 on --paper       4.61
+       date box key        --paper on --rule         6.85
+       tab bar label       --rule on --paper-2       7.40
+       current tab         --paper on --block        8.89
+       duration            --block on --block-2      5.23
+       glance line         --rule over the graph     5.66 worst case
+     Every tap target is 44px or larger; tab bar items are 97.5 x 49. No
+     information is carried by colour alone: the recording is a toned row with a
+     waveform, a duration and a play control; the current tab carries
+     aria-current, a filled ground and an inverted label; the Private mark is a
+     keyline, a glyph and the word.
+
+     FONTS. Constantia, Segoe UI, Ink Free. Locally installed, no network request
+     from this file or from lock.css.
+     Production substitutes: Recoleta or Freight Text Pro, a grotesk with real
+     small caps, Caveat.
+     ========================================================================== -->
+
+<link rel="stylesheet" href="../lock.css">
+</head>
+<body>
+
+<p class="caption"><b>Today . mobile app 390x844 . iOS . Pro, settled day</b><br>
+Stage 5, screen 1 of 12, and the first native screen in the product. <b>The page is
+the screen, not the document.</b> It is held to 714px between a 47px status bar and
+an 83px tab bar, so the day is cut exactly where the phone cuts it and the second
+device below is the second scroll position.</p>
+
+<div class="device ios">
+  <div class="chrome ios" aria-hidden="true">
+    <span>21:58</span>
+    <span class="sig">
+      <svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+      <svg viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1.5 4.2a11 11 0 0 1 15 0"/><path d="M4.4 7a7 7 0 0 1 9.2 0"/><path d="M7.2 9.7a3 3 0 0 1 3.6 0"/></svg>
+      <svg viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="1.1"><rect x="0.6" y="1.6" width="14" height="8.8" rx="2.2"/><rect x="2.2" y="3.2" width="9" height="5.6" rx="1.1" fill="currentColor" stroke="none"/><path d="M16.2 4.6v2.8" stroke-linecap="round"/></svg>
+    </span>
+  </div>
+
+  <div class="app ios">
+    <div class="rail" aria-hidden="true"></div>
+
+    <div class="page">
+
+      <header class="mast">
+        <h1 class="wordmark">Journal</h1>
+        <div class="keybox">
+          <span class="k">Day</span>
+          <span class="v">Sun 9 Aug '26</span>
+        </div>
+      </header>
+
+      <p class="glance"><span class="gline">Sleep has come up on four of the last six days.</span></p>
+
+      <main class="sheet">
+
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-09T09:20">09:20</time></div>
+          <div class="ccol">
+            <p class="prose">The flat people said Tuesday, and it's Sunday, so I've
+              decided not to think about it until Tuesday. That lasted about an hour.
+              I keep opening the email to check I read it right.</p>
+          </div>
+        </div>
+
+        <aside class="said" aria-label="From your record">
+          <div class="tcol">From your record</div>
+          <div class="ccol">
+            <details>
+              <summary>
+                <span class="lblbox"><span class="lbl shut">Read the note</span>
+                <span class="lbl open">Hide the note</span></span>
+                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </summary>
+              <div class="note">
+                <p>You wrote something close to this in March, about the job. That you'd
+                   decided not to think about it until Thursday.</p>
+                <div class="said-foot">
+                  <a class="cite" href="#">12 March</a>
+                  <button class="wrong" type="button">That's not right</button>
+                </div>
+              </div>
+            </details>
+          </div>
+        </aside>
+
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"><time datetime="2026-08-09T14:05">14:05</time></div>
+            <div class="ccol">
+              <button class="play" type="button"
+                      aria-label="Play recording, 2 minutes 41 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/>
+                </svg>
+              </button>
+              <svg class="wave" viewBox="0 0 174 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="18" width="2" height="8"/><rect x="7" y="13" width="2" height="18"/>
+                  <rect x="14" y="4" width="2" height="36"/><rect x="21" y="15" width="2" height="14"/>
+                  <rect x="28" y="19" width="2" height="6"/><rect x="35" y="7" width="2" height="30"/>
+                  <rect x="42" y="16" width="2" height="12"/><rect x="49" y="2" width="2" height="40"/>
+                  <rect x="56" y="12" width="2" height="20"/><rect x="63" y="19" width="2" height="6"/>
+                  <rect x="70" y="8" width="2" height="28"/><rect x="77" y="16" width="2" height="12"/>
+                  <rect x="84" y="5" width="2" height="34"/><rect x="91" y="18" width="2" height="8"/>
+                  <rect x="98" y="12" width="2" height="20"/><rect x="105" y="3" width="2" height="38"/>
+                  <rect x="112" y="19" width="2" height="6"/><rect x="119" y="14" width="2" height="16"/>
+                  <rect x="126" y="8" width="2" height="28"/><rect x="133" y="18" width="2" height="8"/>
+                  <rect x="140" y="11" width="2" height="22"/><rect x="147" y="2" width="2" height="40"/>
+                  <rect x="154" y="16" width="2" height="12"/><rect x="161" y="19" width="2" height="6"/>
+                  <rect x="168" y="12" width="2" height="20"/><rect x="175" y="6" width="2" height="32"/>
+                  <rect x="182" y="18" width="2" height="8"/><rect x="189" y="14" width="2" height="16"/>
+                  <rect x="196" y="4" width="2" height="36"/><rect x="203" y="19" width="2" height="6"/>
+                  <rect x="210" y="13" width="2" height="18"/><rect x="217" y="9" width="2" height="26"/>
+                  <rect x="224" y="17" width="2" height="10"/><rect x="231" y="6" width="2" height="32"/>
+                </g>
+              </svg>
+              <span class="dur">2:41</span>
+            </div>
+          </div>
+          <div class="body">
+            <div class="tcol"></div>
+            <div class="ccol">
+              <p class="prose">Walked the canal as far as the second bridge and back.
+                Didn't listen to anything. There were two swans that have been there
+                all summer and I've never once seen them move.</p>
+            </div>
+          </div>
+        </div>
+
+        <aside class="said" aria-label="From your record">
+          <div class="tcol">From your record</div>
+          <div class="ccol">
+            <details>
+              <summary>
+                <span class="lblbox"><span class="lbl shut">Read the note</span>
+                <span class="lbl open">Hide the note</span></span>
+                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </summary>
+              <div class="note">
+                <p>That stretch of canal is in your entry from 3 July too. What keeps
+                   taking you there?</p>
+                <div class="said-foot">
+                  <a class="cite" href="#">3 July</a>
+                  <button class="wrong" type="button">That's not right</button>
+                </div>
+              </div>
+            </details>
+          </div>
+        </aside>
+
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-09T21:40">21:40</time></div>
+          <div class="ccol">
+            <p class="prose">Priya rang. We talked for an hour about nothing. I'd
+              forgotten that's a thing you can do.</p>
+            <span class="mark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   aria-hidden="true">
+                <rect x="5" y="11" width="14" height="10" rx="1"/>
+                <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+              </svg>
+              Private, out of memory
+            </span>
+          </div>
+        </div>
+
+        <section class="moodrow">
+          <h2>How was today?</h2>
+          <div class="chips">
+            <button type="button" aria-pressed="false">Hard</button>
+            <button type="button" aria-pressed="false">Low</button>
+            <button type="button" aria-pressed="false">Even</button>
+            <button type="button" aria-pressed="false">Good</button>
+            <button type="button" aria-pressed="false">Light</button>
+          </div>
+        </section>
+
+      </main>
+
+      <div class="composer">
+        <div class="crow">
+          <div class="field placeholder">Add to today</div>
+          <button class="mic" type="button" aria-label="Record">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="2.5" width="6" height="11.5" rx="3"/>
+              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/>
+            </svg>
+          </button>
+        </div>
+        <button class="opt" type="button" aria-pressed="false">
+          <span class="tick" aria-hidden="true"></span> Keep this out of memory
+        </button>
+      </div>
+
+    </div>
+
+    <nav class="dest tab" aria-label="Destinations">
+      <span class="homebar" aria-hidden="true"></span>
+      <a href="#" aria-current="page">Today</a>
+      <a href="#">Timeline</a>
+      <a href="#">Ask</a>
+      <a href="#">You</a>
+    </nav>
+
+  </div>
+</div>
+
+<p class="caption"><b>The same screen, scrolled.</b> The large title has gone and the
+wordmark has returned as an inline title in a 44px bar that stays; the date box, the
+glance line and the sheet have scrolled under it. <b>The tab bar has not moved.</b>
+Nothing on a web page in this product is fixed except the composer, so this is the
+half of the native derivation the web build cannot have. The wordmark here is not a
+second h1: it is the same document at a second scroll position.</p>
+
+<div class="device ios">
+  <div class="chrome ios" aria-hidden="true">
+    <span>21:58</span>
+    <span class="sig">
+      <svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+      <svg viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1.5 4.2a11 11 0 0 1 15 0"/><path d="M4.4 7a7 7 0 0 1 9.2 0"/><path d="M7.2 9.7a3 3 0 0 1 3.6 0"/></svg>
+      <svg viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="1.1"><rect x="0.6" y="1.6" width="14" height="8.8" rx="2.2"/><rect x="2.2" y="3.2" width="9" height="5.6" rx="1.1" fill="currentColor" stroke="none"/><path d="M16.2 4.6v2.8" stroke-linecap="round"/></svg>
+    </span>
+  </div>
+
+  <div class="app ios">
+    <div class="rail" aria-hidden="true"></div>
+
+    <div class="page scrolled">
+
+      <header class="mast collapsed">
+        <span class="wordmark">Journal</span>
+      </header>
+
+      <main class="sheet">
+
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-09T09:20">09:20</time></div>
+          <div class="ccol">
+            <p class="prose">The flat people said Tuesday, and it's Sunday, so I've
+              decided not to think about it until Tuesday. That lasted about an hour.
+              I keep opening the email to check I read it right.</p>
+          </div>
+        </div>
+
+        <aside class="said" aria-label="From your record">
+          <div class="tcol">From your record</div>
+          <div class="ccol">
+            <details>
+              <summary>
+                <span class="lblbox"><span class="lbl shut">Read the note</span>
+                <span class="lbl open">Hide the note</span></span>
+                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </summary>
+              <div class="note">
+                <p>You wrote something close to this in March, about the job. That you'd
+                   decided not to think about it until Thursday.</p>
+                <div class="said-foot">
+                  <a class="cite" href="#">12 March</a>
+                  <button class="wrong" type="button">That's not right</button>
+                </div>
+              </div>
+            </details>
+          </div>
+        </aside>
+
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"><time datetime="2026-08-09T14:05">14:05</time></div>
+            <div class="ccol">
+              <button class="play" type="button"
+                      aria-label="Play recording, 2 minutes 41 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/>
+                </svg>
+              </button>
+              <svg class="wave" viewBox="0 0 174 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="18" width="2" height="8"/><rect x="7" y="13" width="2" height="18"/>
+                  <rect x="14" y="4" width="2" height="36"/><rect x="21" y="15" width="2" height="14"/>
+                  <rect x="28" y="19" width="2" height="6"/><rect x="35" y="7" width="2" height="30"/>
+                  <rect x="42" y="16" width="2" height="12"/><rect x="49" y="2" width="2" height="40"/>
+                  <rect x="56" y="12" width="2" height="20"/><rect x="63" y="19" width="2" height="6"/>
+                  <rect x="70" y="8" width="2" height="28"/><rect x="77" y="16" width="2" height="12"/>
+                  <rect x="84" y="5" width="2" height="34"/><rect x="91" y="18" width="2" height="8"/>
+                  <rect x="98" y="12" width="2" height="20"/><rect x="105" y="3" width="2" height="38"/>
+                  <rect x="112" y="19" width="2" height="6"/><rect x="119" y="14" width="2" height="16"/>
+                  <rect x="126" y="8" width="2" height="28"/><rect x="133" y="18" width="2" height="8"/>
+                  <rect x="140" y="11" width="2" height="22"/><rect x="147" y="2" width="2" height="40"/>
+                  <rect x="154" y="16" width="2" height="12"/><rect x="161" y="19" width="2" height="6"/>
+                  <rect x="168" y="12" width="2" height="20"/><rect x="175" y="6" width="2" height="32"/>
+                  <rect x="182" y="18" width="2" height="8"/><rect x="189" y="14" width="2" height="16"/>
+                  <rect x="196" y="4" width="2" height="36"/><rect x="203" y="19" width="2" height="6"/>
+                  <rect x="210" y="13" width="2" height="18"/><rect x="217" y="9" width="2" height="26"/>
+                  <rect x="224" y="17" width="2" height="10"/><rect x="231" y="6" width="2" height="32"/>
+                </g>
+              </svg>
+              <span class="dur">2:41</span>
+            </div>
+          </div>
+          <div class="body">
+            <div class="tcol"></div>
+            <div class="ccol">
+              <p class="prose">Walked the canal as far as the second bridge and back.
+                Didn't listen to anything. There were two swans that have been there
+                all summer and I've never once seen them move.</p>
+            </div>
+          </div>
+        </div>
+
+        <aside class="said" aria-label="From your record">
+          <div class="tcol">From your record</div>
+          <div class="ccol">
+            <details>
+              <summary>
+                <span class="lblbox"><span class="lbl shut">Read the note</span>
+                <span class="lbl open">Hide the note</span></span>
+                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </summary>
+              <div class="note">
+                <p>That stretch of canal is in your entry from 3 July too. What keeps
+                   taking you there?</p>
+                <div class="said-foot">
+                  <a class="cite" href="#">3 July</a>
+                  <button class="wrong" type="button">That's not right</button>
+                </div>
+              </div>
+            </details>
+          </div>
+        </aside>
+
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-09T21:40">21:40</time></div>
+          <div class="ccol">
+            <p class="prose">Priya rang. We talked for an hour about nothing. I'd
+              forgotten that's a thing you can do.</p>
+            <span class="mark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   aria-hidden="true">
+                <rect x="5" y="11" width="14" height="10" rx="1"/>
+                <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+              </svg>
+              Private, out of memory
+            </span>
+          </div>
+        </div>
+
+        <section class="moodrow">
+          <h2>How was today?</h2>
+          <div class="chips">
+            <button type="button" aria-pressed="false">Hard</button>
+            <button type="button" aria-pressed="false">Low</button>
+            <button type="button" aria-pressed="false">Even</button>
+            <button type="button" aria-pressed="false">Good</button>
+            <button type="button" aria-pressed="false">Light</button>
+          </div>
+        </section>
+
+      </main>
+
+      <div class="composer">
+        <div class="crow">
+          <div class="field placeholder">Add to today</div>
+          <button class="mic" type="button" aria-label="Record">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="2.5" width="6" height="11.5" rx="3"/>
+              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/>
+            </svg>
+          </button>
+        </div>
+        <button class="opt" type="button" aria-pressed="false">
+          <span class="tick" aria-hidden="true"></span> Keep this out of memory
+        </button>
+      </div>
+
+    </div>
+
+    <nav class="dest tab" aria-label="Destinations">
+      <span class="homebar" aria-hidden="true"></span>
+      <a href="#" aria-current="page">Today</a>
+      <a href="#">Timeline</a>
+      <a href="#">Ask</a>
+      <a href="#">You</a>
+    </nav>
+
+  </div>
+</div>
+
+<p class="caption"><b>The tab bar is four printed words, not four icons.</b> The current
+destination keeps the filled ground and inverted label it has on every other platform,
+because iOS marks the current tab by tint alone and rule 2.4 forbids colour carrying
+information on its own. <b>You is still set apart</b>, by a hairline rather than by the
+auto margin the web platforms use: a tab bar divides equally, so the space that says it
+at 390 and 834 is not available, and the rule says the same thing in the product's own
+vocabulary.<br>
+<b>The binding stops at the tab bar.</b> The spiral binds the paper, and the tab bar is
+the system's furniture underneath it. That is the fourth platform on which something
+positioned against .app has needed a line of its own.<br>
+<b>All values come from lock.css.</b> No style block, no colour literal, no script, no
+network request.</p>
+
+</body>
+</html>
