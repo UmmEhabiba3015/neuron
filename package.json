@@ -14,6 +14,10 @@
     "test:e2e": "pnpm --filter @neuron/api test:e2e",
     "migration:generate": "pnpm --filter @neuron/api migration:generate",
     "migration:run": "pnpm --filter @neuron/api migration:run",
-    "migration:revert": "pnpm --filter @neuron/api migration:revert"
+    "migration:revert": "pnpm --filter @neuron/api migration:revert",
+    "dev:web": "pnpm --filter @neuron/web dev",
+    "build:web": "pnpm --filter @neuron/web build",
+    "lint:web": "pnpm --filter @neuron/web lint",
+    "typecheck:web": "pnpm --filter @neuron/web typecheck"
   }
 }
