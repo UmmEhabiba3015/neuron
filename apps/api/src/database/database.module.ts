@@ -5,9 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import type { DataSourceOptions } from 'typeorm';
 import type { EnvironmentVariables } from '../config/env.validation';
-import { JournalEntry } from '../entries/entry.entity';
-import { Session } from '../auth/session.entity';
-import { User } from '../users/user.entity';
+import { entities } from './entities';
 import { migrations } from './migrations';
 
 const logger = new Logger('DatabaseModule');
@@ -52,7 +50,7 @@ export function buildDatabaseOptions(
     type: 'better-sqlite3',
     database: databasePath,
 
-    entities: [JournalEntry, User, Session],
+    entities,
     migrations,
 
     synchronize: false,

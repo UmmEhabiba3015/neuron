@@ -1,14 +1,20 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
-import { Day } from '../days/day.entity';
 import { User } from '../users/user.entity';
 
-@Entity({ name: 'entries' })
-export class JournalEntry {
+export const MOODS = ['Hard', 'Low', 'Even', 'Good', 'Light'] as const;
+
+export type Mood = (typeof MOODS)[number];
+
+@Entity({ name: 'days' })
+export class Day {
   @PrimaryColumn({ type: 'text' })
   id: string;
 
   @Column({ type: 'text' })
-  content: string;
+  date: string;
+
+  @Column({ type: 'text', nullable: true })
+  mood!: Mood | null;
 
   @Column({ name: 'created_at', type: 'text' })
   createdAt: string;
@@ -16,14 +22,7 @@ export class JournalEntry {
   @Column({ name: 'user_id', type: 'text', select: false })
   userId?: string;
 
-  @Column({ name: 'day_id', type: 'text', select: false })
-  dayId?: string;
-
   @ManyToOne(() => User)
   @JoinColumn({ name: 'user_id' })
   user?: User;
-
-  @ManyToOne(() => Day)
-  @JoinColumn({ name: 'day_id' })
-  day?: Day;
 }

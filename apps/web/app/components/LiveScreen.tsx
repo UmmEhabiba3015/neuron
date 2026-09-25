@@ -14,24 +14,28 @@ type Destination = 'Today' | 'Timeline' | 'Ask' | 'You';
  * Both headers are rendered because the desktop comp hoists the header out
  * of .page into .title and a container query cannot restructure the DOM.
  * live.css hides whichever one the width does not want.
+ *
+ * `aside` is the masthead's second object. Today carries a date box there
+ * and Timeline carries the zoom control, and rule 7.6 says nothing above
+ * the destination row may vary beyond that.
  */
 export function LiveScreen({
   current,
-  keyLabel,
-  keyValue,
-  glance,
+  aside,
+  lede,
   children,
+  foot,
 }: {
   current: Destination;
-  keyLabel: string;
-  keyValue: string;
-  glance?: ReactNode;
+  aside: ReactNode;
+  lede?: ReactNode;
   children: ReactNode;
+  foot?: ReactNode;
 }) {
   const header = (
     <>
       <Wordmark />
-      <KeyBox label={keyLabel} value={keyValue} />
+      {aside}
     </>
   );
 
@@ -42,15 +46,18 @@ export function LiveScreen({
       <div className="title">
         {header}
         <Destinations current={current} />
-        {glance ? <Glance>{glance}</Glance> : null}
+        {lede}
       </div>
 
       <div className="page">
         <header className="mast">{header}</header>
         <Destinations current={current} />
-        {glance ? <Glance>{glance}</Glance> : null}
+        {lede}
         {children}
+        {foot}
       </div>
     </div>
   );
 }
+
+export { Glance, KeyBox };

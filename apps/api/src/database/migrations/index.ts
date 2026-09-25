@@ -5,6 +5,7 @@ import { AddUserPasswordHash1789294233406 } from './1789294233406-AddUserPasswor
 import { AddUniqueUserName1789295560638 } from './1789295560638-AddUniqueUserName';
 import { RequireEntryOwner1789374205681 } from './1789374205681-RequireEntryOwner';
 import { AddSessions1790015003339 } from './1790015003339-AddSessions';
+import { AddDays1790354879734 } from './1790354879734-AddDays';
 
 type Migration = new () => MigrationInterface;
 
@@ -15,4 +16,5 @@ export const migrations: Migration[] = [
   AddUniqueUserName1789295560638,
   RequireEntryOwner1789374205681,
   AddSessions1790015003339,
+  AddDays1790354879734,
 ];

@@ -271,3 +271,36 @@ export function LiveRecording({
     </div>
   );
 }
+
+/*
+ * .mark carries two different statements in the comps: "Private, out of
+ * memory" with a padlock, and an import source such as "Day One" with no
+ * icon at all. Same component, and 00-flow.md lists both as Timeline states.
+ */
+export function SourceMark({ source }: { source: string }) {
+  return <span className="mark">{source}</span>;
+}
+
+export function Segmented({
+  label,
+  options,
+  active,
+}: {
+  label: string;
+  options: string[];
+  active: string;
+}) {
+  return (
+    <div className="seg" role="group" aria-label={label}>
+      {options.map((option) => (
+        <button
+          key={option}
+          type="button"
+          aria-pressed={option === active ? 'true' : 'false'}
+        >
+          {option}
+        </button>
+      ))}
+    </div>
+  );
+}

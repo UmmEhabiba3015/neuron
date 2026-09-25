@@ -1,16 +1,16 @@
 import request from 'supertest';
 import type { App } from 'supertest/types';
 import { DataSource } from 'typeorm';
+import { entities } from '../src/database/entities';
 import { migrations } from '../src/database/migrations';
 import { JournalEntry } from '../src/entries/entry.entity';
-import { Session } from '../src/auth/session.entity';
 import { User } from '../src/users/user.entity';
 
 export async function createTestDataSource(): Promise<DataSource> {
   const dataSource = new DataSource({
     type: 'better-sqlite3',
     database: ':memory:',
-    entities: [JournalEntry, User, Session],
+    entities,
     migrations,
     synchronize: false,
   });

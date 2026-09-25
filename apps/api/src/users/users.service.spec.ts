@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
+import { entities } from '../database/entities';
 import { migrations } from '../database/migrations';
 import { JournalEntry } from '../entries/entry.entity';
 import { PasswordService } from '../auth/password.service';
@@ -16,7 +17,7 @@ describe('UsersService', () => {
     const dataSource = new DataSource({
       type: 'better-sqlite3',
       database: ':memory:',
-      entities: [JournalEntry, User],
+      entities,
       migrations,
       synchronize: false,
     });

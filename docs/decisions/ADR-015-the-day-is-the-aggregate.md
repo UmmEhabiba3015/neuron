@@ -17,8 +17,9 @@ an entry. Mood is a property of a *day*.
 3. **The day boundary is 04:00 local time, not midnight.**
 4. **A day is stored as a date, not as an instant.** `2026-08-09`, not a
    timestamp.
-5. **`users` gains a timezone**, because a 4am boundary is meaningless without
-   one.
+5. **The boundary is computed in UTC for now.** A 4am boundary is meaningless
+   without a timezone, and `users` has no column for one. **Deferred by the
+   owner on 2026-09-25**, not overlooked: see *The timezone is deferred*, below.
 6. **An empty day does not exist.** No row is created for a day with no
    content, and a day whose last item is deleted is removed.
 
@@ -75,6 +76,33 @@ The alternative is computing the day from `created_at` on every read, as
 Resolving once, at write time, records what the product actually means: *this
 is the day the user was having when they wrote this.*
 
+## The timezone is deferred, and this is what that means
+
+The day is resolved at write time, so the server has to answer "which day is
+this?" at the moment of the insert. Doing that correctly needs the writer's
+timezone, and nothing in the system knows it.
+
+**Decision: use UTC, and revisit.** Three options were on the table — default
+to UTC; have the client send its timezone on each write; store it on the user
+at registration. The last two differ only in how they are wrong when someone
+travels, and neither is obviously better until there is a real user in a real
+second timezone.
+
+**What is actually being deferred is a decision, not a column.** The offset is
+applied when the day is computed, so switching from UTC to a stored or
+client-sent timezone changes that one calculation and the rows already written
+keep the day they were given. **No entry silently moves**, which is the whole
+point of resolving at write time.
+
+**What is wrong in the meantime, stated plainly.** For a user more than four
+hours from UTC the boundary lands at the wrong local hour, and for a user far
+enough east or west some late-night entries land on the neighbouring day.
+There is currently one user, and she is at UTC+5, so a 4am UTC boundary is
+09:00 for her — wrong in exactly the way this will eventually need fixing.
+
+**Revisit when** the first real user is in a second timezone, or when a day
+boundary is visibly wrong on a screen.
+
 ## Costs accepted
 
 - **A write is now two writes** — resolve or create the day, then insert the
@@ -82,6 +110,7 @@ is the day the user was having when they wrote this.*
 - **A timezone change does not retroactively move existing entries.** This is
   deliberate and matches the reasoning above, but it means two entries written
   the same wall-clock hour in different timezones can land on different days.
+  It is also what makes the deferral above safe.
 - **Deleting the last item on a day must delete the day**, or the calendar will
   show marks for days with nothing in them, which the flow forbids
   ("an empty day does not exist").
