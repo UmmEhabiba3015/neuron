@@ -110,20 +110,83 @@ state the free tier ships: kept as audio, never read.
 
 ---
 
-## Decision 3 — Tiers and guest sessions are deferred, and that is recorded
+## Decision 3 — Tiers are deferred; guest sessions are refused outright
 
 The designs carry a full commercial model — free and Pro at $9.99, a paywall
-with rules, guest sessions that carry over on signup. **None of it is being
-built**, and none of it blocks a frontend.
+with rules, guest sessions that carry over on signup.
 
-- **Tiers.** Every screen the frontend can build in Phase 3 is a free-tier
-  screen. The Pro surfaces (`/ask/{id}`, `/reflection/{week}`) are the RAG work
-  in Phase 4 and cannot be built before it.
-- **Guest sessions.** A real feature with a real cost — browser-held state,
-  quota warnings, and a claim path that migrates content into an account. It is
-  deferred until there is a frontend to hold the guest state.
+**Tiers are deferred.** Every screen the frontend can build in Phase 3 is a
+free-tier screen. The Pro surfaces (`/ask/{id}`, `/reflection/{week}`) are the
+RAG work in Phase 4 and cannot be built before it. Deferred, not refused: the
+decision returns when entitlement becomes real.
 
-Recorded so that their absence is a decision rather than an omission.
+**Guest sessions are refused.** Amended 2026-09-25, by the owner. This is
+stronger than a deferral and the designs have to move, so the reasoning is
+recorded rather than assumed.
+
+The case for them is the cold-start problem, and the brief makes it well:
+asking for an account before someone has written anything is the wrong order,
+and the first traced path in `00-flow.md` §3.1 has a live composer and
+microphone on a logged-out screen.
+
+The case against is that ADR-013 made every route closed by default —
+`APP_GUARD` plus an explicit `@Public()` — and called that a new route being
+*closed until someone decides otherwise*. Guest access is a deliberate hole in
+that, carrying browser-held state, quota warnings, and a claim path that
+migrates content into an account at signup. **It buys a funnel improvement for
+a product that does not have a funnel yet**, at the cost of the guard's
+strongest property.
+
+### What this costs, and it is a real cost
+
+`08-first-run.html` cannot be built as drawn. It shows the working application
+with no sign-in wall, which was a deliberate product decision and is now
+reversed. That screen needs redrawing.
+
+**This merges with an amendment the designs already owed.** `/in`, `/new` and
+`/restore` are in the flow's route table and are not among the 12 drawn
+screens, so auth had no interface either way. First-run and the three auth
+screens are now one piece of design work rather than two.
+
+Dropped with it: the guest strip on Today, the *keep this* panel, the
+browser-quota warning, and the claim-on-signup migration.
+
+---
+
+## Decision 4 — The product does not try to detect distress
+
+Amended 2026-09-25, by the owner.
+
+The brief calls the crisis path a non-negotiable. `00-flow.md` §4.3 then
+records, honestly and at length, that its own answer does not meet it: a
+curated phrase list with no model behind it, which **does not cover voice
+memos at all** — and a voice memo at 1am is precisely the case §4.3 identifies
+as highest risk.
+
+**The two halves of the designed feature are decided separately.**
+
+**Keyword detection is not being built.** A phrase list tuned for precision
+catches almost nothing, because distress rarely announces itself in matchable
+language. Tuned for recall it fires on grief, venting and fiction, and the
+brief is explicit that every uncorrectable false positive costs real trust.
+There is no setting of that dial that is good. A detector that misses the
+dangerous case and insults the ordinary one is worse than no detector, and
+shipping one would let the product claim a safety property it does not have.
+
+**The static, always-present resource stays.** Human-written, never generated,
+in settings and the composer overflow, at every tier. Dropping it is a
+different decision from dropping detection and a worse one: it costs nothing,
+it claims nothing it cannot do, and a product explicitly built for people
+without a support network should not have zero route to help.
+
+**The shortfall is accepted, not solved.** `00-flow.md` §4.3 says the gap
+"cannot be closed inside a zero-spend constraint" and points at on-device
+transcription in the native passes as the thing that would close it. That
+remains true and unbuilt. This ADR records the gap as a known, accepted
+position rather than leaving it implied by an empty backlog.
+
+State 6 of the states pack — the crisis card beneath a completed entry — is
+therefore not built.
 
 ---
 

@@ -140,15 +140,29 @@ build in Phase 3 is a free-tier screen.
 **The cost of deferring:** none until the AI surfaces exist in Phase 4. At that
 point "who is allowed to call this" becomes real.
 
-### 5. Guest sessions — DEFERRED, needs confirming
+### 5. Guest sessions — SETTLED. Not building them.
 
 **Designs:** the first run has no sign-in wall at all. You write first and are
 asked to keep it afterwards.
 **Roadmap:** everything is behind `APP_GUARD`; a new route is closed by default.
-**The cost of deferring:** the first-run screen cannot be built as designed.
-It is screen 8 of 12, and the flow's first traced path.
-**Worth noting:** this conflicts with a *good* decision. Closed-by-default is
-ADR-013's strength, and guest access punches a deliberate hole in it.
+**Decision (2026-09-25): no guest access. An account is required to write.**
+
+The reason to take it seriously was the cold-start problem — the brief argues
+that asking for an account before someone has anything worth keeping is the
+wrong order. The reason it loses is that it contradicts ADR-013's
+closed-by-default guard, which is one of the stronger decisions in the
+codebase, and it buys a funnel improvement for a product that has no funnel
+yet.
+
+**What this costs, stated plainly.** `08-first-run.html` cannot be built as
+drawn: it shows a live composer and microphone with no account. That screen
+needs redrawing as a sign-in or sign-up screen, which the designs are missing
+anyway — `/in`, `/new` and `/restore` are in the route table and were never
+drawn. **These are now the same piece of design work rather than two.**
+
+Also gone with it: the "keep this" panel, the guest strip on Today, the
+browser-quota warning, and the claim-on-signup path that migrates local
+content into a new account. None of them are needed now.
 
 ### 6. Import — UNDECIDED
 
@@ -165,13 +179,37 @@ after cancelling, no email gate.
 **Cheap to build** — it is a read and a serialisation — and it is the one
 feature the designs treat as an ethical commitment rather than a feature.
 
-### 8. Crisis detection — UNDECIDED, and the designs admit it is unsolved
+### 8. Crisis detection — SETTLED. No detection. The resource stays.
 
-The brief calls it a non-negotiable. `00-flow.md` §4.3 then records honestly
-that the free-tier implementation "does not meet it and cannot be closed inside
-a zero-spend constraint", and that voice memos are not covered at all.
-**This is a product-safety decision, not an engineering one.** It should not be
-decided by whichever of the two documents happens to win.
+The brief calls the crisis path a non-negotiable. `00-flow.md` §4.3 then
+records honestly that its own answer "does not meet it and cannot be closed
+inside a zero-spend constraint", and that voice memos are not covered at all.
+
+**Decision (2026-09-25): the product does not try to detect distress.**
+
+The designs describe two separate things, and only the first is being dropped:
+
+1. **Keyword detection** that triggers a card after an entry is saved. **Not
+   building it.** A phrase list tuned to avoid false alarms catches almost
+   nothing, and tuned to catch more it fires on grief, venting and fiction —
+   and the brief is explicit that every wrong one costs real trust. It also
+   cannot see voice memos, which §4.3 concedes is precisely where the risk is
+   highest. A detector that misses the dangerous case and insults the ordinary
+   one is worse than no detector.
+
+2. **A static, always-present resource** in settings and the composer
+   overflow, human-written, never generated. **This stays.** Dropping it would
+   be a different decision from dropping detection, and a worse one: it costs
+   nothing, it is honest about what it is, and removing it would leave a
+   product explicitly built for people without a support network with no
+   route to help at all.
+
+**What this means for the design.** State 6 of the states pack — the crisis
+card that appears beneath a completed entry — is not built. The resource
+becomes what §4.3 already admits it mostly is: a link that is always there
+rather than one that arrives at the right moment. **The shortfall the designs
+recorded is not solved by this decision; it is accepted, and written down here
+instead of being implied by an empty backlog.**
 
 ### 9. Trackers beyond mood — CONFLICT
 
@@ -237,12 +275,9 @@ chart. **Neither wants it.**
 - **Trackers beyond mood** (#9) — the brief's own reasoning argues against
   them, and mood alone teaches the same data modelling.
 
-**Decide deliberately, not by default:**
+**Decided on 2026-09-25, both by the owner:**
 
-- **Guest sessions** (#5). It is the first traced path in the flow and it
-  contradicts closed-by-default. Either is defensible; drifting into one is not.
-- **Crisis detection** (#8). The designs record it as unsolved. A product for
-  people without a support network either has a position on this or does not
-  ship. It may be that the honest answer is a static, always-present resource
-  and no detection at all — which is cheap, and which the flow already
-  concedes is most of what free gets anyway.
+- **Guest sessions** (#5) — **not building them.** An account is required.
+- **Crisis detection** (#8) — **no detection.** The always-present resource
+  stays, because that is a separate decision and dropping it would be a worse
+  one.

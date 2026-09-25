@@ -1,5 +1,6 @@
-import { Today } from '@/app/screens/Today';
+import './styles/live.css';
+import { LiveToday } from '@/app/screens/LiveToday';
 
 export default function TodayPage() {
-  return <Today platform="desktop" />;
+  return <LiveToday />;
 }

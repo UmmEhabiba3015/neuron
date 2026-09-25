@@ -200,3 +200,74 @@ export function Composer({
     </div>
   );
 }
+
+/*
+ * All three authored waveforms. live.css shows the one that matches the
+ * width; see the note there and direction-lock.md 12.7.
+ */
+export function LiveWaveform() {
+  return (
+    <>
+      {(['mobile', 'tablet', 'desktop'] as const).map((platform) => {
+        const { width, height, ticks } = WAVEFORMS[platform];
+        return (
+          <svg
+            key={platform}
+            className="wave"
+            data-w={platform}
+            viewBox={`0 0 ${width} ${height}`}
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <g fill="currentColor">
+              {ticks.map(([x, y, h]) => (
+                <rect key={x} x={x} y={y} width="2" height={h} />
+              ))}
+            </g>
+          </svg>
+        );
+      })}
+    </>
+  );
+}
+
+export function LiveRecording({
+  time,
+  datetime,
+  duration,
+  label,
+  children,
+}: {
+  time: string;
+  datetime: string;
+  duration: string;
+  label: string;
+  children?: ReactNode;
+}) {
+  return (
+    <div className="recrow">
+      <div className="head dated">
+        <div className="tcol">
+          <time dateTime={datetime}>{time}</time>
+        </div>
+        <div className="ccol">
+          <button className="play" type="button" aria-label={label}>
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M8 5.5v13l11-6.5z" />
+            </svg>
+          </button>
+          <LiveWaveform />
+          <span className="dur">{duration}</span>
+        </div>
+      </div>
+      {children ? (
+        <div className="body">
+          <div className="tcol" />
+          <div className="ccol">
+            <p className="prose">{children}</p>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}

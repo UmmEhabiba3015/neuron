@@ -372,9 +372,14 @@ because Day 21's `LIKE` visibly fails.
 The design of record is allowed to move on this day, and three things in it
 need to change:
 
-1. **Draw `/in`, `/new`, `/restore`** with an email and password field.
+1. **Redraw first run, and draw `/in`, `/new`, `/restore`** with an email and
+   password field. One piece of work, not two: guest sessions were refused on
+   2026-09-25 (ADR-016), so `08-first-run.html`'s logged-out composer is no
+   longer the product, and auth never had screens anyway.
 2. **Draw a validation error state** — a sentence in place, no disabled control.
 3. **Decide delete's undo:** draw it, or the API stops returning the entry.
+4. **Drop state 6, the crisis card.** Detection is not being built (ADR-016).
+   The always-present resource in settings and the composer overflow stays.
 
 
 ### What to bring
