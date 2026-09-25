@@ -48,10 +48,14 @@ body {
  * query that drives the rest of the layout choose between them, so the
  * threshold stays the one lock.css already states rather than a second one
  * written here. .mast is the mobile and tablet header; .title is desktop's.
+ *
+ * .mast is only hidden, never given a display value. lock.css leaves it a
+ * plain block at mobile, where the wordmark and the date box stack, and turns
+ * it into a flex row itself at the 700 threshold. Declaring display:flex here
+ * put the tablet masthead on the 390 layout and collided the two.
  */
 
 .app > .title { display: none; }
-.app .page > .mast { display: flex; }
 
 @container (min-width: 1200px) {
   .app > .title { display: block; }
