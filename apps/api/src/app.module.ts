@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { validate } from './config/env.validation';
 import { EntriesModule } from './entries/entries.module';
+import { DaysModule } from './days/days.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { EntriesModule } from './entries/entries.module';
       validate,
     }),
     AuthModule,
+    DaysModule,
     EntriesModule,
   ],
 

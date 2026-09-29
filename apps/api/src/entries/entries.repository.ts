@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Raw, Repository } from 'typeorm';
 import { JournalEntry } from './entry.entity';
+import type { Page } from './page';
 
 @Injectable()
 export class EntriesRepository {
@@ -10,10 +11,12 @@ export class EntriesRepository {
     private readonly entries: Repository<JournalEntry>,
   ) {}
 
-  findAll(userId: string): Promise<JournalEntry[]> {
+  findAll(userId: string, page: Page): Promise<JournalEntry[]> {
     return this.entries.find({
       where: { userId },
       order: { createdAt: 'DESC' },
+      take: page.limit,
+      skip: page.offset,
     });
   }
 
@@ -41,7 +44,11 @@ export class EntriesRepository {
     );
   }
 
-  findByContent(word: string, userId: string): Promise<JournalEntry[]> {
+  findByContent(
+    word: string,
+    userId: string,
+    page: Page,
+  ): Promise<JournalEntry[]> {
     return this.entries.find({
       where: {
         userId,
@@ -51,6 +58,8 @@ export class EntriesRepository {
         ),
       },
       order: { createdAt: 'DESC' },
+      take: page.limit,
+      skip: page.offset,
     });
   }
 

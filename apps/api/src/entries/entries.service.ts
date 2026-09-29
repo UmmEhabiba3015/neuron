@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import { DaysService } from '../days/days.service';
 import { EntriesRepository } from './entries.repository';
 import { JournalEntry } from './entry.entity';
+import { FULL_PAGE, type Page } from './page';
 
 @Injectable()
 export class EntriesService {
@@ -12,8 +13,8 @@ export class EntriesService {
     private readonly dataSource: DataSource,
   ) {}
 
-  findAll(userId: string): Promise<JournalEntry[]> {
-    return this.entriesRepository.findAll(userId);
+  findAll(userId: string, page: Page = FULL_PAGE): Promise<JournalEntry[]> {
+    return this.entriesRepository.findAll(userId, page);
   }
 
   /*
@@ -49,12 +50,16 @@ export class EntriesService {
     return this.entriesRepository.findById(id, userId);
   }
 
-  findByContent(word: string, userId: string): Promise<JournalEntry[]> {
+  findByContent(
+    word: string,
+    userId: string,
+    page: Page = FULL_PAGE,
+  ): Promise<JournalEntry[]> {
     if (word === '') {
       return Promise.resolve([]);
     }
 
-    return this.entriesRepository.findByContent(word, userId);
+    return this.entriesRepository.findByContent(word, userId, page);
   }
 
   update(
