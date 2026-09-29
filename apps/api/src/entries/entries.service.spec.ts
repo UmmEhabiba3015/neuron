@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import type { DataSource } from 'typeorm';
 import {
   closeTestDataSource,
@@ -7,9 +6,8 @@ import {
   seedEntries,
   seedUser,
 } from '../../test/test-database';
-import { EntriesRepository } from './entries.repository';
 import { EntriesService } from './entries.service';
-import { JournalEntry } from './entry.entity';
+import { entriesProviders } from '../../test/entries-providers';
 
 const CALLER_ID = 'caller-id';
 
@@ -22,16 +20,7 @@ describe('EntriesService', () => {
     await seedUser(dataSource, CALLER_ID);
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        EntriesService,
-
-        EntriesRepository,
-
-        {
-          provide: getRepositoryToken(JournalEntry),
-          useValue: dataSource.getRepository(JournalEntry),
-        },
-      ],
+      providers: entriesProviders(dataSource),
     }).compile();
 
     service = module.get<EntriesService>(EntriesService);

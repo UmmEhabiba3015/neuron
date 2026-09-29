@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import type { DataSource } from 'typeorm';
 import {
   closeTestDataSource,
@@ -8,11 +7,9 @@ import {
   seedUser,
 } from '../../test/test-database';
 import { EntriesController } from './entries.controller';
-import { EntriesRepository } from './entries.repository';
-import { EntriesService } from './entries.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import type { AuthenticatedRequest } from '../auth/authenticated-request';
-import { JournalEntry } from './entry.entity';
+import { entriesProviders } from '../../test/entries-providers';
 
 const CALLER_ID = 'caller-id';
 
@@ -30,14 +27,7 @@ describe('EntriesController', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [EntriesController],
-      providers: [
-        EntriesService,
-        EntriesRepository,
-        {
-          provide: getRepositoryToken(JournalEntry),
-          useValue: dataSource.getRepository(JournalEntry),
-        },
-      ],
+      providers: entriesProviders(dataSource),
     })
 
       .overrideGuard(JwtAuthGuard)

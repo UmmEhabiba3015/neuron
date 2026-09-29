@@ -24,6 +24,23 @@ export class EntriesRepository {
     return (await this.entries.findOneBy({ id, userId })) ?? undefined;
   }
 
+  /*
+   * findById hides day_id, because select:false keeps it off every response.
+   * Deleting a day when its last entry goes needs the id, so this is the one
+   * read that asks for it explicitly.
+   */
+  async findWithDay(
+    id: string,
+    userId: string,
+  ): Promise<JournalEntry | undefined> {
+    return (
+      (await this.entries.findOne({
+        where: { id, userId },
+        select: { id: true, dayId: true },
+      })) ?? undefined
+    );
+  }
+
   findByContent(word: string, userId: string): Promise<JournalEntry[]> {
     return this.entries.find({
       where: {

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
 import { DatabaseModule } from '../database/database.module';
+import { DaysModule } from '../days/days.module';
 import { EntriesController } from './entries.controller';
 import { EntriesRepository } from './entries.repository';
 import { EntriesService } from './entries.service';
@@ -12,6 +13,8 @@ import { JournalEntry } from './entry.entity';
     DatabaseModule,
 
     AuthModule,
+
+    DaysModule,
 
     TypeOrmModule.forFeature([JournalEntry]),
   ],

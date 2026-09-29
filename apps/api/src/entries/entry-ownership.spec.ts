@@ -4,6 +4,9 @@ import {
   createTestDataSource,
 } from '../../test/test-database';
 import { User } from '../users/user.entity';
+import { Day } from '../days/day.entity';
+import { DaysRepository } from '../days/days.repository';
+import { DaysService } from '../days/days.service';
 import { EntriesRepository } from './entries.repository';
 import { EntriesService } from './entries.service';
 import { JournalEntry } from './entry.entity';
@@ -175,6 +178,10 @@ describe('entry ownership', () => {
 
       const service = new EntriesService(
         new EntriesRepository(dataSource.getRepository(JournalEntry)),
+        new DaysService(
+          new DaysRepository(dataSource.getRepository(Day), dataSource),
+        ),
+        dataSource,
       );
 
       const created = await service.create('an owned entry', 'owner-1');
