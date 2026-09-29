@@ -18,7 +18,10 @@ describe('sessions and revocation (e2e)', () => {
   let app: INestApplication<App>;
   let dataSource: DataSource;
 
-  const credentials = { name: 'umer', password: 'a-long-enough-password' };
+  const credentials = {
+    email: 'umer@example.com',
+    password: 'a-long-enough-password',
+  };
 
   const login = async (): Promise<LoginBody> => {
     const response = await request(app.getHttpServer())

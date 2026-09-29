@@ -28,10 +28,10 @@ describe('entry ownership', () => {
     >(`PRAGMA table_info(${table})`);
 
   describe('the users table', () => {
-    it('should have exactly id, name, created_at and password_hash', async () => {
+    it('should have exactly id, email, created_at and password_hash', async () => {
       expect((await columnsOf('users')).map((column) => column.name)).toEqual([
         'id',
-        'name',
+        'email',
         'created_at',
         'password_hash',
       ]);
@@ -58,14 +58,14 @@ describe('entry ownership', () => {
 
       await users.insert({
         id: 'user-1',
-        name: 'habiba',
+        email: 'habiba@example.com',
         createdAt: '2026-09-02T09:00:00.000Z',
       });
 
       await expect(
         users.insert({
           id: 'user-2',
-          name: 'habiba',
+          email: 'habiba@example.com',
           createdAt: '2026-09-02T09:00:01.000Z',
         }),
       ).rejects.toThrow(/UNIQUE constraint failed/);
@@ -110,7 +110,7 @@ describe('entry ownership', () => {
     it('should round-trip an owner through the entity', async () => {
       await dataSource.getRepository(User).insert({
         id: 'user-1',
-        name: 'habiba',
+        email: 'habiba@example.com',
         createdAt: '2026-09-02T09:00:00.000Z',
       });
 
@@ -147,7 +147,7 @@ describe('entry ownership', () => {
 
       await dataSource.getRepository(User).insert({
         id: 'owner-of-entry-1',
-        name: 'somebody',
+        email: 'somebody@example.com',
         createdAt: '2026-09-01T00:00:00.000Z',
         passwordHash: null,
       });
@@ -171,7 +171,7 @@ describe('entry ownership', () => {
     it('should record the caller as the owner of a new entry', async () => {
       await dataSource.getRepository(User).insert({
         id: 'owner-1',
-        name: 'the-owner',
+        email: 'the-owner@example.com',
         createdAt: '2026-09-01T00:00:00.000Z',
         passwordHash: null,
       });

@@ -30,10 +30,10 @@ export class AuthController {
   @Public()
   @Post('register')
   async register(@Body() dto: RegisterDto): Promise<User> {
-    const user = await this.usersService.register(dto.name, dto.password);
+    const user = await this.usersService.register(dto.email, dto.password);
 
     if (!user) {
-      throw new ConflictException('That name is already taken');
+      throw new ConflictException('That email address is already registered');
     }
 
     return user;
@@ -43,10 +43,10 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() dto: LoginDto): Promise<AuthenticatedSession> {
-    const session = await this.authService.login(dto.name, dto.password);
+    const session = await this.authService.login(dto.email, dto.password);
 
     if (!session) {
-      throw new UnauthorizedException('Invalid name or password');
+      throw new UnauthorizedException('Invalid email or password');
     }
 
     return session;

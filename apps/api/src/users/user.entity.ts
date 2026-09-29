@@ -6,8 +6,13 @@ export class User {
   @PrimaryColumn({ type: 'text' })
   id: string;
 
-  @Column({ type: 'text', unique: true })
-  name: string;
+  /*
+   * Unique, but the index that enforces it is on lower(email) and lives in
+   * the migration rather than here: TypeORM's unique:true would emit a plain
+   * index and let one mailbox hold two accounts.
+   */
+  @Column({ type: 'text' })
+  email: string;
 
   @Exclude()
   @Column({ name: 'password_hash', type: 'text', nullable: true })

@@ -51,7 +51,7 @@ describe('UsersService', () => {
 
       await service.register('umer', password);
 
-      const stored = await users.findOneByOrFail({ name: 'umer' });
+      const stored = await users.findOneByOrFail({ email: 'umer' });
 
       expect(stored.passwordHash).not.toBe(password);
       expect(stored.passwordHash).toMatch(/^\$argon2id\$/);
@@ -68,25 +68,25 @@ describe('UsersService', () => {
 
     it('should not overwrite the existing user when the name is taken', async () => {
       await service.register('umer', 'the-first-password');
-      const first = await users.findOneByOrFail({ name: 'umer' });
+      const first = await users.findOneByOrFail({ email: 'umer' });
 
       await service.register('umer', 'the-second-password');
 
-      expect((await users.findOneByOrFail({ name: 'umer' })).passwordHash).toBe(
-        first.passwordHash,
-      );
+      expect(
+        (await users.findOneByOrFail({ email: 'umer' })).passwordHash,
+      ).toBe(first.passwordHash);
     });
   });
 
-  describe('findByName', () => {
+  describe('findByEmail', () => {
     it('should return undefined when no user has that name', async () => {
-      expect(await service.findByName('nobody')).toBeUndefined();
+      expect(await service.findByEmail('nobody')).toBeUndefined();
     });
 
     it('should find a registered user', async () => {
       await service.register('umer', 'a-long-enough-password');
 
-      expect((await service.findByName('umer'))?.name).toBe('umer');
+      expect((await service.findByEmail('umer'))?.email).toBe('umer');
     });
   });
 });

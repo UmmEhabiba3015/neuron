@@ -27,10 +27,10 @@ export class AuthService {
   ) {}
 
   async login(
-    name: string,
+    email: string,
     password: string,
   ): Promise<AuthenticatedSession | undefined> {
-    const user = await this.usersService.findByName(name);
+    const user = await this.usersService.findByEmail(email);
 
     if (!user?.passwordHash) {
       await this.passwordService.verify(UNKNOWN_USER_HASH, password);

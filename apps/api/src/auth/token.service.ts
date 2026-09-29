@@ -4,7 +4,7 @@ import type { User } from '../users/user.entity';
 
 export interface AccessTokenPayload {
   sub: string;
-  name: string;
+  email: string;
   sid: string;
 }
 
@@ -15,7 +15,7 @@ export class TokenService {
   sign(user: User, sessionId: string): Promise<string> {
     const payload: AccessTokenPayload = {
       sub: user.id,
-      name: user.name,
+      email: user.email,
       sid: sessionId,
     };
 

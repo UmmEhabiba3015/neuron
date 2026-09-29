@@ -12,15 +12,15 @@ export class UsersService {
     private readonly passwordService: PasswordService,
   ) {}
 
-  async register(name: string, password: string): Promise<User | undefined> {
-    if (await this.usersRepository.findByName(name)) {
+  async register(email: string, password: string): Promise<User | undefined> {
+    if (await this.usersRepository.findByEmail(email)) {
       return undefined;
     }
 
     const user = new User();
 
     user.id = randomUUID();
-    user.name = name;
+    user.email = email;
     user.createdAt = new Date().toISOString();
     user.passwordHash = await this.passwordService.hash(password);
 
@@ -37,8 +37,8 @@ export class UsersService {
     return user;
   }
 
-  findByName(name: string): Promise<User | undefined> {
-    return this.usersRepository.findByName(name);
+  findByEmail(email: string): Promise<User | undefined> {
+    return this.usersRepository.findByEmail(email);
   }
 
   findById(id: string): Promise<User | undefined> {

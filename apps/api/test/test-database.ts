@@ -39,20 +39,26 @@ export async function seedEntries(
     );
 }
 
+/*
+ * Callers name accounts the way a person would -- authenticate(server,
+ * 'alice') -- so anything without an @ is turned into an address here rather
+ * than at every call site.
+ */
 export async function authenticate(
   server: App,
-  name = 'test-user',
+  who = 'test-user',
 ): Promise<string> {
+  const email = who.includes('@') ? who : `${who}@example.com`;
   const password = 'a-long-enough-test-password';
 
   await request(server)
     .post('/auth/register')
-    .send({ name, password })
+    .send({ email, password })
     .expect(201);
 
   const response = await request(server)
     .post('/auth/login')
-    .send({ name, password })
+    .send({ email, password })
     .expect(200);
 
   return `Bearer ${(response.body as { accessToken: string }).accessToken}`;
@@ -64,7 +70,7 @@ export async function seedUser(
 ): Promise<string> {
   await dataSource.getRepository(User).insert({
     id,
-    name: `user-${id}`,
+    email: `${id}@example.com`,
     createdAt: '2026-09-01T00:00:00.000Z',
     passwordHash: null,
   });

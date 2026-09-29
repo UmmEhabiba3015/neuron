@@ -39,25 +39,25 @@ describe('AuthController (e2e)', () => {
     it('should create a user and return it with an id', async () => {
       const response = await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ name: 'umer', password: 'a-long-enough-password' })
+        .send({ email: 'umer@example.com', password: 'a-long-enough-password' })
         .expect(201);
 
-      const body = response.body as { id: string; name: string };
+      const body = response.body as { id: string; email: string };
 
-      expect(body.name).toBe('umer');
+      expect(body.email).toBe('umer@example.com');
       expect(typeof body.id).toBe('string');
     });
 
     it('should never put a credential in the response body', async () => {
       const response = await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ name: 'umer', password: 'a-long-enough-password' })
+        .send({ email: 'umer@example.com', password: 'a-long-enough-password' })
         .expect(201);
 
       expect(Object.keys(response.body as object).sort()).toEqual([
         'createdAt',
+        'email',
         'id',
-        'name',
       ]);
 
       expect(JSON.stringify(response.body)).not.toContain('$argon2');
@@ -68,12 +68,12 @@ describe('AuthController (e2e)', () => {
 
       await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ name: 'umer', password })
+        .send({ email: 'umer@example.com', password })
         .expect(201);
 
       const stored = await dataSource
         .getRepository(User)
-        .findOneByOrFail({ name: 'umer' });
+        .findOneByOrFail({ email: 'umer@example.com' });
 
       expect(stored.passwordHash).not.toBe(password);
       expect(stored.passwordHash).not.toContain(password);
@@ -86,11 +86,11 @@ describe('AuthController (e2e)', () => {
 
       await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ name: 'alice', password })
+        .send({ email: 'alice@example.com', password })
         .expect(201);
       await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ name: 'bob', password })
+        .send({ email: 'bob@example.com', password })
         .expect(201);
 
       const users = await dataSource.getRepository(User).find();
@@ -99,15 +99,15 @@ describe('AuthController (e2e)', () => {
       expect(users[0].passwordHash).not.toBe(users[1].passwordHash);
     });
 
-    it('should reject a name that is already taken with 409', async () => {
+    it('should reject an email that is already registered with 409', async () => {
       await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ name: 'umer', password: 'a-long-enough-password' })
+        .send({ email: 'umer@example.com', password: 'a-long-enough-password' })
         .expect(201);
 
       await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ name: 'umer', password: 'a-different-password' })
+        .send({ email: 'umer@example.com', password: 'a-different-password' })
         .expect(409);
 
       expect(await dataSource.getRepository(User).count()).toBe(1);
@@ -117,7 +117,7 @@ describe('AuthController (e2e)', () => {
       it('should reject a password shorter than 8 characters', async () => {
         const response = await request(app.getHttpServer())
           .post('/auth/register')
-          .send({ name: 'umer', password: 'short' })
+          .send({ email: 'umer@example.com', password: 'short' })
           .expect(400);
 
         expect(messagesFrom(response)).toContainEqual(
@@ -125,10 +125,10 @@ describe('AuthController (e2e)', () => {
         );
       });
 
-      it('should reject a whitespace-only name', async () => {
+      it('should reject a whitespace-only email', async () => {
         await request(app.getHttpServer())
           .post('/auth/register')
-          .send({ name: '   ', password: 'a-long-enough-password' })
+          .send({ email: '   ', password: 'a-long-enough-password' })
           .expect(400);
       });
 
@@ -136,7 +136,7 @@ describe('AuthController (e2e)', () => {
         await request(app.getHttpServer())
           .post('/auth/register')
           .send({
-            name: 'umer',
+            email: 'umer@example.com',
             password: 'a-long-enough-password',
             isAdmin: true,
           })
@@ -146,14 +146,17 @@ describe('AuthController (e2e)', () => {
       it('should reject a missing password', async () => {
         await request(app.getHttpServer())
           .post('/auth/register')
-          .send({ name: 'umer' })
+          .send({ email: 'umer@example.com' })
           .expect(400);
       });
     });
   });
 
   describe('POST /auth/login', () => {
-    const credentials = { name: 'umer', password: 'a-long-enough-password' };
+    const credentials = {
+      email: 'umer@example.com',
+      password: 'a-long-enough-password',
+    };
 
     const registerUser = () =>
       request(app.getHttpServer())
@@ -171,11 +174,11 @@ describe('AuthController (e2e)', () => {
 
       const body = response.body as {
         accessToken: string;
-        user: { id: string; name: string };
+        user: { id: string; email: string };
       };
 
       expect(typeof body.accessToken).toBe('string');
-      expect(body.user.name).toBe('umer');
+      expect(body.user.email).toBe('umer@example.com');
     });
 
     it('should answer 200 rather than 201', async () => {
@@ -202,9 +205,9 @@ describe('AuthController (e2e)', () => {
 
       expect(payload.sub).toEqual(expect.any(String));
       expect(Object.keys(payload).sort()).toEqual([
+        'email',
         'exp',
         'iat',
-        'name',
         'sid',
         'sub',
       ]);
@@ -224,37 +227,37 @@ describe('AuthController (e2e)', () => {
       expect(JSON.stringify(response.body)).not.toContain(credentials.password);
     });
 
-    it('should answer identically for a wrong password and an unknown name', async () => {
+    it('should answer identically for a wrong password and an unknown email', async () => {
       await registerUser();
 
       const wrongPassword = await request(app.getHttpServer())
         .post('/auth/login')
-        .send({ name: 'umer', password: 'the-wrong-password' })
+        .send({ email: 'umer@example.com', password: 'the-wrong-password' })
         .expect(401);
 
       const unknownName = await request(app.getHttpServer())
         .post('/auth/login')
-        .send({ name: 'nobody-has-this-name', password: 'the-wrong-password' })
+        .send({ email: 'nobody@example.com', password: 'the-wrong-password' })
         .expect(401);
 
       expect(unknownName.body).toEqual(wrongPassword.body);
       expect(JSON.stringify(wrongPassword.body)).not.toContain('umer');
     });
 
-    it('should take comparable time for a wrong password and an unknown name', async () => {
+    it('should take comparable time for a wrong password and an unknown email', async () => {
       await registerUser();
 
-      const timeOf = async (name: string): Promise<number> => {
+      const timeOf = async (email: string): Promise<number> => {
         const startedAt = process.hrtime.bigint();
         await request(app.getHttpServer())
           .post('/auth/login')
-          .send({ name, password: 'the-wrong-password' })
+          .send({ email, password: 'the-wrong-password' })
           .expect(401);
         return Number(process.hrtime.bigint() - startedAt) / 1e6;
       };
 
       const wrongPassword = await timeOf('umer');
-      const unknownName = await timeOf('nobody-has-this-name');
+      const unknownName = await timeOf('nobody@example.com');
 
       expect(unknownName).toBeGreaterThan(wrongPassword / 4);
     });
@@ -262,14 +265,14 @@ describe('AuthController (e2e)', () => {
     it('should reject a login for a user whose password was never set', async () => {
       await dataSource.getRepository(User).insert({
         id: 'legacy-user',
-        name: 'legacy',
+        email: 'legacy@example.com',
         createdAt: '2026-09-01T00:00:00.000Z',
         passwordHash: null,
       });
 
       await request(app.getHttpServer())
         .post('/auth/login')
-        .send({ name: 'legacy', password: 'any-password-at-all' })
+        .send({ email: 'legacy@example.com', password: 'any-password-at-all' })
         .expect(401);
     });
 
@@ -284,7 +287,10 @@ describe('AuthController (e2e)', () => {
   });
 
   describe('GET /auth/me', () => {
-    const credentials = { name: 'umer', password: 'a-long-enough-password' };
+    const credentials = {
+      email: 'umer@example.com',
+      password: 'a-long-enough-password',
+    };
 
     const login = async (): Promise<string> => {
       await request(app.getHttpServer())
@@ -300,7 +306,7 @@ describe('AuthController (e2e)', () => {
       return `Bearer ${(response.body as { accessToken: string }).accessToken}`;
     };
 
-    it('should name the caller for a valid token', async () => {
+    it('should identify the caller for a valid token', async () => {
       const authorization = await login();
 
       const response = await request(app.getHttpServer())
@@ -308,7 +314,9 @@ describe('AuthController (e2e)', () => {
         .set('Authorization', authorization)
         .expect(200);
 
-      expect((response.body as { name: string }).name).toBe('umer');
+      expect((response.body as { email: string }).email).toBe(
+        'umer@example.com',
+      );
     });
 
     it('should never put a credential in the body', async () => {
@@ -321,8 +329,8 @@ describe('AuthController (e2e)', () => {
 
       expect(Object.keys(response.body as object).sort()).toEqual([
         'createdAt',
+        'email',
         'id',
-        'name',
       ]);
     });
 
@@ -347,7 +355,7 @@ describe('AuthController (e2e)', () => {
       const { JwtService } = await import('@nestjs/jwt');
       const forged = await new JwtService({
         secret: 'a-completely-different-secret-of-sufficient-length',
-      }).signAsync({ sub: 'anyone', name: 'attacker' });
+      }).signAsync({ sub: 'anyone', email: 'attacker@example.com' });
 
       await request(app.getHttpServer())
         .get('/auth/me')
@@ -369,7 +377,10 @@ describe('AuthController (e2e)', () => {
       const { JwtService } = await import('@nestjs/jwt');
       const expired = await new JwtService({
         secret: process.env.JWT_SECRET,
-      }).signAsync({ sub: 'anyone', name: 'umer' }, { expiresIn: '-1h' });
+      }).signAsync(
+        { sub: 'anyone', email: 'umer@example.com' },
+        { expiresIn: '-1h' },
+      );
 
       const response = await request(app.getHttpServer())
         .get('/auth/me')
@@ -391,7 +402,7 @@ describe('AuthController (e2e)', () => {
 
       const user = await dataSource
         .getRepository(User)
-        .findOneByOrFail({ name: 'umer' });
+        .findOneByOrFail({ email: 'umer@example.com' });
 
       await dataSource.getRepository(Session).delete({ userId: user.id });
       await dataSource.getRepository(User).delete({ id: user.id });
