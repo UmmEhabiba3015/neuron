@@ -256,10 +256,24 @@ describe('AuthController (e2e)', () => {
         return Number(process.hrtime.bigint() - startedAt) / 1e6;
       };
 
-      const wrongPassword = await timeOf('umer');
-      const unknownName = await timeOf('nobody@example.com');
+      /*
+       * The registered address, so this really is the wrong-password path.
+       * It said 'umer' until Day 14: registerUser creates umer@example.com,
+       * so both calls took the unknown-user branch and the test compared the
+       * thing to itself. It could not fail, and it did not when the dummy
+       * verify was deleted.
+       */
+      const wrongPassword = await timeOf(credentials.email);
+      const unknownAddress = await timeOf('nobody@example.com');
 
-      expect(unknownName).toBeGreaterThan(wrongPassword / 4);
+      /*
+       * Both bounds, because only the lower one is a real claim about
+       * timing: without the dummy verify the unknown path returns without
+       * hashing at all, and is far faster. The upper bound catches the
+       * reverse drift.
+       */
+      expect(unknownAddress).toBeGreaterThan(wrongPassword / 2);
+      expect(unknownAddress).toBeLessThan(wrongPassword * 2);
     });
 
     it('should reject a login for a user whose password was never set', async () => {
