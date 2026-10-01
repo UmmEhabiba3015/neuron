@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import { DaysService } from '../days/days.service';
 import { EntriesRepository } from './entries.repository';
 import { JournalEntry } from './entry.entity';
+import type { EntryFilters } from './entry-filters';
 import { FULL_PAGE, type Page } from './page';
 
 @Injectable()
@@ -13,8 +14,16 @@ export class EntriesService {
     private readonly dataSource: DataSource,
   ) {}
 
-  findAll(userId: string, page: Page = FULL_PAGE): Promise<JournalEntry[]> {
-    return this.entriesRepository.findAll(userId, page);
+  find(
+    userId: string,
+    filters: EntryFilters = {},
+    page: Page = FULL_PAGE,
+  ): Promise<JournalEntry[]> {
+    return this.entriesRepository.find(userId, filters, page);
+  }
+
+  count(userId: string, filters: EntryFilters = {}): Promise<number> {
+    return this.entriesRepository.count(userId, filters);
   }
 
   /*
@@ -50,18 +59,6 @@ export class EntriesService {
     return this.entriesRepository.findById(id, userId);
   }
 
-  findByContent(
-    word: string,
-    userId: string,
-    page: Page = FULL_PAGE,
-  ): Promise<JournalEntry[]> {
-    if (word === '') {
-      return Promise.resolve([]);
-    }
-
-    return this.entriesRepository.findByContent(word, userId, page);
-  }
-
   update(
     id: string,
     content: string,
@@ -83,9 +80,5 @@ export class EntriesService {
     }
 
     return deleted;
-  }
-
-  countEntries(userId: string): Promise<number> {
-    return this.entriesRepository.countEntries(userId);
   }
 }

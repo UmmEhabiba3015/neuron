@@ -84,10 +84,19 @@ export class DaysRepository {
     });
   }
 
+  /*
+   * The count is scoped by user as well as by day, and that is not
+   * redundant. ADR-013's rule is that ownership belongs in the WHERE clause
+   * rather than in the caller, and a count scoped only by day_id is correct
+   * only for as long as every caller passes an id it already owns. That is
+   * true today -- the entry is read with findWithDay(id, userId) first --
+   * which makes this a latent bug rather than a live one, and exactly the
+   * kind that a later caller turns into a real one.
+   */
   async deleteIfEmpty(dayId: string, userId: string): Promise<boolean> {
     const result = await this.dataSource.query<{ count: number }[]>(
-      `SELECT COUNT(*) AS count FROM entries WHERE day_id = ?`,
-      [dayId],
+      `SELECT COUNT(*) AS count FROM entries WHERE day_id = ? AND user_id = ?`,
+      [dayId, userId],
     );
 
     if (Number(result[0]?.count ?? 0) > 0) {

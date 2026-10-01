@@ -13,6 +13,8 @@ import {
 import type { AuthenticatedRequest } from '../auth/authenticated-request';
 import { EntriesService } from './entries.service';
 import { CreateEntryDto } from './create-entry.dto';
+import { CountEntriesQueryDto } from './count-entries-query.dto';
+import type { EntryFilters } from './entry-filters';
 import { FindEntriesQueryDto } from './find-entries-query.dto';
 import { DEFAULT_PAGE_SIZE } from './page';
 import { UpdateEntryDto } from './update-entry.dto';
@@ -37,20 +39,10 @@ export class EntriesController {
     @Query() query: FindEntriesQueryDto,
     @Req() request: AuthenticatedRequest,
   ): Promise<JournalEntry[]> {
-    const page = {
+    return this.entriesService.find(request.user.id, filtersFrom(query), {
       limit: query.limit ?? DEFAULT_PAGE_SIZE,
       offset: query.offset ?? 0,
-    };
-
-    if (query.word !== undefined) {
-      return this.entriesService.findByContent(
-        query.word,
-        request.user.id,
-        page,
-      );
-    }
-
-    return this.entriesService.findAll(request.user.id, page);
+    });
   }
 
   @Post()
@@ -61,11 +53,27 @@ export class EntriesController {
     return this.entriesService.create(dto.content, request.user.id);
   }
 
+  /*
+   * Counting takes the same filters as listing, so "how many match this
+   * search" has an answer. It did not: count ignored the word entirely and
+   * returned the size of the whole journal, which is a number no screen
+   * wanted.
+   *
+   * A separate resource rather than an envelope around the list. ADR-005
+   * settled that a collection is a bare array, and a total for one screen is
+   * not a reason to reopen it -- ADR-017.
+   */
   @Get('count')
   async countEntries(
+    @Query() query: CountEntriesQueryDto,
     @Req() request: AuthenticatedRequest,
   ): Promise<{ count: number }> {
-    return { count: await this.entriesService.countEntries(request.user.id) };
+    return {
+      count: await this.entriesService.count(
+        request.user.id,
+        filtersFrom(query),
+      ),
+    };
   }
 
   @Get(':id')
@@ -114,4 +122,12 @@ export class EntriesController {
 
     return deleted;
   }
+}
+
+/*
+ * The listing and the count build their filters the same way, so a filter
+ * cannot reach one and miss the other.
+ */
+function filtersFrom(query: { word?: string }): EntryFilters {
+  return { word: query.word };
 }

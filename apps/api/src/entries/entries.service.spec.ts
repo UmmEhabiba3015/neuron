@@ -36,7 +36,7 @@ describe('EntriesService', () => {
 
   describe('findAll', () => {
     it('should return nothing for a fresh database', async () => {
-      expect(await service.findAll(CALLER_ID)).toEqual([]);
+      expect(await service.find(CALLER_ID)).toEqual([]);
     });
 
     it('should return an entry that was created', async () => {
@@ -45,7 +45,7 @@ describe('EntriesService', () => {
         CALLER_ID,
       );
 
-      expect(await service.findAll(CALLER_ID)).toContainEqual(created);
+      expect(await service.find(CALLER_ID)).toContainEqual(created);
     });
 
     it('should return entries newest first', async () => {
@@ -66,9 +66,10 @@ describe('EntriesService', () => {
         CALLER_ID,
       );
 
-      expect(
-        (await service.findAll(CALLER_ID)).map((entry) => entry.id),
-      ).toEqual(['newer', 'older']);
+      expect((await service.find(CALLER_ID)).map((entry) => entry.id)).toEqual([
+        'newer',
+        'older',
+      ]);
     });
   });
 
@@ -97,7 +98,7 @@ describe('EntriesService', () => {
 
       await service.create(hostile, CALLER_ID);
 
-      expect((await service.findAll(CALLER_ID)).map((e) => e.content)).toEqual([
+      expect((await service.find(CALLER_ID)).map((e) => e.content)).toEqual([
         hostile,
       ]);
     });
@@ -156,7 +157,7 @@ describe('EntriesService', () => {
       await seed();
 
       expect(
-        (await service.findByContent('work', CALLER_ID))
+        (await service.find(CALLER_ID, { word: 'work' }))
           .map((entry) => entry.id)
           .sort(),
       ).toEqual(['newer-match', 'older-match']);
@@ -166,7 +167,7 @@ describe('EntriesService', () => {
       await seed();
 
       expect(
-        (await service.findByContent('work', CALLER_ID)).map(
+        (await service.find(CALLER_ID, { word: 'work' })).map(
           (entry) => entry.id,
         ),
       ).toEqual(['newer-match', 'older-match']);
@@ -175,14 +176,14 @@ describe('EntriesService', () => {
     it('should return an empty array when nothing matches', async () => {
       await seed();
 
-      expect(await service.findByContent('zzz', CALLER_ID)).toEqual([]);
+      expect(await service.find(CALLER_ID, { word: 'zzz' })).toEqual([]);
     });
 
     it('should return nothing for an empty search term', async () => {
       await seed();
 
-      expect((await service.findAll(CALLER_ID)).length).toBeGreaterThan(0);
-      expect(await service.findByContent('', CALLER_ID)).toEqual([]);
+      expect((await service.find(CALLER_ID)).length).toBeGreaterThan(0);
+      expect(await service.find(CALLER_ID, { word: '' })).toEqual([]);
     });
   });
 
@@ -220,7 +221,7 @@ describe('EntriesService', () => {
       await seedSpecialCharacters();
 
       expect(
-        (await service.findByContent('%', CALLER_ID)).map((entry) => entry.id),
+        (await service.find(CALLER_ID, { word: '%' })).map((entry) => entry.id),
       ).toEqual(['has-percent']);
     });
 
@@ -228,7 +229,7 @@ describe('EntriesService', () => {
       await seedSpecialCharacters();
 
       expect(
-        (await service.findByContent('_', CALLER_ID)).map((entry) => entry.id),
+        (await service.find(CALLER_ID, { word: '_' })).map((entry) => entry.id),
       ).toEqual(['has-underscore']);
     });
 
@@ -236,7 +237,9 @@ describe('EntriesService', () => {
       await seedSpecialCharacters();
 
       expect(
-        (await service.findByContent('\\', CALLER_ID)).map((entry) => entry.id),
+        (await service.find(CALLER_ID, { word: '\\' })).map(
+          (entry) => entry.id,
+        ),
       ).toEqual(['has-backslash']);
     });
 
@@ -244,7 +247,7 @@ describe('EntriesService', () => {
       await seedSpecialCharacters();
 
       expect(
-        (await service.findByContent('100%', CALLER_ID)).map(
+        (await service.find(CALLER_ID, { word: '100%' })).map(
           (entry) => entry.id,
         ),
       ).toEqual(['has-percent']);
@@ -301,7 +304,7 @@ describe('EntriesService', () => {
     it('should not create an entry for an id that does not exist', async () => {
       await service.update('no-such-id', 'anything', CALLER_ID);
 
-      expect(await service.countEntries(CALLER_ID)).toBe(0);
+      expect(await service.count(CALLER_ID)).toBe(0);
     });
   });
 
@@ -311,7 +314,7 @@ describe('EntriesService', () => {
 
       expect(await service.delete(created.id, CALLER_ID)).toEqual(created);
       expect(await service.findById(created.id, CALLER_ID)).toBeUndefined();
-      expect(await service.countEntries(CALLER_ID)).toBe(0);
+      expect(await service.count(CALLER_ID)).toBe(0);
     });
 
     it('should leave other entries alone', async () => {
@@ -320,7 +323,7 @@ describe('EntriesService', () => {
 
       await service.delete(doomed.id, CALLER_ID);
 
-      expect(await service.findAll(CALLER_ID)).toEqual([survivor]);
+      expect(await service.find(CALLER_ID)).toEqual([survivor]);
     });
 
     it('should return undefined when the id does not exist', async () => {
@@ -330,7 +333,7 @@ describe('EntriesService', () => {
 
   describe('countEntries', () => {
     it('should return zero for a fresh database', async () => {
-      expect(await service.countEntries(CALLER_ID)).toBe(0);
+      expect(await service.count(CALLER_ID)).toBe(0);
     });
 
     it('should return the number of entries', async () => {
@@ -338,7 +341,7 @@ describe('EntriesService', () => {
       await service.create('two', CALLER_ID);
       await service.create('three', CALLER_ID);
 
-      expect(await service.countEntries(CALLER_ID)).toBe(3);
+      expect(await service.count(CALLER_ID)).toBe(3);
     });
   });
 });

@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Raw, Repository } from 'typeorm';
+import { IsNull, Raw, Repository, type FindOptionsWhere } from 'typeorm';
 import { JournalEntry } from './entry.entity';
+import type { EntryFilters } from './entry-filters';
 import type { Page } from './page';
 
 @Injectable()
@@ -11,13 +12,26 @@ export class EntriesRepository {
     private readonly entries: Repository<JournalEntry>,
   ) {}
 
-  findAll(userId: string, page: Page): Promise<JournalEntry[]> {
+  find(
+    userId: string,
+    filters: EntryFilters,
+    page: Page,
+  ): Promise<JournalEntry[]> {
     return this.entries.find({
-      where: { userId },
+      where: whereFor(userId, filters),
       order: { createdAt: 'DESC' },
       take: page.limit,
       skip: page.offset,
     });
+  }
+
+  /*
+   * The same where clause the listing uses, so the two cannot disagree.
+   * They did: count ignored the search term entirely, so counting a search
+   * returned the size of the whole journal.
+   */
+  count(userId: string, filters: EntryFilters): Promise<number> {
+    return this.entries.count({ where: whereFor(userId, filters) });
   }
 
   async findById(
@@ -42,29 +56,6 @@ export class EntriesRepository {
         select: { id: true, dayId: true },
       })) ?? undefined
     );
-  }
-
-  findByContent(
-    word: string,
-    userId: string,
-    page: Page,
-  ): Promise<JournalEntry[]> {
-    return this.entries.find({
-      where: {
-        userId,
-        content: Raw(
-          (alias) => `${alias} LIKE :pattern ESCAPE '${LIKE_ESCAPE_CHARACTER}'`,
-          { pattern: `%${escapeLikePattern(word)}%` },
-        ),
-      },
-      order: { createdAt: 'DESC' },
-      take: page.limit,
-      skip: page.offset,
-    });
-  }
-
-  countEntries(userId: string): Promise<number> {
-    return this.entries.count({ where: { userId } });
   }
 
   async save(entry: JournalEntry): Promise<void> {
@@ -100,6 +91,42 @@ export class EntriesRepository {
 
     return existing;
   }
+}
+
+/*
+ * One place that turns filters into a where clause. Every read that answers
+ * "which entries" goes through it -- the listing, the search and the count --
+ * so a filter added here reaches all of them at once. Three separate clauses
+ * is how count came to ignore the search term.
+ */
+function whereFor(
+  userId: string,
+  filters: EntryFilters,
+): FindOptionsWhere<JournalEntry> {
+  const where: FindOptionsWhere<JournalEntry> = { userId };
+
+  /*
+   * An empty search term is a search that matches nothing, not a search that
+   * was never made. Day 5 chose that deliberately: ?word= falling through to
+   * "everything" is a search box that answers a request for nothing with the
+   * whole journal. IS NULL on a NOT NULL column is how that is said in a
+   * where clause, so the listing and the count agree on it without either
+   * having to special-case it first.
+   */
+  if (filters.word === '') {
+    where.content = IsNull();
+
+    return where;
+  }
+
+  if (filters.word !== undefined) {
+    where.content = Raw(
+      (alias) => `${alias} LIKE :pattern ESCAPE '${LIKE_ESCAPE_CHARACTER}'`,
+      { pattern: `%${escapeLikePattern(filters.word)}%` },
+    );
+  }
+
+  return where;
 }
 
 const LIKE_ESCAPE_CHARACTER = '\\';

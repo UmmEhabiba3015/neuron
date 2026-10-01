@@ -221,12 +221,12 @@ describe('EntriesController', () => {
 
   describe('countEntries', () => {
     it('should return the count wrapped in an object', async () => {
-      expect(await controller.countEntries(caller)).toEqual({ count: 0 });
+      expect(await controller.countEntries({}, caller)).toEqual({ count: 0 });
 
       await controller.create({ content: 'one' }, caller);
       await controller.create({ content: 'two' }, caller);
 
-      expect(await controller.countEntries(caller)).toEqual({ count: 2 });
+      expect(await controller.countEntries({}, caller)).toEqual({ count: 2 });
     });
   });
 });
