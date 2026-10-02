@@ -41,12 +41,21 @@ docs/workers/
 docs/learning/**/report.md
 docs/learning/**/worker-report-*.md
 
-# Exception: the Day 8 TypeORM study report. It is a record of a learning
-# session rather than a worker artifact, and it is the evidence that the debt
-# blocking Day 9 was actually repaid — which the roadmap, master-state and
-# HANDOFF all point at. Narrow on purpose: whether the rule above still earns
-# its place for the rest of the reports is a Day 14 decision, and this does not
-# pre-empt it.
+# DECIDED ON DAY 14, 2026-10-02. The rule above keeps its place, and the
+# Phase 1 reports stay local. They were read before this was decided and hold
+# no secrets, so the reason is editorial rather than cautious: 2,649 lines of
+# worker reports and 1,954 of prompts are agent output, and a reader meeting
+# them before the ADRs gets a worse account of this project rather than a
+# fuller one. docs/handbook/ now carries the same material in 398 lines, which
+# is what the constitution actually asked for when it promised a handbook.
+#
+# The exceptions below stay. They are learning records rather than worker
+# artifacts — evidence that a named debt was repaid, which the roadmap,
+# master-state and HANDOFF all point at — and that is a different kind of
+# document from an implementation report.
+#
+# Nothing is lost: every report is still on disk and in no way deleted. If a
+# future day needs one in the repository, un-ignore that file and say why.
 !docs/learning/day-08/report.md
 !docs/learning/day-09/report.md
 !docs/learning/day-10/report.md

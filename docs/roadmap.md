@@ -30,7 +30,7 @@
 
 ---
 
-## Where The Project Actually Stands (as of Day 8, verified 2026-09-04)
+## Where The Project Actually Stands (as of Day 14, verified 2026-10-02)
 
 Everything in this section was re-run and confirmed rather than copied from a
 previous report.
@@ -39,16 +39,25 @@ previous report.
 entries in SQLite. Data access lives behind a repository. Input is validated at
 the boundary by `class-validator` and a globally registered pipe. Configuration
 is checked once at boot and the application refuses to start when it is wrong.
-Schema changes happen through TypeORM migrations and never at boot. A `users`
-table exists, and `entries.user_id` exists with a real foreign key.
+Schema changes happen through TypeORM migrations and never at boot.
 
-**The numbers.** 874 lines of production code. 108 unit tests and 35
-end-to-end tests, all passing. Ten architecture decision records. Typecheck,
-lint and build all clean.
+**Identity is real.** Accounts with argon2id passwords and an email identifier.
+Sessions with rotating refresh tokens, so logout takes effect on the next
+request rather than when the token expires. Every route is closed by default
+and every read and write is scoped to its owner in the `WHERE` clause.
 
-**Not built yet, and worth saying plainly.** Nothing authenticates. No endpoint
-knows who is calling it. There is no way to create a user. There is no frontend
-at all. There is no AI in the product yet.
+**Days are the aggregate.** A day has a row, a 4am boundary and a mood.
+Entries belong to days. Listing is paginated and counting takes the same
+filters as listing.
+
+**The numbers.** 149 unit tests and 160 end-to-end tests, all passing.
+Seventeen architecture decision records. Typecheck, lint and build all clean.
+A handbook with an entry per completed phase.
+
+**Not built yet, and worth saying plainly.** There is no AI in the product.
+`apps/web` holds one screen at three breakpoints, static and wired to nothing.
+Voice, transcription, import, export and tiers are all decided and unbuilt
+(ADR-016, `docs/feature-reconciliation.md`). A user account cannot be deleted.
 
 **The one structural weakness in the codebase.** The test suite is good at
 checking that pieces work and has been repeatedly bad at checking that pieces
@@ -58,6 +67,12 @@ an entire day's work while every test stayed green: `validate,` on Day 6, the
 by mutation during an audit, not by a test. Each now has a test. **The rule this
 produced: a test that does not fail when the wiring is removed has not been
 written.** Every future day is expected to include one mutation check.
+
+**Day 14 measured that weakness rather than assuming it had gone.** Twenty
+mutations across Phase 2; seventeen were caught. The three that were not: an
+expired session, a deleted user, and a test that compared the thing to itself.
+The first two are states the system reaches by waiting rather than by anything
+a user does, which is a category this suite had never covered.
 
 ---
 
@@ -159,11 +174,37 @@ to someone.**
 | 11 | Tokens don't expire, and logging out does nothing. | **Done.** Her Day 8 objection answered in code: a sessions table, 15-minute access tokens, 30-day rotating refresh tokens, and a guard that checks the session on every request so revocation is *immediate* rather than bounded by expiry. `logout`, `logout-everywhere`, `sessions`. Refresh-token reuse revokes every session for that user. ADR-014. 131 unit, 102 e2e. |
 | 12 | **Design review. The screens exist; the API was built without seeing them.** | **Done.** 40 screens reviewed against the API. The API models entries; the designs model days, and the day ends at 4am — ADR-015. Two contradictions settled: email login, and voice memos in scope — ADR-016. See the section below. **No implementation on this day.** |
 | 13 | Mood is part of the product but isn't modeled — and neither is the thing mood belongs to. | **Done.** The `days` table, with `UNIQUE(user_id, date)` as the business key and a UUID as the row key — her distinction, and she named the race the constraint closes before it was built. The 4am boundary is written twice, in SQL for the backfill and TypeScript for new writes, and the two were checked against each other over 34,000 instants. Mood, `GET /days?from=&to=`, and pagination pulled forward from Day 29. `name` became `email` with a case-insensitive index. **The generated migration carried Day 8's bug again** — a `NOT NULL` column copied without a value — and was replaced by 96 hand-written lines. 142 unit, 144 e2e. |
-| 14 | **Review day.** Audit, refactor, document. | The handbook entries for Phase 2. This is also where the Phase 1 documentation debt gets paid. |
+| 14 | **Review day.** Audit, refactor, document. | **Done, 2026-10-01/02.** An audit, a twenty-mutation sweep, two fixes, and the handbook. Her three audit predictions found two real bugs; one of mine was wrong and is withdrawn in the commit rather than quietly dropped. The sweep found two states nobody had tested — an expired session and a deleted user — and one test that could not fail. `docs/handbook/` now exists with both phase entries, which closes the Phase 1 documentation debt. ADR-017. 149 unit, 160 e2e. |
 
 **Why identity comes before AI:** a retrieval system that leaks another user's
 memories is the worst possible bug in this product, and retrieval cannot be
 designed safely while tenancy is still fuzzy.
+
+### Phase 2 is closed — 2026-10-02
+
+**Delivered.** Registration and login with argon2id. Sessions with immediate
+revocation rather than revocation bounded by token expiry. Ownership in the
+`WHERE` clause on every read and write, 404 never 403. Days as a first-class
+aggregate with a 4am boundary, and mood on the day. Pagination. Email as the
+identifier, enforced case-insensitively. Nine ADRs, 009 through 017.
+
+**The phase's own account of itself** is
+[docs/handbook/phase-2-identity-and-ownership.md](handbook/phase-2-identity-and-ownership.md).
+
+**What Phase 3 inherits, stated plainly.**
+
+- **A user cannot be deleted.** Every foreign key is `ON DELETE NO ACTION`.
+  That is the generator's default rather than a decision, and the open
+  question below has been open since Day 8.
+- **`entries.day_id` is nullable.** The contract step of
+  expand-backfill-contract is scheduled, not forgotten.
+- **No timezone.** The 4am boundary is computed in UTC. ADR-015 carries the
+  argument and the revisit trigger.
+- **Every route is closed by default.** `APP_GUARD` plus an explicit
+  `@Public()`. A new endpoint requires authentication unless someone says
+  otherwise, which is the opposite of the usual default.
+- **`apps/web` exists** with the Today screen at three breakpoints, static and
+  unwired. It was built on Day 12 against the designs rather than the API.
 
 ---
 
@@ -413,12 +454,19 @@ eight at step 1). Two of her answers shipped as code: `@Exclude()` over a
 response DTO, and `APP_GUARD` + `@Public()`. Record in
 `docs/learning/day-09/report.md`.
 
+**Phase 2 carried no learning debt into Day 14, and leaves none.** Days 12 and
+13 were worked through directly rather than by a worker agent, so nothing was
+introduced that had to be explained afterwards. Two of her Day 13 answers are
+load-bearing in the code: the surrogate-key/business-key split on `days`, and
+the find-or-create shape where the constraint is the guard and the pre-check is
+an optimisation. Day 14's audit closed the two oldest open rows below.
+
 
 | Concept | Introduced | Status |
 |---|---|---|
 | `transform: true` on the validation pipe | Day 7 | ✅ **Closed on Day 13, and the entry was wrong.** It has been on since Day 7 — `fbaafcd` — so it was never declined. Day 13 assumed that meant it also coerced types, wrote a test on the assumption, and the test disagreed: `transform: true` builds the DTO instance but leaves `"5"` a string unless `@Type` or `enableImplicitConversion` says otherwise. Paging declares `@Type` on its two fields; implicit conversion stays off, because it would coerce every input in the application from its declared type. |
-| Where validation belongs — boundary vs service | Day 4 | 🟡 **Partial.** She reasoned it out, got it wrong, and accepted the argument; the distinction was given to her rather than derived. **Re-test on Day 10**, when ownership checks arrive and the same question returns in a harder form. |
-| Reading and judging a whole suite unprompted | Day 4 | 🟡 **Partial.** She has found real gaps when handed cases one at a time. Doing it across an entire suite without prompting is the remaining step. |
+| Where validation belongs — boundary vs service | Day 4 | ✅ **Closed on Day 14, by her own audit.** The re-test never happened on Day 10, so it was overdue. She predicted the ownership hole would be "a mutation path that loads by id, then acts without scoping", and gave the method: grep every query, and each hit either mentions `userId` or is a bug. That found `deleteIfEmpty`'s unscoped `COUNT(*)` — the exact shape she named. The distinction is derived now rather than given. |
+| Reading and judging a whole suite unprompted | Day 4 | ✅ **Closed on Day 14.** Asked for three audit predictions before any code was read, she produced ranked hypotheses with confidence levels, a mechanical check per hypothesis, and a mutation to prove each. Two of three were right; the third was right about the structure and wrong about the direction. She also specified the fix for it — one shared query builder, strict query params, the invariant as a test, and a named limit on what `/count` may grow into — which became ADR-017's five conditions. |
 | Jest — runners, matchers, mocking | Day 1 | 🟡 **Basics only.** Sufficient for now and not worth a dedicated day. |
 
 ### Closed, with how it closed
@@ -517,12 +565,16 @@ the explanation happens.
   both `POST` and `PATCH` reject with a 400 (ADR-006).
 - ~~What should search do with `%` and `_`?~~ **Resolved Day 5** — treat them as
   ordinary characters and escape them before they reach `LIKE`.
-- **Does deleting a user delete their journal?** The foreign key currently says
-  `ON DELETE NO ACTION`, which refuses. That is the generator's default rather
-  than a decision. Day 10 or Day 11 must decide it deliberately.
-- **When does `user_id` become `NOT NULL`?** Day 8 added it nullable because no
-  user existed yet. That is the expand step of expand-backfill-contract, and
-  the contract step is unscheduled. Day 10 is the natural home.
+- **Does deleting a user delete their journal?** Still open, and now sharper:
+  Day 14 established that a user **cannot be deleted at all** — `sessions`,
+  `entries` and `days` all refuse it. Day 10 and Day 11 passed without
+  deciding. The three answers are cascade, orphan, or refuse that accounts can
+  be deleted; the last is a position rather than a default and would need
+  saying out loud. **Phase 3 or Day 27, and it should not slide again.**
+- ~~**When does `user_id` become `NOT NULL`?**~~ **Resolved Day 10.** The same
+  question now applies to `entries.day_id`, added nullable on Day 13. Its
+  contract step is unscheduled; Day 27 is the natural home, once the
+  application has been writing the column long enough to trust the backfill.
 - **Where does the token live in the browser?** Day 15, and it is a security
   decision rather than a convenience one.
 - ~~Rich text versus plain text for entries?~~ **Resolved by the designs** —
