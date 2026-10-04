@@ -113,8 +113,9 @@ not fail when the wiring is removed has not been written.**
 
 ### 6. Generated migrations are a draft, not an answer
 
-TypeORM's generator produced destructive or broken SQL on **four** of the
-phase's migrations, and every one was read before it was run.
+TypeORM's generator produced destructive or broken SQL on **five** of the
+phase's migrations, and every one was read before it was run. The table below
+lists all five.
 
 | Migration | Generated | What was wrong |
 |---|---|---|

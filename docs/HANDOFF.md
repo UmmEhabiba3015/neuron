@@ -1,5 +1,10 @@
 # Handoff — starting a new Master Thread
 
+> **SUPERSEDED, 2026-10-04.** This file describes the project at Day 11 and is
+> kept for its account of that moment. For the current state read
+> [HANDOFF-PHASE-3.md](HANDOFF-PHASE-3.md), which was written at the end of
+> Day 14 and verified by re-running everything it claims.
+
 **Written:** 2026-09-04, after the maintenance pass and before the machine move.
 **Updated:** 2026-09-21, after Days 9 and 10 shipped and were pushed.
 **Read this after** `master-prompt.md`, `constitution.md`, `roadmap.md` and
