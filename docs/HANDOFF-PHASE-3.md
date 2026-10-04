@@ -7,6 +7,11 @@ from an earlier report.
 You do not need to have followed this project to read this. It assumes you
 know software but not this codebase.
 
+**This is not the document for restarting a Master Thread.** That is
+`docs/master-state.md`, which carries the full continuity record and is read
+after `master-prompt.md`, `constitution.md` and `roadmap.md`. This file is for
+a person.
+
 ---
 
 ## 1. What this is

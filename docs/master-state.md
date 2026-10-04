@@ -16,20 +16,137 @@ the recovery cost most of a working session.
 
 ---
 
-**Last updated:** 2026-09-21, after Day 11.
+**Last updated:** 2026-10-04, after Day 14.
 
-**Current day:** Days 9, 10 and 11 are **complete and merged**. Day 12 has not
-started.
+**Current day:** Days 0–14 are **complete and merged**. **Phase 2 is closed.**
+Phase 3 opened and stopped inside Day 15, block 3 — see *Where Day 15 stopped*
+below, which is the first thing a fresh thread needs.
 
-**Current branch:** `main`, at commit `4401cda`. Days 9 and 10 were committed
-straight to `main` rather than through pull requests. Four older merged branches
-still exist locally and on the remote (`day-02-persistence`,
+**Current branch:** `main`, at commit `655978a`, clean. Days 9 onward were
+committed straight to `main` rather than through pull requests. Four older
+merged branches still exist locally and on the remote (`day-02-persistence`,
 `day-06-configuration`, `day-07-validation`, `day-08-identity`); they were
 deliberately left rather than deleted.
 
-**Verified on 2026-09-21, by re-running rather than by reading a report:**
-`pnpm lint`, `pnpm typecheck` and `pnpm build` all pass. `pnpm test` passes with
-131 tests. `pnpm test:e2e` passes with 102 tests.
+**Verified on 2026-10-04, by re-running rather than by reading a report:**
+`pnpm lint`, `pnpm typecheck` and both builds pass. `pnpm test` passes with
+**149** tests. `pnpm test:e2e` passes with **160** tests. 17 ADRs. 55
+production files, ~2,400 lines excluding tests.
+
+---
+
+## Where Day 15 stopped — read this first
+
+**Phase 3, Day 15, block 3 of 6.** The question on the table: **where does the
+browser keep the credential that keeps a user logged in?**
+
+**Nothing has been built. No ADR written. The decision is genuinely open.**
+
+She worked through the threat model in full and her analysis is the reason the
+decision is close rather than obvious. Two findings are hers and should not be
+re-derived for her:
+
+1. **Reuse detection does not save `localStorage`.** It fires only when the
+   real client and the thief collide. A patient attacker waits until the user
+   stops using that device, so nothing stale is ever presented. Her words:
+   *"Reuse detection catches a careless thief. A patient one gets through."*
+2. **HttpOnly bounds the attack rather than preventing it.** An attacker with
+   JavaScript on the page can still call `/auth/refresh` and get an access
+   token, because the browser attaches the cookie automatically. What they
+   cannot do is carry the credential off the device. Her words: *"HttpOnly
+   doesn't prevent XSS. It bounds XSS in time and place."*
+
+She also enumerated eleven browser storage mechanisms unprompted and collapsed
+them correctly into two groups, and caught the `sessionStorage` trap.
+
+**Then she raised the thing that reopened it:** there will be a **mobile app**
+on this same backend. A native client cannot use a browser cookie; iOS uses the
+Keychain. So the two clients were never going to share a mechanism.
+
+**My standing recommendation, not yet accepted:** HttpOnly cookie for web,
+token-in-body for native, `/auth/refresh` accepting either. The native app does
+not make `localStorage` better — it makes the body path necessary regardless,
+and adding it does not require weakening the web.
+
+**She has leaned toward `localStorage` once** ("i wanna use localStorage but you
+tell me what would be best way") and has not settled. **Do not decide this for
+her.** Blocks 4 (CORS) and 5 (ADR-018) were never reached.
+
+**What the API would need either way**, and does not have:
+
+- **No CORS at all.** `apps/api/src/main.ts` has no `enableCors`. A browser on
+  `localhost:3001` cannot call `localhost:3000` today.
+- **`/auth/login` returns the refresh token in the JSON body**, and
+  `/auth/refresh` takes it in the request body. That is a design for a client
+  that stores it — the cookie path needs `Set-Cookie` and a cookie read.
+
+**The remaining Day 15 blocks:** 4 CORS, 5 ADR-018, 6 build it (login, and one
+screen reading real data).
+
+---
+
+## Days 12, 13 and 14, compressed
+
+**Day 12 — the design review.** 40 screens arrived and are now in the repo at
+`designs/AIJournal-handover/`. The finding: **the API models entries, the
+designs model days**, and a day ends at 4am. ADR-015. Two contradictions
+settled by her: the login identifier becomes an **email**, and **voice memos
+are in scope** — ADR-016. Of the roadmap's ten predicted misalignments, four
+were already designed, four were real, one could not be scored because `/in`,
+`/new` and `/restore` were never drawn, and one came up empty. She also asked
+for both feature lists side by side, which is
+`docs/feature-reconciliation.md`, and settled two more from it: **no guest
+sessions** and **no distress detection**, with the always-present crisis
+resource deliberately kept.
+
+**`apps/web` was created on Day 12**, against her instruction to build the
+screens before the API caught up. Next.js, the Today screen at three
+breakpoints, verified against the comps by DOM diff at 87 nodes each. It makes
+**zero network calls**. `lock.css` is copied in byte-identical and must not be
+edited — the designs are explicit that a screen needing a value it lacks is a
+revision to that file, not a local override.
+
+**Day 13 — the days table.** `days` with `UNIQUE(user_id, date)` as the
+business key and a UUID as the row key; both halves of that distinction were
+hers, as was the find-or-create shape where the constraint is the guard and the
+pre-check is an optimisation. The 4am boundary is written twice, SQL for the
+backfill and TypeScript for new writes, cross-checked over 34,000 instants.
+Mood, `GET /days?from=&to=`, pagination pulled forward from Day 29, and
+`name` → `email` with a case-insensitive index.
+
+**Day 14 — review day.** An audit, a 20-mutation sweep, two fixes, and the
+handbook. Her three audit predictions found two real bugs. The sweep caught 17
+of 20; the three survivors were an expired session, a deleted user, and **a
+test that could not fail**. `docs/handbook/` now exists with an entry per
+completed phase, which closes the Phase 1 documentation debt. ADR-017 — her
+five conditions, including "one query builder, two endpoints", which is the
+condition that prevents recurrence rather than fixing the instance.
+
+---
+
+## Mistakes made in Days 12–14, recorded rather than tidied away
+
+**I reported a concurrency bug that did not exist** (Day 14). Claimed concurrent
+`POST /entries` crashed with "cannot start a transaction within a transaction",
+built a serialising `TransactionRunner`, and reverted all of it. Twelve
+concurrent writes against the real server succeed with and without the fix. Two
+mistakes underneath: my repro fired eight transactions inside one `Promise.all`
+in a single tick, which real HTTP requests never do; and the e2e `ECONNRESET`
+was **supertest**, proven by a control test where eight concurrent plain GETs
+touching no transaction failed identically.
+
+**I broke a test so that it could not fail** (Day 13, found Day 14). The
+timing test for the unknown-user login path passed a bare name after the email
+rename, so both branches took the unknown-user path and it compared the thing
+to itself. It passed for three days.
+
+**I introduced a `userId` leak** (Day 10). `create` returned its in-memory
+object, carrying the owner into the 201 body. She had identified that exact
+trap an hour earlier in the abstract.
+
+**The shape all three share:** a test result was believed without checking the
+test was sound. Day 11 produced the same lesson from the other direction.
+**State this when it recurs; it is the project's most repeated failure.**
 
 ### What changed in the 2026-09-04 maintenance pass
 
@@ -66,6 +183,12 @@ outside the repository and is not carried by git.
 ---
 
 ## Next Session Starts Here
+
+> **Current as of 2026-10-04.** Day 15 is mid-flight and stopped at block 3.
+> **Read *Where Day 15 stopped* near the top of this file** — it has the live
+> decision and what the API still lacks. Everything under this heading from
+> here down is the historical record of Days 9–11 and is kept for its
+> reasoning, not as a statement of where the project is.
 
 ### Days 9 and 10 are done, merged and pushed ✅
 
@@ -1302,6 +1425,22 @@ and that is deliberate — see ADR-001.
 
 ## Known Debt
 
+### Open as of 2026-10-04
+
+| Item | Where | Note |
+|---|---|---|
+| **A user cannot be deleted** | `sessions`, `entries`, `days` FKs | `ON DELETE NO ACTION`, the generator's default. Open since Day 8, slipped three days |
+| **`entries.day_id` is nullable** | `AddDays` migration | Contract step pending, Day 27 |
+| **No timezone on a user** | `day-boundary.ts` | 4am boundary is UTC. ADR-015 |
+| **No CORS** | `apps/api/src/main.ts` | A browser cannot call the API. Day 15 block 4 |
+| **Refresh token travels in the body** | `/auth/login`, `/auth/refresh` | Fine for native, wrong for a cookie-based web client. Day 15 |
+| **`apps/web` calls nothing** | all of `apps/web` | One screen, three breakpoints, static |
+| **Migration comments were stripped** | `src/database/migrations/` | A project-wide comment sweep removed the notes explaining why five migrations were hand-written. `docs/handbook/phase-2-identity-and-ownership.md` §6 is now the only record |
+| **`better-sqlite3@13` outside `typeorm`'s peer range** | `package.json` | Works, pinned, dissolves on Day 31 |
+
+**Historical, below.** Everything from here down is the record of debt that was
+resolved, kept for its reasoning.
+
 **Resolved by the Day 2 cleanup worker** (audited and verified):
 
 | Item | Resolution |
@@ -1375,6 +1514,30 @@ Master Thread audit still owed):
 
 Concepts introduced by worker agents that have **not yet been learned**. See
 the roadmap's *Learning Debt* section for why this is tracked.
+
+### Status as of 2026-10-04: none open
+
+**Phase 2 carried no learning debt into Day 14 and leaves none.** Days 12–15
+were worked through directly rather than by a worker agent, so nothing was
+introduced that had to be explained afterwards.
+
+**Two long-standing rows closed on Day 14, both by her own audit:**
+
+- *Where validation belongs — boundary vs service* (owed since Day 4, and owed
+  a re-test on Day 10 that never happened). She closed it by predicting the
+  ownership hole's shape — "a mutation path that loads by id, then acts without
+  scoping" — and supplying the mechanical check that found it.
+- *Reading and judging a whole suite unprompted* (owed since Day 4). Asked for
+  audit predictions before any code was read, she produced ranked hypotheses
+  with confidence levels, a check per hypothesis and a mutation to prove each.
+
+**Her answers that became code:** `@Exclude()` over a response DTO and
+`APP_GUARD` + `@Public()` (Day 9); the surrogate-key/business-key split and the
+find-or-create shape (Day 13); ADR-017's five conditions (Day 14).
+
+**Jest basics** remains the only 🟡 row and is not worth a dedicated day.
+
+**Historical record below.**
 
 **Repaid on Day 2:**
 
@@ -1512,8 +1675,30 @@ see the direction recorded in *Next Session Starts Here*.
 
 ## Open Questions
 
-- Rich text vs plain text for entries — deferred until the data model forces it.
-- Which AI provider, and does that decision need to be reversible? (Phase 3)
+**Live, and in priority order as of 2026-10-04:**
+
+1. **Where does the browser keep the refresh credential?** Day 15, block 3,
+   unresolved. See *Where Day 15 stopped*. Blocks all of Phase 3.
+2. **What happens when a user asks for their account to be deleted?** A user
+   **cannot currently be deleted at all** — `sessions`, `entries` and `days`
+   all carry `ON DELETE NO ACTION`, which is the generator's default rather
+   than anyone's decision. Open since Day 8 and has now slipped past Days 10,
+   11 and 14. The three answers are cascade, orphan, or refuse that accounts
+   can be deleted; the last is legitimate but has to be said out loud.
+3. **When does `entries.day_id` become `NOT NULL`?** The contract step of
+   expand-backfill-contract. Day 27 is the natural home.
+4. **Does a user get a timezone?** The 4am day boundary is computed in UTC.
+   For her at UTC+5 that is 9am local — wrong in exactly the way this will
+   need fixing. ADR-015 carries the argument and the revisit trigger.
+5. **Does `packages/` earn its place?** Day 16 is the test: two apps now
+   describe the same data. ADR-001 argued for the workspace on Day 1 and said
+   this is where it is proven or removed.
+
+**Deferred, with a trigger:**
+
+- ~~Rich text vs plain text for entries~~ — **resolved by the designs.** The
+  brief cut markdown outright and no screen renders formatted text.
+- Which AI provider, and does that decision need to be reversible? (Phase 4)
 - When does TypeScript 7 become viable? (blocked on ecosystem peer ranges)
 - Day 0's LinkedIn post lists PostgreSQL in the stack; Day 2 chose SQLite.
   ADR-003 explains when Postgres arrives, so this is a documented evolution
