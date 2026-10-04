@@ -16,13 +16,15 @@ the recovery cost most of a working session.
 
 ---
 
-**Last updated:** 2026-10-04, after Day 14.
+**Last updated:** 2026-10-04, after her husband's scope and data model session.
 
 **Current day:** Days 0–14 are **complete and merged**. **Phase 2 is closed.**
-Phase 3 opened and stopped inside Day 15, block 3 — see *Where Day 15 stopped*
-below, which is the first thing a fresh thread needs.
+Phase 3 opened and stopped inside Day 15, block 3. **A fresh thread needs two
+sections, in this order: *How to open the next session with her*, then *Where
+Day 15 stopped*.** Both are directly below.
 
-**Current branch:** `main`, at commit `655978a`, clean. Days 9 onward were
+**Current branch:** `main`, clean. The latest commit is the one that records
+the 2026-10-04 session; `git log -1` names it. Days 9 onward were
 committed straight to `main` rather than through pull requests. Four older
 merged branches still exist locally and on the remote (`day-02-persistence`,
 `day-06-configuration`, `day-07-validation`, `day-08-identity`); they were
@@ -35,7 +37,48 @@ production files, ~2,400 lines excluding tests.
 
 ---
 
-## Where Day 15 stopped — read this first
+## How to open the next session with her
+
+**She was not in the last session.** On 2026-10-04 her husband drove. He asked
+about her progress, set guardrails, ruled on every open product question, and
+settled the data model. He built nothing. She has seen none of it.
+
+**His view of her work, which she should hear.** He is happy with her learning
+and her decision making. He is not happy with the pace. Days 2 to 14 took about
+nine weeks, and the gaps between working days cost more than the work.
+
+**Open the session in this order.**
+
+1. **Tell her what changed while she was away.** Use the section *What her
+   husband decided on 2026-10-04*, further down. These are decided, so present
+   them plainly and briefly. Do not turn them into Socratic questions and do
+   not reopen them. If she disagrees with one, record it and tell her to raise
+   it with him.
+2. **Show her the data model.** The *Neuron Data Model* artifact is at
+   https://claude.ai/artifact/WiebtfE8n43EYeufy12UfB. It is private to the
+   account that published it. If she cannot open it, the same content is in
+   the roadmap's scope section and in `docs/feature-reconciliation.md`.
+3. **Resume Day 15 at block 3**, as described in *Where Day 15 stopped*. Put
+   the decision to her as a short choice. It is still hers.
+4. **Then blocks 4, 5 and 6**: CORS, ADR-018, and building login plus one
+   screen that reads real data.
+
+**Three guardrails now apply to every session.** They are written out in full
+under *How To Work With The Learner*, and they are the most important change
+to how this thread works.
+
+- **Depth.** Go deep enough that she understands the thing completely, then
+  stop. Do not explore every possible attack or every edge case.
+- **One mutation per day.** The large sweep is for review days only.
+- **Amend an ADR only when its decision changes.**
+
+**The plan is no longer fixed at 40 days.** He said it may be extended by as
+many days as the work needs. Finishing soon is still the aim. A day should
+still end merged.
+
+---
+
+## Where Day 15 stopped
 
 **Phase 3, Day 15, block 3 of 6.** The question on the table: **where does the
 browser keep the credential that keeps a user logged in?**
@@ -68,6 +111,14 @@ token-in-body for native, `/auth/refresh` accepting either. The native app does
 not make `localStorage` better — it makes the body path necessary regardless,
 and adding it does not require weakening the web.
 
+**Scope change on 2026-10-04, from her husband: the mobile app is out of scope
+for this project.** It will be a later project, and any backend change it needs
+is made then. So the complication she raised no longer applies, and the
+question is about the web client only. He did not give a view on
+`localStorage` against a cookie, and the decision is still hers. Under the
+depth guardrail (see *How To Work With The Learner*) it should now be put to
+her as a short choice, not as further analysis.
+
 **She has leaned toward `localStorage` once** ("i wanna use localStorage but you
 tell me what would be best way") and has not settled. **Do not decide this for
 her.** Blocks 4 (CORS) and 5 (ADR-018) were never reached.
@@ -82,6 +133,59 @@ her.** Blocks 4 (CORS) and 5 (ADR-018) were never reached.
 
 **The remaining Day 15 blocks:** 4 CORS, 5 ADR-018, 6 build it (login, and one
 screen reading real data).
+
+**One thing to know before block 6.** The Today screen already built in
+`apps/web` includes the "From your record" notes, which are AI output. That is
+correct and stays: with no tiers, the drawn screen is the product, and the
+notes are simply empty until Phase 4.
+
+---
+
+## What her husband decided on 2026-10-04
+
+Every item below is his ruling. The full record is the table at the head of
+`docs/feature-reconciliation.md`. What the designer has to draw is
+`docs/ui-handover.md`, twelve sections, all ready and **not yet sent to the
+designer**.
+
+**The product.**
+
+| Decision | Detail |
+|---|---|
+| **No tiers** | No Free and no Pro. Every user gets every feature, including the AI features when they are built. A free trial followed by a subscription is possible later and is not decided. ADR-016 is amended |
+| **Mobile app out of scope** | A later project. Any backend change it needs is made then |
+| **Offline out** | The product needs a connection |
+| **Voice memos in**, confirmed | His reason: recording is easier than typing |
+| **Forgot password in** | Day 20, by an emailed link |
+| **Export in** | Markdown, JSON and audio. Day 34 |
+| **Device list in** | See and sign out each signed-in device. Day 34 |
+| **Editing an entry in** | From the interface. Typed entries only. Day 18 |
+| **Deleting one entry in** | With a required confirmation and no undo. Day 17 |
+| **"Keep this out of memory" in** | One column on an entry |
+| **Out** | Import, trackers beyond mood, notifications, the Timeline total line |
+
+**The data model.**
+
+| Decision | Detail |
+|---|---|
+| **One `entries` table** | A recording is an entry with a `kind`. Its transcript is saved into `content` and cannot be edited |
+| **Timezone** | A setting on the user. Days are worked out in it. This answers the question ADR-015 left open. No day is assigned yet, and it should be early |
+| **Soft delete** | Deleting an entry sets `deleted_at`. There is no timed removal; the row stays until the account is deleted. Soft or hard is chosen per feature as each is built |
+| **Account deletion** | A hard delete of the account and only its data. Day 34. This closes the question open since Day 8 |
+| **The day row stays** | When its last entry is deleted. It keeps its mood and is not shown |
+| **`password_hash` becomes required** | It is nullable only by accident of a migration |
+| **Drafts on the server** | A `drafts` table, one row per user as proposed. Day 18 |
+| **AI tables** | Designed when Phase 4 is built |
+
+**Owed, and not done.**
+
+- **An ADR for the data model decisions.** One table, timezone, soft delete
+  and drafts are expensive to reverse and none has an ADR. Write it when she
+  is walked through them, so that she can explain each one.
+- **`docs/HANDOFF-PHASE-3.md` is out of date.** It was written before this
+  session and still describes the mobile app and tiers as live.
+- **The column shapes for everything planned are proposals** from this
+  thread. They are in the artifact and were not reviewed column by column.
 
 ---
 
@@ -1429,9 +1533,11 @@ and that is deliberate — see ADR-001.
 
 | Item | Where | Note |
 |---|---|---|
-| **A user cannot be deleted** | `sessions`, `entries`, `days` FKs | `ON DELETE NO ACTION`, the generator's default. Open since Day 8, slipped three days |
+| **A user cannot be deleted** | `sessions`, `entries`, `days` FKs | `ON DELETE NO ACTION`, the generator's default. **Decided 2026-10-04: hard delete, Day 34** |
 | **`entries.day_id` is nullable** | `AddDays` migration | Contract step pending, Day 27 |
-| **No timezone on a user** | `day-boundary.ts` | 4am boundary is UTC. ADR-015 |
+| **No timezone on a user** | `day-boundary.ts` | 4am boundary is UTC. **Decided 2026-10-04: a per-user setting. Not yet scheduled** |
+| **`users.password_hash` is nullable** | `user.entity.ts` | Becomes `NOT NULL`. Decided 2026-10-04 |
+| **No ADR for the data model decisions** | `docs/decisions/` | Owed. See *What her husband decided* |
 | **No CORS** | `apps/api/src/main.ts` | A browser cannot call the API. Day 15 block 4 |
 | **Refresh token travels in the body** | `/auth/login`, `/auth/refresh` | Fine for native, wrong for a cookie-based web client. Day 15 |
 | **`apps/web` calls nothing** | all of `apps/web` | One screen, three breakpoints, static |
@@ -1679,7 +1785,9 @@ see the direction recorded in *Next Session Starts Here*.
 
 1. **Where does the browser keep the refresh credential?** Day 15, block 3,
    unresolved. See *Where Day 15 stopped*. Blocks all of Phase 3.
-2. **What happens when a user asks for their account to be deleted?** A user
+2. ~~**What happens when a user asks for their account to be deleted?**~~
+   **Decided 2026-10-04: a hard delete of the account and only its data,
+   Day 34.** The history: a user
    **cannot currently be deleted at all** — `sessions`, `entries` and `days`
    all carry `ON DELETE NO ACTION`, which is the generator's default rather
    than anyone's decision. Open since Day 8 and has now slipped past Days 10,
@@ -1687,7 +1795,8 @@ see the direction recorded in *Next Session Starts Here*.
    can be deleted; the last is legitimate but has to be said out loud.
 3. **When does `entries.day_id` become `NOT NULL`?** The contract step of
    expand-backfill-contract. Day 27 is the natural home.
-4. **Does a user get a timezone?** The 4am day boundary is computed in UTC.
+4. ~~**Does a user get a timezone?**~~ **Decided 2026-10-04: yes, as a
+   setting on the user.** The 4am day boundary is computed in UTC.
    For her at UTC+5 that is 9am local — wrong in exactly the way this will
    need fixing. ADR-015 carries the argument and the revisit trigger.
 5. **Does `packages/` earn its place?** Day 16 is the test: two apps now
@@ -1812,6 +1921,35 @@ Rules 1 to 6 above still hold. This is how to execute rule 3.
 
 If she says she wants to move on, move on. Record what was skipped in the
 Learning Debt section rather than pushing.
+
+### ⚠️ The depth guardrail — set by her husband on 2026-10-04
+
+**Go deep enough that she understands the thing completely. Then stop.** Do
+not go deeper than her level needs, and do not branch into side topics. This
+is not permission to be shallow; he said so directly.
+
+His example: she does not need to work through every possible way an attacker
+could attack her application.
+
+His reasons. This is her first big project, and it has to be finished so that
+she feels the accomplishment. Two or three more projects are planned after it,
+for microservices, events and message brokers, so this one cannot absorb
+unlimited depth. He is happy with her learning and not happy with the pace.
+
+How to apply it. For each topic, cover the main mechanism, the one or two
+realistic failure cases, and the trade-off behind the decision. Then decide and
+move on. Name any remaining edge cases in one line as "this exists, and it is
+not needed now" instead of teaching them. Judging where that line sits is the
+Master Thread's job, not hers.
+
+Two rules that follow from it, approved by him the same day:
+
+- **One mutation per day. The large sweep is for review days only.** Every day
+  still ends with one mutation check, because that has caught real defects. A
+  sweep of many mutations, like Day 14's twenty, happens only on the scheduled
+  review days, 27 and 39.
+- **An ADR is amended only when the decision itself changes.** A correction to
+  the explanation is fixed in place, without a numbered amendment.
 
 ### How to write
 

@@ -1,5 +1,10 @@
 # Neuron — handoff, written for a fresh reader
 
+> **Out of date since the session of 2026-10-04.** The mobile app is now out
+> of scope, there are no tiers, and user deletion and the timezone are
+> decided. The current record is `docs/master-state.md`, sections *How to open
+> the next session with her* and *What her husband decided on 2026-10-04*.
+
 **Written 2026-10-04**, at the end of Day 14 and the start of Phase 3.
 **Every number in this file was re-run on the day it was written**, not copied
 from an earlier report.

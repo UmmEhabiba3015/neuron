@@ -99,12 +99,40 @@ A retrieval feature with no interface is a feature nobody can judge.
 insights, auth, a real frontend, deployment.
 
 **Explicitly deferred:** habit tracking, notifications, monthly insights,
-rich-text editing, analytics dashboards, tiers and the paywall, guest sessions.
+rich-text editing, analytics dashboards, guest sessions. **Tiers are no longer
+deferred; they are refused** (2026-10-04, ADR-016). Everyone gets the whole
+product.
 
 ~~calendar view~~, ~~file and image attachments~~ — **both amended on Day 12.**
 The calendar is a zoom level of the one timeline rather than a second screen,
 and voice memos are the brief's primary input mode and the commercial model.
 Photo and file attachments stay deferred. ADR-016.
+
+**Scope set on 2026-10-04, by her husband.** **No tiers: there is no Free and no Pro, and every user gets every feature.**
+A free trial followed by a subscription is a possible later model and is not
+decided. In: editing an entry from the interface (Day 18), forgot password
+(Day 20),
+the per-entry "keep this out of memory" option, and voice memos, confirmed.
+Out: offline use, and the native mobile app. Mobile is a later project, and
+any change it needs is made then, after this one is finished. Account deletion
+is a hard delete of that account and only that account's data. Things a user
+deletes inside their journal are soft-deleted. The record is
+`docs/feature-reconciliation.md`, and what the designer has to draw is
+`docs/ui-handover.md`.
+
+**Data model decisions, same day.** A recording is an entry: one `entries`
+table with a `kind`, and a transcript is saved into `content`. Each user has a
+timezone setting and days are worked out in it, which answers the timezone
+question ADR-015 left open; the day it is built is not yet scheduled, and it
+should come before real entries accumulate on the wrong day. Also decided: a
+day row stays when its last entry is deleted; a transcript cannot be edited;
+`users.password_hash` becomes `NOT NULL`; drafts are stored on the server
+(Day 18). The AI tables are designed when Phase 4 is built. The picture of all
+of it is the *Neuron Data Model* artifact, linked from `master-state.md`.
+
+**The day count is not a limit.** He said the same day that the plan may be
+extended by as many days as the work needs. Finishing soon is still the aim.
+A slack day that has been given real work can be replaced by adding a day.
 
 Deferred does not mean bad. It means these features teach concepts the core
 path already teaches, so they cost time without buying understanding. If a day
@@ -220,10 +248,10 @@ a product.
 |---|---|---|
 | 15 | There is no UI, and the token has to live somewhere in a browser. | Next.js rendering models — what runs on the server and what runs in the browser, and why that question decides everything else. Cookies vs `localStorage` for the token, and why the answer is a security decision rather than a convenience one. CORS: what it actually protects against. |
 | 16 | Two apps now describe the same data, in two places, and they will drift. | Sharing types across a monorepo. This is the day `packages/` earns the workspace ADR-001 argued for on Day 1 — or fails to, and gets removed. Either outcome is a real result. |
-| 17 | The journal screen works and feels broken. | Loading, empty and error states as first-class design concerns rather than afterthoughts. Optimistic updates. What a user sees while a request is in flight. |
-| 18 | Writing an entry is the product, and the editor is an afterthought. | The core writing experience. Autosave and what it means for the API — does a draft hit the server, and if so how often, and what happens on a failed save. This is likely to produce a real API change. |
+| 17 | The journal screen works and feels broken. | Loading, empty and error states as first-class design concerns rather than afterthoughts. Optimistic updates. What a user sees while a request is in flight. **Added 2026-10-04: deleting an entry becomes a soft delete.** A `deleted_at` column, and every read filters on it. There is no undo and no timed purge; the interface must ask once, in place, before deleting. Whether a thing is soft- or hard-deleted is decided per feature as it is built. `docs/ui-handover.md` §6. |
+| 18 | Writing an entry is the product, and the editor is an afterthought. | The core writing experience. Autosave and what it means for the API — does a draft hit the server, and if so how often, and what happens on a failed save. This is likely to produce a real API change. **Added 2026-10-04: editing a saved entry from the interface.** `PATCH /entries/:id` has existed since Day 5 and nothing calls it. `docs/ui-handover.md` §11. |
 | 19 | It works on her laptop, at her screen size, signed in as herself. | Responsive layout, keyboard access, and a genuine pass at accessibility rather than a checklist. |
-| 20 | **Slack / overflow.** | Deliberately light. First call on absorbing an overrun from Day 9 or Phase 2. |
+| 20 | A person who forgets their password is locked out of their own journal for good. | **Forgot password**, added 2026-10-04. A reset link sent by email: what a mail service is and why the application does not send mail itself, why the reset token is stored hashed, used once and expires, why the answer is the same whether or not the account exists, and why a password change revokes every session. The screens are specified in `docs/ui-handover.md` §2. **This day was slack.** Phase 3 now has no overflow day of its own, so an overrun goes to Day 27. |
 
 ---
 
@@ -253,13 +281,13 @@ embeddings are interesting.
 
 | Day | Problem to solve | What she should be able to explain afterward |
 |---|---|---|
-| 28 | Weekly summaries have to run without a user clicking anything. | Scheduled work vs queued work. Idempotency. What happens when a job runs twice. |
+| 28 | Weekly summaries have to run without a user clicking anything. | Scheduled work vs queued work. Idempotency. What happens when a job runs twice. **Added 2026-10-04: the same mechanism removes expired session rows**, which Day 11 left without one. Soft-deleted entries are *not* purged on a timer; they stay until the account is deleted. |
 | 29 | The timeline query loads every entry ever written. | Read patterns, pagination, aggregation, N+1. Measuring before optimizing. |
 | 30 | Insights exist in the database and nowhere on screen. | The insight and chat interfaces. Streaming a response into a UI, and what that costs in complexity. |
 | 31 | It only runs on my laptop. | Containers, environments, managed Postgres, build-time vs runtime configuration. **This is where SQLite is left behind, and where ADR-003's stated revisit condition finally fires.** |
 | 32 | Deploying by hand is a coin flip. | CI, running migrations in production, secret management, rollback. Day 8's migration work is what makes this a real conversation rather than a hosting tutorial. |
 | 33 | Something broke in production and I have no idea what. | Structured logging, error tracking, health checks, and what observability actually buys. |
-| 34 | **Slack / overflow.** | Third call on absorbing an overrun. Deployment always takes longer than planned. |
+| 34 | A person cannot take their journal out, cannot delete their account, and cannot see where they are signed in. | **Your data and your account**, added 2026-10-04. Export as markdown, JSON and audio files. Account deletion as a hard delete of that account and only its data, which finally settles the foreign keys left at `NO ACTION` since Day 8. A device list, which needs `sessions` to record the browser and when it was last used, and an endpoint to end one session. `docs/ui-handover.md` §7–9. **This day was slack.** The remaining slack is Days 27 and 38. |
 | 35 | Anyone can hammer my AI endpoint and spend my money. | Rate limiting, abuse, input hardening, and a real security pass. |
 | 36 | Nobody has ever used this except me. | A real user test with a real person. Findings become a backlog, and the backlog gets triaged rather than implemented wholesale. |
 | 37 | The findings from Day 36. | Fix what a real person actually tripped over. |
@@ -565,7 +593,11 @@ the explanation happens.
   both `POST` and `PATCH` reject with a 400 (ADR-006).
 - ~~What should search do with `%` and `_`?~~ **Resolved Day 5** — treat them as
   ordinary characters and escape them before they reach `LIKE`.
-- **Does deleting a user delete their journal?** Still open, and now sharper:
+- **Does deleting a user delete their journal?** **Direction set 2026-10-04:
+  yes. Deleting an account is a hard delete of the account and all of its
+  data, and of nothing else.** The foreign keys still refuse it, and the day
+  it is built is not yet scheduled. The history of the question follows.
+  Still open, and now sharper:
   Day 14 established that a user **cannot be deleted at all** — `sessions`,
   `entries` and `days` all refuse it. Day 10 and Day 11 passed without
   deciding. The three answers are cascade, orphan, or refuse that accounts can

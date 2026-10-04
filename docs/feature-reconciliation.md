@@ -4,6 +4,38 @@
 "Settled", which means an ADR already carries it.
 **Date:** 2026-09-25 (Day 12, continued)
 
+## Decisions taken on 2026-10-04, by her husband
+
+These override the statuses further down where they differ.
+
+| Item | Decision |
+|---|---|
+| Offline use | **Out.** Not built |
+| Forgot password | **In.** Roadmap Day 20. Screens in `docs/ui-handover.md` §2 |
+| Per-entry AI opt-out (#11) | **In** |
+| Voice memos (#2) | **In, confirmed** |
+| Native mobile app | **Out of scope for this project.** A later project |
+| Deleting an account | **Hard delete** of the account and only that account's data |
+| Deleting one entry or recording | **In. Soft delete, and no undo** (the undo was dropped later the same day as problematic). A confirmation in place before deleting is required. No timed removal: soft-deleted rows stay until the account is deleted. Soft or hard is chosen per feature at build time. Roadmap Day 17 |
+| Drafts | **On the server.** Roadmap Day 18 |
+| One table for entries and recordings | **Decided.** A recording is an entry with a kind; its transcript is saved into `content` |
+| Timezone | **In.** A per-user setting; days are worked out in it. Screens in `docs/ui-handover.md` §12. Day not yet scheduled |
+| Export (#7) | **In.** Markdown, JSON and audio. Roadmap Day 34 |
+| Device and session list | **In.** Roadmap Day 34 |
+| Import (#6) | **Out** |
+| The Timeline total (#12) | **Out**, the whole line |
+| Trackers beyond mood (#9) | **Out** |
+| Notifications (#10) | **Out** |
+
+| Tiers and the paywall (#4) | **Refused. No tiers.** Every user gets the whole product, including the AI features when they are built. A free trial followed by a subscription is a possible later model and is not decided |
+| Editing an entry from the interface | **In.** Roadmap Day 18 |
+
+**Every item in this document now has a ruling.**
+
+What the designer has to draw as a result is kept in `docs/ui-handover.md`.
+
+---
+
 Two feature sets were written independently. The roadmap's came from the
 project's own learning goals; the designs' came from a product brief written
 outside this thread. Day 12 is where they meet. This document lists both and

@@ -151,6 +151,24 @@ screens are now one piece of design work rather than two.
 Dropped with it: the guest strip on Today, the *keep this* panel, the
 browser-quota warning, and the claim-on-signup migration.
 
+### Amendment — 2026-10-04: tiers are refused, not deferred
+
+Decided by the owner's husband, who set the project up. **There are no tiers.**
+There is no Free and no Pro; every user gets the whole product, including
+transcription and the AI surfaces when Phase 4 builds them. A free trial
+followed by a subscription is a possible later model and is not decided.
+
+What this changes. "Who is allowed to call this" never becomes an entitlement
+question in this project, so Phase 4 needs no tier check. The designs' plan
+page, upgrade screen and every sentence naming Free or Pro are removed; the
+screens drawn as Pro are simply the product. `docs/ui-handover.md` §4 carries
+the detail for the designer.
+
+What this does not change. Decision 2's case for voice rested partly on voice
+being the commercial model. That argument is gone, and voice stays in scope on
+the other one: it is the convenient way to make an entry, and its transcript
+is text the rest of the product can read.
+
 ---
 
 ## Decision 4 — The product does not try to detect distress
