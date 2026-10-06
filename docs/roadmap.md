@@ -246,8 +246,8 @@ a product.
 
 | Day | Problem to solve | What she should be able to explain afterward |
 |---|---|---|
-| 15 | There is no UI, and the token has to live somewhere in a browser. | Next.js rendering models — what runs on the server and what runs in the browser, and why that question decides everything else. Cookies vs `localStorage` for the token, and why the answer is a security decision rather than a convenience one. CORS: what it actually protects against. |
-| 16 | Two apps now describe the same data, in two places, and they will drift. | Sharing types across a monorepo. This is the day `packages/` earns the workspace ADR-001 argued for on Day 1 — or fails to, and gets removed. Either outcome is a real result. |
+| 15 | There is no UI, and the token has to live somewhere in a browser. | **Done, 2026-10-05/06.** The refresh credential lives in an `HttpOnly`, `SameSite=Strict` cookie and the access token in memory; her reason is that XSS should not be able to carry the long-lived credential away. CORS allows one origin, and `WEB_ORIGIN` has no default. She predicted that a cross-origin request reaches the API and only the answer is withheld, and from that derived CSRF as the cost of a cookie. The web app signs in, survives a reload, and shows real entries; **only one refresh runs at a time**, because two together would trip Day 11's reuse detection. She found by reading the endpoint list that nothing returned one day's entries, and ruled that the API, not the browser, decides what today is. ADR-018. 175 unit, 232 e2e, 15 web. |
+| 16 | Two apps now describe the same data, in two places, and they will drift. | Sharing types across a monorepo. This is the day `packages/` earns the workspace ADR-001 argued for on Day 1 — or fails to, and gets removed. Either outcome is a real result. **Added on Day 15: the day opens by making `entries.day_id` `NOT NULL`**, pulled forward from Day 27 by her decision. The duplication this day exists to solve is already listed in `docs/learning/day-15/report-15c.md`, question 5. |
 | 17 | The journal screen works and feels broken. | Loading, empty and error states as first-class design concerns rather than afterthoughts. Optimistic updates. What a user sees while a request is in flight. **Added 2026-10-04: deleting an entry becomes a soft delete.** A `deleted_at` column, and every read filters on it. There is no undo and no timed purge; the interface must ask once, in place, before deleting. Whether a thing is soft- or hard-deleted is decided per feature as it is built. `docs/ui-handover.md` §6. |
 | 18 | Writing an entry is the product, and the editor is an afterthought. | The core writing experience. Autosave and what it means for the API — does a draft hit the server, and if so how often, and what happens on a failed save. This is likely to produce a real API change. **Added 2026-10-04: editing a saved entry from the interface.** `PATCH /entries/:id` has existed since Day 5 and nothing calls it. `docs/ui-handover.md` §11. |
 | 19 | It works on her laptop, at her screen size, signed in as herself. | Responsive layout, keyboard access, and a genuine pass at accessibility rather than a checklist. |
@@ -605,10 +605,12 @@ the explanation happens.
   saying out loud. **Phase 3 or Day 27, and it should not slide again.**
 - ~~**When does `user_id` become `NOT NULL`?**~~ **Resolved Day 10.** The same
   question now applies to `entries.day_id`, added nullable on Day 13. Its
-  contract step is unscheduled; Day 27 is the natural home, once the
-  application has been writing the column long enough to trust the backfill.
-- **Where does the token live in the browser?** Day 15, and it is a security
-  decision rather than a convenience one.
+  contract step is **Day 16**, by her decision on Day 15: the `?date=` filter
+  now relies on the column, so an entry without a day would be silently
+  unreachable by date.
+- ~~**Where does the token live in the browser?**~~ **Resolved Day 15** — an
+  `HttpOnly` cookie for the refresh credential, memory for the access token.
+  ADR-018.
 - ~~Rich text versus plain text for entries?~~ **Resolved by the designs** —
   the brief cut markdown outright ("journal writing is prose") and no screen
   renders formatted text. Plain text stands.

@@ -16,128 +16,171 @@ the recovery cost most of a working session.
 
 ---
 
-**Last updated:** 2026-10-04, after her husband's scope and data model session.
+**Last updated:** 2026-10-06, at the close of Day 15.
 
-**Current day:** Days 0–14 are **complete and merged**. **Phase 2 is closed.**
-Phase 3 opened and stopped inside Day 15, block 3. **A fresh thread needs two
-sections, in this order: *How to open the next session with her*, then *Where
-Day 15 stopped*.** Both are directly below.
+**Current day:** Days 0–15 are **complete and merged**. Phase 3 is open.
+**A fresh thread needs two sections, in this order: *How to open the next
+session with her*, then *Day 15, compressed*.** Both are directly below.
 
-**Current branch:** `main`, clean. The latest commit is the one that records
-the 2026-10-04 session; `git log -1` names it. Days 9 onward were
-committed straight to `main` rather than through pull requests. Four older
-merged branches still exist locally and on the remote (`day-02-persistence`,
+**Current branch:** `main`. Day 15 is three commits, `4fc1a40`, `a9efb35` and
+the documentation commit that follows them. Days 9 onward were committed
+straight to `main` rather than through pull requests. Four older merged
+branches still exist locally and on the remote (`day-02-persistence`,
 `day-06-configuration`, `day-07-validation`, `day-08-identity`); they were
 deliberately left rather than deleted.
 
-**Verified on 2026-10-04, by re-running rather than by reading a report:**
-`pnpm lint`, `pnpm typecheck` and both builds pass. `pnpm test` passes with
-**149** tests. `pnpm test:e2e` passes with **160** tests. 17 ADRs. 55
-production files, ~2,400 lines excluding tests.
+**Verified on 2026-10-06, by re-running rather than by reading a report:**
+`pnpm lint`, `pnpm typecheck` and `pnpm build` pass. `pnpm test` passes with
+**175** tests. `pnpm test:e2e` passes with **232** tests. `pnpm lint:web`,
+`pnpm typecheck:web` and `pnpm build:web` pass, and `pnpm test:web` passes
+with **15** tests. 18 ADRs.
+
+**The daily check now has eight commands, not five.** The root `lint`,
+`typecheck` and `build` cover the API only. A web commit went in before Day 15
+with `typecheck:web` red, and nothing noticed. Run the four `:web` commands
+every day from here on.
 
 ---
 
 ## How to open the next session with her
 
-**She was not in the last session.** On 2026-10-04 her husband drove. He asked
-about her progress, set guardrails, ruled on every open product question, and
-settled the data model. He built nothing. She has seen none of it.
+**Day 16 is next.** She was present for all of Day 15 and made every decision
+in it. Her husband's rulings of 2026-10-04 were presented to her at the start
+of Day 15 and she raised no objection to any of them.
 
-**His view of her work, which she should hear.** He is happy with her learning
-and her decision making. He is not happy with the pace. Days 2 to 14 took about
-nine weeks, and the gaps between working days cost more than the work.
+**Open Day 16 in this order.**
 
-**Open the session in this order.**
+1. **Re-test three ideas from Day 15, without notes, each with an
+   experiment.** Many of the day's answers arrived as pasted, formatted text,
+   and the record cannot tell how they were produced. That is not an
+   accusation; it is the reason to check that the ideas lasted. The three
+   worth asking: what CORS stops and what it does not; why the Today screen
+   must be a client component; and why two refresh requests sent together
+   sign the user out. If one has not lasted, teach it again before going on.
+   **Then repay the one open learning debt, React**, before any new work:
+   see *Learning Debt*. By this project's rule an open debt blocks the next
+   day, and her asking to skip it is not enough.
+2. **Make `entries.day_id` required.** Her decision on Day 15, with her
+   reason: once a filter relies on `day_id`, an entry without one can never
+   be retrieved by date. It is the contract step of expand, backfill,
+   contract. The migration should refuse to run if any entry has no day, as
+   `RequireEntryOwner` does. Also fix the entity, which already claims the
+   column is required while the schema allows it to be empty.
+3. **Then the roadmap's Day 16: two apps describe the same data.** The
+   evidence is already in the repository and is listed in
+   `docs/learning/day-15/report-15c.md`, question 5: the entry and day types
+   exist twice, the five mood words three times, the page size of 200 twice,
+   the password minimum of 8 twice, and the web app recognises two of the
+   API's validation messages by their exact text. This is the day `packages/`
+   earns its place or is removed (ADR-001).
+4. **Raise the timezone day with her.** It is decided and unscheduled, and
+   her husband said it should come early. Day 15 made the gap visible on a
+   screen in two ways: her Today changes date at 09:00 local time, and an
+   entry written at 08:30 is filed under the previous day while showing
+   08:30. ADR-015's revisit condition has fired.
 
-1. **Tell her what changed while she was away.** Use the section *What her
-   husband decided on 2026-10-04*, further down. These are decided, so present
-   them plainly and briefly. Do not turn them into Socratic questions and do
-   not reopen them. If she disagrees with one, record it and tell her to raise
-   it with him.
-2. **Show her the data model.** The *Neuron Data Model* artifact is at
-   https://claude.ai/artifact/WiebtfE8n43EYeufy12UfB. It is private to the
-   account that published it. If she cannot open it, the same content is in
-   the roadmap's scope section and in `docs/feature-reconciliation.md`.
-3. **Resume Day 15 at block 3**, as described in *Where Day 15 stopped*. Put
-   the decision to her as a short choice. It is still hers.
-4. **Then blocks 4, 5 and 6**: CORS, ADR-018, and building login plus one
-   screen that reads real data.
+**The three guardrails still apply to every session.** They are written out
+in full under *How To Work With The Learner*: depth, one mutation per day,
+and amend an ADR only when its decision changes.
 
-**Three guardrails now apply to every session.** They are written out in full
-under *How To Work With The Learner*, and they are the most important change
-to how this thread works.
-
-- **Depth.** Go deep enough that she understands the thing completely, then
-  stop. Do not explore every possible attack or every edge case.
-- **One mutation per day.** The large sweep is for review days only.
-- **Amend an ADR only when its decision changes.**
-
-**The plan is no longer fixed at 40 days.** He said it may be extended by as
-many days as the work needs. Finishing soon is still the aim. A day should
-still end merged.
+**She does not know Next.js or React.** She said so directly on Day 15. The
+state file had claimed that blocks 1 and 2 covered rendering models; whatever
+they covered did not last. Server and client components were taught from the
+beginning on Day 15, with an experiment she ran. Assume no React knowledge:
+hooks, state and effects have not been taught at all, and the web worker's
+`useSession` hook is code she has not been walked through.
 
 ---
 
-## Where Day 15 stopped
+## Day 15, compressed
 
-**Phase 3, Day 15, block 3 of 6.** The question on the table: **where does the
-browser keep the credential that keeps a user logged in?**
+**The problem:** there was no interface, and the credential had to live
+somewhere in a browser. **ADR-018.**
 
-**Nothing has been built. No ADR written. The decision is genuinely open.**
+**What was decided, all of it by her.**
 
-She worked through the threat model in full and her analysis is the reason the
-decision is close rather than obvious. Two findings are hers and should not be
-re-derived for her:
+| Decision | Her reason |
+|---|---|
+| The refresh credential lives in an `HttpOnly` cookie | An XSS attacker should not be able to take the long-lived credential elsewhere |
+| CORS allows exactly one origin, held in configuration | Only her own frontend should read API responses; the value differs per environment |
+| `WEB_ORIGIN` has no default; the API refuses to start without it | It is a security boundary, and a deployment must declare the frontend it trusts |
+| The password minimum stays 8 | The design said 12; the API is the authority |
+| On load, the app calls `/auth/refresh` before choosing a screen | The cookie is invisible to script, so the answer is the only way to know |
+| Only one refresh runs at a time | Two together carry the same cookie; the second is read as a replay and revokes every session |
+| The API decides which date is today | The 4am rule and the coming timezone both live on the server |
+| `entries.day_id` becomes required on Day 16, not Day 27 | See the opening order above |
 
-1. **Reuse detection does not save `localStorage`.** It fires only when the
-   real client and the thief collide. A patient attacker waits until the user
-   stops using that device, so nothing stale is ever presented. Her words:
-   *"Reuse detection catches a careless thief. A patient one gets through."*
-2. **HttpOnly bounds the attack rather than preventing it.** An attacker with
-   JavaScript on the page can still call `/auth/refresh` and get an access
-   token, because the browser attaches the cookie automatically. What they
-   cannot do is carry the credential off the device. Her words: *"HttpOnly
-   doesn't prevent XSS. It bounds XSS in time and place."*
+**What was built, by three workers, each audited with one mutation of the
+Master Thread's own.**
 
-She also enumerated eleven browser storage mechanisms unprompted and collapsed
-them correctly into two groups, and caught the `sessionStorage` trap.
+- **15a, the API.** Login and refresh set an `HttpOnly`, `SameSite=Strict`,
+  `Path=/auth/refresh` cookie; no body carries the refresh token. CORS and
+  the cookie parser are set up in `configureHttp`, which `main.ts` and every
+  end-to-end suite call, and one test starts `main.ts` as a real process.
+  One dependency, `cookie-parser`.
+- **15b, the API.** `GET /entries?date=` and `GET /entries/count?date=`,
+  three lines inside the shared query builder from ADR-017. `GET /days/today`.
+  No dependency.
+- **15c, the web app.** `lib/session.ts` owns the session and imports
+  nothing. Routes `/in`, `/new` and `/`. Today reads `GET /days/today` and
+  then `GET /entries?date=`. The API's address is `NEXT_PUBLIC_API_URL`, and
+  a missing value stops the build. Tests run on Node's own runner. No
+  dependency.
 
-**Then she raised the thing that reopened it:** there will be a **mobile app**
-on this same backend. A native client cannot use a browser cookie; iOS uses the
-Keychain. So the two clients were never going to share a mechanism.
+She created an account and saw a real entry from her own database on her own
+Today screen.
 
-**My standing recommendation, not yet accepted:** HttpOnly cookie for web,
-token-in-body for native, `/auth/refresh` accepting either. The native app does
-not make `localStorage` better — it makes the body path necessary regardless,
-and adding it does not require weakening the web.
+**Where she answered.** Step 1 means the open question was enough.
 
-**Scope change on 2026-10-04, from her husband: the mobile app is out of scope
-for this project.** It will be a later project, and any backend change it needs
-is made then. So the complication she raised no longer applies, and the
-question is about the web client only. He did not give a view on
-`localStorage` against a cookie, and the decision is still hers. Under the
-depth guardrail (see *How To Work With The Learner*) it should now be put to
-her as a short choice, not as further analysis.
+| Topic | Step |
+|---|---|
+| Where the credential lives | 1, as a short choice |
+| CORS: does the request arrive, who withholds the answer | 1, all three parts |
+| The forged form and the cookie (CSRF) | 1 |
+| One origin, and where the value is written | 1 |
+| `WEB_ORIGIN` absent: default or refuse | 1 |
+| Preflight | 1 |
+| Deleting the cookie parser: 401, not a crash | 1 |
+| `@Res({ passthrough: true })` | Taught first, then predicted correctly |
+| Why `configureHttp` is shared, and why that was still not enough | 1 |
+| Server and client components | 3. Taught from the beginning; she ran the experiment. The follow-up question was asked twice and not answered, so the conclusion was given |
+| What the app does first after a reload | 1 |
+| Two refreshes together | 1, and the rule that follows |
+| Which endpoint gives today's entries | 1. None did, and she found that by reading the list |
+| Who decides what today is | 1 |
+| `credentials: 'include'`, build-time values, the shared promise, the join | 1 each, after a short explanation |
 
-**She has leaned toward `localStorage` once** ("i wanna use localStorage but you
-tell me what would be best way") and has not settled. **Do not decide this for
-her.** Blocks 4 (CORS) and 5 (ADR-018) were never reached.
+**Two things the browser taught that were not planned.** Twice she saw a
+CORS error whose real cause was that no server was running. The status code
+tells the two apart: no status means nothing answered. That distinction is
+now a named state in the web app. And the API refused to boot for her twice,
+once for `JWT_SECRET` and once for `WEB_ORIGIN`, which is her own rule from
+Day 6 working on her.
 
-**What the API would need either way**, and does not have:
+**Mistakes of mine, recorded.**
 
-- **No CORS at all.** `apps/api/src/main.ts` has no `enableCors`. A browser on
-  `localhost:3001` cannot call `localhost:3000` today.
-- **`/auth/login` returns the refresh token in the JSON body**, and
-  `/auth/refresh` takes it in the request body. That is a design for a client
-  that stores it — the cookie path needs `Set-Cookie` and a cookie read.
+- **My worker prompt said two things that disagreed.** "Set `origin` to
+  exactly this string" and "a foreign origin gets no allow header". The
+  library does not do both. The worker found it with `curl`.
+- **I assumed Next.js knowledge she did not have**, because this file said
+  blocks 1 and 2 had covered it. The question had to be withdrawn and taught.
+- **The daily check did not cover the web app**, so an earlier commit went in
+  with `typecheck:web` red.
 
-**The remaining Day 15 blocks:** 4 CORS, 5 ADR-018, 6 build it (login, and one
-screen reading real data).
+**Not built, and said plainly.** There is no sign-out control. The composer
+and the mood row are drawn and wired to nothing. The destinations link to
+`/timeline`, `/ask` and `/you`, which do not exist. No test covers a React
+component.
 
-**One thing to know before block 6.** The Today screen already built in
-`apps/web` includes the "From your record" notes, which are AI output. That is
-correct and stays: with no tiers, the drawn screen is the product, and the
-notes are simply empty until Phase 4.
+**With the designer.** He delivered sign-in, create-account and a states
+file without having seen `docs/ui-handover.md`, so they carry guest-session
+lines, a line about Free, an email verification step and a 12-character
+password rule. All of that conflicts with settled decisions and was left out
+of the build. Section 13 of the handover lists it, with ten sentences the
+worker had to write. **She still has to send him the handover document, and
+ask for the new `lock.css` and `00-prototype.html`.** The form's layout lives
+in a block marked TEMPORARY in `apps/web/app/styles/live.css` until then. The
+three delivered HTML files are not in the repository yet.
 
 ---
 
@@ -288,9 +331,8 @@ outside the repository and is not carried by git.
 
 ## Next Session Starts Here
 
-> **Current as of 2026-10-04.** Day 15 is mid-flight and stopped at block 3.
-> **Read *Where Day 15 stopped* near the top of this file** — it has the live
-> decision and what the API still lacks. Everything under this heading from
+> **Current as of 2026-10-06.** Day 15 is complete. **Read *How to open the
+> next session with her* near the top of this file.** Everything under this heading from
 > here down is the historical record of Days 9–11 and is kept for its
 > reasoning, not as a statement of where the project is.
 
@@ -1534,13 +1576,17 @@ and that is deliberate — see ADR-001.
 | Item | Where | Note |
 |---|---|---|
 | **A user cannot be deleted** | `sessions`, `entries`, `days` FKs | `ON DELETE NO ACTION`, the generator's default. **Decided 2026-10-04: hard delete, Day 34** |
-| **`entries.day_id` is nullable** | `AddDays` migration | Contract step pending, Day 27 |
+| **`entries.day_id` is nullable** | `AddDays` migration, `entry.entity.ts` | **Day 16, first task.** Her decision on Day 15. An entry with no day is returned for no `?date=`, silently |
+| **Two apps describe the same data by hand** | `apps/web/lib/api.ts` and the API's entities | Types, mood words, page size, password minimum, two validation messages. Day 16 |
+| **Entry times use the device's clock; the day uses the API's** | `apps/web/lib/format.ts` | Dissolves with the per-user timezone |
+| **No sign-out control; composer and mood row unwired** | `apps/web` | The You screen and Day 18 |
+| **The auth form's layout is temporary** | `apps/web/app/styles/live.css` | Until the designer's new `lock.css` arrives |
+| **No test covers a React component** | `apps/web` | No framework was added. The session module is tested |
+| **`NEXT_PUBLIC_API_URL` is fixed at build time** | `apps/web/lib/config.ts` | One build cannot move between environments. Day 31 |
+| **The cookie has no `Secure` attribute** | `refresh-cookie.ts` | Day 31, when HTTPS exists. ADR-018 |
 | **No timezone on a user** | `day-boundary.ts` | 4am boundary is UTC. **Decided 2026-10-04: a per-user setting. Not yet scheduled** |
 | **`users.password_hash` is nullable** | `user.entity.ts` | Becomes `NOT NULL`. Decided 2026-10-04 |
 | **No ADR for the data model decisions** | `docs/decisions/` | Owed. See *What her husband decided* |
-| **No CORS** | `apps/api/src/main.ts` | A browser cannot call the API. Day 15 block 4 |
-| **Refresh token travels in the body** | `/auth/login`, `/auth/refresh` | Fine for native, wrong for a cookie-based web client. Day 15 |
-| **`apps/web` calls nothing** | all of `apps/web` | One screen, three breakpoints, static |
 | **Migration comments were stripped** | `src/database/migrations/` | A project-wide comment sweep removed the notes explaining why five migrations were hand-written. `docs/handbook/phase-2-identity-and-ownership.md` §6 is now the only record |
 | **`better-sqlite3@13` outside `typeorm`'s peer range** | `package.json` | Works, pinned, dissolves on Day 31 |
 
@@ -1621,11 +1667,21 @@ Master Thread audit still owed):
 Concepts introduced by worker agents that have **not yet been learned**. See
 the roadmap's *Learning Debt* section for why this is tracked.
 
-### Status as of 2026-10-04: none open
+### Status as of 2026-10-06: one item open
 
-**Phase 2 carried no learning debt into Day 14 and leaves none.** Days 12–15
-were worked through directly rather than by a worker agent, so nothing was
-introduced that had to be explained afterwards.
+**Day 15 used three workers and repaid eight items the same day**: preflight,
+the cookie parser, `@Res({ passthrough: true })`, `configureHttp`,
+`credentials: 'include'`, build-time values, the shared refresh promise, and
+the relation join behind `?date=`.
+
+**Open: React itself.** The web worker wrote a hook, `useSession`, and client
+components that hold state and run effects. She has not been taught hooks,
+state or effects, and said she does not know Next.js. This is the first debt
+in a skill the roadmap calls secondary, so repay it to the depth guardrail:
+enough to read `LiveToday.tsx` and say what runs when.
+
+**Phase 2 carried no learning debt into Day 14 and left none.** Days 12–14
+were worked through directly rather than by a worker agent.
 
 **Two long-standing rows closed on Day 14, both by her own audit:**
 
@@ -1783,8 +1839,8 @@ see the direction recorded in *Next Session Starts Here*.
 
 **Live, and in priority order as of 2026-10-04:**
 
-1. **Where does the browser keep the refresh credential?** Day 15, block 3,
-   unresolved. See *Where Day 15 stopped*. Blocks all of Phase 3.
+1. ~~**Where does the browser keep the refresh credential?**~~ **Decided on
+   Day 15: an `HttpOnly` cookie. ADR-018.**
 2. ~~**What happens when a user asks for their account to be deleted?**~~
    **Decided 2026-10-04: a hard delete of the account and only its data,
    Day 34.** The history: a user

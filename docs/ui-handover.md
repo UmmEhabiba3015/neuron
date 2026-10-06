@@ -32,6 +32,7 @@ carry information.
 | 10 | Features removed from the designs | **Ready** |
 | 11 | Editing an entry | **Ready to draw** |
 | 12 | Timezone | **Ready to draw** |
+| 13 | The sign-in screens you delivered: what we built and what needs changing | **Ready** |
 
 ---
 
@@ -543,3 +544,75 @@ still ends at 4am, and it is now 4am where the person is.
 | **The sentence that goes with it** | One sentence saying that a day ends at 4am in this timezone, and that changing it does not move what is already written. |
 | **Could not reach the server** | The setting stays as it was, with a sentence. |
 
+---
+
+## 13. The sign-in screens you delivered — what we built, and what needs changing
+
+Thank you for `13-login.html`, `14-register.html` and `15-auth-states.html`.
+They arrived before you had seen this document, so some of what they show was
+decided differently in sections 1, 3 and 4. We have built sign in and create
+account from them, leaving out the parts listed below.
+
+### What we still need from you
+
+- **The updated `lock.css`.** The three files use classes such as
+  `auth-sheet`, `auth-content` and `auth-field`, and the `lock.css` we hold
+  does not define them. We wrote a temporary layout for the form and will
+  delete it when yours arrives.
+- **The updated `00-prototype.html`**, and the tablet and mobile versions of
+  these screens if they exist.
+
+### Built as drawn
+
+| State | Wording used |
+|---|---|
+| Sign in | "Log in", "Open your journal on this device." |
+| Create an account | "Create an account", "Keep what you have written." |
+| Sign in refused | "Try again", "We could not log you in with those details.", "Check your email and password, then try again." |
+| Address already registered | "There is already an account with this email.", "Use another email, or log in to your existing journal.", "Log in instead" |
+| No answer from the server | "Could not connect", "We could not finish that request." |
+| Session ended while in use | "Log in again", "Your session has ended. Log in to open your account." |
+
+### Please change
+
+| On the screens | Why |
+|---|---|
+| "Continue without an account", "Not now", "Keep writing", "Keep writing on this device", "Start a browser session" | An account is required. There are no guest sessions (section 1). |
+| "Everything in this browser session, including recordings, comes with you.", "Anything saved on this device stays here.", "Your writing and recordings in this browser have not been removed." | The same. Nothing is kept in the browser. |
+| "An account starts on Free. No payment details." | There are no tiers (section 4). |
+| "Use at least 12 characters", on create account and on choose a new password | The rule is at least 8 characters (section 3.2). |
+| "Check your email" and "Email sent again", the verification screens | There is no email confirmation step. A new account is signed in at once (section 3.2). The "Send a verification email" action on the expired-link screen goes with them. |
+| "You are offline" | The product needs a connection (section 1). "Could not connect" covers the real case. |
+| "Logging in" and "Creating your account", drawn as the You page with a progress bar | That page shows Plan, Free, Pro and Import, which are all removed. Section 3 asks for a plain line of text while signing in. |
+
+The reset-password screens are correct and are built later.
+
+### Sentences we had to write
+
+You did not supply these, so we wrote plain ones. Please approve or replace
+them.
+
+| Where | Sentence |
+|---|---|
+| Email left empty | "Enter your email address." |
+| Not an email address | "That does not look like an email address." |
+| Password left empty, on sign in | "Enter your password." |
+| Password too short, on create account | "That is shorter than 8 characters." |
+| While signing in | "Logging in." |
+| While creating an account | "Creating your account." |
+| Any other error from the server | "Something went wrong on our side. Nothing was changed." |
+| Today, while loading | "Opening today." |
+| Today, no answer from the server | "Could not connect. We could not open today." |
+| Today, server error | "Something went wrong on our side. We could not open today." |
+| The action on a failure | "Try again" |
+
+### Two questions
+
+1. **After a reload there is a moment of blank paper**, while the product
+   checks whether the person is signed in. On a slow connection that could
+   last a second or two. Should a line of text appear if it lasts, and what
+   should it say?
+2. **A person who returns after their session ran out sees plain "Log in"**,
+   and not "Log in again". The product cannot tell the two cases apart at
+   that moment. "Log in again" appears only when a session ends while the
+   page is open. Is that acceptable?
