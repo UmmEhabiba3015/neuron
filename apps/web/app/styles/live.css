@@ -65,6 +65,26 @@ body {
 }
 
 /*
+ * A consequence of rendering both headers. On desktop lock.css gives the
+ * page's first child a top margin, --lead, so that the content starts on the
+ * date box's line. In a comp the first child is the content. Here the first
+ * child is .mast, which the rule above has just hidden, so the margin was
+ * spent on something invisible and the content started at the top edge.
+ *
+ * This gives the same margin, from the same token, to the first thing that
+ * is actually shown. The exclusions are lock.css's own: a split page carries
+ * the lead as padding, and a stack centres itself.
+ */
+
+@container (min-width: 1200px) {
+  .app .page:not(.split) > .mast + :not(.dest):not(.stack),
+  .app .page:not(.split) > .mast + .dest + :not(.glance):not(.stack),
+  .app .page:not(.split) > .mast + .dest + .glance + :not(.stack) {
+    margin-top: var(--lead);
+  }
+}
+
+/*
  * The waveform is authored per platform rather than scaled, and
  * direction-lock.md 12.7 gives the reason: tick weight is held at 1.769 and
  * pitch at 6.18-6.21px at every width by re-authoring the viewBox, which is
@@ -87,4 +107,83 @@ body {
 @container (min-width: 1200px) {
   .wave[data-w="tablet"] { display: none; }
   .wave[data-w="desktop"] { display: block; }
+}
+
+/*
+ * TEMPORARY, until the designer's new lock.css arrives.
+ *
+ * The designer has delivered the sign-in and create-account screens, and the
+ * stylesheet that goes with them has not arrived. lock.css may not be edited,
+ * so the form's layout lives here under the class names the designer used.
+ * When the new lock.css defines these classes, this whole block is deleted
+ * and nothing else in this file changes.
+ *
+ * Only layout and the choice of existing tokens are declared. No colour
+ * literal and no new size: every value is a token lock.css already has. The
+ * sheet, the field, the buttons and the notice are lock.css's own.
+ */
+
+.auth-sheet {
+  align-self: flex-start;
+  width: calc(100% - 2 * var(--gut));
+  max-width: 420px;
+}
+
+.auth-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s6);
+  padding: var(--s7) var(--s6);
+}
+
+.auth-content .notice {
+  margin: 0;
+}
+
+.auth-heading {
+  font-family: var(--f-prose);
+  font-size: var(--t-hand-s);
+  font-weight: 400;
+  line-height: var(--lh-tight);
+  color: var(--rule);
+}
+
+.auth-copy,
+.auth-help {
+  font-family: var(--f-prose);
+  font-size: var(--t-note);
+  line-height: var(--lh-note);
+  color: var(--rule);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s6);
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+}
+
+.auth-field label {
+  font-family: var(--f-label);
+  font-size: var(--t-print);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--rule);
+}
+
+.auth-field .field {
+  flex: 0 0 auto;
+  width: 100%;
+}
+
+.auth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s4) var(--s6);
 }

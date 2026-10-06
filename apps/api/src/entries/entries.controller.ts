@@ -128,6 +128,6 @@ export class EntriesController {
  * The listing and the count build their filters the same way, so a filter
  * cannot reach one and miss the other.
  */
-function filtersFrom(query: { word?: string }): EntryFilters {
-  return { word: query.word };
+function filtersFrom(query: { word?: string; date?: string }): EntryFilters {
+  return { word: query.word, date: query.date };
 }

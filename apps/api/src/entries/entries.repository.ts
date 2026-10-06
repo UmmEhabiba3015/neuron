@@ -106,6 +106,19 @@ function whereFor(
   const where: FindOptionsWhere<JournalEntry> = { userId };
 
   /*
+   * "Written on that day" is the day row the entry points at, not a window
+   * on created_at. The 4am boundary was applied once, when the entry was
+   * assigned its day, and comparing instants here would apply it again in a
+   * second place that could come to disagree with the first.
+   *
+   * The owner is still the entry's own user_id, above. The day is only ever
+   * consulted for its date.
+   */
+  if (filters.date !== undefined) {
+    where.day = { date: filters.date };
+  }
+
+  /*
    * An empty search term is a search that matches nothing, not a search that
    * was never made. Day 5 chose that deliberately: ?word= falling through to
    * "everything" is a search box that answers a request for nothing with the

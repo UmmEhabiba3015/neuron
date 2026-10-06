@@ -40,6 +40,19 @@ export class DaysController {
   }
 
   /*
+   * Declared before :date, and it has to be. Routes are matched in the order
+   * they are written, and "today" fits :date as well as any other string
+   * does -- it would arrive at the calendar-date check and be refused as a
+   * 400.
+   */
+  @Get('today')
+  async findToday(@Req() request: AuthenticatedRequest): Promise<DayResponse> {
+    const { date, day } = await this.daysService.findToday(request.user.id);
+
+    return day ? toResponse(day) : { date, mood: null };
+  }
+
+  /*
    * A day that has never been written to is not an error and is not a 404.
    * It is a real day with nothing on it yet, and the screen for it has to
    * render. ADR-005 settled the same question for an empty collection: an

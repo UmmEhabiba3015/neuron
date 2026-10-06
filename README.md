@@ -72,6 +72,13 @@ PORT=4242 pnpm dev
 See [ADR-007](docs/decisions/ADR-007-configuration-and-boot-validation.md) for
 why these are checked at boot rather than at first use.
 
+The web app has one setting of its own, `NEXT_PUBLIC_API_URL`, the address of
+the API as the browser calls it. It is required and has no default. Copy
+[apps/web/.env.example](apps/web/.env.example) to `apps/web/.env.local`; without
+it `pnpm dev:web` and `pnpm build:web` stop with a message that names the
+variable. The value is written into the JavaScript when the web app is built,
+so changing it needs a new build.
+
 ## The API
 
 Every `/entries` route requires a valid access token as of Day 9. Without one
@@ -86,12 +93,13 @@ they answer `401` with the reason in a `WWW-Authenticate` header.
 | `POST` | `/auth/logout-everywhere` | ✅ | Revokes every session for the caller and clears the refresh cookie. `204`. |
 | `GET`  | `/auth/sessions` | ✅   | The caller's active sessions. |
 | `GET`  | `/auth/me`       | ✅   | Returns the caller. |
-| `GET`  | `/entries`       | ✅   | The journal, newest first. `?word=` searches content. |
+| `GET`  | `/entries`       | ✅   | The journal, newest first. `?word=` searches content. `?date=YYYY-MM-DD` narrows to the entries of one day. `?limit=` and `?offset=` page. |
 | `POST` | `/entries`       | ✅   | Creates an entry owned by the caller. |
-| `GET`  | `/entries/count` | ✅   | `{ count }`. |
+| `GET`  | `/entries/count` | ✅   | `{ count }`. Takes the same `?word=` and `?date=` as the listing. |
 | `GET`  | `/entries/:id`   | ✅   | One entry, or `404`. |
 | `PATCH`| `/entries/:id`   | ✅   | Updates content, or `404`. |
 | `DELETE`| `/entries/:id`  | ✅   | Deletes and returns it, or `404`. |
+| `GET`  | `/days/today`    | ✅   | `{ date, mood }` for the day the current instant falls on. The day ends at 04:00 UTC, so the API decides which date today is. |
 
 ```bash
 # register, then log in

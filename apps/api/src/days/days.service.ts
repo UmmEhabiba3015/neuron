@@ -21,6 +21,22 @@ export class DaysService {
     return this.daysRepository.findByDate(userId, date);
   }
 
+  /*
+   * Which date "today" is, decided here rather than in a browser. The 4am
+   * boundary lives on this side, and so will the user's timezone when there
+   * is one, so a client that worked the date out for itself would be writing
+   * the rule a second time and getting it wrong the day the rule changes.
+   *
+   * Reading a day does not create it. An empty day does not exist.
+   */
+  async findToday(
+    userId: string,
+  ): Promise<{ date: string; day: Day | undefined }> {
+    const date = dayFor(new Date());
+
+    return { date, day: await this.daysRepository.findByDate(userId, date) };
+  }
+
   findInRange(userId: string, from: string, to: string): Promise<Day[]> {
     return this.daysRepository.findInRange(userId, from, to);
   }

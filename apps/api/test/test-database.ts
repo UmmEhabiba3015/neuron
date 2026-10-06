@@ -56,6 +56,18 @@ export async function authenticate(
     .send({ email, password })
     .expect(201);
 
+  return login(server, who);
+}
+
+/*
+ * Signing in again as an account that already exists. A suite that moves the
+ * clock needs this: an access token lasts fifteen minutes, so one issued
+ * before the clock jumped a day is expired after it.
+ */
+export async function login(server: App, who = 'test-user'): Promise<string> {
+  const email = who.includes('@') ? who : `${who}@example.com`;
+  const password = 'a-long-enough-test-password';
+
   const response = await request(server)
     .post('/auth/login')
     .send({ email, password })

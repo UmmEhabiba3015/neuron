@@ -18,6 +18,7 @@
     "dev:web": "pnpm --filter @neuron/web dev",
     "build:web": "pnpm --filter @neuron/web build",
     "lint:web": "pnpm --filter @neuron/web lint",
-    "typecheck:web": "pnpm --filter @neuron/web typecheck"
+    "typecheck:web": "pnpm --filter @neuron/web typecheck",
+    "test:web": "pnpm --filter @neuron/web test"
   }
 }

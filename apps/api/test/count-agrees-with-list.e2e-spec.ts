@@ -6,10 +6,12 @@ import { App } from 'supertest/types';
 import type { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
 import { configureHttp } from './../src/configure-http';
+import { freezeClockAt, moveClockTo, releaseClock } from './clock';
 import {
   authenticate,
   closeTestDataSource,
   createTestDataSource,
+  login,
 } from './test-database';
 
 /*
@@ -35,7 +37,21 @@ describe('count agrees with the listing (e2e)', () => {
     'nothing much today',
   ];
 
+  /*
+   * A date filter can only be shown to agree if the journal spans more than
+   * one day, so the clock is set: these three are written on the 8th and
+   * CONTENTS on the 9th. Counting everything where the listing narrows to a
+   * day would otherwise give the same number and prove nothing.
+   */
+  const EARLIER_CONTENTS = [
+    'the day before, first',
+    'the day before, second, about the flat',
+    'the day before, third',
+  ];
+
   beforeEach(async () => {
+    freezeClockAt('2026-08-08T12:00:00.000Z');
+
     dataSource = await createTestDataSource();
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -51,6 +67,22 @@ describe('count agrees with the listing (e2e)', () => {
 
     alice = await authenticate(app.getHttpServer(), 'alice');
     bob = await authenticate(app.getHttpServer(), 'bob');
+
+    for (const content of EARLIER_CONTENTS) {
+      await request(app.getHttpServer())
+        .post('/entries')
+        .set('Authorization', alice)
+        .send({ content })
+        .expect(201);
+    }
+
+    /*
+     * A day later. The tokens issued on the 8th have expired by now, so both
+     * users sign in again.
+     */
+    moveClockTo('2026-08-09T12:00:00.000Z');
+    alice = await login(app.getHttpServer(), 'alice');
+    bob = await login(app.getHttpServer(), 'bob');
 
     for (const content of CONTENTS) {
       await request(app.getHttpServer())
@@ -70,6 +102,7 @@ describe('count agrees with the listing (e2e)', () => {
   afterEach(async () => {
     await app.close();
     await closeTestDataSource(dataSource);
+    releaseClock();
   });
 
   const countFor = async (query: string): Promise<number> => {
@@ -112,11 +145,36 @@ describe('count agrees with the listing (e2e)', () => {
     ['a word that matches once', '?word=canal', '&word=canal'],
     ['a word that matches nothing', '?word=zzzz', '&word=zzzz'],
     ['an empty word', '?word=', '&word='],
+    ['a date with seven entries', '?date=2026-08-09', '&date=2026-08-09'],
+    ['a date with three entries', '?date=2026-08-08', '&date=2026-08-08'],
+    ['a date with no entries', '?date=2026-08-01', '&date=2026-08-01'],
+    [
+      'a date and a word together',
+      '?date=2026-08-09&word=flat',
+      '&date=2026-08-09&word=flat',
+    ],
+    [
+      'a date and a word that only matches on another date',
+      '?date=2026-08-08&word=sister',
+      '&date=2026-08-08&word=sister',
+    ],
   ])('agrees for %s', async (_label, countQuery, listQuery) => {
     const counted = await countFor(countQuery);
     const walked = await walk(listQuery === '' ? '' : `?${listQuery.slice(1)}`);
 
     expect(counted).toBe(walked.length);
+  });
+
+  /*
+   * Agreement alone would also hold if both ignored the date. These pin the
+   * numbers, so a filter dropped from the shared builder fails here as well
+   * as in the suite that tests the filter itself.
+   */
+  it('counts a day as that day and not as the whole journal', async () => {
+    expect(await countFor('')).toBe(10);
+    expect(await countFor('?date=2026-08-09')).toBe(7);
+    expect(await countFor('?date=2026-08-08')).toBe(3);
+    expect(await countFor('?date=2026-08-09&word=flat')).toBe(2);
   });
 
   it('counts only the caller, not everyone who wrote that word', async () => {
