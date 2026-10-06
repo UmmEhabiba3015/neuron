@@ -56,6 +56,26 @@ describe('configuration wiring (e2e)', () => {
     );
   });
 
+  it('should refuse to build when WEB_ORIGIN is not set', async () => {
+    process.env.PORT = '3000';
+    delete process.env.DATABASE_PATH;
+    delete process.env.WEB_ORIGIN;
+
+    await expect(buildTheRealApplication()).rejects.toThrow(
+      /^WEB_ORIGIN must be set/,
+    );
+  });
+
+  it('should refuse to build when WEB_ORIGIN is not an origin', async () => {
+    process.env.PORT = '3000';
+    delete process.env.DATABASE_PATH;
+    process.env.WEB_ORIGIN = 'http://localhost:3001/';
+
+    await expect(buildTheRealApplication()).rejects.toThrow(
+      'received "http://localhost:3001/"',
+    );
+  });
+
   it('should build the real application when the configuration is valid', async () => {
     const databaseFile = join(directory, 'neuron.db');
     writeFileSync(databaseFile, '');

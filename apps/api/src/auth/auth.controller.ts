@@ -7,18 +7,31 @@ import {
   HttpStatus,
   Post,
   Req,
+  Res,
   UnauthorizedException,
 } from '@nestjs/common';
+import type { Request, Response } from 'express';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { Public } from './public.decorator';
 import { LoginDto } from './login.dto';
-import { RefreshDto } from './refresh.dto';
+import {
+  REFRESH_COOKIE_CLEAR_OPTIONS,
+  REFRESH_COOKIE_NAME,
+  REFRESH_COOKIE_OPTIONS,
+  packRefreshCookie,
+  unpackRefreshCookie,
+} from './refresh-cookie';
 import { RegisterDto } from './register.dto';
 import type { AuthenticatedRequest } from './authenticated-request';
 import type { AuthenticatedSession } from './auth.service';
 import type { Session } from './session.entity';
 import type { User } from '../users/user.entity';
+
+export interface AuthenticatedResponse {
+  accessToken: string;
+  user: User;
+}
 
 @Controller('auth')
 export class AuthController {
@@ -42,14 +55,17 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginDto): Promise<AuthenticatedSession> {
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<AuthenticatedResponse> {
     const session = await this.authService.login(dto.email, dto.password);
 
     if (!session) {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    return session;
+    return this.respondWith(session, response);
   }
 
   @Get('me')
@@ -60,33 +76,69 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(@Body() dto: RefreshDto): Promise<AuthenticatedSession> {
-    const session = await this.authService.refresh(
-      dto.sessionId,
-      dto.refreshToken,
-    );
+  async refresh(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<AuthenticatedResponse> {
+    const cookies = request.cookies as Record<string, unknown> | undefined;
+    const credential = unpackRefreshCookie(cookies?.[REFRESH_COOKIE_NAME]);
+
+    const session = credential
+      ? await this.authService.refresh(
+          credential.sessionId,
+          credential.refreshToken,
+        )
+      : undefined;
 
     if (!session) {
       throw new UnauthorizedException('Invalid or expired session');
     }
 
-    return session;
+    return this.respondWith(session, response);
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async logout(@Req() request: AuthenticatedRequest): Promise<void> {
+  async logout(
+    @Req() request: AuthenticatedRequest,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
     await this.authService.logout(request.session.id);
+
+    response.clearCookie(REFRESH_COOKIE_NAME, REFRESH_COOKIE_CLEAR_OPTIONS);
   }
 
   @Post('logout-everywhere')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async logoutEverywhere(@Req() request: AuthenticatedRequest): Promise<void> {
+  async logoutEverywhere(
+    @Req() request: AuthenticatedRequest,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
     await this.authService.logoutEverywhere(request.user.id);
+
+    response.clearCookie(REFRESH_COOKIE_NAME, REFRESH_COOKIE_CLEAR_OPTIONS);
   }
 
   @Get('sessions')
   listSessions(@Req() request: AuthenticatedRequest): Promise<Session[]> {
     return this.authService.listSessions(request.user.id);
+  }
+
+  /*
+   * The refresh credential leaves in the cookie and only in the cookie. The
+   * body is built field by field so that it cannot follow the service's
+   * result into the response.
+   */
+  private respondWith(
+    session: AuthenticatedSession,
+    response: Response,
+  ): AuthenticatedResponse {
+    response.cookie(
+      REFRESH_COOKIE_NAME,
+      packRefreshCookie(session),
+      REFRESH_COOKIE_OPTIONS,
+    );
+
+    return { accessToken: session.accessToken, user: session.user };
   }
 }

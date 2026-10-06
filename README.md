@@ -44,6 +44,7 @@ message naming the variable, rather than being quietly corrected.
 | `PORT`          | `3000`                   | A whole number from 1 to 65535. Empty, `0`, negative, above the range, text, or a number with stray spaces around it all refuse to boot. |
 | `DATABASE_PATH` | `apps/api/data/neuron.db` | Any non-empty path; empty refuses to boot. A relative path resolves from the directory the API was started in. If the file does not exist, the API warns and creates an empty one. |
 | `JWT_SECRET`    | **none — required**       | At least 32 characters. There is no default and no fallback: the application refuses to start without it. |
+| `WEB_ORIGIN`    | **none — required**       | The one origin allowed to read this API from a browser, e.g. `http://localhost:3001`. A scheme, a host and an optional port, with no path and no trailing slash. Absent, empty or malformed refuses to boot. |
 
 **`JWT_SECRET` has no default on purpose.** It signs every access token, so a
 value committed to source would let anyone who can read this repository forge a
@@ -79,10 +80,10 @@ they answer `401` with the reason in a `WWW-Authenticate` header.
 | Method | Route            | Auth | What it does |
 | ------ | ---------------- | ---- | ------------ |
 | `POST` | `/auth/register` | —    | Creates a user. `201` with the user; `409` if the name is taken. |
-| `POST` | `/auth/login`    | —    | `200` with `{ accessToken, refreshToken, user }`; `401` for any failure. |
-| `POST` | `/auth/refresh`  | —    | Exchanges a refresh token for a new pair. `401` if revoked, expired or already rotated. |
-| `POST` | `/auth/logout`   | ✅   | Revokes this session. `204`. |
-| `POST` | `/auth/logout-everywhere` | ✅ | Revokes every session for the caller. `204`. |
+| `POST` | `/auth/login`    | —    | `200` with `{ accessToken, user }`, and the refresh credential in an `HttpOnly` cookie; `401` for any failure. |
+| `POST` | `/auth/refresh`  | —    | Reads the refresh cookie, takes no body. `200` with `{ accessToken, user }` and a rotated cookie; `401` if the cookie is missing, revoked, expired or already rotated. |
+| `POST` | `/auth/logout`   | ✅   | Revokes this session and clears the refresh cookie. `204`. |
+| `POST` | `/auth/logout-everywhere` | ✅ | Revokes every session for the caller and clears the refresh cookie. `204`. |
 | `GET`  | `/auth/sessions` | ✅   | The caller's active sessions. |
 | `GET`  | `/auth/me`       | ✅   | Returns the caller. |
 | `GET`  | `/entries`       | ✅   | The journal, newest first. `?word=` searches content. |
@@ -117,7 +118,9 @@ to pick another and the same fact is obtainable by trying to register. See
 
 **Access tokens last 15 minutes; refresh tokens last 30 days.** The access
 token goes on every request; the refresh token goes only to `/auth/refresh`,
-which is what makes a database check on it affordable.
+which is what makes a database check on it affordable. It travels in a cookie
+that JavaScript cannot read and is never in a response body; see
+[ADR-018](docs/decisions/ADR-018-browser-credential-and-cors.md).
 
 **Logging out works, immediately.** Each login creates a session row, and the
 guard checks it on every request — so revoking a session locks out its access

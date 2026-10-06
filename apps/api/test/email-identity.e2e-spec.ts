@@ -5,6 +5,7 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import type { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
+import { configureHttp } from './../src/configure-http';
 import { closeTestDataSource, createTestDataSource } from './test-database';
 
 describe('email as the identifier (e2e)', () => {
@@ -24,6 +25,7 @@ describe('email as the identifier (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
+    configureHttp(app);
     await app.init();
   });
 

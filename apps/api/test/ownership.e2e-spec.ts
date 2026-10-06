@@ -5,6 +5,7 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import type { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
+import { configureHttp } from './../src/configure-http';
 import { JournalEntry } from './../src/entries/entry.entity';
 import {
   authenticate,
@@ -30,6 +31,7 @@ describe('entry ownership (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
+    configureHttp(app);
     await app.init();
 
     alice = await authenticate(app.getHttpServer(), 'alice');

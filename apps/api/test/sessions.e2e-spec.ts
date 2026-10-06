@@ -5,13 +5,23 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import type { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
+import { configureHttp } from './../src/configure-http';
+import { REFRESH_COOKIE_NAME } from './../src/auth/refresh-cookie';
 import { Session } from './../src/auth/session.entity';
+import {
+  refreshCookieFrom,
+  refreshTokenIn,
+  type RefreshCookie,
+} from './refresh-cookie';
 import { closeTestDataSource, createTestDataSource } from './test-database';
 
 interface LoginBody {
   accessToken: string;
-  refreshToken: string;
   user: { id: string };
+}
+
+interface Login extends LoginBody {
+  cookie: RefreshCookie;
 }
 
 describe('sessions and revocation (e2e)', () => {
@@ -23,22 +33,22 @@ describe('sessions and revocation (e2e)', () => {
     password: 'a-long-enough-password',
   };
 
-  const login = async (): Promise<LoginBody> => {
+  const login = async (): Promise<Login> => {
     const response = await request(app.getHttpServer())
       .post('/auth/login')
       .send(credentials)
       .expect(200);
 
-    return response.body as LoginBody;
+    return {
+      ...(response.body as LoginBody),
+      cookie: refreshCookieFrom(response),
+    };
   };
 
-  const sessionIdOf = async (userId: string): Promise<string> => {
-    const sessions = await dataSource
-      .getRepository(Session)
-      .find({ where: { userId }, order: { createdAt: 'DESC' } });
-
-    return sessions[0].id;
-  };
+  const refreshWith = (cookie: RefreshCookie) =>
+    request(app.getHttpServer())
+      .post('/auth/refresh')
+      .set('Cookie', cookie.pair);
 
   beforeEach(async () => {
     dataSource = await createTestDataSource();
@@ -51,6 +61,7 @@ describe('sessions and revocation (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
+    configureHttp(app);
     await app.init();
 
     await request(app.getHttpServer())
@@ -65,11 +76,11 @@ describe('sessions and revocation (e2e)', () => {
   });
 
   describe('login', () => {
-    it('should return a refresh token alongside the access token', async () => {
+    it('should return an access token and set a refresh cookie', async () => {
       const body = await login();
 
       expect(typeof body.accessToken).toBe('string');
-      expect(typeof body.refreshToken).toBe('string');
+      expect(refreshTokenIn(body.cookie)).not.toBe('');
     });
 
     it('should create one session row per login', async () => {
@@ -84,8 +95,10 @@ describe('sessions and revocation (e2e)', () => {
 
       const [session] = await dataSource.getRepository(Session).find();
 
-      expect(session.refreshTokenHash).not.toBe(body.refreshToken);
-      expect(session.refreshTokenHash).not.toContain(body.refreshToken);
+      const refreshToken = refreshTokenIn(body.cookie);
+
+      expect(session.refreshTokenHash).not.toBe(refreshToken);
+      expect(session.refreshTokenHash).not.toContain(refreshToken);
       expect(session.refreshTokenHash).toMatch(/^[0-9a-f]{64}$/);
     });
 
@@ -100,14 +113,10 @@ describe('sessions and revocation (e2e)', () => {
   });
 
   describe('POST /auth/refresh', () => {
-    it('should exchange a refresh token for a new access token', async () => {
+    it('should exchange a refresh cookie for a new access token', async () => {
       const body = await login();
-      const sessionId = await sessionIdOf(body.user.id);
 
-      const refreshed = await request(app.getHttpServer())
-        .post('/auth/refresh')
-        .send({ sessionId, refreshToken: body.refreshToken })
-        .expect(200);
+      const refreshed = await refreshWith(body.cookie).expect(200);
 
       const next = refreshed.body as LoginBody;
 
@@ -120,54 +129,44 @@ describe('sessions and revocation (e2e)', () => {
 
     it('should rotate the refresh token on every use', async () => {
       const body = await login();
-      const sessionId = await sessionIdOf(body.user.id);
 
-      const refreshed = await request(app.getHttpServer())
-        .post('/auth/refresh')
-        .send({ sessionId, refreshToken: body.refreshToken })
-        .expect(200);
+      const refreshed = await refreshWith(body.cookie).expect(200);
+      const next = refreshCookieFrom(refreshed);
 
-      expect((refreshed.body as LoginBody).refreshToken).not.toBe(
-        body.refreshToken,
-      );
+      expect(refreshTokenIn(next)).not.toBe(refreshTokenIn(body.cookie));
+      await refreshWith(next).expect(200);
     });
 
-    it('should reject a refresh token that has already been rotated', async () => {
+    it('should reject a refresh cookie that has already been rotated', async () => {
       const body = await login();
-      const sessionId = await sessionIdOf(body.user.id);
 
-      await request(app.getHttpServer())
-        .post('/auth/refresh')
-        .send({ sessionId, refreshToken: body.refreshToken })
-        .expect(200);
+      await refreshWith(body.cookie).expect(200);
 
-      await request(app.getHttpServer())
-        .post('/auth/refresh')
-        .send({ sessionId, refreshToken: body.refreshToken })
-        .expect(401);
+      await refreshWith(body.cookie).expect(401);
     });
 
-    it('should revoke every session for the user when a rotated token is replayed', async () => {
+    it('should revoke every session for the user when a rotated cookie is replayed', async () => {
       const first = await login();
-      const sessionId = await sessionIdOf(first.user.id);
+      const second = await login();
 
-      await login();
+      const rotated = refreshCookieFrom(
+        await refreshWith(first.cookie).expect(200),
+      );
 
-      await request(app.getHttpServer())
-        .post('/auth/refresh')
-        .send({ sessionId, refreshToken: first.refreshToken })
-        .expect(200);
-
-      await request(app.getHttpServer())
-        .post('/auth/refresh')
-        .send({ sessionId, refreshToken: first.refreshToken })
-        .expect(401);
+      await refreshWith(first.cookie).expect(401);
 
       const sessions = await dataSource.getRepository(Session).find();
 
+      expect(sessions).toHaveLength(2);
       expect(sessions.every((session) => session.revokedAt !== null)).toBe(
         true,
       );
+      await refreshWith(rotated).expect(401);
+      await refreshWith(second.cookie).expect(401);
+      await request(app.getHttpServer())
+        .get('/auth/me')
+        .set('Authorization', `Bearer ${second.accessToken}`)
+        .expect(401);
     });
 
     it('should reject a refresh token for an unknown session', async () => {
@@ -175,38 +174,30 @@ describe('sessions and revocation (e2e)', () => {
 
       await request(app.getHttpServer())
         .post('/auth/refresh')
-        .send({
-          sessionId: '00000000-0000-0000-0000-000000000000',
-          refreshToken: body.refreshToken,
-        })
+        .set(
+          'Cookie',
+          `${REFRESH_COOKIE_NAME}=00000000-0000-0000-0000-000000000000.${refreshTokenIn(body.cookie)}`,
+        )
         .expect(401);
     });
 
     it('should be reachable without an access token', async () => {
       const body = await login();
-      const sessionId = await sessionIdOf(body.user.id);
 
-      await request(app.getHttpServer())
-        .post('/auth/refresh')
-        .send({ sessionId, refreshToken: body.refreshToken })
-        .expect(200);
+      await refreshWith(body.cookie).expect(200);
     });
   });
 
   describe('POST /auth/logout', () => {
     it('should stop the session obtaining new access tokens', async () => {
       const body = await login();
-      const sessionId = await sessionIdOf(body.user.id);
 
       await request(app.getHttpServer())
         .post('/auth/logout')
         .set('Authorization', `Bearer ${body.accessToken}`)
         .expect(204);
 
-      await request(app.getHttpServer())
-        .post('/auth/refresh')
-        .send({ sessionId, refreshToken: body.refreshToken })
-        .expect(401);
+      await refreshWith(body.cookie).expect(401);
     });
 
     it('should reject the access token it was issued with, immediately', async () => {

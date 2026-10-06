@@ -5,6 +5,7 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import type { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
+import { configureHttp } from './../src/configure-http';
 import {
   authenticate,
   closeTestDataSource,
@@ -27,6 +28,7 @@ describe('pagination (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
+    configureHttp(app);
     await app.init();
 
     alice = await authenticate(app.getHttpServer(), 'alice');

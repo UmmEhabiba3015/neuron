@@ -9,8 +9,11 @@ import { SessionsRepository } from './sessions.repository';
 import { TokenService } from './token.service';
 
 export const REFRESH_TOKEN_LIFETIME_DAYS = 30;
+export const REFRESH_TOKEN_LIFETIME_MS =
+  REFRESH_TOKEN_LIFETIME_DAYS * 86_400_000;
 
 export interface AuthenticatedSession {
+  sessionId: string;
   accessToken: string;
   refreshToken: string;
   user: User;
@@ -81,6 +84,7 @@ export class AuthService {
     );
 
     return {
+      sessionId: session.id,
       accessToken: await this.tokenService.sign(user, session.id),
       refreshToken: nextRefreshToken,
       user,
@@ -109,13 +113,14 @@ export class AuthService {
     session.refreshTokenHash = this.refreshTokenService.hash(refreshToken);
     session.createdAt = toIso(now);
     session.expiresAt = toIso(
-      new Date(now.getTime() + REFRESH_TOKEN_LIFETIME_DAYS * 86_400_000),
+      new Date(now.getTime() + REFRESH_TOKEN_LIFETIME_MS),
     );
     session.revokedAt = null;
 
     await this.sessionsRepository.save(session);
 
     return {
+      sessionId: session.id,
       accessToken: await this.tokenService.sign(user, session.id),
       refreshToken,
       user,

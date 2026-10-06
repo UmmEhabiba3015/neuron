@@ -5,6 +5,7 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import type { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
+import { configureHttp } from './../src/configure-http';
 import { Session } from './../src/auth/session.entity';
 import { User } from './../src/users/user.entity';
 import { closeTestDataSource, createTestDataSource } from './test-database';
@@ -27,6 +28,7 @@ describe('AuthController (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
+    configureHttp(app);
     await app.init();
   });
 
