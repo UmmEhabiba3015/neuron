@@ -1,9 +1,14 @@
 /*
  * The session: who is signed in, and how every request to the API is sent.
  *
- * This file imports nothing, from React, from Next or from anywhere else, so
- * that it can be tested with Node alone. The address of the API and the
- * function that sends a request are both handed in.
+ * This file imports nothing that exists when it runs, from React, from Next
+ * or from anywhere else, so that it can be tested with Node alone. The
+ * address of the API and the function that sends a request are both handed
+ * in.
+ *
+ * The one import below is of types, and the word `type` matters: Node removes
+ * such an import before running the file, so it never looks for the package.
+ * Without the word, the tests would stop being Node alone.
  *
  * The four rules are the owner's (ADR-018, and the Day 15c prompt):
  *
@@ -20,11 +25,7 @@
  * user has (ADR-014).
  */
 
-export interface SessionUser {
-  id: string;
-  email: string;
-  createdAt: string;
-}
+import type { WireAuthenticated, WireUser } from '@neuron/contracts';
 
 /*
  * `unknown` means the first refresh has not answered yet. `unreachable` means
@@ -37,7 +38,7 @@ export interface SessionUser {
 export type SessionState =
   | { status: 'unknown' }
   | { status: 'unreachable' }
-  | { status: 'signedIn'; user: SessionUser }
+  | { status: 'signedIn'; user: WireUser }
   | { status: 'signedOut'; ended: boolean };
 
 /*
@@ -71,8 +72,8 @@ export interface Session {
   getState(): SessionState;
   subscribe(listener: () => void): () => void;
   restore(): Promise<SessionState>;
-  login(email: string, password: string): Promise<ApiResult<SessionUser>>;
-  register(email: string, password: string): Promise<ApiResult<SessionUser>>;
+  login(email: string, password: string): Promise<ApiResult<WireUser>>;
+  register(email: string, password: string): Promise<ApiResult<WireUser>>;
   request<T>(path: string, options?: RequestOptions): Promise<ApiResult<T>>;
 }
 
@@ -102,11 +103,8 @@ export function createSession(config: {
     listeners.forEach((listener) => listener());
   }
 
-  function signIn(body: unknown): SessionUser {
-    const { accessToken: token, user } = body as {
-      accessToken: string;
-      user: SessionUser;
-    };
+  function signIn(body: unknown): WireUser {
+    const { accessToken: token, user } = body as WireAuthenticated;
 
     accessToken = token;
     setState({ status: 'signedIn', user });
@@ -286,7 +284,7 @@ export function createSession(config: {
   async function login(
     email: string,
     password: string,
-  ): Promise<ApiResult<SessionUser>> {
+  ): Promise<ApiResult<WireUser>> {
     const answer = await send(
       '/auth/login',
       { method: 'POST', body: { email, password } },
@@ -297,14 +295,14 @@ export function createSession(config: {
       return { kind: 'ok', data: signIn(answer.body) };
     }
 
-    return resultOf<SessionUser>(answer);
+    return resultOf<WireUser>(answer);
   }
 
   async function register(
     email: string,
     password: string,
-  ): Promise<ApiResult<SessionUser>> {
-    return resultOf<SessionUser>(
+  ): Promise<ApiResult<WireUser>> {
+    return resultOf<WireUser>(
       await send(
         '/auth/register',
         { method: 'POST', body: { email, password } },

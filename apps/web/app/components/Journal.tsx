@@ -1,3 +1,4 @@
+import { MOODS } from '@neuron/contracts';
 import type { ReactNode } from 'react';
 import { WAVEFORMS } from '@/lib/waveform';
 import type { Platform } from '@/lib/platform';
@@ -146,8 +147,6 @@ export function Recording({
     </div>
   );
 }
-
-const MOODS = ['Hard', 'Low', 'Even', 'Good', 'Light'] as const;
 
 export function MoodRow() {
   return (

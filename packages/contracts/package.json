@@ -1,0 +1,11 @@
+{
+  "name": "@neuron/contracts",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"test/**/*.test.mjs\""
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

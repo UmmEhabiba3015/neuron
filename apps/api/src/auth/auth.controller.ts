@@ -10,6 +10,7 @@ import {
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
+import type { WireAuthenticated, WireUser } from '@neuron/contracts';
 import type { Request, Response } from 'express';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
@@ -26,12 +27,6 @@ import { RegisterDto } from './register.dto';
 import type { AuthenticatedRequest } from './authenticated-request';
 import type { AuthenticatedSession } from './auth.service';
 import type { Session } from './session.entity';
-import type { User } from '../users/user.entity';
-
-export interface AuthenticatedResponse {
-  accessToken: string;
-  user: User;
-}
 
 @Controller('auth')
 export class AuthController {
@@ -42,7 +37,7 @@ export class AuthController {
 
   @Public()
   @Post('register')
-  async register(@Body() dto: RegisterDto): Promise<User> {
+  async register(@Body() dto: RegisterDto): Promise<WireUser> {
     const user = await this.usersService.register(dto.email, dto.password);
 
     if (!user) {
@@ -58,7 +53,7 @@ export class AuthController {
   async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<AuthenticatedResponse> {
+  ): Promise<WireAuthenticated> {
     const session = await this.authService.login(dto.email, dto.password);
 
     if (!session) {
@@ -69,7 +64,7 @@ export class AuthController {
   }
 
   @Get('me')
-  me(@Req() request: AuthenticatedRequest): User {
+  me(@Req() request: AuthenticatedRequest): WireUser {
     return request.user;
   }
 
@@ -79,7 +74,7 @@ export class AuthController {
   async refresh(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<AuthenticatedResponse> {
+  ): Promise<WireAuthenticated> {
     const cookies = request.cookies as Record<string, unknown> | undefined;
     const credential = unpackRefreshCookie(cookies?.[REFRESH_COOKIE_NAME]);
 
@@ -132,7 +127,7 @@ export class AuthController {
   private respondWith(
     session: AuthenticatedSession,
     response: Response,
-  ): AuthenticatedResponse {
+  ): WireAuthenticated {
     response.cookie(
       REFRESH_COOKIE_NAME,
       packRefreshCookie(session),

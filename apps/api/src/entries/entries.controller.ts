@@ -10,17 +10,21 @@ import {
   Query,
   Req,
 } from '@nestjs/common';
+import { DEFAULT_PAGE_SIZE, type WireEntry } from '@neuron/contracts';
 import type { AuthenticatedRequest } from '../auth/authenticated-request';
 import { EntriesService } from './entries.service';
 import { CreateEntryDto } from './create-entry.dto';
 import { CountEntriesQueryDto } from './count-entries-query.dto';
 import type { EntryFilters } from './entry-filters';
 import { FindEntriesQueryDto } from './find-entries-query.dto';
-import { DEFAULT_PAGE_SIZE } from './page';
 import { UpdateEntryDto } from './update-entry.dto';
 
-import type { JournalEntry } from './entry.entity';
-
+/*
+ * Every handler here answers with the contract's WireEntry, and hands back
+ * the JournalEntry entity the service gave it. That assignment is the check:
+ * if the entity stops having what the contract promises, this file stops
+ * compiling.
+ */
 @Controller('entries')
 export class EntriesController {
   constructor(private readonly entriesService: EntriesService) {}
@@ -38,7 +42,7 @@ export class EntriesController {
   findAll(
     @Query() query: FindEntriesQueryDto,
     @Req() request: AuthenticatedRequest,
-  ): Promise<JournalEntry[]> {
+  ): Promise<WireEntry[]> {
     return this.entriesService.find(request.user.id, filtersFrom(query), {
       limit: query.limit ?? DEFAULT_PAGE_SIZE,
       offset: query.offset ?? 0,
@@ -49,7 +53,7 @@ export class EntriesController {
   create(
     @Body() dto: CreateEntryDto,
     @Req() request: AuthenticatedRequest,
-  ): Promise<JournalEntry> {
+  ): Promise<WireEntry> {
     return this.entriesService.create(dto.content, request.user.id);
   }
 
@@ -80,7 +84,7 @@ export class EntriesController {
   async findById(
     @Param('id') id: string,
     @Req() request: AuthenticatedRequest,
-  ): Promise<JournalEntry> {
+  ): Promise<WireEntry> {
     const entry = await this.entriesService.findById(id, request.user.id);
 
     if (!entry) {
@@ -95,7 +99,7 @@ export class EntriesController {
     @Param('id') id: string,
     @Body() dto: UpdateEntryDto,
     @Req() request: AuthenticatedRequest,
-  ): Promise<JournalEntry> {
+  ): Promise<WireEntry> {
     const updated = await this.entriesService.update(
       id,
       dto.content!,
@@ -113,7 +117,7 @@ export class EntriesController {
   async delete(
     @Param('id') id: string,
     @Req() request: AuthenticatedRequest,
-  ): Promise<JournalEntry> {
+  ): Promise<WireEntry> {
     const deleted = await this.entriesService.delete(id, request.user.id);
 
     if (!deleted) {

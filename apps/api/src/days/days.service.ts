@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { dayFor } from './day-boundary';
 import { DaysRepository } from './days.repository';
-import type { Day, Mood } from './day.entity';
+import type { Mood } from '@neuron/contracts';
+import type { Day } from './day.entity';
 
 @Injectable()
 export class DaysService {

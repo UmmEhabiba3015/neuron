@@ -25,6 +25,7 @@
     "migration:revert": "node --env-file-if-exists=../../.env node_modules/typeorm/cli-ts-node-commonjs.js migration:revert --dataSource src/database/data-source.ts"
   },
   "dependencies": {
+    "@neuron/contracts": "workspace:*",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",

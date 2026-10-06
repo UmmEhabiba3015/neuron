@@ -1,24 +1,22 @@
 'use client';
 
+import { MAX_PAGE_SIZE, type WireDay, type WireEntry } from '@neuron/contracts';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { BlankScreen } from '@/app/components/AuthScreen';
 import { KeyBox, LiveScreen } from '@/app/components/LiveScreen';
 import { Composer, Entry, MoodRow } from '@/app/components/Journal';
 import { useSession } from '@/app/components/useSession';
-import { session, type Day, type JournalEntry } from '@/lib/api';
+import { session } from '@/lib/api';
 import { formatDay, formatTime } from '@/lib/format';
 import { CouldNotConnect } from './CouldNotConnect';
-
-/* The largest page the API serves (apps/api/src/entries/page.ts). */
-const PAGE_SIZE = 200;
 
 /*
  * `ended` is not a failure of this screen. The session module has already
  * recorded that the person is signed out, and the screen leaves for /in.
  */
 type Fetched =
-  | { status: 'loaded'; day: Day; entries: JournalEntry[] }
+  | { status: 'loaded'; day: WireDay; entries: WireEntry[] }
   | { status: 'unreachable' }
   | { status: 'failed' }
   | { status: 'ended' };
@@ -31,17 +29,18 @@ type Load = { status: 'loading' } | Exclude<Fetched, { status: 'ended' }>;
  * 4am by the API's clock and not at midnight by this device's (ADR-015).
  */
 async function fetchToday(): Promise<Fetched> {
-  const day = await session.request<Day>('/days/today');
+  const day = await session.request<WireDay>('/days/today');
 
   if (day.kind !== 'ok') {
     return { status: statusOf(day.kind) };
   }
 
-  const entries: JournalEntry[] = [];
+  const entries: WireEntry[] = [];
 
+  /* The largest page the API serves, so a day is one request in practice. */
   for (;;) {
-    const page = await session.request<JournalEntry[]>(
-      `/entries?date=${day.data.date}&limit=${PAGE_SIZE}&offset=${entries.length}`,
+    const page = await session.request<WireEntry[]>(
+      `/entries?date=${day.data.date}&limit=${MAX_PAGE_SIZE}&offset=${entries.length}`,
     );
 
     if (page.kind !== 'ok') {
@@ -50,7 +49,7 @@ async function fetchToday(): Promise<Fetched> {
 
     entries.push(...page.data);
 
-    if (page.data.length < PAGE_SIZE) {
+    if (page.data.length < MAX_PAGE_SIZE) {
       break;
     }
   }

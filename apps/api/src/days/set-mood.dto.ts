@@ -1,5 +1,5 @@
+import { MOODS, type Mood } from '@neuron/contracts';
 import { IsIn, ValidateIf } from 'class-validator';
-import { MOODS, type Mood } from './day.entity';
 
 /*
  * Five words, or null to clear it.

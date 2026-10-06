@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, DataSource, QueryFailedError, Repository } from 'typeorm';
-import { Day, type Mood } from './day.entity';
+import type { Mood } from '@neuron/contracts';
+import { Day } from './day.entity';
 
 @Injectable()
 export class DaysRepository {

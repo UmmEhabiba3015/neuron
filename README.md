@@ -259,7 +259,10 @@ pnpm test:e2e   # run the API's end-to-end tests
 
 ```
 apps/
-  api/    NestJS API (the only app so far)
+  api/    NestJS API
+  web/    Next.js web app
+packages/
+  contracts/   what crosses between the two apps, stated once
 docs/
   decisions/        Architecture Decision Records (ADRs)
   learning/         day-by-day learning notes and worker reports
@@ -270,6 +273,14 @@ docs/
   SETUP.md          how to continue this project on another machine
 ```
 
-There is no `packages/` directory yet — it's intentionally deferred until
-the API and web app both exist and actually need to share code. See
-[ADR-001](docs/decisions/ADR-001-monorepo.md) for why.
+`packages/contracts` holds the facts both apps must agree on: the shape of
+an entry, a day and the signed-in user as they travel over HTTP, the mood
+words, the page sizes and the password minimum. It imports nothing and
+contains no function. Both apps import it as `@neuron/contracts`. See
+[ADR-019](docs/decisions/ADR-019-shared-contracts-package.md).
+
+The package is TypeScript source and has no build step. `pnpm install` links
+it into both apps, and that is all a fresh clone needs. `pnpm test:contracts`
+runs its two checks: that it still imports nothing, and that neither app has
+written one of its values out again by hand. `pnpm test` and `pnpm test:web`
+run those checks first.

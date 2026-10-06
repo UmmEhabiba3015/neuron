@@ -1,18 +1,16 @@
+import { MAX_PAGE_SIZE } from '@neuron/contracts';
+
 export interface Page {
   limit: number;
   offset: number;
 }
-
-export const DEFAULT_PAGE_SIZE = 50;
-export const MAX_PAGE_SIZE = 200;
 
 /*
  * The default for a call inside the application. The HTTP boundary always
  * passes a real page, because the controller defaults an absent limit to
  * DEFAULT_PAGE_SIZE.
  *
- * These live here rather than on the query DTO so that importing them does
- * not drag class-validator's decorators -- and therefore reflect-metadata --
- * into code that only wants two numbers.
+ * The two page sizes are the contract's, because the web app asks for pages
+ * too (ADR-019).
  */
 export const FULL_PAGE: Page = { limit: MAX_PAGE_SIZE, offset: 0 };

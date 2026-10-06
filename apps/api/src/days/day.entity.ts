@@ -1,9 +1,6 @@
+import type { Mood } from '@neuron/contracts';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { User } from '../users/user.entity';
-
-export const MOODS = ['Hard', 'Low', 'Even', 'Good', 'Light'] as const;
-
-export type Mood = (typeof MOODS)[number];
 
 @Entity({ name: 'days' })
 export class Day {

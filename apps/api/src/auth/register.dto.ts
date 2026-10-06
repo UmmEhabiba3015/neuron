@@ -1,3 +1,4 @@
+import { PASSWORD_MIN_LENGTH } from '@neuron/contracts';
 import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class RegisterDto {
@@ -11,7 +12,7 @@ export class RegisterDto {
   email: string;
 
   @IsString()
-  @MinLength(8)
+  @MinLength(PASSWORD_MIN_LENGTH)
   @MaxLength(128)
   password: string;
 }

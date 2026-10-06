@@ -1,20 +1,11 @@
 import { Body, Controller, Get, Param, Put, Query, Req } from '@nestjs/common';
+import type { WireDay } from '@neuron/contracts';
 import type { AuthenticatedRequest } from '../auth/authenticated-request';
 import type { Day } from './day.entity';
 import { DayDateParamDto } from './day-date.dto';
 import { DaysRangeQueryDto } from './days-range-query.dto';
 import { DaysService } from './days.service';
 import { SetMoodDto } from './set-mood.dto';
-
-/*
- * What a day looks like on the wire. The entity carries user_id, which is
- * select:false and never leaves the server, so the response shape is stated
- * here rather than being whatever the entity happens to hold.
- */
-export interface DayResponse {
-  date: string;
-  mood: string | null;
-}
 
 @Controller('days')
 export class DaysController {
@@ -29,7 +20,7 @@ export class DaysController {
   async findInRange(
     @Query() query: DaysRangeQueryDto,
     @Req() request: AuthenticatedRequest,
-  ): Promise<DayResponse[]> {
+  ): Promise<WireDay[]> {
     const days = await this.daysService.findInRange(
       request.user.id,
       query.from,
@@ -46,7 +37,7 @@ export class DaysController {
    * 400.
    */
   @Get('today')
-  async findToday(@Req() request: AuthenticatedRequest): Promise<DayResponse> {
+  async findToday(@Req() request: AuthenticatedRequest): Promise<WireDay> {
     const { date, day } = await this.daysService.findToday(request.user.id);
 
     return day ? toResponse(day) : { date, mood: null };
@@ -62,7 +53,7 @@ export class DaysController {
   async findByDate(
     @Param() params: DayDateParamDto,
     @Req() request: AuthenticatedRequest,
-  ): Promise<DayResponse> {
+  ): Promise<WireDay> {
     const day = await this.daysService.findByDate(request.user.id, params.date);
 
     return day ? toResponse(day) : { date: params.date, mood: null };
@@ -82,7 +73,7 @@ export class DaysController {
     @Param() params: DayDateParamDto,
     @Body() dto: SetMoodDto,
     @Req() request: AuthenticatedRequest,
-  ): Promise<DayResponse> {
+  ): Promise<WireDay> {
     const day = await this.daysService.setMood(
       request.user.id,
       params.date,
@@ -93,6 +84,11 @@ export class DaysController {
   }
 }
 
-function toResponse(day: Day): DayResponse {
+/*
+ * A day as it travels is the contract's WireDay. The entity also carries
+ * user_id, which is select:false and never leaves the server, so the answer
+ * is built field by field rather than being whatever the entity holds.
+ */
+function toResponse(day: Day): WireDay {
   return { date: day.date, mood: day.mood };
 }

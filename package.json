@@ -10,7 +10,7 @@
     "build": "pnpm --filter @neuron/api build",
     "lint": "pnpm --filter @neuron/api lint",
     "typecheck": "pnpm --filter @neuron/api typecheck",
-    "test": "pnpm --filter @neuron/api test",
+    "test": "pnpm test:contracts && pnpm --filter @neuron/api test",
     "test:e2e": "pnpm --filter @neuron/api test:e2e",
     "migration:generate": "pnpm --filter @neuron/api migration:generate",
     "migration:run": "pnpm --filter @neuron/api migration:run",
@@ -19,6 +19,7 @@
     "build:web": "pnpm --filter @neuron/web build",
     "lint:web": "pnpm --filter @neuron/web lint",
     "typecheck:web": "pnpm --filter @neuron/web typecheck",
-    "test:web": "pnpm --filter @neuron/web test"
+    "test:web": "pnpm test:contracts && pnpm --filter @neuron/web test",
+    "test:contracts": "pnpm --filter @neuron/contracts test"
   }
 }

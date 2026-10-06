@@ -1,5 +1,6 @@
 'use client';
 
+import { PASSWORD_MIN_LENGTH } from '@neuron/contracts';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
@@ -27,7 +28,7 @@ type Outcome =
   | { kind: 'unreachable' }
   | { kind: 'failed' };
 
-const PASSWORD_MINIMUM = 8;
+const TOO_SHORT = `That is shorter than ${PASSWORD_MIN_LENGTH} characters.`;
 
 const WORDS = {
   in: {
@@ -148,7 +149,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
     (outcome.kind === 'refused'
       ? 'Check your email and password, then try again.'
       : mode === 'new'
-        ? 'Use at least 8 characters. A few unrelated words work well.'
+        ? `Use at least ${PASSWORD_MIN_LENGTH} characters. A few unrelated words work well.`
         : undefined);
 
   return (
@@ -302,8 +303,8 @@ function checkFields(
 
   if (mode === 'in' && password === '') {
     sentences.password = 'Enter your password.';
-  } else if (mode === 'new' && password.length < PASSWORD_MINIMUM) {
-    sentences.password = 'That is shorter than 8 characters.';
+  } else if (mode === 'new' && password.length < PASSWORD_MIN_LENGTH) {
+    sentences.password = TOO_SHORT;
   }
 
   return sentences;
@@ -347,7 +348,7 @@ function inProductWords(message: string): string {
   }
 
   if (message.startsWith('password must be longer than or equal to')) {
-    return 'That is shorter than 8 characters.';
+    return TOO_SHORT;
   }
 
   return asSentence(message);
