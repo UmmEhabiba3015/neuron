@@ -12,9 +12,8 @@ import type { SessionState } from '@/lib/session';
 const NOT_YET_KNOWN: SessionState = { status: 'unknown' };
 
 /*
- * The session, for a screen. Every screen that uses this asks for the
- * on-load refresh when it mounts. React in development mounts twice, and the
- * session module shares that refresh, so one request is sent.
+ * React in development mounts twice, and the session module shares the
+ * on-load refresh, so one request is sent.
  */
 export function useSession(): SessionState {
   const state = useSyncExternalStore(

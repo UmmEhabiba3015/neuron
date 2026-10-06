@@ -102,11 +102,6 @@ describe('mood (e2e)', () => {
     await setMood(alice, 'not-a-date', 'Even').expect(400);
   });
 
-  /*
-   * A day nobody has written to is not a 404. It is a real day with nothing
-   * on it, and the screen for it has to render. Same rule as ADR-005's empty
-   * collection: an empty answer is a complete answer.
-   */
   it('answers for a day that has never been touched', async () => {
     const read = await request(app.getHttpServer())
       .get('/days/2020-01-01')

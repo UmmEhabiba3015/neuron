@@ -11,11 +11,6 @@ import { SetMoodDto } from './set-mood.dto';
 export class DaysController {
   constructor(private readonly daysService: DaysService) {}
 
-  /*
-   * The calendar zoom paints which dates have content. It needs the dates,
-   * not the writing on them: returning the days themselves would send a
-   * month of prose to draw a grid of squares.
-   */
   @Get()
   async findInRange(
     @Query() query: DaysRangeQueryDto,
@@ -60,13 +55,8 @@ export class DaysController {
   }
 
   /*
-   * PUT rather than PATCH: mood is one field with one value, and setting it
-   * twice has the same result as setting it once.
-   *
    * Setting a mood creates the day if it does not exist, which is the one
-   * place a day is born without an entry. "An empty day does not exist"
-   * governs what is rendered and what a deleted last entry leaves behind;
-   * a day someone has deliberately marked is not empty.
+   * place a day is born without an entry.
    */
   @Put(':date/mood')
   async setMood(

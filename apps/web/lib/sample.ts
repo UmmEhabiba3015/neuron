@@ -1,13 +1,6 @@
 /*
- * Sample content, lifted from the design comps.
- *
- * The designs are explicit that content is part of the deliverable and that
- * a screen making a false statement about the user's own record is a defect
- * a mechanical check cannot see (PROJECT.md section 9). So these are the
- * comps' own entries, dates and durations rather than invented ones, and the
- * totals below agree with the rows.
- *
- * This file goes when the API arrives. Nothing imports it except screens.
+ * The comps' own entries, dates and durations rather than invented ones, and
+ * the totals below agree with the rows (PROJECT.md section 9).
  */
 
 export type TimelineItem =

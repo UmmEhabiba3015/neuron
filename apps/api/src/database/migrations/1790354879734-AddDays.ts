@@ -1,27 +1,13 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 /*
- * The generated version of this migration was 506 lines and rebuilt all four
- * tables. It was discarded for the same defect Day 8 found in
- * AddUserPasswordHash: it created entries.day_id as NOT NULL and then copied
- * the rows without supplying a value, which passes on an empty table and
- * fails as soon as one entry exists. It also dropped UQ_users_name.
- *
- * This is written by hand and does three things:
- *
- *   1. creates days, with UNIQUE(user_id, date) as the business key
- *   2. adds entries.day_id, nullable, so the copy is not needed at all
- *   3. backfills a day for every entry that already has one, and points the
- *      entry at it
- *
- * day_id stays nullable here. Making it NOT NULL is the contract step of
- * expand-backfill-contract and belongs in its own migration, after the
- * application has been writing it for a while. Day 10 made the same split
- * for user_id and it is the reason that one was safe.
+ * Written by hand. The generated version created entries.day_id as NOT NULL
+ * and then copied the rows without supplying a value, which passes on an
+ * empty table and fails as soon as one entry exists. It also dropped
+ * UQ_users_name.
  *
  * The backfill computes the day in UTC, which is the deferral recorded in
- * ADR-015: there is no timezone on a user yet. Rows written from here on get
- * their day resolved the same way at write time, so nothing moves later.
+ * ADR-015.
  */
 export class AddDays1790354879734 implements MigrationInterface {
   name = 'AddDays1790354879734';

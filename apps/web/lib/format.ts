@@ -15,12 +15,8 @@ const MONTHS = [
 ];
 
 /*
- * "2026-08-09" becomes "Sun 9 Aug '26", the form the date box uses in the
- * comps.
- *
- * The date is the API's and is only being written out differently. It is
- * read as three numbers and never as a moment in time, so the timezone of
- * the browser cannot move it to the day before or after.
+ * The date is read as three numbers and never as a moment in time, so the
+ * timezone of the browser cannot move it to the day before or after.
  */
 export function formatDay(date: string): string {
   const [year, month, day] = date.split('-').map(Number);

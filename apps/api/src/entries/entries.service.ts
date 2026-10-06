@@ -67,9 +67,6 @@ export class EntriesService {
     return this.entriesRepository.update(id, content, userId);
   }
 
-  /*
-   * Deleting the last item on a day deletes the day. See discardIfEmpty.
-   */
   async delete(id: string, userId: string): Promise<JournalEntry | undefined> {
     const existing = await this.entriesRepository.findWithDay(id, userId);
 

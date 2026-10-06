@@ -1,23 +1,12 @@
 /*
- * The live shell.
+ * lock.css section 2.1 is the presentation stage for comps, not product.
+ * Every rule below overrides a declaration from 2.1 or hides .chrome, and
+ * nothing else: no component, colour, type scale, rule weight or spacing
+ * token is touched.
  *
- * lock.css section 2.1 is labelled "The presentation stage. NOT PRODUCT."
- * It paints a grey mount, centres a fixed-width .device on it with a drop
- * shadow, and draws a fake browser bar. That is how a comp is presented for
- * review; it is not how the product runs, and PROJECT.md is explicit that
- * "the web app is the whole product, not a shopfront."
- *
- * This file neutralises that stage and nothing else. Every rule below
- * overrides a declaration from 2.1 or hides .chrome. No component, colour,
- * type scale, rule weight or spacing token is touched, so the direction lock
- * holds in full.
- *
- * The layout then works on its own. Sections 4 and 5 are CONTAINER queries
- * keyed on .app, not media queries, and direction-lock.md 12.6 states the
- * reason in the terms this file needs: the layout "depends on how wide the
- * app is, which in production is the viewport and in a comp is the device."
- * Letting .app be the viewport is therefore the designed behaviour, not an
- * override of it.
+ * Sections 4 and 5 of lock.css are container queries keyed on .app, so
+ * letting .app be the viewport is the designed behaviour, not an override of
+ * it.
  */
 
 body {
@@ -38,21 +27,14 @@ body {
 }
 
 /*
- * The one thing a container query cannot do: the desktop comp HOISTS the
- * wordmark, date box, destinations and glance out of .page into a .title
- * block, which section 5 then positions absolutely in a 360px sidebar. That
- * is a change of markup, not of style, and the comps solve it by being three
- * separate files.
+ * The desktop comp hoists the wordmark, date box, destinations and glance out
+ * of .page into .title, which is a change of markup and not of style. A
+ * single live page therefore renders both, and the container query chooses
+ * between them.
  *
- * A single live page therefore renders both and lets the same container
- * query that drives the rest of the layout choose between them, so the
- * threshold stays the one lock.css already states rather than a second one
- * written here. .mast is the mobile and tablet header; .title is desktop's.
- *
- * .mast is only hidden, never given a display value. lock.css leaves it a
- * plain block at mobile, where the wordmark and the date box stack, and turns
- * it into a flex row itself at the 700 threshold. Declaring display:flex here
- * put the tablet masthead on the 390 layout and collided the two.
+ * .mast is only hidden, never given a display value. lock.css turns it into a
+ * flex row itself at the 700 threshold, and declaring display:flex here put
+ * the tablet masthead on the 390 layout.
  */
 
 .app > .title { display: none; }
@@ -85,15 +67,10 @@ body {
 }
 
 /*
- * The waveform is authored per platform rather than scaled, and
- * direction-lock.md 12.7 gives the reason: tick weight is held at 1.769 and
- * pitch at 6.18-6.21px at every width by re-authoring the viewBox, which is
- * what lets one "45px a frame" motion ceiling cover all three platforms.
- * Scaling one SVG would draw the same recording at more than twice the tick
- * weight at 1440.
- *
- * Three are rendered and the width picks one, on the same two thresholds
- * lock.css already uses.
+ * The waveform is authored per platform rather than scaled (direction-lock.md
+ * 12.7), so three are rendered and the width picks one, on the same two
+ * thresholds lock.css already uses. Scaling one SVG would draw the same
+ * recording at more than twice the tick weight at 1440.
  */
 
 .wave[data-w="tablet"],

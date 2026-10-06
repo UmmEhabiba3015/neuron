@@ -25,11 +25,6 @@ export class EntriesRepository {
     });
   }
 
-  /*
-   * The same where clause the listing uses, so the two cannot disagree.
-   * They did: count ignored the search term entirely, so counting a search
-   * returned the size of the whole journal.
-   */
   count(userId: string, filters: EntryFilters): Promise<number> {
     return this.entries.count({ where: whereFor(userId, filters) });
   }
@@ -95,9 +90,8 @@ export class EntriesRepository {
 
 /*
  * One place that turns filters into a where clause. Every read that answers
- * "which entries" goes through it -- the listing, the search and the count --
- * so a filter added here reaches all of them at once. Three separate clauses
- * is how count came to ignore the search term.
+ * "which entries" goes through it, so a filter added here reaches the
+ * listing, the search and the count at once.
  */
 function whereFor(
   userId: string,

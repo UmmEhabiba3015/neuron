@@ -24,9 +24,8 @@ type Fetched =
 type Load = { status: 'loading' } | Exclude<Fetched, { status: 'ended' }>;
 
 /*
- * Two requests, the second depending on the first. The date is the API's:
- * the browser never works out which day "today" is, because the day ends at
- * 4am by the API's clock and not at midnight by this device's (ADR-015).
+ * The date is the API's: the browser never works out which day "today" is
+ * (ADR-015).
  */
 async function fetchToday(): Promise<Fetched> {
   const day = await session.request<WireDay>('/days/today');
@@ -37,7 +36,6 @@ async function fetchToday(): Promise<Fetched> {
 
   const entries: WireEntry[] = [];
 
-  /* The largest page the API serves, so a day is one request in practice. */
   for (;;) {
     const page = await session.request<WireEntry[]>(
       `/entries?date=${day.data.date}&limit=${MAX_PAGE_SIZE}&offset=${entries.length}`,

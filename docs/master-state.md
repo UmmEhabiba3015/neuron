@@ -16,79 +16,160 @@ the recovery cost most of a working session.
 
 ---
 
-**Last updated:** 2026-10-06, at the close of Day 15.
+**Last updated:** 2026-10-07, at the close of Day 16.
 
-**Current day:** Days 0–15 are **complete and merged**. Phase 3 is open.
-**A fresh thread needs two sections, in this order: *How to open the next
-session with her*, then *Day 15, compressed*.** Both are directly below.
+**Current day:** Days 0–16 are **complete**. Phase 3 is open. **A fresh
+thread needs three sections, in this order: *How to open the next session
+with her*, *Day 16, compressed*, then *Day 15, compressed*.** All three are
+directly below.
 
-**Current branch:** `main`. Day 15 is three commits, `4fc1a40`, `a9efb35` and
-the documentation commit that follows them. Days 9 onward were committed
-straight to `main` rather than through pull requests. Four older merged
-branches still exist locally and on the remote (`day-02-persistence`,
-`day-06-configuration`, `day-07-validation`, `day-08-identity`); they were
-deliberately left rather than deleted.
+**Current branch:** `main`. Days 9 onward were committed straight to `main`
+rather than through pull requests. Four older merged branches still exist
+locally and on the remote (`day-02-persistence`, `day-06-configuration`,
+`day-07-validation`, `day-08-identity`); they were deliberately left rather
+than deleted.
 
-**Verified on 2026-10-06, by re-running rather than by reading a report:**
-`pnpm lint`, `pnpm typecheck` and `pnpm build` pass. `pnpm test` passes with
-**175** tests. `pnpm test:e2e` passes with **232** tests. `pnpm lint:web`,
-`pnpm typecheck:web` and `pnpm build:web` pass, and `pnpm test:web` passes
-with **15** tests. 18 ADRs.
+**Verified on 2026-10-07, by re-running rather than by reading a report.**
+All nine commands pass:
 
-**The daily check now has eight commands, not five.** The root `lint`,
-`typecheck` and `build` cover the API only. A web commit went in before Day 15
-with `typecheck:web` red, and nothing noticed. Run the four `:web` commands
-every day from here on.
+```bash
+pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
+pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
+```
+
+**194** API unit tests, **236** API end-to-end tests, **15** web tests, and
+**6** checks on the shared package, which `pnpm test` and `pnpm test:web`
+both run first. 19 ADRs. Nine migrations.
+
+**Run all nine every day.** The root `lint`, `typecheck` and `build` cover
+the API only. A web commit went in before Day 15 with `typecheck:web` red,
+and nothing noticed.
 
 ---
 
 ## How to open the next session with her
 
-**Day 16 is next.** She was present for all of Day 15 and made every decision
-in it. Her husband's rulings of 2026-10-04 were presented to her at the start
-of Day 15 and she raised no objection to any of them.
+**Day 17 is next.** No learning debt is open.
 
-**Open Day 16 in this order.**
+**The order of the next three days, decided by her on Day 16.**
 
-1. **Re-test three ideas from Day 15, without notes, each with an
-   experiment.** Many of the day's answers arrived as pasted, formatted text,
-   and the record cannot tell how they were produced. That is not an
-   accusation; it is the reason to check that the ideas lasted. The three
-   worth asking: what CORS stops and what it does not; why the Today screen
-   must be a client component; and why two refresh requests sent together
-   sign the user out. If one has not lasted, teach it again before going on.
-   **Then repay the one open learning debt, React**, before any new work:
-   see *Learning Debt*. By this project's rule an open debt blocks the next
-   day, and her asking to skip it is not enough.
-2. **Make `entries.day_id` required.** Her decision on Day 15, with her
-   reason: once a filter relies on `day_id`, an entry without one can never
-   be retrieved by date. It is the contract step of expand, backfill,
-   contract. The migration should refuse to run if any entry has no day, as
-   `RequireEntryOwner` does. Also fix the entity, which already claims the
-   column is required while the schema allows it to be empty.
-3. **Then the roadmap's Day 16: two apps describe the same data.** The
-   evidence is already in the repository and is listed in
-   `docs/learning/day-15/report-15c.md`, question 5: the entry and day types
-   exist twice, the five mood words three times, the page size of 200 twice,
-   the password minimum of 8 twice, and the web app recognises two of the
-   API's validation messages by their exact text. This is the day `packages/`
-   earns its place or is removed (ADR-001).
-4. **Raise the timezone day with her.** It is decided and unscheduled, and
-   her husband said it should come early. Day 15 made the gap visible on a
-   screen in two ways: her Today changes date at 09:00 local time, and an
-   entry written at 08:30 is filed under the previous day while showing
-   08:30. ADR-015's revisit condition has fired.
+| Day | What it is |
+|---|---|
+| **17** | The roadmap's Day 17: loading, empty and error states, optimistic updates, and deleting an entry as a soft delete |
+| **17b** | **Timezone**, inserted here by her choice. A per-user setting; `dayFor` takes a timezone; days are worked out in it. It must land before the composer is wired, because an entry never moves once it is filed (ADR-015) |
+| **18** | The roadmap's Day 18: the composer, drafts, and editing an entry |
 
-**The three guardrails still apply to every session.** They are written out
-in full under *How To Work With The Learner*: depth, one mutation per day,
-and amend an ADR only when its decision changes.
+**The inserted day is called 17b, not 18, on purpose.** Roughly forty
+references across the roadmap, this file, the handover document and the ADRs
+name later days by number: forgot password on Day 20, review on Day 27,
+deployment on Day 31, export on Day 34. Calling the new day 17b keeps every
+one of them true. She numbers her LinkedIn posts as she likes.
 
-**She does not know Next.js or React.** She said so directly on Day 15. The
-state file had claimed that blocks 1 and 2 covered rendering models; whatever
-they covered did not last. Server and client components were taught from the
-beginning on Day 15, with an experiment she ran. Assume no React knowledge:
-hooks, state and effects have not been taught at all, and the web worker's
-`useSession` hook is code she has not been walked through.
+**Open Day 17 in this order.**
+
+1. **The day overview first**, with the block count, as always.
+2. **The day's problem.** The roadmap's sentence is "the journal screen works
+   and feels broken". The screen already has a loading line, a failure
+   notice and an empty state from Day 15c, so start by having her use the
+   screen and say what still feels wrong. Do not assume the list.
+3. **Before the web app sends anything, the request shapes go into the
+   contract.** Day 16's package describes what the API answers and not what
+   it is sent. The worker's suggestion, which fits ADR-019's rule: plain
+   interfaces in the package, and each DTO class in the API declares that it
+   `implements` one. The decorators stay in the API. Put this to her as a
+   question; do not hand it over.
+4. **Soft delete** is specified in `docs/ui-handover.md` section 6 and in the
+   roadmap's Day 17 row: a `deleted_at` column, every read filters on it, no
+   undo, no timed purge, and the interface asks once before deleting.
+
+**She does not know React beyond three ideas.** Day 16 taught: a component
+is a function React calls again when state changes; `useState`; and
+`useEffect` with its dependency list. She predicted the render loop and read
+the dependency list correctly. Nothing else has been taught: not the cleanup
+function an effect returns, not `useSyncExternalStore`, not forms or events.
+Teach what a day needs and no more.
+
+**Many of her answers arrive as pasted, formatted text.** The record cannot
+tell how they were produced. Day 16 opened by asking three Day 15 ideas again
+from memory, in her own words, and all three had lasted. That is the method:
+re-test what matters, at the start of a later day, without notes. Do it again
+on Day 17 for the two ideas listed at the end of *Day 16, compressed*.
+
+**The three guardrails still apply to every session**: depth, one mutation
+per day, and amend an ADR only when its decision changes. They are written
+out under *How To Work With The Learner*.
+
+---
+
+## Day 16, compressed
+
+**The problem:** two apps describe the same data in two places, and they
+will drift. **ADR-019.**
+
+**What was decided, all of it by her.**
+
+| Decision | Her reason |
+|---|---|
+| A shared package, over leaving the copies and over a generated client | The copies fail silently; generation is far more machinery than three shapes and three values need |
+| The rule for the package | "Facts about data crossing the boundary between the two apps, not implementation or behaviour belonging to either app" |
+| `dayFor` stays out of the package | The API decides which day it is; sharing the function would invite the browser to compute it |
+| The web app must not import the API's entity files | It would couple the browser to TypeORM and to database details |
+| The `day_id` migration refuses, and does not repair | Following her Day 10 precedent. She did not give the reason when asked; it was given to her |
+| Timezone is Day 17b | See the table above |
+
+**One correction to her reasoning, recorded because the ADR depends on it.**
+She argued that the copies "are already drifting". They were identical. The
+argument that stands is that five facts were written twice after one screen,
+and the next days make the web app send data for the first time.
+
+**ADR-019 reverses part of ADR-001**, which expected request and response
+shapes to come from a generated client and not to be written by hand. The
+ADR says so openly and makes the generated client its first revisit
+condition. It is the first time this project has reversed an earlier ADR.
+
+**What was built, by two workers, each audited with one mutation of the
+Master Thread's own.**
+
+- **16a.** `RequireEntryDay`: `entries.day_id` is `NOT NULL`, and the worker
+  added the foreign key to `days`, which had never existed. The migration
+  refuses on an entry with no day and on one pointing at a missing day.
+  Foreign keys are switched off while a migration runs, which is why the
+  second check exists. **She ran it on her own database**, after a backup at
+  `~/neuron-backup-2026-10-07.db`.
+- **16b.** `packages/contracts`, one 49-line file: the mood words, two page
+  sizes, the password minimum, and four `Wire` shapes. Ten declarations left
+  the two applications. The API's controllers return the contract's types,
+  so an entity that stops matching fails to compile. No dependency and no
+  configuration in either application.
+
+**Where she answered.**
+
+| Topic | Step |
+|---|---|
+| Three Day 15 ideas, from memory | 1, all three |
+| Why a component runs more than once | 2. Her first answer was the development double-render; the real cause, a state change, was given after one narrowing question went unanswered |
+| What a `fetch` in the component body would do | 1. She traced the loop |
+| Why "Try again" fetches again | 1. Read from the dependency list |
+| Why not repair entries with no day | Not answered. Given |
+| How many tests notice a missing index | Not answered. Given: 1 of 426 |
+| What breaks when a mood or a field drifts | 1, both cases |
+| Which option, and why not import the entity | 1 |
+| What belongs in the package, and the rule | 1, all seven, and the rule in her words |
+| Types or values: which is harder to share | 1 |
+| Does typecheck catch an extra field | 1 |
+
+**Re-test at the start of Day 17, from memory:** what `setLoad` does besides
+storing a value, and why the contract's types cannot catch the API sending
+an extra field.
+
+**Mistakes of mine, recorded.**
+
+- **My 16a prompt assumed a foreign key that did not exist**, and asked for a
+  `migration:generate` result that this project cannot produce. The worker
+  found both.
+- **My 16b prompt said "eight commands" and listed nine.**
+- **The Day 15 state file claimed she had been taught Next.js rendering.**
+  She had not. Corrected on Day 15 and repaid on Day 16.
 
 ---
 
@@ -1576,8 +1657,12 @@ and that is deliberate — see ADR-001.
 | Item | Where | Note |
 |---|---|---|
 | **A user cannot be deleted** | `sessions`, `entries`, `days` FKs | `ON DELETE NO ACTION`, the generator's default. **Decided 2026-10-04: hard delete, Day 34** |
-| **`entries.day_id` is nullable** | `AddDays` migration, `entry.entity.ts` | **Day 16, first task.** Her decision on Day 15. An entry with no day is returned for no `?date=`, silently |
-| **Two apps describe the same data by hand** | `apps/web/lib/api.ts` and the API's entities | Types, mood words, page size, password minimum, two validation messages. Day 16 |
+| **The contract covers answers, not requests** | `packages/contracts` | Login and register bodies, and soon a mood and an entry, are still written twice. Day 17 |
+| **The package loads only while its `package.json` has no `"type"` field** | `packages/contracts/package.json` | Node advises adding one; doing so breaks `ts-node` and the migration commands. `built-output.e2e-spec.ts` guards it |
+| **The built API reads `packages/contracts/src/index.ts` at runtime** | `apps/api/dist` | A deployment that copies only `dist` will not start. Day 31 |
+| **`migration:generate` is never empty** | `sessions`, `days`, `users` | Foreign keys written across two lines, and an index on `lower("email")` that TypeORM cannot describe. Not caused by Day 16 |
+| **No test says a page of 200 is accepted** | `pagination.e2e-spec.ts` | Only that 201 is refused. Whether 200 is a promise is hers to say |
+| **`deleteIfEmpty` throws in one corrupt situation** | `days.repository.ts` | Another user's entry on your day. Unreachable through the API; a 500 if reached |
 | **Entry times use the device's clock; the day uses the API's** | `apps/web/lib/format.ts` | Dissolves with the per-user timezone |
 | **No sign-out control; composer and mood row unwired** | `apps/web` | The You screen and Day 18 |
 | **The auth form's layout is temporary** | `apps/web/app/styles/live.css` | Until the designer's new `lock.css` arrives |
@@ -1667,7 +1752,14 @@ Master Thread audit still owed):
 Concepts introduced by worker agents that have **not yet been learned**. See
 the roadmap's *Learning Debt* section for why this is tracked.
 
-### Status as of 2026-10-06: one item open
+### Status as of 2026-10-07: none open
+
+**React was repaid on Day 16**, to the depth guardrail: three ideas, one
+experiment she ran, and two predictions from the real file. Day 16's own two
+workers opened nothing that was left unexplained; the package's loading
+mechanism was named as existing and not taught.
+
+### Status as of 2026-10-06, kept for the record
 
 **Day 15 used three workers and repaid eight items the same day**: preflight,
 the cookie parser, `@Res({ passthrough: true })`, `configureHttp`,

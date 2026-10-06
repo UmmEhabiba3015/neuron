@@ -57,7 +57,6 @@ export interface RequestOptions {
   body?: unknown;
 }
 
-/* The part of `fetch` this file uses, so a test can supply its own. */
 export type Fetch = (
   url: string,
   init: {

@@ -271,11 +271,6 @@ export function LiveRecording({
   );
 }
 
-/*
- * .mark carries two different statements in the comps: "Private, out of
- * memory" with a padlock, and an import source such as "Day One" with no
- * icon at all. Same component, and 00-flow.md lists both as Timeline states.
- */
 export function SourceMark({ source }: { source: string }) {
   return <span className="mark">{source}</span>;
 }

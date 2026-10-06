@@ -259,11 +259,9 @@ describe('AuthController (e2e)', () => {
       };
 
       /*
-       * The registered address, so this really is the wrong-password path.
-       * It said 'umer' until Day 14: registerUser creates umer@example.com,
-       * so both calls took the unknown-user branch and the test compared the
-       * thing to itself. It could not fail, and it did not when the dummy
-       * verify was deleted.
+       * The registered address, so this really is the wrong-password path. A
+       * bare name would take the unknown-user branch on both calls and
+       * compare the thing to itself.
        */
       const wrongPassword = await timeOf(credentials.email);
       const unknownAddress = await timeOf('nobody@example.com');

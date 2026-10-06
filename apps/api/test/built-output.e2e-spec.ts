@@ -5,18 +5,13 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 /*
- * Every other suite runs the TypeScript source through a compiler that
- * resolves @neuron/contracts for it. This one builds the API the way
- * `pnpm build` does and starts the result the way `pnpm start:prod` does, so
- * that plain Node has to find the contract by itself at runtime.
- *
- * The contract is a package of TypeScript source with no build step
- * (ADR-019, report 16b). If Node could not load it, the process would stop
- * at its first require and never listen.
+ * Builds the API the way `pnpm build` does and starts the result the way
+ * `pnpm start:prod` does, so that plain Node has to find @neuron/contracts by
+ * itself at runtime.
  *
  * The contract's package.json has no "type" field, and that is deliberate.
- * Adding "type": "module" makes ts-node refuse the package, which breaks
- * the migration commands and the main-wiring suite (report 16b, question 1).
+ * Adding "type": "module" makes ts-node refuse the package, which breaks the
+ * migration commands and the main-wiring suite.
  *
  * It builds for itself rather than trusting a dist folder that happens to be
  * there, which may be old or absent.

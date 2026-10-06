@@ -9,14 +9,6 @@ import { configureHttp } from './../src/configure-http';
 import { Session } from './../src/auth/session.entity';
 import { closeTestDataSource, createTestDataSource } from './test-database';
 
-/*
- * Two states a long-lived system reaches on its own, and neither was tested
- * until the Day 14 mutation sweep: a session that has expired rather than
- * been revoked, and a token belonging to a user who no longer exists.
- *
- * Both mutations survived the whole suite. Logout and rotation were covered
- * thoroughly; simply waiting was not.
- */
 describe('stale credentials (e2e)', () => {
   let app: INestApplication<App>;
   let dataSource: DataSource;
@@ -117,26 +109,15 @@ describe('stale credentials (e2e)', () => {
     beforeEach(async () => {
       /*
        * The session has to survive the user, or the guard rejects on the
-       * session check and never reaches the user one. Every foreign key is
-       * ON DELETE NO ACTION, so that state cannot be reached through the
-       * ORM -- the constraint is switched off for this one statement.
-       *
-       * The state is reachable in production regardless: ADR-014's cleanup
-       * removes expired sessions, nothing removes live ones when an account
-       * goes, and the roadmap has carried "does deleting a user delete their
-       * journal?" as an open question since Day 8. This test does not answer
-       * it; it only needs the state to exist to test the guard.
+       * session check and never reaches the user one. Every foreign key is ON
+       * DELETE NO ACTION, so the constraint is switched off for this one
+       * statement.
        */
       await dataSource.query('PRAGMA foreign_keys = OFF');
       await dataSource.query('DELETE FROM users WHERE id = ?', [userId]);
       await dataSource.query('PRAGMA foreign_keys = ON');
     });
 
-    /*
-     * ADR-012 attaches the user to the request rather than the token payload,
-     * and this is the case that decided it: a payload-only guard would keep
-     * admitting a deleted user until their token expired.
-     */
     it('refuses a token whose user no longer exists', async () => {
       await withToken('/entries').expect(401);
     });

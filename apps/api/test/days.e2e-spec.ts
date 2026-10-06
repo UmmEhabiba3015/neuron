@@ -80,11 +80,6 @@ describe('days (e2e)', () => {
     expect(Number(orphans[0].c)).toBe(0);
   });
 
-  /*
-   * day_id is select:false for the same reason user_id is. This is the test
-   * that would have caught Day 9's leak, where create returned its in-memory
-   * object and carried the owner out with it.
-   */
   it('never puts day_id in a response', async () => {
     const created = await write(alice, 'watch the keys');
     expect(Object.keys(created.body as object).sort()).toEqual([
@@ -104,9 +99,6 @@ describe('days (e2e)', () => {
     ]);
   });
 
-  /*
-   * "An empty day does not exist" -- 00-flow.md section 0.
-   */
   it('deletes the day when its last entry is deleted', async () => {
     const created = await write(alice, 'the only thing today');
     expect(await countDays()).toBe(1);

@@ -4,11 +4,9 @@ import { test } from 'node:test';
 import { createSession, type Fetch } from './session.ts';
 
 /*
- * A stand-in for the API. Each test says how a path answers; the stand-in
- * records every request that was sent, which is what the claims are about.
- *
- * It refuses to answer more than MAX_CALLS requests. A session that retries
- * without limit would otherwise hang the test run instead of failing it.
+ * The stand-in refuses to answer more than MAX_CALLS requests. A session that
+ * retries without limit would otherwise hang the test run instead of failing
+ * it.
  */
 const API = 'http://api.test';
 const MAX_CALLS = 20;
@@ -65,7 +63,6 @@ const signedInAs = (accessToken: string): Reply => ({
 
 const UNAUTHORIZED: Reply = { status: 401, body: { message: 'Unauthorized' } };
 
-/* A reply the test releases by hand, to hold a request in flight. */
 function held() {
   let release!: (reply: Reply) => void;
   const reply = new Promise<Reply>((resolve) => {
@@ -75,10 +72,8 @@ function held() {
   return { reply, release };
 }
 
-/* Lets every promise that is already able to settle do so. */
 const settle = () => new Promise((resolve) => setImmediate(resolve));
 
-/* Entries answer only to the token called "new". */
 const onlyNewToken: Handler = (sent) =>
   sent.token === 'new' ? { status: 200, body: [] } : UNAUTHORIZED;
 
@@ -105,7 +100,6 @@ test('two requests that receive 401 together cause exactly one refresh, and both
   const entries = session.request('/entries');
   const today = session.request('/days/today');
 
-  /* Both have their 401 by now, and the refresh has not answered. */
   await settle();
   refresh.release(signedInAs('new'));
 
@@ -164,7 +158,6 @@ test('two calls to the on-load refresh made together cause exactly one request',
   assert.equal(first.status, 'signedIn');
   assert.equal(second.status, 'signedIn');
 
-  /* A screen that mounts later asks again, and the answer is already known. */
   await session.restore();
   assert.equal(api.sentTo('/auth/refresh').length, 1);
 });

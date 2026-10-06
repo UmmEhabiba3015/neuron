@@ -4,9 +4,8 @@ import { AuthScreen } from '@/app/components/AuthScreen';
 import { session } from '@/lib/api';
 
 /*
- * The first refresh got no answer. The app does not know whether this
- * person is signed in, so it shows neither Today nor a form, and offers the
- * question again.
+ * The app does not know whether this person is signed in, so it shows neither
+ * Today nor a form.
  */
 export function CouldNotConnect() {
   return (

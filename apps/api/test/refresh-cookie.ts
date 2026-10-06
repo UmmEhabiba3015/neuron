@@ -1,13 +1,6 @@
 import type { Response } from 'supertest';
 import { REFRESH_COOKIE_NAME } from '../src/auth/refresh-cookie';
 
-/*
- * What a `Set-Cookie` header for the refresh cookie says, taken apart.
- *
- * `pair` is `name=value`, which is exactly what a client sends back in its
- * `Cookie` header. `attributes` is everything after it, one entry each, so a
- * test can assert on a single attribute without matching the whole line.
- */
 export interface RefreshCookie {
   pair: string;
   value: string;

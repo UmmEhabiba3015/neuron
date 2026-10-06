@@ -7,11 +7,6 @@ import { migrations } from './migrations';
 import { RequireEntryDay1791314102576 } from './migrations/1791314102576-RequireEntryDay';
 
 /*
- * RequireEntryDay rebuilds the entries table, and a rebuild keeps only what
- * is written out again. These tests open a database as it stood before the
- * migration, put rows in it, run the migration the way the application runs
- * it, and compare.
- *
  * The database is a file in a temporary folder and not ':memory:', because
  * "before" and "after" are two connections with two migration lists, and an
  * in-memory database does not outlive its connection.
@@ -54,9 +49,8 @@ describe('RequireEntryDay', () => {
   });
 
   /*
-   * Two users, two days, three entries. Raw SQL and not the entity, because
-   * the entity describes the schema after this migration and the rows have
-   * to be written into the schema before it.
+   * Raw SQL and not the entity, because the entity describes the schema after
+   * this migration and the rows have to be written into the schema before it.
    */
   const seed = async (database: DataSource) => {
     await database.query(`
@@ -118,10 +112,6 @@ describe('RequireEntryDay', () => {
       }))
       .sort((a, b) => a.table.localeCompare(b.table));
 
-  /*
-   * Name, uniqueness and columns of every index on entries, including the
-   * one SQLite makes for the primary key.
-   */
   const indexesOf = async (database: DataSource) => {
     const list = await database.query<{ name: string; unique: number }[]>(
       `PRAGMA index_list(entries)`,
@@ -217,10 +207,6 @@ describe('RequireEntryDay', () => {
       expect(await rowsOf(database)).toHaveLength(4);
     });
 
-    /*
-     * A required column that may point at nothing is half a guarantee. This
-     * is the foreign key to days, enforced and not merely declared.
-     */
     it('has the database refuse an entry whose day does not exist', async () => {
       await expect(
         database.query(`

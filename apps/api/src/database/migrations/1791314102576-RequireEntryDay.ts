@@ -1,33 +1,19 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 /*
- * The contract step of expand-backfill-contract for entries.day_id. AddDays
- * added the column nullable and backfilled it; this makes it NOT NULL.
- *
  * SQLite cannot add NOT NULL to an existing column, so the table is rebuilt,
- * and a rebuild keeps only what is written out again. What entries had
- * before this migration, read from a migrated database and not from memory:
- *
- *   columns      id, content, created_at, user_id (all NOT NULL), day_id
- *   foreign keys FK_entries_user -> users(id)
- *   indexes      IDX_entries_day_id on (day_id)
- *
- * There was no foreign key from day_id to days. AddDays used ADD COLUMN, and
- * its ADD COLUMN did not declare one. This migration adds it as
- * FK_entries_day, because the entity has declared that relation since Day 13
- * and a required column that may point at nothing is half a guarantee.
+ * and a rebuild keeps only what is written out again: every column, both
+ * foreign keys and IDX_entries_day_id.
  *
  * TypeORM switches PRAGMA foreign_keys OFF for the whole of a migration run
  * and back ON afterwards. So nothing below is checked by SQLite while it
  * runs: the copy into the new table would accept a day_id that points at no
- * day, and the row would sit there violating a constraint that was never
- * tested against it. That is why the second refusal exists.
+ * day. That is why the second refusal exists.
  *
  * Each constraint keeps FOREIGN KEY (...) REFERENCES "table" on one line.
  * TypeORM reads a constraint's name back out of the stored CREATE TABLE with
  * a pattern that allows one space there and not a line break. Written across
- * two lines, as RequireEntryOwner wrote it, the key works and TypeORM cannot
- * see what it is called, so migration:generate proposes replacing it.
+ * two lines the key works and TypeORM cannot see what it is called.
  *
  * The index is created last. DROP TABLE removes a table's indexes with it,
  * and index names are global in SQLite, so the name is not free until then.

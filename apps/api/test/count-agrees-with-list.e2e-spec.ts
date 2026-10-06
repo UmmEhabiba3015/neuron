@@ -14,13 +14,6 @@ import {
   login,
 } from './test-database';
 
-/*
- * The invariant: for every filter the listing accepts, the count has to
- * agree with the number of entries the listing actually yields.
- *
- * It did not. Count took no filters at all, so counting a search returned
- * the size of the whole journal -- a plausible number, quietly wrong.
- */
 describe('count agrees with the listing (e2e)', () => {
   let app: INestApplication<App>;
   let dataSource: DataSource;

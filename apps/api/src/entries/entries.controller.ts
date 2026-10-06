@@ -29,15 +29,6 @@ import { UpdateEntryDto } from './update-entry.dto';
 export class EntriesController {
   constructor(private readonly entriesService: EntriesService) {}
 
-  /*
-   * A page, not the whole journal. Returning every entry ever written is
-   * fine at twelve and wrong at twelve hundred, and the designs show month
-   * six as the ordinary case rather than the extreme one.
-   *
-   * The default is a page rather than everything, so a client that has not
-   * been updated gets a fast, correct first page instead of a slow, complete
-   * one. That is the failure worth choosing.
-   */
   @Get()
   findAll(
     @Query() query: FindEntriesQueryDto,
@@ -57,16 +48,6 @@ export class EntriesController {
     return this.entriesService.create(dto.content, request.user.id);
   }
 
-  /*
-   * Counting takes the same filters as listing, so "how many match this
-   * search" has an answer. It did not: count ignored the word entirely and
-   * returned the size of the whole journal, which is a number no screen
-   * wanted.
-   *
-   * A separate resource rather than an envelope around the list. ADR-005
-   * settled that a collection is a bare array, and a total for one screen is
-   * not a reason to reopen it -- ADR-017.
-   */
   @Get('count')
   async countEntries(
     @Query() query: CountEntriesQueryDto,

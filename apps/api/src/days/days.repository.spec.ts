@@ -59,11 +59,6 @@ describe('DaysRepository', () => {
       expect(bob.id).not.toBe(alice.id);
     });
 
-    /*
-     * The loser of the race reads back the winner's row rather than failing.
-     * Inserting the row behind the repository's back is what makes the
-     * pre-check stale, which is the state a concurrent writer would see.
-     */
     it('returns the existing row when the insert loses to a unique violation', async () => {
       await dataSource.query(
         `INSERT INTO days (id, date, mood, created_at, user_id)
@@ -104,17 +99,10 @@ describe('DaysRepository', () => {
     });
 
     /*
-     * The count has to be scoped by user as well as by day. Scoped only by
-     * day_id, another user's row on the same day keeps this one alive --
-     * ownership living in the caller rather than in the WHERE clause, which
-     * is what ADR-013 refused.
-     *
-     * Until RequireEntryDay this expected `true`: the day was deleted and
-     * Bob's entry was left pointing at a row that no longer existed. Since
-     * that migration entries.day_id is a foreign key, so the scoped count
-     * still ignores Bob's entry, the delete is still attempted, and the
-     * database is what refuses it. An unscoped count would answer `false`
-     * and never reach the delete, so this still tells the two apart.
+     * The count has to be scoped by user as well as by day. An unscoped count
+     * would answer `false` and never reach the delete. The scoped count
+     * ignores Bob's entry, the delete is attempted, and the foreign key on
+     * entries.day_id is what refuses it.
      */
     it("ignores another user's entry when deciding the day is empty, and the database then refuses the delete", async () => {
       const day = await repository.findOrCreate('alice', '2026-08-09');

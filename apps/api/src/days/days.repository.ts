@@ -73,11 +73,6 @@ export class DaysRepository {
     return this.findByDate(userId, date);
   }
 
-  /*
-   * The calendar needs to know which dates have content, and nothing more.
-   * Returning the days themselves would mean sending a month of prose to
-   * paint a grid of squares.
-   */
   async findInRange(userId: string, from: string, to: string): Promise<Day[]> {
     return this.days.find({
       where: { userId, date: Between(from, to) },
@@ -86,13 +81,9 @@ export class DaysRepository {
   }
 
   /*
-   * The count is scoped by user as well as by day, and that is not
-   * redundant. ADR-013's rule is that ownership belongs in the WHERE clause
-   * rather than in the caller, and a count scoped only by day_id is correct
-   * only for as long as every caller passes an id it already owns. That is
-   * true today -- the entry is read with findWithDay(id, userId) first --
-   * which makes this a latent bug rather than a live one, and exactly the
-   * kind that a later caller turns into a real one.
+   * The count is scoped by user as well as by day, and that is not redundant:
+   * ownership belongs in the WHERE clause rather than in the caller
+   * (ADR-013).
    */
   async deleteIfEmpty(dayId: string, userId: string): Promise<boolean> {
     const result = await this.dataSource.query<{ count: number }[]>(

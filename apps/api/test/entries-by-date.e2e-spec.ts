@@ -15,12 +15,10 @@ import {
 } from './test-database';
 
 /*
- * GET /entries?date=YYYY-MM-DD -- the entries that belong to one day.
- *
- * Every entry here is written through the API with the clock set, rather
- * than inserted with a day_id chosen by the test. The claim is about which
- * day the application files an entry under, so the application has to be the
- * one that files it.
+ * Every entry here is written through the API with the clock set, rather than
+ * inserted with a day_id chosen by the test. The claim is about which day the
+ * application files an entry under, so the application has to be the one that
+ * files it.
  */
 describe('entries for one day (e2e)', () => {
   let app: INestApplication<App>;
@@ -209,13 +207,6 @@ describe('entries for one day (e2e)', () => {
     }
   });
 
-  /*
-   * This used to take an entry's day away and show that no ?date= reached
-   * it afterwards. Since RequireEntryDay the database refuses to take the
-   * day away, so the entry that no date could find can no longer be made.
-   * What is left to claim is the refusal, and that the entry is still where
-   * it was.
-   */
   it('cannot have its day taken away, so it stays under its date', async () => {
     await expect(
       dataSource.query(

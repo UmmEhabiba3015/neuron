@@ -42,10 +42,6 @@ describe('email as the identifier (e2e)', () => {
   const login = (email: string) =>
     request(app.getHttpServer()).post('/auth/login').send({ email, password });
 
-  /*
-   * The reason the migration builds the index on lower(email) rather than
-   * renaming the old one. Without it these are two accounts for one mailbox.
-   */
   it('treats two spellings of one address as the same account', async () => {
     await register('Ummi@Example.com').expect(201);
     await register('ummi@example.com').expect(409);
@@ -84,10 +80,6 @@ describe('email as the identifier (e2e)', () => {
     await register('umer example.com').expect(400);
   });
 
-  /*
-   * ADR-012: a wrong password and an unknown address answer identically, so
-   * the response cannot be used to discover who has an account.
-   */
   it('answers the same for an unknown address and a wrong password', async () => {
     await register('known@example.com').expect(201);
 

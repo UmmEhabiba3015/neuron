@@ -16,11 +16,8 @@ import {
 } from './test-database';
 
 /*
- * GET /days/today -- the API says which date today is.
- *
  * The clock is set in every test. A suite that read the real one would pass
- * or fail depending on the hour it ran, and would never once exercise the
- * four hours after midnight unless somebody ran it then.
+ * or fail depending on the hour it ran.
  */
 describe('today (e2e)', () => {
   let app: INestApplication<App>;
@@ -60,10 +57,6 @@ describe('today (e2e)', () => {
     releaseClock();
   });
 
-  /*
-   * Reachable at all: declared after :date, "today" would be handed to the
-   * calendar-date check and come back as a 400.
-   */
   it('is reachable, and is not taken for a date', async () => {
     const response = await todayAt('alice', '2026-08-09T12:00:00.000Z');
 
@@ -135,11 +128,6 @@ describe('today (e2e)', () => {
     expect(Number(rows[0].c)).toBe(0);
   });
 
-  /*
-   * The two halves of the Today screen have to mean the same day: the date
-   * this endpoint names is the date ?date= finds a just-written entry under,
-   * including in the hours where midnight and 4am disagree.
-   */
   it.each([['2026-08-09T03:59:00.000Z'], ['2026-08-09T04:01:00.000Z']])(
     'names the date an entry written at %s is filed under',
     async (instant) => {

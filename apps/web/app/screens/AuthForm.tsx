@@ -16,9 +16,8 @@ type FieldName = 'email' | 'password';
 type FieldSentences = Partial<Record<FieldName, string>>;
 
 /*
- * What the last attempt came to. Each one is a different thing to say, and
- * `unreachable` and `refused` in particular are never merged: no answer from
- * the server and a refusal by it are different facts.
+ * `unreachable` and `refused` are never merged: no answer from the server and
+ * a refusal by it are different facts.
  */
 type Outcome =
   | { kind: 'none' }
@@ -287,7 +286,6 @@ function outcomeOf(
   return { kind: 'failed' };
 }
 
-/* Checked in the browser first, so an obvious slip costs no request. */
 function checkFields(
   mode: Mode,
   email: string,
@@ -311,13 +309,9 @@ function checkFields(
 }
 
 /*
- * The API refused the input and sent an array of messages. Each one begins
- * with the name of the field it is about, which is how it finds its place.
- *
- * The API's sentences are written for developers. The two it sends in
- * practice are replaced with this product's own wording; any other is shown
- * as it came, because a sentence in the wrong register is better than no
- * sentence.
+ * Each message begins with the name of the field it is about, which is how it
+ * finds its place. The two the API sends in practice are replaced with this
+ * product's own wording.
  */
 function fromApiMessages(messages: string[]): Outcome {
   const sentences: FieldSentences = {};
