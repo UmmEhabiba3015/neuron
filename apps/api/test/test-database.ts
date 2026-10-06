@@ -3,6 +3,9 @@ import type { App } from 'supertest/types';
 import { DataSource } from 'typeorm';
 import { entities } from '../src/database/entities';
 import { migrations } from '../src/database/migrations';
+import { dayFor } from '../src/days/day-boundary';
+import { Day } from '../src/days/day.entity';
+import { DaysRepository } from '../src/days/days.repository';
 import { JournalEntry } from '../src/entries/entry.entity';
 import { User } from '../src/users/user.entity';
 
@@ -32,11 +35,25 @@ export async function seedEntries(
   entries: JournalEntry[],
   userId?: string,
 ): Promise<void> {
-  await dataSource
-    .getRepository(JournalEntry)
-    .insert(
-      userId === undefined ? entries : entries.map((e) => ({ ...e, userId })),
-    );
+  if (userId === undefined) {
+    await dataSource.getRepository(JournalEntry).insert(entries);
+    return;
+  }
+
+  /*
+   * An entry must have a day, so a seeded entry gets the one the application
+   * would have filed it under. dayFor is the only place the 4am rule is
+   * written, and it is asked here rather than copied.
+   */
+  const days = new DaysRepository(dataSource.getRepository(Day), dataSource);
+
+  for (const entry of entries) {
+    const day = await days.findOrCreate(userId, dayFor(entry.createdAt));
+
+    await dataSource
+      .getRepository(JournalEntry)
+      .insert({ ...entry, userId, dayId: day.id });
+  }
 }
 
 /*

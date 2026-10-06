@@ -108,12 +108,22 @@ describe('DaysRepository', () => {
      * day_id, another user's row on the same day keeps this one alive --
      * ownership living in the caller rather than in the WHERE clause, which
      * is what ADR-013 refused.
+     *
+     * Until RequireEntryDay this expected `true`: the day was deleted and
+     * Bob's entry was left pointing at a row that no longer existed. Since
+     * that migration entries.day_id is a foreign key, so the scoped count
+     * still ignores Bob's entry, the delete is still attempted, and the
+     * database is what refuses it. An unscoped count would answer `false`
+     * and never reach the delete, so this still tells the two apart.
      */
-    it("ignores another user's entry when deciding the day is empty", async () => {
+    it("ignores another user's entry when deciding the day is empty, and the database then refuses the delete", async () => {
       const day = await repository.findOrCreate('alice', '2026-08-09');
       await entryOn('bobs-entry', day.id, 'bob');
 
-      expect(await repository.deleteIfEmpty(day.id, 'alice')).toBe(true);
+      await expect(repository.deleteIfEmpty(day.id, 'alice')).rejects.toThrow(
+        'FOREIGN KEY constraint failed',
+      );
+      expect(await repository.findByDate('alice', '2026-08-09')).toBeDefined();
     });
 
     it("refuses to delete another user's day", async () => {

@@ -210,20 +210,24 @@ describe('entries for one day (e2e)', () => {
   });
 
   /*
-   * entries.day_id is still nullable in the schema. An entry with no day
-   * belongs to no date, so no ?date= reaches it; it stays in the unfiltered
-   * listing. The report says whether that is right.
+   * This used to take an entry's day away and show that no ?date= reached
+   * it afterwards. Since RequireEntryDay the database refuses to take the
+   * day away, so the entry that no date could find can no longer be made.
+   * What is left to claim is the refusal, and that the entry is still where
+   * it was.
    */
-  it('does not return an entry that has no day under any date', async () => {
-    await dataSource.query(
-      `UPDATE entries SET day_id = NULL WHERE content = 'the morning'`,
-    );
+  it('cannot have its day taken away, so it stays under its date', async () => {
+    await expect(
+      dataSource.query(
+        `UPDATE entries SET day_id = NULL WHERE content = 'the morning'`,
+      ),
+    ).rejects.toThrow('NOT NULL constraint failed: entries.day_id');
 
     expect(await contentsOf(alice, '?date=2026-08-09')).toEqual([
       'the evening',
+      'the morning',
     ]);
-    expect(await countOf(alice, '?date=2026-08-09')).toBe(1);
-    expect(await contentsOf(alice, '')).toContain('the morning');
+    expect(await countOf(alice, '?date=2026-08-09')).toBe(2);
   });
 
   it.each([

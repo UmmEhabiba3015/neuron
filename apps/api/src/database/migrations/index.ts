@@ -7,6 +7,7 @@ import { RequireEntryOwner1789374205681 } from './1789374205681-RequireEntryOwne
 import { AddSessions1790015003339 } from './1790015003339-AddSessions';
 import { AddDays1790354879734 } from './1790354879734-AddDays';
 import { UserNameBecomesEmail1790668948320 } from './1790668948320-UserNameBecomesEmail';
+import { RequireEntryDay1791314102576 } from './1791314102576-RequireEntryDay';
 
 type Migration = new () => MigrationInterface;
 
@@ -19,4 +20,5 @@ export const migrations: Migration[] = [
   AddSessions1790015003339,
   AddDays1790354879734,
   UserNameBecomesEmail1790668948320,
+  RequireEntryDay1791314102576,
 ];

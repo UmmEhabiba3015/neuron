@@ -1,4 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { Day } from '../days/day.entity';
 import { User } from '../users/user.entity';
 
@@ -16,14 +23,15 @@ export class JournalEntry {
   @Column({ name: 'user_id', type: 'text', select: false })
   userId?: string;
 
+  @Index('IDX_entries_day_id')
   @Column({ name: 'day_id', type: 'text', select: false })
   dayId?: string;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'user_id', foreignKeyConstraintName: 'FK_entries_user' })
   user?: User;
 
   @ManyToOne(() => Day)
-  @JoinColumn({ name: 'day_id' })
+  @JoinColumn({ name: 'day_id', foreignKeyConstraintName: 'FK_entries_day' })
   day?: Day;
 }

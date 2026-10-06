@@ -22,6 +22,18 @@ describe('entry ownership', () => {
     await closeTestDataSource(dataSource);
   });
 
+  /*
+   * An entry must have a day since RequireEntryDay, and a day must have an
+   * owner who exists. A test about the owner of an entry therefore needs a
+   * real day to hang the entry on, or it fails on day_id before it reaches
+   * the thing it is testing.
+   */
+  const dayOf = async (userId: string): Promise<string> => {
+    const days = new DaysRepository(dataSource.getRepository(Day), dataSource);
+
+    return (await days.findOrCreate(userId, '2026-09-02')).id;
+  };
+
   const columnsOf = (table: string) =>
     dataSource.query<
       { name: string; type: string; notnull: number; pk: number }[]
@@ -89,18 +101,25 @@ describe('entry ownership', () => {
         { table: string; from: string; to: string }[]
       >(`PRAGMA foreign_key_list(entries)`);
 
-      expect(foreignKeys).toEqual([
+      expect(foreignKeys).toContainEqual(
         expect.objectContaining({ table: 'users', from: 'user_id', to: 'id' }),
-      ]);
+      );
     });
 
     it('should actually be enforced, not merely declared', async () => {
+      await dataSource.getRepository(User).insert({
+        id: 'user-1',
+        email: 'habiba@example.com',
+        createdAt: '2026-09-02T09:00:00.000Z',
+      });
+
       await expect(
         dataSource.getRepository(JournalEntry).insert({
           id: 'entry-1',
           content: 'owned by nobody who exists',
           createdAt: '2026-09-02T09:00:00.000Z',
           userId: 'no-such-user',
+          dayId: await dayOf('user-1'),
         }),
       ).rejects.toThrow('FOREIGN KEY constraint failed');
     });
@@ -121,6 +140,7 @@ describe('entry ownership', () => {
         content: 'mine',
         createdAt: '2026-09-02T09:00:01.000Z',
         userId: 'user-1',
+        dayId: await dayOf('user-1'),
       });
 
       const stored = await entries.find({ select: { id: true, userId: true } });
@@ -137,7 +157,7 @@ describe('entry ownership', () => {
           content: 'written with nobody to own it',
           createdAt: '2026-09-02T09:00:00.000Z',
         }),
-      ).rejects.toThrow(/NOT NULL constraint failed/);
+      ).rejects.toThrow(/NOT NULL constraint failed: entries\.user_id/);
     });
   });
 
@@ -157,6 +177,7 @@ describe('entry ownership', () => {
         content: 'anything',
         createdAt: '2026-09-02T09:00:00.000Z',
         userId: 'owner-of-entry-1',
+        dayId: await dayOf('owner-of-entry-1'),
       });
 
       const [found] = await entries.find();
