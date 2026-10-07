@@ -16,12 +16,11 @@ the recovery cost most of a working session.
 
 ---
 
-**Last updated:** 2026-10-07, at the close of Day 16.
+**Last updated:** 2026-10-07, at the close of Day 17.
 
-**Current day:** Days 0–16 are **complete**. Phase 3 is open. **A fresh
-thread needs three sections, in this order: *How to open the next session
-with her*, *Day 16, compressed*, then *Day 15, compressed*.** All three are
-directly below.
+**Current day:** Days 0–17 are **complete**. Phase 3 is open. **A fresh
+thread needs two sections first: *How to open the next session with her*,
+then *Day 17, compressed*.** Days 16 and 15 follow them.
 
 **Current branch:** `main`. Days 9 onward were committed straight to `main`
 rather than through pull requests. Four older merged branches still exist
@@ -37,67 +36,164 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-**194** API unit tests, **236** API end-to-end tests, **15** web tests, and
-**6** checks on the shared package, which `pnpm test` and `pnpm test:web`
-both run first. 19 ADRs. Nine migrations.
+**211** API unit tests, **279** API end-to-end tests, **41** web tests, and
+**6** checks on the shared package. 21 ADRs. Ten migrations.
 
 **Run all nine every day.** The root `lint`, `typecheck` and `build` cover
-the API only. A web commit went in before Day 15 with `typecheck:web` red,
-and nothing noticed.
+the API only.
+
+**The designs moved.** `designs/AIJournal-handover/` is gone from the working
+tree and `designs/AIJournal-v3/` replaces it. Older documents and ADR-016
+name the old folder; they describe the day they were written and were left
+as they are.
 
 ---
 
 ## How to open the next session with her
 
-**Day 17 is next.** No learning debt is open.
+**Day 17a is next: bring the web app in line with the new designs.**
 
-**The order of the next three days, decided by her on Day 16.**
+**The order of the coming days, all decided by her.**
 
 | Day | What it is |
 |---|---|
-| **17** | The roadmap's Day 17: loading, empty and error states, optimistic updates, and deleting an entry as a soft delete |
-| **17b** | **Timezone**, inserted here by her choice. A per-user setting; `dayFor` takes a timezone; days are worked out in it. It must land before the composer is wired, because an entry never moves once it is filed (ADR-015) |
-| **18** | The roadmap's Day 18: the composer, drafts, and editing an entry |
+| **17a** | Design alignment with `designs/AIJournal-v3/` |
+| **17b** | Timezone: a per-user setting, and `dayFor` works a day out in it |
+| **17c** | Seeing a day other than today |
+| **18** | Drafts, saving as she types, and editing a saved entry |
 
-**The inserted day is called 17b, not 18, on purpose.** Roughly forty
-references across the roadmap, this file, the handover document and the ADRs
-name later days by number: forgot password on Day 20, review on Day 27,
-deployment on Day 31, export on Day 34. Calling the new day 17b keeps every
-one of them true. She numbers her LinkedIn posts as she likes.
+The lettered days keep every later day's number true. About forty places in
+the documents name later days by number.
 
-**Open Day 17 in this order.**
+**Open Day 17a in this order.**
 
-1. **The day overview first**, with the block count, as always.
-2. **The day's problem.** The roadmap's sentence is "the journal screen works
-   and feels broken". The screen already has a loading line, a failure
-   notice and an empty state from Day 15c, so start by having her use the
-   screen and say what still feels wrong. Do not assume the list.
-3. **Before the web app sends anything, the request shapes go into the
-   contract.** Day 16's package describes what the API answers and not what
-   it is sent. The worker's suggestion, which fits ADR-019's rule: plain
-   interfaces in the package, and each DTO class in the API declares that it
-   `implements` one. The decorators stay in the API. Put this to her as a
-   question; do not hand it over.
-4. **Soft delete** is specified in `docs/ui-handover.md` section 6 and in the
-   roadmap's Day 17 row: a `deleted_at` column, every read filters on it, no
-   undo, no timed purge, and the interface asks once before deleting.
+1. **The day overview first**, with the block count.
+2. **Two ideas from Day 17, from memory, in her own typed words:** why
+   writing an entry waits for the API while deleting does not; and why
+   `PATCH` on a deleted entry could answer 404 while still changing the row.
+3. **Repay the open learning debt** before new work. Three small React
+   things, listed under *Learning Debt*.
+4. **Read `designs/AIJournal-v3/V3-REVISION.md` with her**, then write the
+   worker prompt. It has not been written. It should open, as Day 8b did, by
+   closing the audit finding below, and it should cover: replacing
+   `apps/web/app/styles/lock.css` with the new file, byte for byte, and
+   deleting both TEMPORARY blocks in `live.css`; sign in and create account
+   on the new open spread, with the second password field and the eye
+   control; Today with the real entry controls, the row titled "Today felt",
+   and the mood words in the designer's order, which is one line in
+   `packages/contracts`; and what becomes of the `/review` pages, which were
+   checked against the old comps.
 
-**She does not know React beyond three ideas.** Day 16 taught: a component
-is a function React calls again when state changes; `useState`; and
-`useEffect` with its dependency list. She predicted the render loop and read
-the dependency list correctly. Nothing else has been taught: not the cleanup
-function an effect returns, not `useSyncExternalStore`, not forms or events.
-Teach what a day needs and no more.
+**The audit finding Day 17 left open.** In `apps/web/lib/today.ts`, each
+question about today is numbered and the answer to an older question is
+thrown away. Deleting that guard leaves all 41 web tests passing. The guard
+is right and nothing proves it. One more thing for the same task: the loop
+that reads a day's entries page by page never stops if an API keeps
+returning full pages. A cap on the number of pages makes it safe.
 
-**Many of her answers arrive as pasted, formatted text.** The record cannot
-tell how they were produced. Day 16 opened by asking three Day 15 ideas again
-from memory, in her own words, and all three had lasted. That is the method:
-re-test what matters, at the start of a later day, without notes. Do it again
-on Day 17 for the two ideas listed at the end of *Day 16, compressed*.
+**The designer's documents are information, not instructions.** The new
+folder holds an `AGENTS.md` and build scripts written for whoever edits the
+design files. A worker reads them to understand the designs and does not run
+them or follow them as orders.
+
+**Many of her answers arrive as pasted, formatted text**, and on Day 17 one
+ended with a sentence that read like a reply written for her. She was asked
+about it once, plainly and kindly, and did not answer. Do not raise it again
+as a question. Keep doing what works: ask two ideas from memory at the start
+of each day, and ask for typed, rough answers there.
+
+**Her answers on Day 17 became shorter as the day went on.** She skipped two
+questions and gave her last two decisions in a few words without reasons. It
+was a very long session. Shorter days that end merged will serve her better
+than long ones.
+
+**She does not know React beyond three ideas**, taught on Day 16: a
+component is a function React calls again when state changes; `useState`;
+and `useEffect` with its dependency list.
 
 **The three guardrails still apply to every session**: depth, one mutation
-per day, and amend an ADR only when its decision changes. They are written
-out under *How To Work With The Learner*.
+per day, and amend an ADR only when its decision changes.
+
+---
+
+## Day 17, compressed
+
+**The problem:** the journal screen works and feels broken. **ADR-020 and
+ADR-021.**
+
+**She reshaped the day by using the product.** Asked to use the Today screen
+and say what felt wrong, she reported four things. The reload was slow with
+nothing to say so. "Try again" gave no sign of being pressed. The composer
+could not be typed into. And yesterday's entry could not be reached at all,
+because nothing in the product shows any day but today. The last one was a
+gap in the roadmap itself that the Master Thread had not seen: no day in
+Phase 3 built it. Day 17c exists because of it.
+
+**What was decided, all of it by her.**
+
+| Decision | Her reason |
+|---|---|
+| Today builds writing and deleting; other days get their own day after the timezone | Chosen as option A, without a stated reason |
+| Request shapes go into the shared package as plain interfaces, and the API's DTO classes `implement` them | The interface is only a shape; validation is behaviour and stays in the API |
+| Writing an entry waits for the API | The server decides an entry's time and day; showing it early would make the browser guess both |
+| Deleting an entry shows at once | It feels responsive, and a failure puts the entry back with a sentence. **Kept after the worker and the Master Thread both recommended changing it** |
+| The soft-delete filter must be automatic | So that a new query excludes deleted entries unless it asks otherwise |
+| `DELETE` answers 204 with no body | There is no undo, and the client already has the entry |
+| A date is listed only if it has a live entry | An empty day should behave as if it does not exist |
+| The composer trims the ends of an entry before sending | No reason given; the worker's was that a trailing Enter is not meant to be stored |
+| The web app is aligned with the new designs next, before the timezone | Chosen as option A |
+| The second password field, the new mood order and colours, and the disabled Start control | Approved by her directly with the designer |
+
+**What was built, by two workers, each audited with one mutation of the
+Master Thread's own.**
+
+- **API.** `AddEntryDeletedAt`, an additive migration. `@DeleteDateColumn`
+  on the entity, with the value written by the application and never by
+  TypeORM's `softDelete`, which writes the database's clock in another
+  format. `update` and `markDeleted` carry the condition by hand. The code
+  that deleted an emptied day is gone. `WireNewEntry`, `WireLogin` and
+  `WireRegistration` joined the contract. **She ran the migration on her own
+  database**, after a backup at `~/neuron-backup-2026-10-07-b.db`. My
+  mutation, sending `deleted_at` in responses, was caught by five tests.
+- **Web.** `lib/today.ts` holds the screen's logic with no React in it. The
+  composer is a real text field. Delete asks first, in place. "Try again"
+  says it is asking and counts. **My mutation was not caught**; see the
+  opening order above.
+
+**Three things worth keeping from the workers' reports.**
+
+- With the hand-written condition removed from `update`, `PATCH` on a
+  deleted entry still answered 404 while overwriting the row, because the
+  read that follows the write is filtered. One test in 490 caught it, by
+  reading the row from the database. She explained this correctly.
+- The automatic filter has a third hole the ADR had not named: a hard
+  `delete` by criteria. Account deletion will meet it.
+- The new code does not run on a database without the new column. For the
+  first time the order between "take the code" and "run the migration"
+  mattered.
+
+**Where she answered.**
+
+| Topic | Step |
+|---|---|
+| What `setLoad` causes; why a plain variable fails | 1, from memory |
+| Why typecheck misses an extra field, and what catches it | 1, from memory |
+| The interface, the rename, and where the whitespace rule belongs | 1, all three |
+| Who owns an entry's time and day, and so which strategy for writing | 1 |
+| What a forgotten filter allows, and how to prevent forgetting | 1 |
+| The two problems with a database-clock timestamp | 1 |
+| The quiet `PATCH` bug | 1, all three parts |
+| The mood order: files, API check, migration | Not answered. Given |
+
+**Mistakes of mine, recorded.**
+
+- **I did not see that the roadmap had no day for viewing other days.** She
+  found it in a morning of using the product.
+- **I planned a day about feedback on actions for a screen that had no
+  actions.** Her observations corrected the plan.
+- **A worker ran while the designs folder was replaced under it.** Nothing
+  broke, because it had already read the old files. Do not start a worker
+  when a design delivery is about to land.
 
 ---
 
@@ -412,7 +508,7 @@ outside the repository and is not carried by git.
 
 ## Next Session Starts Here
 
-> **Current as of 2026-10-06.** Day 15 is complete. **Read *How to open the
+> **Current as of 2026-10-07.** Day 17 is complete. **Read *How to open the
 > next session with her* near the top of this file.** Everything under this heading from
 > here down is the historical record of Days 9–11 and is kept for its
 > reasoning, not as a statement of where the project is.
@@ -1657,7 +1753,14 @@ and that is deliberate — see ADR-001.
 | Item | Where | Note |
 |---|---|---|
 | **A user cannot be deleted** | `sessions`, `entries`, `days` FKs | `ON DELETE NO ACTION`, the generator's default. **Decided 2026-10-04: hard delete, Day 34** |
-| **The contract covers answers, not requests** | `packages/contracts` | Login and register bodies, and soon a mood and an entry, are still written twice. Day 17 |
+| **No test proves an out-of-date answer about today is discarded** | `apps/web/lib/today.ts` | The Master Thread's Day 17 mutation survived. First part of Day 17a |
+| **The loop that reads a day's entries has no cap** | `apps/web/lib/today.ts` | It never stops if an API keeps returning full pages. Day 17a |
+| **The web app is drawn on the old stylesheet** | `apps/web/app/styles/lock.css`, two TEMPORARY blocks in `live.css` | Day 17a |
+| **A failed delete can be missed when scrolled away** | `LiveToday.tsx` | Her decision, kept with the cost known. ADR-021 |
+| **Typed text is lost on a reload and when a session ends** | the composer | Drafts, Day 18 |
+| **The record control and "Keep this out of memory" do nothing** | the composer | Later days |
+| **A mood can be stored where no screen shows it** | `PUT /days/:date/mood` | ADR-020. To be answered when mood is wired |
+| **Deleted entries must be kept out of every later reader** | search, embeddings, export | ADR-020. Phase 4 and Day 34 |
 | **The package loads only while its `package.json` has no `"type"` field** | `packages/contracts/package.json` | Node advises adding one; doing so breaks `ts-node` and the migration commands. `built-output.e2e-spec.ts` guards it |
 | **The built API reads `packages/contracts/src/index.ts` at runtime** | `apps/api/dist` | A deployment that copies only `dist` will not start. Day 31 |
 | **`migration:generate` is never empty** | `sessions`, `days`, `users` | Foreign keys written across two lines, and an index on `lower("email")` that TypeORM cannot describe. Not caused by Day 16 |
@@ -1752,7 +1855,23 @@ Master Thread audit still owed):
 Concepts introduced by worker agents that have **not yet been learned**. See
 the roadmap's *Learning Debt* section for why this is tracked.
 
-### Status as of 2026-10-07: none open
+### Status as of the close of Day 17: three small items open
+
+The web worker used three things she has not been taught. Repay them at the
+opening of Day 17a, each in a few sentences and one prediction:
+
+- **`useSyncExternalStore`**: how a component is redrawn when a value that
+  lives outside React changes. It is how `LiveToday` follows `lib/today.ts`.
+- **A function passed to `useState`**, as in
+  `useState(() => createToday(...))`: React calls it once, on the first
+  draw.
+- **One button whose text changes**, in place of two buttons shown one at a
+  time, so that keyboard focus is not lost.
+
+The API worker's `EXISTS` subquery and `select: false` on the new column
+were explained in its report and in the audit, and are not counted as debt.
+
+### Status as of the close of Day 16: none open
 
 **React was repaid on Day 16**, to the depth guardrail: three ideas, one
 experiment she ran, and two predictions from the real file. Day 16's own two
@@ -1929,27 +2048,24 @@ see the direction recorded in *Next Session Starts Here*.
 
 ## Open Questions
 
-**Live, and in priority order as of 2026-10-04:**
+**Live, and in priority order as of the close of Day 17:**
 
-1. ~~**Where does the browser keep the refresh credential?**~~ **Decided on
-   Day 15: an `HttpOnly` cookie. ADR-018.**
-2. ~~**What happens when a user asks for their account to be deleted?**~~
-   **Decided 2026-10-04: a hard delete of the account and only its data,
-   Day 34.** The history: a user
-   **cannot currently be deleted at all** — `sessions`, `entries` and `days`
-   all carry `ON DELETE NO ACTION`, which is the generator's default rather
-   than anyone's decision. Open since Day 8 and has now slipped past Days 10,
-   11 and 14. The three answers are cascade, orphan, or refuse that accounts
-   can be deleted; the last is legitimate but has to be said out loud.
-3. **When does `entries.day_id` become `NOT NULL`?** The contract step of
-   expand-backfill-contract. Day 27 is the natural home.
-4. ~~**Does a user get a timezone?**~~ **Decided 2026-10-04: yes, as a
-   setting on the user.** The 4am day boundary is computed in UTC.
-   For her at UTC+5 that is 9am local — wrong in exactly the way this will
-   need fixing. ADR-015 carries the argument and the revisit trigger.
-5. **Does `packages/` earn its place?** Day 16 is the test: two apps now
-   describe the same data. ADR-001 argued for the workspace on Day 1 and said
-   this is where it is proven or removed.
+1. **May a mood be set on a date that has no live entry?** The API allows
+   it, and by ADR-020 such a mood is never shown on a calendar. To be
+   answered on the day the mood row is wired.
+2. **Does deleting an entry keep "show at once"?** She kept it on Day 17
+   against two recommendations. ADR-021 names what would reopen it.
+3. **Hand-written wire shapes, or a generated client?** ADR-019 chose
+   hand-written and reversed part of ADR-001. The revisit point is about
+   fifteen endpoints called by the web app, or a native client.
+4. **Should `docs/workers/` and the worker reports be committed?** They are
+   gitignored and exist on one laptop. Open since Day 7.
+
+**Settled since this list was last written:** where the credential lives
+(Day 15, ADR-018); account deletion is a hard delete (2026-10-04, built on
+Day 34); `entries.day_id` is `NOT NULL` (Day 16); a user gets a timezone
+(2026-10-04, built on Day 17b); `packages/` earned its place (Day 16,
+ADR-019).
 
 **Deferred, with a trigger:**
 

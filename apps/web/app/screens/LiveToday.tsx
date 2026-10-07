@@ -1,73 +1,80 @@
 'use client';
 
-import { MAX_PAGE_SIZE, type WireDay, type WireEntry } from '@neuron/contracts';
+import { MAX_PAGE_SIZE } from '@neuron/contracts';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { BlankScreen } from '@/app/components/AuthScreen';
 import { KeyBox, LiveScreen } from '@/app/components/LiveScreen';
-import { Composer, Entry, MoodRow } from '@/app/components/Journal';
+import { LiveComposer, LiveEntry, MoodRow } from '@/app/components/Journal';
 import { useSession } from '@/app/components/useSession';
 import { session } from '@/lib/api';
 import { formatDay, formatTime } from '@/lib/format';
+import {
+  createToday,
+  isBlank,
+  type NotDeleted,
+  type TodayState,
+} from '@/lib/today';
 import { CouldNotConnect } from './CouldNotConnect';
 
-/*
- * `ended` is not a failure of this screen. The session module has already
- * recorded that the person is signed out, and the screen leaves for /in.
- */
-type Fetched =
-  | { status: 'loaded'; day: WireDay; entries: WireEntry[] }
-  | { status: 'unreachable' }
-  | { status: 'failed' }
-  | { status: 'ended' };
-
-type Load = { status: 'loading' } | Exclude<Fetched, { status: 'ended' }>;
+const NOT_DELETED: Record<NotDeleted, string> = {
+  unreachable: 'We could not reach the server. The entry is still here.',
+  refused: 'Something went wrong on our side. The entry is still here.',
+};
 
 /*
- * The date is the API's: the browser never works out which day "today" is
- * (ADR-015).
+ * An ended session has no sentence here: the screen leaves for /in, and that
+ * screen says it.
  */
-async function fetchToday(): Promise<Fetched> {
-  const day = await session.request<WireDay>('/days/today');
-
-  if (day.kind !== 'ok') {
-    return { status: statusOf(day.kind) };
+function composerProblem(save: TodayState['save']): string | undefined {
+  if (save.status !== 'notSaved') {
+    return undefined;
   }
 
-  const entries: WireEntry[] = [];
-
-  for (;;) {
-    const page = await session.request<WireEntry[]>(
-      `/entries?date=${day.data.date}&limit=${MAX_PAGE_SIZE}&offset=${entries.length}`,
-    );
-
-    if (page.kind !== 'ok') {
-      return { status: statusOf(page.kind) };
-    }
-
-    entries.push(...page.data);
-
-    if (page.data.length < MAX_PAGE_SIZE) {
-      break;
-    }
+  if (save.why === 'unreachable') {
+    return 'We could not reach the server. Your entry was not saved. Your words are still here; try saving again.';
   }
 
-  /* The API lists newest first, and a day reads oldest first. */
-  entries.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  if (save.why === 'blank') {
+    return 'An entry needs some words. Your entry was not saved.';
+  }
 
-  return { status: 'loaded', day: day.data, entries };
+  if (save.why === 'refused') {
+    return 'Something went wrong on our side. Your entry was not saved. Your words are still here; try saving again.';
+  }
+
+  return undefined;
 }
 
-function statusOf(
-  kind: 'rejected' | 'ended' | 'unreachable',
-): 'failed' | 'ended' | 'unreachable' {
-  return kind === 'rejected' ? 'failed' : kind;
+function composerLine(save: TodayState['save']): string | undefined {
+  if (save.status === 'saving') {
+    return 'Saving.';
+  }
+
+  if (save.status === 'saved') {
+    return 'Saved. Opening today again.';
+  }
+
+  return undefined;
 }
 
 export function LiveToday() {
   const state = useSession();
   const router = useRouter();
-  const [load, setLoad] = useState<Load>({ status: 'loading' });
+
+  /*
+   * One for each time this screen is opened, and not one for the page as the
+   * session is: what one person typed must not be there for the next person
+   * who signs in.
+   */
+  const [today] = useState(() =>
+    createToday({ request: session.request, pageSize: MAX_PAGE_SIZE }),
+  );
+  const view = useSyncExternalStore(
+    today.subscribe,
+    today.getState,
+    today.getState,
+  );
 
   const signedIn = state.status === 'signedIn';
   const signedOut = state.status === 'signedOut';
@@ -78,32 +85,12 @@ export function LiveToday() {
     }
   }, [signedOut, router]);
 
-  /* Counts presses of "Try again", so that a press asks the API again. */
-  const [attempt, setAttempt] = useState(0);
-
   useEffect(() => {
     if (!signedIn) {
       return;
     }
 
-    let current = true;
-
-    /*
-     * `keep` is for asking again while something is already on the screen:
-     * what is there stays unless the new answer is a good one.
-     */
-    const open = (keep: boolean) =>
-      fetchToday().then((fetched) => {
-        if (!current || fetched.status === 'ended') {
-          return;
-        }
-
-        if (!keep || fetched.status === 'loaded') {
-          setLoad(fetched);
-        }
-      });
-
-    void open(false);
+    void today.open();
 
     /*
      * A tab left open across 4am still holds yesterday's date, so the
@@ -111,80 +98,101 @@ export function LiveToday() {
      */
     const onVisible = () => {
       if (document.visibilityState === 'visible') {
-        void open(true);
+        void today.look();
       }
     };
 
     document.addEventListener('visibilitychange', onVisible);
 
     return () => {
-      current = false;
       document.removeEventListener('visibilitychange', onVisible);
     };
-  }, [signedIn, attempt]);
+  }, [signedIn, today]);
 
   if (state.status === 'unreachable') {
-    return <CouldNotConnect />;
+    return <CouldNotConnect asking={state.asking} asked={state.asked} />;
   }
 
   if (!signedIn) {
     return <BlankScreen />;
   }
 
-  const tryAgain = () => {
-    setLoad({ status: 'loading' });
-    setAttempt((count) => count + 1);
-  };
+  const { day, save } = view;
 
   /*
    * The date box is always drawn, and is empty until the API has said which
    * day it is, so that the masthead keeps its height and nothing below it
    * moves when the date arrives.
    */
-  const date = load.status === 'loaded' ? formatDay(load.day.date) : '';
+  const date = day.status === 'open' ? formatDay(day.date) : '';
 
   return (
     <LiveScreen current="Today" aside={<KeyBox label="Day" value={date} />}>
-      {load.status === 'loading' ? (
+      {day.status === 'opening' ? (
         <p className="empty" role="status">
           Opening today.
         </p>
       ) : null}
 
-      {load.status === 'unreachable' || load.status === 'failed' ? (
+      {day.status === 'unreachable' || day.status === 'failed' ? (
         <div className="notice" role="alert">
           <p>
-            {load.status === 'unreachable'
+            {save.status === 'saved' ? 'Your entry was saved. ' : null}
+            {day.status === 'unreachable'
               ? 'Could not connect. We could not open today.'
               : 'Something went wrong on our side. We could not open today.'}
+            {day.asked > 1 ? ` Asked ${day.asked} times.` : null}
           </p>
-          <button className="btn quiet" type="button" onClick={tryAgain}>
+          {view.asking ? <p role="status">Asking again.</p> : null}
+          <button
+            className="btn quiet"
+            type="button"
+            onClick={() => void today.open()}
+          >
             Try again
           </button>
         </div>
       ) : null}
 
-      {load.status === 'loaded' && load.entries.length === 0 ? (
+      {day.status === 'open' && day.entries.length === 0 ? (
         <p className="empty">What&apos;s today been like?</p>
       ) : null}
 
-      {load.status === 'loaded' && load.entries.length > 0 ? (
+      {day.status === 'open' && day.entries.length > 0 ? (
         <main className="sheet">
-          {load.entries.map((entry) => (
-            <Entry
-              key={entry.id}
-              time={formatTime(entry.createdAt)}
-              datetime={entry.createdAt}
-            >
-              {entry.content}
-            </Entry>
-          ))}
+          {day.entries.map((entry) => {
+            const why = view.notDeleted[entry.id];
+
+            return (
+              <LiveEntry
+                key={entry.id}
+                time={formatTime(entry.createdAt)}
+                datetime={entry.createdAt}
+                confirming={view.confirming === entry.id}
+                notDeleted={why ? NOT_DELETED[why] : undefined}
+                onAsk={() => today.askToDelete(entry.id)}
+                onKeep={today.keep}
+                onGoAhead={() => void today.goAhead()}
+              >
+                {entry.content}
+              </LiveEntry>
+            );
+          })}
 
           <MoodRow />
         </main>
       ) : null}
 
-      {load.status === 'loaded' ? <Composer /> : null}
+      {day.status === 'open' ? (
+        <LiveComposer
+          text={view.text}
+          holdsWords={!isBlank(view.text)}
+          line={composerLine(save)}
+          problem={composerProblem(save)}
+          onType={today.type}
+          onSave={() => void today.save()}
+        />
+      ) : null}
     </LiveScreen>
   );
 }

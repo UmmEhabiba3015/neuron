@@ -71,7 +71,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
   }, [signedIn, router]);
 
   if (state.status === 'unreachable') {
-    return <CouldNotConnect />;
+    return <CouldNotConnect asking={state.asking} asked={state.asked} />;
   }
 
   if (state.status !== 'signedOut') {

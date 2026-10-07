@@ -193,10 +193,53 @@ test('no answer to the on-load refresh is neither signed in nor signed out, and 
   });
   const session = createSession({ apiUrl: API, fetch: api.fetch });
 
-  assert.deepEqual(await session.restore(), { status: 'unreachable' });
+  assert.deepEqual(await session.restore(), {
+    status: 'unreachable',
+    asking: false,
+    asked: 1,
+  });
 
   reachable = true;
   assert.equal((await session.restore()).status, 'signedIn');
+});
+
+test('asking again after no answer says that it is asking, sends one request for two presses, and counts the question', async () => {
+  const again = held();
+  let first = true;
+  const api = fakeApi({
+    '/auth/refresh': () => {
+      if (first) {
+        first = false;
+        return 'no answer';
+      }
+
+      return again.reply;
+    },
+  });
+  const session = createSession({ apiUrl: API, fetch: api.fetch });
+
+  await session.restore();
+
+  const press = session.restore();
+  const secondPress = session.restore();
+  await settle();
+
+  assert.deepEqual(session.getState(), {
+    status: 'unreachable',
+    asking: true,
+    asked: 1,
+  });
+  assert.equal(api.sentTo('/auth/refresh').length, 2);
+
+  again.release('no answer');
+  await press;
+  await secondPress;
+
+  assert.deepEqual(session.getState(), {
+    status: 'unreachable',
+    asking: false,
+    asked: 2,
+  });
 });
 
 test('no answer to the refresh that follows a 401 does not end the session', async () => {

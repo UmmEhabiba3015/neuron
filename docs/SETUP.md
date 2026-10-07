@@ -9,7 +9,7 @@ Everything needed to pick this project up somewhere else. Written on
 
 | Thing | Version here | Notes |
 |---|---|---|
-| Node | v24.18.0 | Must be 22 or newer. The start scripts use `--env-file-if-exists`, which does not exist in Node 20. |
+| Node | v24.18.0 | **Must be 24 or newer.** The built API and the web tests load TypeScript files from `packages/contracts` directly, which Node does without a flag only from version 24. |
 | pnpm | 11.17.0 | `corepack enable` is the least painful way to get it. npm and yarn will not work — this is a pnpm workspace and the lockfile is pnpm's. |
 | git | any recent | |
 
@@ -20,34 +20,62 @@ is why.
 
 ## 2. Getting it running
 
+There are two applications and one shared package: `apps/api` (NestJS),
+`apps/web` (Next.js) and `packages/contracts`. One install links all three.
+
 ```bash
 git clone <repo-url> neuron
 cd neuron
 pnpm install
-cp .env.example .env      # every value in it is already the default
 ```
 
+**Two environment files are needed, and neither is in git.**
+
+```bash
+cp .env.example .env
+cp apps/web/.env.example apps/web/.env.local
+```
+
+The root `.env` does not work as copied. Two values have no default, and the
+API refuses to start without them:
+
+- `JWT_SECRET`. Generate one with the command written in `.env.example`.
+- `WEB_ORIGIN`. For local work it is `http://localhost:3001`, with no
+  trailing slash.
+
+`apps/web/.env.local` works as copied. It holds `NEXT_PUBLIC_API_URL`, the
+address of the API as the browser calls it.
+
 At this point there is **no database**, and that is expected. The file is
-created automatically on first run but the tables are not — the schema comes
+created automatically on first run but the tables are not. The schema comes
 from migrations and the API never applies them itself:
 
 ```bash
 pnpm migration:run
 ```
 
-Then:
+**Run migrations before starting the API whenever new ones arrive.** Since
+Day 17 the code does not work on a database that lacks its newest column.
+
+Then, each in its own terminal:
 
 ```bash
-pnpm dev                  # http://localhost:3000/entries
+pnpm dev                  # the API, http://localhost:3000
+pnpm dev:web              # the web app, http://localhost:3001
 ```
 
-Verify with the full check, which is what every audit runs:
+Open `http://localhost:3001`, create an account, and write an entry.
+
+Verify with the full check, which is what every audit runs. It is nine
+commands, and the first five cover the API only:
 
 ```bash
 pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
+pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-Expected at Day 8: everything clean, 108 unit tests, 35 end-to-end tests.
+Expected at the close of Day 17: everything clean, 211 API unit tests, 279
+API end-to-end tests, 41 web tests, and 6 checks on the shared package.
 
 ## 3. Moving the existing journal
 

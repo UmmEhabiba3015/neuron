@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Journal runtime component tests</title>
+  <link rel="stylesheet" href="../journal-components.bundle.css">
+</head>
+<body>
+  <div class="journal-app">
+  <output id="result">Running</output>
+  <div id="composer" class="composer">
+    <label for="entry">Add to today</label><input id="entry" class="field" placeholder="Add to today">
+    <button data-action="record" type="button">Record</button>
+    <button data-action="save" type="button" hidden>Save</button>
+    <button data-action="memory" type="button" aria-pressed="false">Exclude</button>
+    <p data-journal-status role="status"></p>
+  </div>
+  <section id="mood"><div class="chips" aria-label="Mood">
+    <button type="button" aria-pressed="false">Hard</button><button type="button" aria-pressed="false">Low</button>
+    <button type="button" aria-pressed="true">Even</button><button type="button" aria-pressed="false">Good</button>
+    <button type="button" aria-pressed="false">Light</button>
+  </div></section>
+  <section id="timeline">
+    <button data-view="list" type="button" aria-pressed="true">List</button>
+    <button data-view="calendar" type="button" aria-pressed="false">Calendar</button>
+    <div data-view-panel="list">List panel</div><div data-view-panel="calendar" hidden>Calendar panel</div>
+  </section>
+  <div id="calendar"><button data-date="2026-08-09" data-target="day-9" type="button">9</button></div>
+  <article id="day-9" data-entry-date="2026-08-09">Day 9</article>
+  <nav id="navigation"><a href="/timeline">Timeline</a></nav><a id="back" href="/">Back</a>
+  <button id="dialog-trigger" type="button">Open</button>
+  <div id="dialog" role="dialog" aria-modal="true" aria-hidden="true" hidden>
+    <button data-dialog-action="cancel" type="button">Cancel</button>
+    <button data-dialog-action="confirm" type="button">Confirm</button>
+  </div>
+  <button id="play" class="play" type="button" aria-label="Play recording, 3 seconds">Play</button>
+  </div>
+
+  <script type="module">
+    import { createAudioControl, createBackControl, createCalendarIndex, createComposer,
+      createDialog, createMoodChoice, createNavigation, createTimelineView } from "../journal-components.js";
+    const result = document.querySelector("#result");
+    const assert = (condition, message) => { if (!condition) throw new Error(message); };
+    try {
+      let saved = null;
+      const composerRoot = document.querySelector("#composer");
+      const composer = createComposer(composerRoot, { onSave: async (entry) => { saved = entry; } });
+      const field = document.querySelector("#entry");
+      const mic = composerRoot.querySelector('[data-action="record"]');
+      const send = composerRoot.querySelector('[data-action="save"]');
+      assert(!mic.hidden && send.hidden, "Composer should start in its recording state.");
+      field.value = "A real entry";
+      field.dispatchEvent(new Event("input", { bubbles: true }));
+      assert(mic.hidden && !send.hidden, "Composer should swap to Save while holding content.");
+      composerRoot.querySelector('[data-action="memory"]').click();
+      send.click();
+      await new Promise((resolve) => setTimeout(resolve));
+      assert(saved?.value === "A real entry" && saved?.excluded, "Composer should send value and memory state.");
+      assert(field.value === "" && !mic.hidden && send.hidden, "Composer should reset after a successful save.");
+
+      let moodValue = null;
+      createMoodChoice(document.querySelector("#mood"), { onChange: (value) => { moodValue = value; } });
+      document.querySelectorAll("#mood button")[3].click();
+      assert(moodValue === "Good", "Mood should report the selected value.");
+      assert(document.querySelectorAll('#mood [aria-pressed="true"]').length === 1, "Mood should remain single select.");
+
+      const timeline = createTimelineView(document.querySelector("#timeline"));
+      document.querySelector('[data-view="calendar"]').click();
+      assert(document.querySelector('[data-view-panel="list"]').hidden, "List panel should hide.");
+      assert(!document.querySelector('[data-view-panel="calendar"]').hidden, "Calendar panel should show.");
+      timeline.select("list");
+
+      const initialHistoryLength = history.length;
+      let selectedDate = null;
+      createCalendarIndex(document.querySelector("#calendar"), { onSelect: (date) => { selectedDate = date; } });
+      document.querySelector("#calendar button").click();
+      assert(selectedDate === "2026-08-09", "Calendar should report the selected date.");
+      assert(history.length === initialHistoryLength, "Calendar should not push a history entry.");
+
+      let destination = null;
+      createNavigation(document.querySelector("#navigation"), { navigate: (href) => { destination = href; } });
+      document.querySelector("#navigation a").click();
+      assert(destination === "/timeline", "Navigation should delegate to the app router.");
+      let backed = false;
+      createBackControl(document.querySelector("#back"), { onBack: () => { backed = true; } });
+      document.querySelector("#back").click();
+      assert(backed, "Back should delegate to the app router.");
+
+      const dialog = createDialog(document.querySelector("#dialog"));
+      dialog.open(document.querySelector("#dialog-trigger"));
+      await new Promise((resolve) => queueMicrotask(resolve));
+      assert(!document.querySelector("#dialog").hidden, "Dialog should open.");
+      document.querySelector('[data-dialog-action="cancel"]').click();
+      assert(document.querySelector("#dialog").hidden, "Dialog should close.");
+
+      class FakeAudio extends EventTarget {
+        paused = true; ended = false; error = null;
+        async play() { this.paused = false; this.dispatchEvent(new Event("play")); }
+        pause() { this.paused = true; this.dispatchEvent(new Event("pause")); }
+      }
+      createAudioControl(document.querySelector("#play"), { audio: new FakeAudio() });
+      document.querySelector("#play").click();
+      await new Promise((resolve) => setTimeout(resolve));
+      assert(document.querySelector("#play").getAttribute("aria-pressed") === "true", "Audio should expose playing state.");
+
+      composer.destroy();
+      result.value = "Passed"; result.textContent = "Passed";
+      document.documentElement.dataset.testStatus = "passed";
+    } catch (error) {
+      result.value = `Failed: ${error.message}`; result.textContent = `Failed: ${error.message}`;
+      document.documentElement.dataset.testStatus = "failed";
+      document.documentElement.dataset.testError = error.message;
+    }
+  </script>
+</body></html>

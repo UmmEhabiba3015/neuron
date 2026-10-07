@@ -32,12 +32,16 @@ import type { WireAuthenticated, WireUser } from '@neuron/contracts';
  * it got no answer at all, which is not the same as being signed out: the
  * person may well have a good session that the app could not ask about.
  *
+ * `asking` is true while the question is being asked again, and `asked` is
+ * how many times it has gone unanswered. Together they let the screen show
+ * that a press of "Try again" was received, even when the answer is the same.
+ *
  * `ended` is true when a session that was in use stopped working, and false
  * for a visitor who was never signed in on this page load.
  */
 export type SessionState =
   | { status: 'unknown' }
-  | { status: 'unreachable' }
+  | { status: 'unreachable'; asking: boolean; asked: number }
   | { status: 'signedIn'; user: WireUser }
   | { status: 'signedOut'; ended: boolean };
 
@@ -189,29 +193,51 @@ export function createSession(config: {
     return attempt;
   }
 
+  /* While the on-load refresh is being asked for, this is that question. */
+  let restoreInFlight: Promise<SessionState> | undefined;
+
   /*
    * Rule 2. Asked for by every screen when it mounts, and React in
    * development mounts twice, so calls made together share one refresh and
    * calls made after the answer is known send nothing at all.
+   *
+   * Asking again after no answer does not go back to `unknown`. The screen
+   * that says it could not connect stays, and says that it is asking.
    */
-  async function restore(): Promise<SessionState> {
+  function restore(): Promise<SessionState> {
     if (state.status === 'signedIn' || state.status === 'signedOut') {
+      return Promise.resolve(state);
+    }
+
+    if (restoreInFlight) {
+      return restoreInFlight;
+    }
+
+    const attempt = (async (): Promise<SessionState> => {
+      const before = state.status === 'unreachable' ? state.asked : 0;
+
+      if (state.status === 'unreachable') {
+        setState({ ...state, asking: true });
+      }
+
+      const outcome = await refresh();
+
+      if (outcome === 'ended') {
+        setState({ status: 'signedOut', ended: false });
+      } else if (outcome === 'unreachable') {
+        setState({ status: 'unreachable', asking: false, asked: before + 1 });
+      }
+
       return state;
-    }
+    })();
 
-    if (state.status === 'unreachable') {
-      setState({ status: 'unknown' });
-    }
+    restoreInFlight = attempt;
 
-    const outcome = await refresh();
+    void attempt.finally(() => {
+      restoreInFlight = undefined;
+    });
 
-    if (outcome === 'ended') {
-      setState({ status: 'signedOut', ended: false });
-    } else if (outcome === 'unreachable') {
-      setState({ status: 'unreachable' });
-    }
-
-    return state;
+    return attempt;
   }
 
   function endSession(): ApiResult<never> {

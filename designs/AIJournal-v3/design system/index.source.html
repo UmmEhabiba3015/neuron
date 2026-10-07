@@ -1,0 +1,1010 @@
+<!doctype html>
+<html lang="en" data-motion-review="play">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="The visual design system and component reference for Journal.">
+<title>Journal / Design system</title>
+<link rel="stylesheet" href="../lock.css">
+<link rel="stylesheet" href="components/journal-components.css">
+<style>
+/* Documentation furniture only. Product values always come from ../lock.css. */
+html{scroll-behavior:smooth}
+body.ds-body{display:block;width:100%;max-width:100%;min-width:0;margin:0;padding:0;
+  overflow-x:hidden;background:var(--paper);color:var(--ink)}
+.ds-body *{box-sizing:border-box}
+.ds-shell{width:100%;max-width:100%;min-width:0;min-height:100vh;overflow-x:hidden;
+  background-color:var(--paper);background-image:
+  repeating-linear-gradient(to right,var(--grid) 0 1px,transparent 1px var(--mod)),
+  repeating-linear-gradient(to bottom,var(--grid) 0 1px,transparent 1px var(--mod))}
+.ds-top{position:relative;min-width:0;max-width:100%;padding:var(--s9) max(var(--s6),calc((100vw - 1180px)/2));
+  background:var(--paper-2);border-bottom:var(--w) solid var(--rule)}
+.ds-eyebrow,.ds-kicker{font:600 var(--t-key)/var(--lh-tight) var(--f-label);
+  letter-spacing:.18em;text-transform:uppercase;color:var(--rule)}
+.ds-top h1{max-width:900px;margin:var(--s5) 0 var(--s6);overflow-wrap:break-word;
+  font:400 clamp(42px,7vw,82px)/.95 var(--f-prose);letter-spacing:-.035em;color:var(--rule)}
+.ds-intro{max-width:720px;font:400 18px/1.55 var(--f-prose);color:var(--ink)}
+.ds-meta{display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s7)}
+.ds-meta span{padding:var(--s3) var(--s5);border:var(--w) solid var(--rule-2);border-radius:var(--r);
+  background:var(--paper);font:600 var(--t-key)/1 var(--f-label);letter-spacing:.12em;
+  text-transform:uppercase;color:var(--rule)}
+.ds-nav-wrap{position:sticky;top:0;z-index:10;max-width:100%;overflow:hidden;border-bottom:var(--w) solid var(--rule);
+  background:var(--paper-2)}
+.ds-nav{display:flex;gap:var(--s1);max-width:1180px;margin:auto;padding:var(--s3) var(--s6);overflow-x:auto}
+.ds-nav a{display:flex;align-items:center;min-height:var(--tap);padding:0 var(--s5);white-space:nowrap;
+  font:600 var(--t-print)/1 var(--f-label);letter-spacing:.07em;text-transform:uppercase;
+  color:var(--rule);text-decoration:none;border:var(--w) solid transparent;border-radius:var(--r)}
+.ds-nav a:hover{border-color:var(--rule-2);background:var(--paper)}
+.ds-main{max-width:1180px;margin:auto;padding:var(--s9) var(--s6) calc(var(--s9)*2)}
+.ds-section{scroll-margin-top:76px;margin-bottom:calc(var(--s9)*2)}
+.ds-section-head{display:grid;grid-template-columns:minmax(180px,1fr) minmax(0,2fr);gap:var(--s8);
+  align-items:start;margin-bottom:var(--s8);padding-top:var(--s6);border-top:var(--w) solid var(--rule)}
+.ds-section h2{font:400 34px/1 var(--f-prose);letter-spacing:-.015em;color:var(--rule)}
+.ds-section-head p,.ds-body-copy{font:400 var(--t-body)/var(--lh-body) var(--f-prose);color:var(--ink)}
+.ds-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6)}
+.ds-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ds-panel{min-width:0;padding:var(--s7);background:var(--paper-2);border:var(--w) solid var(--rule);
+  border-radius:var(--r);box-shadow:var(--elev)}
+.ds-panel.full{grid-column:1/-1}
+.ds-panel h3{margin-bottom:var(--s5);font:400 var(--t-key)/var(--lh-tight) var(--f-label);
+  letter-spacing:.18em;text-transform:uppercase;color:var(--rule)}
+.ds-panel > p,.ds-caption{font:400 var(--t-note)/var(--lh-note) var(--f-prose);color:var(--rule)}
+.ds-panel > p + p{margin-top:var(--s4)}
+.ds-demo{margin-top:var(--s6);padding:var(--s7);background:var(--paper);border:var(--w) solid var(--grid);
+  border-radius:var(--r)}
+.ds-demo.row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s6)}
+.ds-code{position:relative;margin-top:var(--s6);overflow:auto;background:var(--ink);color:var(--paper-2);
+  border-radius:var(--r);border:var(--w) solid var(--ink)}
+.ds-code::before{content:attr(data-label);display:block;padding:var(--s3) var(--s6);
+  border-bottom:var(--w) solid var(--rule-2);font:600 var(--t-key)/1.5 var(--f-label);
+  letter-spacing:.14em;text-transform:uppercase;color:var(--block-2)}
+.ds-code code{display:block;padding:var(--s6);white-space:pre;font:400 12px/1.65 ui-monospace,
+  "SFMono-Regular",Consolas,monospace;color:inherit}
+.ds-note{margin-top:var(--s6);padding:var(--s5) var(--s6);border-left:2px solid var(--rule);
+  background:var(--paper);font:400 var(--t-note)/var(--lh-note) var(--f-prose);color:var(--rule)}
+.ds-swatches{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s3);margin-top:var(--s6)}
+.ds-swatch{min-height:128px;display:flex;flex-direction:column;justify-content:flex-end;padding:var(--s5);
+  border:var(--w) solid var(--rule);border-radius:var(--r)}
+.ds-swatch b{font:600 var(--t-print)/1 var(--f-label);letter-spacing:.07em;text-transform:uppercase}
+.ds-swatch small{margin-top:var(--s2);font:400 var(--t-quiet)/var(--lh-tight) var(--f-label)}
+.ds-paper{background:var(--paper);color:var(--rule)}
+.ds-paper-2{background:var(--paper-2);color:var(--rule)}
+.ds-grid-swatch{background:var(--grid);color:var(--ink)}
+.ds-rule{background:var(--rule);color:var(--paper)}
+.ds-rule-2{background:var(--rule-2);color:var(--paper)}
+.ds-block{background:var(--block);color:var(--paper)}
+.ds-block-2{background:var(--block-2);color:var(--block)}
+.ds-ink{background:var(--ink);color:var(--paper)}
+.ds-type-list{display:grid;gap:var(--s7);margin-top:var(--s6)}
+.ds-type-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:var(--s6);align-items:baseline;
+  padding-bottom:var(--s6);border-bottom:var(--w) solid var(--grid)}
+.ds-type-row:last-child{border:0;padding-bottom:0}
+.ds-spec{font:600 var(--t-key)/1.5 var(--f-label);letter-spacing:.12em;text-transform:uppercase;color:var(--rule-2)}
+.ds-mast{font:400 var(--t-mast)/var(--lh-flat) var(--f-prose);color:var(--rule)}
+.ds-body-type{font:400 var(--t-body)/var(--lh-body) var(--f-prose);color:var(--ink)}
+.ds-field-type{font:400 var(--t-field)/var(--lh-tight) var(--f-prose);color:var(--ink)}
+.ds-note-type{font:400 var(--t-note)/var(--lh-note) var(--f-prose);color:var(--rule)}
+.ds-glance-type{font:400 var(--t-glance)/var(--lh-glance) var(--f-prose);color:var(--rule)}
+.ds-hand-l{font:400 var(--t-hand-l)/var(--lh-flat) var(--f-hand);color:var(--rule)}
+.ds-hand-s{font:400 var(--t-hand-s)/1.1 var(--f-hand);color:var(--rule)}
+.ds-print{font:400 var(--t-print)/var(--lh-tight) var(--f-label);letter-spacing:.07em;text-transform:uppercase;color:var(--rule)}
+.ds-quiet{font:400 var(--t-quiet)/var(--lh-tight) var(--f-label);letter-spacing:.04em;color:var(--rule-2)}
+.ds-space-list{display:grid;gap:var(--s3);margin-top:var(--s6)}
+.ds-space-row{display:grid;grid-template-columns:64px minmax(0,1fr) 44px;gap:var(--s5);align-items:center;
+  font:600 var(--t-key)/1 var(--f-label);letter-spacing:.08em;color:var(--rule)}
+.ds-space-bar{height:var(--s5);background:var(--rule);min-width:2px}
+.ds-space-row:nth-child(1) .ds-space-bar{width:var(--s1)}
+.ds-space-row:nth-child(2) .ds-space-bar{width:var(--s2)}
+.ds-space-row:nth-child(3) .ds-space-bar{width:var(--s3)}
+.ds-space-row:nth-child(4) .ds-space-bar{width:var(--s4)}
+.ds-space-row:nth-child(5) .ds-space-bar{width:var(--s5)}
+.ds-space-row:nth-child(6) .ds-space-bar{width:var(--s6)}
+.ds-space-row:nth-child(7) .ds-space-bar{width:var(--s7)}
+.ds-space-row:nth-child(8) .ds-space-bar{width:var(--s8)}
+.ds-space-row:nth-child(9) .ds-space-bar{width:var(--s9)}
+.ds-rule-demo{display:grid;gap:var(--s6);margin-top:var(--s6)}
+.ds-rule-line{border-top:var(--w) solid var(--rule);padding-top:var(--s3)}
+.ds-rule-inner{border-top:var(--w) solid var(--rule-2);padding-top:var(--s3)}
+.ds-rule-dot{border-top:var(--w) dotted var(--grid);padding-top:var(--s3)}
+.ds-rule-demo span{font:400 var(--t-quiet)/1 var(--f-label);color:var(--rule)}
+.ds-radius-demo{width:100%;min-height:96px;display:grid;place-items:center;border:var(--w) solid var(--rule);
+  border-radius:var(--r);background:var(--paper);font:600 var(--t-print)/1 var(--f-label);
+  letter-spacing:.07em;text-transform:uppercase;color:var(--rule);box-shadow:var(--elev)}
+.ds-control-stack{display:flex;flex-wrap:wrap;gap:var(--s5);align-items:center}
+.ds-control-stack + .ds-control-stack{margin-top:var(--s6)}
+.ds-body .btn,.ds-body button{font-weight:400}
+.ds-body button:focus-visible,.ds-body a:focus-visible,.ds-body input:focus-visible,.ds-body summary:focus-visible{
+  outline:2px solid var(--block);outline-offset:2px}
+.ds-form{display:grid;gap:var(--s6)}
+.ds-label{display:block;margin-bottom:var(--s3);font:600 var(--t-key)/1 var(--f-label);
+  letter-spacing:.14em;text-transform:uppercase;color:var(--rule)}
+.ds-form .field{width:100%;appearance:none}
+.ds-form .field::placeholder{color:var(--rule-2);opacity:1}
+.ds-visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.ds-form .composer{position:static;margin:0;padding:var(--s6);border:var(--w) solid var(--rule);
+  border-radius:var(--r)}
+.ds-form .opt{margin-top:var(--s3)}
+.ds-example-sheet{margin:0;max-width:none}
+.ds-example-sheet .said{border-top:var(--w) solid var(--rule)}
+.ds-example-card.card,.ds-example-notice.notice{margin:0}
+.ds-example-card.card{max-width:520px}
+.ds-example-notice.notice{max-width:520px}
+.ds-example-progress.progress{margin:0;max-width:520px}
+.ds-nav-demo.dest{padding:0;flex-wrap:wrap}
+.ds-seg-demo.seg{margin-top:var(--s6)}
+.ds-motion-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s3);margin-top:var(--s6)}
+.ds-motion-item{min-height:190px;display:flex;flex-direction:column;justify-content:space-between;padding:var(--s6);
+  overflow:hidden;background:var(--paper);border:var(--w) solid var(--rule);border-radius:var(--r)}
+.ds-motion-item b{font:600 var(--t-key)/1.4 var(--f-label);letter-spacing:.14em;text-transform:uppercase;color:var(--rule)}
+.ds-motion-item small{font:400 var(--t-quiet)/1.5 var(--f-label);color:var(--rule-2)}
+.ds-motion-tools{display:flex;flex-wrap:wrap;gap:var(--s5);align-items:center;margin-block:var(--s6)}
+.ds-motion-tools p{font:400 var(--t-note)/var(--lh-note) var(--f-prose);color:var(--rule)}
+.ds-motion-viewport{width:390px;max-width:100%;height:560px;overflow:auto;overscroll-behavior:contain;
+  margin-inline:auto;border:var(--w) solid var(--rule);background:var(--paper)}
+.ds-motion-viewport .app{min-width:0}
+.ds-panel .ds-motion-heading{margin-top:var(--s9)}
+.ds-motion-item p{font:400 var(--t-note)/var(--lh-note) var(--f-prose);color:var(--rule);margin-block:var(--s4)}
+.ds-inventory caption{text-align:left;font:400 var(--t-note)/var(--lh-note) var(--f-prose);color:var(--rule)}
+.ds-inventory{width:100%;border-collapse:collapse;margin-top:var(--s6);background:var(--paper-2)}
+.ds-inventory th,.ds-inventory td{padding:var(--s5) var(--s6);text-align:left;vertical-align:top;
+  border:var(--w) solid var(--rule-2)}
+.ds-inventory th{font:600 var(--t-key)/1.4 var(--f-label);letter-spacing:.14em;text-transform:uppercase;color:var(--rule)}
+.ds-inventory td{font:400 var(--t-note)/var(--lh-note) var(--f-prose);color:var(--ink)}
+.ds-inventory code{font:600 12px/1.5 ui-monospace,Consolas,monospace;color:var(--rule)}
+.ds-principles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3);margin-top:var(--s6)}
+.ds-principle{padding:var(--s6);background:var(--paper);border-left:2px solid var(--rule)}
+.ds-principle b{display:block;margin-bottom:var(--s3);font:600 var(--t-print)/1 var(--f-label);
+  letter-spacing:.07em;text-transform:uppercase;color:var(--rule)}
+.ds-principle p{font:400 var(--t-note)/var(--lh-note) var(--f-prose);color:var(--ink)}
+.ds-footer{padding:var(--s8) var(--s6);text-align:center;border-top:var(--w) solid var(--rule);
+  background:var(--paper-2);font:400 var(--t-quiet)/var(--lh-note) var(--f-label);color:var(--rule)}
+@media (max-width:820px){
+  .ds-section-head{grid-template-columns:1fr;gap:var(--s5)}
+  .ds-grid,.ds-grid.three{grid-template-columns:1fr}
+  .ds-swatches{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ds-motion-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ds-panel.full{grid-column:auto}
+}
+@media (max-width:520px){
+  .ds-main{padding-top:var(--s8)}
+  .ds-top{padding-top:var(--s8);padding-bottom:var(--s8)}
+  .ds-top h1{font-size:42px}
+  .ds-swatches,.ds-motion-grid,.ds-principles{grid-template-columns:1fr}
+  .ds-type-row{grid-template-columns:1fr;gap:var(--s3)}
+  .ds-panel,.ds-demo{padding:var(--s6)}
+  .ds-inventory{display:block;overflow-x:auto;white-space:nowrap}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body class="ds-body">
+<div class="ds-shell">
+  <header class="ds-top">
+    <p class="ds-eyebrow">Journal / implementation reference</p>
+    <h1>A design system for quiet, honest reflection.</h1>
+    <p class="ds-intro">The visual language behind Journal, translated into reusable foundations,
+      accessible controls, composed patterns and application-ready HTML/JavaScript. This guide documents the
+      approved system; <code>../lock.css</code> revision 49 remains the source of truth.</p>
+    <div class="ds-meta" aria-label="System summary">
+      <span>8 colour roles</span><span>9 spacing steps</span><span>37 components</span>
+      <span>44px target floor</span><span>0 shadows</span><span>4 motion patterns</span>
+    </div>
+  </header>
+
+  <div class="ds-nav-wrap">
+    <nav class="ds-nav" aria-label="Design system sections">
+      <a href="#principles">Principles</a><a href="#runtime">Runtime</a><a href="#colour">Colour</a>
+      <a href="#type">Typography</a><a href="#space">Spacing</a>
+      <a href="#shape">Shape</a><a href="#buttons">Buttons</a>
+      <a href="#forms">Forms</a><a href="#cards">Cards</a>
+      <a href="#navigation">Navigation</a><a href="#motion">Motion</a>
+      <a href="#inventory">Inventory</a>
+      <a href="../V3-REVISION.md">Current scope</a>
+    </nav>
+  </div>
+
+  <main class="ds-main">
+    <section class="ds-section" id="principles">
+      <div class="ds-section-head">
+        <h2>Principles</h2>
+        <p>The system protects the hierarchy between a person's record and the product around it.
+          Warmth comes from paper, type and structure, not decorative wellness conventions.</p>
+      </div>
+      <div class="ds-principles">
+        <article class="ds-principle"><b>The user writes in ink</b><p>User-authored words use
+          <code>--ink</code>. Product-authored language uses rust, a smaller size and a labelled position.</p></article>
+        <article class="ds-principle"><b>Audio owns forest</b><p><code>--block</code> marks audio and
+          the current destination only. It is never a generic accent colour.</p></article>
+        <article class="ds-principle"><b>Paper does not float</b><p>Hierarchy comes from flat fills,
+          hairlines and spacing. Product surfaces have no shadow and almost no rounding.</p></article>
+        <article class="ds-principle"><b>Silence is valid</b><p>No streak pressure, red errors,
+          disabled controls or empty illustrations. If an action is unavailable, explain why in a sentence.</p></article>
+        <article class="ds-principle"><b>Meaning survives greyscale</b><p>Colour is reinforced by words,
+          position, outlines, waveform shape and hierarchy.</p></article>
+        <article class="ds-principle"><b>The record stays still</b><p>Only four product-authored actions
+          move. A person's words never animate.</p></article>
+      </div>
+    </section>
+
+    <section class="ds-section" id="runtime">
+      <div class="ds-section-head">
+        <h2>Runtime</h2>
+        <p>The prototype classes remain the visual API. This behavior layer turns their semantic
+          markup into application components while leaving persistence, routing and server data
+          in the application that consumes them.</p>
+      </div>
+      <div class="ds-grid">
+        <article class="ds-panel full">
+          <h3>Install once, mount per route</h3>
+          <pre class="ds-code" data-label="Application entry"><code>import { mountJournalComponents } from "./components/journal-components.js";
+
+const journal = mountJournalComponents(routeElement, {
+  composer: {
+    onSave: ({ value, excluded }) =&gt; api.entries.create({ value, excluded }),
+    onRecord: () =&gt; router.push("/talk")
+  },
+  mood: { onChange: (mood) =&gt; api.days.setMood(mood) },
+  "timeline-view": { onChange: (view) =&gt; timeline.setView(view) }
+});
+
+// Keep this in the framework's route/component cleanup.
+onRouteLeave(() =&gt; journal.destroy());</code></pre>
+          <p class="ds-note">Named exports can be mounted from React effects, Vue lifecycle hooks,
+            Svelte actions or plain JavaScript. TypeScript declarations ship beside the module.</p>
+        </article>
+        <article class="ds-panel full">
+          <h3>Behavior contracts</h3>
+          <table class="ds-inventory">
+            <thead><tr><th>Adapter</th><th>Application supplies</th><th>Adapter guarantees</th></tr></thead>
+            <tbody>
+              <tr><td><code>createComposer</code></td><td>Save and record callbacks</td><td>Real label, Record/Save state, async guard, error preservation and live status.</td></tr>
+              <tr><td><code>createMoodChoice</code></td><td>Persistence callback</td><td>One pressed choice and arrow-key operation.</td></tr>
+              <tr><td><code>createTimelineView</code></td><td>Optional state callback</td><td>Two in-place views with no history entry.</td></tr>
+              <tr><td><code>createCalendarIndex</code></td><td>Dated record targets</td><td>Direct scroll with no route arrival or history entry.</td></tr>
+              <tr><td><code>createAudioControl</code></td><td>An audio element or source</td><td>Play/pause state, accessible label and media error event.</td></tr>
+              <tr><td><code>createNavigation</code> / <code>createBackControl</code></td><td>Router callbacks</td><td>Router ownership and a preserved screen instance on Back.</td></tr>
+              <tr><td><code>createDialog</code></td><td>Delete callback</td><td>Protected focus, Escape, focus return and cleanup.</td></tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+
+    <section class="ds-section" id="colour">
+      <div class="ds-section-head">
+        <h2>Colour</h2>
+        <p>Eight semantic roles, with no generic “primary” or “error” slot. Use role tokens so a future
+          theme remains a one-file change. Never add a literal colour in a screen or component.</p>
+      </div>
+      <div class="ds-panel">
+        <h3>Role palette</h3>
+        <div class="ds-swatches">
+          <div class="ds-swatch ds-paper"><b>--paper</b><small>Page ground</small></div>
+          <div class="ds-swatch ds-paper-2"><b>--paper-2</b><small>Sheets and flat fills</small></div>
+          <div class="ds-swatch ds-grid-swatch"><b>--grid</b><small>Graph and dotted rules</small></div>
+          <div class="ds-swatch ds-rule"><b>--rule</b><small>Hairlines and product voice</small></div>
+          <div class="ds-swatch ds-rule-2"><b>--rule-2</b><small>Secondary printed text</small></div>
+          <div class="ds-swatch ds-block"><b>--block</b><small>Audio and current destination</small></div>
+          <div class="ds-swatch ds-block-2"><b>--block-2</b><small>Recording ground</small></div>
+          <div class="ds-swatch ds-ink"><b>--ink</b><small>User-authored words</small></div>
+        </div>
+        <p class="ds-note"><code>--rule-2</code> must sit on a flat <code>--paper</code> or
+          <code>--paper-2</code> fill, not directly over the graph. Text on <code>--block</code> is
+          <code>--paper</code> or <code>--block-2</code>.</p>
+        <pre class="ds-code" data-label="CSS usage"><code>.journal-entry {
+  color: var(--ink);
+  background: var(--paper-2);
+}
+
+.product-note {
+  color: var(--rule);
+  border-color: var(--rule-2);
+}</code></pre>
+      </div>
+    </section>
+
+    <section class="ds-section" id="type">
+      <div class="ds-section-head">
+        <h2>Typography</h2>
+        <p>Three voices establish authorship: prose for the record, grotesk labels for the product,
+          and handwriting for at most two supporting moments per screen.</p>
+      </div>
+      <div class="ds-grid">
+        <article class="ds-panel full">
+          <h3>Type roles</h3>
+          <div class="ds-type-list">
+            <div class="ds-type-row"><span class="ds-spec">--t-mast · 34</span><span class="ds-mast">Journal</span></div>
+            <div class="ds-type-row"><span class="ds-spec">--t-body · 16.5</span><span class="ds-body-type">The flat people said Tuesday, and it’s Sunday.</span></div>
+            <div class="ds-type-row"><span class="ds-spec">--t-field · 16</span><span class="ds-field-type">Add to today</span></div>
+            <div class="ds-type-row"><span class="ds-spec">--t-note · 14</span><span class="ds-note-type">The product’s note is always smaller than the user’s words.</span></div>
+            <div class="ds-type-row"><span class="ds-spec">--t-glance · 13.5</span><span class="ds-glance-type">Sleep has come up on four of the last six days.</span></div>
+            <div class="ds-type-row"><span class="ds-spec">--t-hand-l · 29</span><span class="ds-hand-l">Sun 9 Aug ’26</span></div>
+            <div class="ds-type-row"><span class="ds-spec">--t-hand-s · 22</span><span class="ds-hand-s">How did this leave you?</span></div>
+            <div class="ds-type-row"><span class="ds-spec">--t-print · 11</span><span class="ds-print">Today · Timeline · Ask · You</span></div>
+            <div class="ds-type-row"><span class="ds-spec">--t-quiet · 11</span><span class="ds-quiet">Keep this out of memory</span></div>
+          </div>
+        </article>
+        <article class="ds-panel">
+          <h3>Font families</h3>
+          <p><code>--f-prose</code>: Constantia in the comps; Recoleta or Freight Text Pro in production.</p>
+          <p><code>--f-label</code>: Segoe UI in the comps; use a grotesk with real small caps in production.</p>
+          <p><code>--f-hand</code>: Ink Free in the comps; Caveat in production. Never below 20px.</p>
+        </article>
+        <article class="ds-panel">
+          <h3>Authorship rule</h3>
+          <p>User writing is the only 16.5px prose and always uses <code>--ink</code>. Product notes are
+            14px rust. This size-and-position distinction must survive greyscale.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="ds-section" id="space">
+      <div class="ds-section-head">
+        <h2>Spacing</h2>
+        <p>Nine steps orbit the 14px graph module. The scale covers rhythm; fixed dimensions such as the
+          44px interaction floor and 58px time column are separate constraints.</p>
+      </div>
+      <div class="ds-grid">
+        <article class="ds-panel">
+          <h3>Scale</h3>
+          <div class="ds-space-list" aria-label="Spacing token scale">
+            <div class="ds-space-row"><span>--s1</span><i class="ds-space-bar"></i><span>2px</span></div>
+            <div class="ds-space-row"><span>--s2</span><i class="ds-space-bar"></i><span>4px</span></div>
+            <div class="ds-space-row"><span>--s3</span><i class="ds-space-bar"></i><span>6px</span></div>
+            <div class="ds-space-row"><span>--s4</span><i class="ds-space-bar"></i><span>8px</span></div>
+            <div class="ds-space-row"><span>--s5</span><i class="ds-space-bar"></i><span>10px</span></div>
+            <div class="ds-space-row"><span>--s6</span><i class="ds-space-bar"></i><span>14px</span></div>
+            <div class="ds-space-row"><span>--s7</span><i class="ds-space-bar"></i><span>20px</span></div>
+            <div class="ds-space-row"><span>--s8</span><i class="ds-space-bar"></i><span>28px</span></div>
+            <div class="ds-space-row"><span>--s9</span><i class="ds-space-bar"></i><span>42px</span></div>
+          </div>
+        </article>
+        <article class="ds-panel">
+          <h3>Fixed geometry</h3>
+          <p><code>--mod: 14px</code> graph module<br><code>--rail: 24px</code> binding rail<br>
+            <code>--tcol: 58px</code> time/date column<br><code>--tap: 44px</code> minimum target<br>
+            <code>--ctl: 50px</code> composer and record control</p>
+          <pre class="ds-code" data-label="CSS"><code>.control-cluster {
+  display: flex;
+  gap: var(--s3);
+  padding: var(--s6);
+}
+
+.control-cluster &gt; button {
+  min-height: var(--tap);
+}</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="ds-section" id="shape">
+      <div class="ds-section-head">
+        <h2>Shape, rules &amp; elevation</h2>
+        <p>One 2px radius and one 1px rule weight keep the interface closer to a printed form than a
+          floating card stack. Shadows and decorative gradients are intentionally absent.</p>
+      </div>
+      <div class="ds-grid three">
+        <article class="ds-panel"><h3>Radius</h3><div class="ds-radius-demo">--r · 2px</div>
+          <p class="ds-note">Paper itself does not round. Binding holes are circles by geometry.</p></article>
+        <article class="ds-panel"><h3>Rules</h3><div class="ds-rule-demo">
+          <div class="ds-rule-line"><span>Outer / --rule</span></div>
+          <div class="ds-rule-inner"><span>Subdivision / --rule-2</span></div>
+          <div class="ds-rule-dot"><span>Note / dotted --grid</span></div></div></article>
+        <article class="ds-panel"><h3>Elevation</h3><div class="ds-radius-demo">--elev · none</div>
+          <p class="ds-note">Cards, sheets, panels and dialogs use flat fill and rules, not box-shadow.</p></article>
+      </div>
+      <pre class="ds-code" data-label="CSS"><code>.surface {
+  border: var(--w) solid var(--rule);
+  border-radius: var(--r);
+  background: var(--paper-2);
+  box-shadow: var(--elev); /* resolves to none */
+}</code></pre>
+    </section>
+
+    <section class="ds-section" id="buttons">
+      <div class="ds-section-head">
+        <h2>Buttons &amp; controls</h2>
+        <p>Three button grades, two approved icon-only controls and one word-based commit action. Hover
+          moves toward forest; press scales to .97 with a 160ms press and 280ms release; focus uses a 2px forest outline.</p>
+      </div>
+      <div class="ds-grid">
+        <article class="ds-panel">
+          <h3>Button hierarchy</h3>
+          <div class="ds-demo">
+            <div class="ds-control-stack">
+              <button class="btn solid" type="button">Save reflection</button>
+              <button class="btn keyline" type="button">Export instead</button>
+              <button class="btn quiet" type="button">Not now</button>
+            </div>
+          </div>
+          <pre class="ds-code" data-label="HTML"><code>&lt;button class="btn solid" type="button"&gt;Save reflection&lt;/button&gt;
+&lt;button class="btn keyline" type="button"&gt;Export instead&lt;/button&gt;
+&lt;button class="btn quiet" type="button"&gt;Not now&lt;/button&gt;</code></pre>
+        </article>
+        <article class="ds-panel">
+          <h3>Audio and commit</h3>
+          <div class="ds-demo row">
+            <button class="mic" type="button" aria-label="Record">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/>
+              </svg>
+            </button>
+            <button class="play" type="button" aria-label="Play recording, 2 minutes 41 seconds">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+            </button>
+            <button class="send" type="button">Save</button>
+          </div>
+          <p class="ds-note">The play label includes duration in words. “Save” is text because the
+            previous commit glyph read as download.</p>
+        </article>
+        <article class="ds-panel full">
+          <h3>States</h3>
+          <div class="ds-control-stack">
+            <button class="btn keyline" type="button">Rest</button>
+            <button class="btn solid" type="button">Hover me</button>
+            <button class="btn quiet" type="button">Focus with keyboard</button>
+          </div>
+          <p class="ds-note">There is no disabled style. Replace an unavailable control with a clear
+            sentence explaining when or how the action becomes available.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="ds-section" id="forms">
+      <div class="ds-section-head">
+        <h2>Forms &amp; choice</h2>
+        <p>The product uses a single-line field, a labelled composer, a five-word mood choice and a
+          checkable memory option. Production inputs need explicit accessible names.</p>
+      </div>
+      <div class="ds-grid">
+        <article class="ds-panel">
+          <h3>Single-line field</h3>
+          <div class="ds-demo ds-form">
+            <div>
+              <label class="ds-label" for="journal-search">Search your journal</label>
+              <input class="field" id="journal-search" name="query" type="search" placeholder="Try ‘sleep’ or ‘work’">
+            </div>
+          </div>
+          <pre class="ds-code" data-label="Application markup"><code>&lt;label class="visually-hidden" for="journal-entry"&gt;Add to today&lt;/label&gt;
+&lt;input class="field" id="journal-entry" name="entry" type="text"
+  placeholder="Add to today" autocomplete="off"&gt;</code></pre>
+          <p class="ds-note">A placeholder is not a reliable accessible name. Supply a visible or visually
+            hidden <code>&lt;label&gt;</code>, or an <code>aria-label</code> when the compact composer has no visible label.</p>
+        </article>
+        <article class="ds-panel">
+          <h3>Composer</h3>
+          <div class="ds-demo ds-form">
+            <div class="composer" data-journal-component="composer">
+              <div class="crow">
+                <label class="ds-visually-hidden" for="journal-entry-demo">Add to today</label>
+                <input class="field" id="journal-entry-demo" name="entry" type="text" placeholder="Add to today" autocomplete="off">
+                <button class="mic" type="button" data-action="record" aria-label="Record">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/>
+                  </svg>
+                </button>
+                <button class="send" type="button" data-action="save" hidden>Save</button>
+              </div>
+              <button class="opt" type="button" data-action="memory" aria-pressed="false"><span class="tick" aria-hidden="true"></span>Keep this out of memory</button>
+              <p data-journal-status role="status" aria-live="polite"></p>
+            </div>
+          </div>
+          <pre class="ds-code" data-label="Application markup"><code>&lt;div class="composer" data-journal-component="composer"&gt;
+  &lt;div class="crow"&gt;
+    &lt;label class="visually-hidden" for="today-entry"&gt;Add to today&lt;/label&gt;
+    &lt;input class="field" id="today-entry" name="entry" type="text"
+      placeholder="Add to today" autocomplete="off"&gt;
+    &lt;button class="mic" data-action="record" type="button" aria-label="Record"&gt;…&lt;/button&gt;
+    &lt;button class="send" data-action="save" type="button" hidden&gt;Save&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;button class="opt" data-action="memory" type="button" aria-pressed="false"&gt;…&lt;/button&gt;
+  &lt;p data-journal-status role="status" aria-live="polite"&gt;&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+          <pre class="ds-code" data-label="Application JavaScript"><code>import { createComposer } from "./components/journal-components.js";
+
+const composer = createComposer(document.querySelector(".composer"), {
+  onSave: ({ value, excluded }) =&gt; api.entries.create({ value, excluded }),
+  onRecord: () =&gt; router.push("/talk")
+});
+
+// composer.destroy() when the route unmounts.</code></pre>
+        </article>
+        <article class="ds-panel full">
+          <h3>Mood choice</h3>
+          <div class="ds-demo">
+            <div class="moodrow ruled-mood" data-journal-component="mood">
+              <div class="tcol"><h2>Today felt</h2></div>
+              <div class="ccol"><div class="chips" role="group" aria-label="How was today?">
+                <button data-mood="light" type="button" aria-pressed="false">Light</button><button data-mood="good" type="button" aria-pressed="false">Good</button>
+                <button data-mood="even" type="button" aria-pressed="true">Even</button><button data-mood="low" type="button" aria-pressed="false">Low</button>
+                <button data-mood="hard" type="button" aria-pressed="false">Hard</button>
+              </div></div>
+            </div>
+          </div>
+          <pre class="ds-code" data-label="Application markup"><code>&lt;div class="moodrow ruled-mood" data-journal-component="mood"&gt;
+  &lt;div class="tcol"&gt;&lt;h2&gt;Today felt&lt;/h2&gt;&lt;/div&gt;
+  &lt;div class="ccol"&gt;&lt;div class="chips" role="group" aria-label="How was today?"&gt;
+    &lt;button data-mood="light" type="button" aria-pressed="false"&gt;Light&lt;/button&gt;
+    &lt;button data-mood="good" type="button" aria-pressed="false"&gt;Good&lt;/button&gt;
+    &lt;button data-mood="even" type="button" aria-pressed="false"&gt;Even&lt;/button&gt;
+    &lt;button data-mood="low" type="button" aria-pressed="false"&gt;Low&lt;/button&gt;
+    &lt;button data-mood="hard" type="button" aria-pressed="false"&gt;Hard&lt;/button&gt;
+  &lt;/div&gt;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="ds-section" id="cards">
+      <div class="ds-section-head">
+        <h2>Cards, notices &amp; records</h2>
+        <p>“Card” is a narrow, approved component, not a default container. Most content belongs in the
+          ruled sheet. Notices are inline; product notes are disclosure rows; progress never animates.</p>
+      </div>
+      <div class="ds-grid">
+        <article class="ds-panel">
+          <h3>Static card</h3>
+          <div class="ds-demo">
+            <article class="card ds-example-card">
+              <h3>Microphone blocked</h3>
+              <p>Allow the microphone in your browser settings, or write instead.</p>
+              <div class="card-foot"><button class="btn keyline" type="button">Write instead</button></div>
+            </article>
+          </div>
+          <pre class="ds-code" data-label="HTML"><code>&lt;article class="card"&gt;
+  &lt;h3&gt;Microphone blocked&lt;/h3&gt;
+  &lt;p&gt;Human-written supporting copy.&lt;/p&gt;
+  &lt;div class="card-foot"&gt;
+    &lt;button class="btn keyline" type="button"&gt;Learn what changes&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/article&gt;</code></pre>
+        </article>
+        <article class="ds-panel">
+          <h3>Inline notice</h3>
+          <div class="ds-demo">
+            <p class="notice ds-example-notice">We could not save this entry. Your words are still in the composer.</p>
+          </div>
+          <p class="ds-note">Notices never touch history and never use an error colour.</p>
+        </article>
+        <article class="ds-panel full">
+          <h3>Ruled entry and product note</h3>
+          <div class="ds-demo">
+            <div class="sheet ds-example-sheet">
+              <div class="srow">
+                <div class="tcol"><time datetime="2026-08-09T09:20">09:20</time></div>
+                <div class="ccol"><p class="prose">I keep opening the email to check I read it right.</p></div>
+              </div>
+              <aside class="said" aria-label="From your record">
+                <div class="tcol">From your record</div>
+                <div class="ccol">
+                  <details>
+                    <summary><span class="lblbox"><span class="lbl shut">Read the note</span><span class="lbl open">Hide the note</span></span>
+                      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+                    <div class="note"><p>You wrote something close to this in March, about the job.</p>
+                      <div class="said-foot"><a class="cite" href="#cards">March 2026</a><button class="wrong" type="button">That’s not right</button></div>
+                    </div>
+                  </details>
+                </div>
+              </aside>
+            </div>
+          </div>
+          <p class="ds-note">The note is collapsed by default and always carries both evidence and a way
+            to mark it wrong. Native <code>&lt;details&gt;</code> provides keyboard and expanded-state semantics.</p>
+        </article>
+        <article class="ds-panel full">
+          <h3>Progress</h3>
+          <div class="ds-demo">
+            <div class="progress ds-example-progress"><progress class="bar" max="31" value="19">19 of 31</progress>
+              <p class="cap">19 of 31 recordings transcribed</p></div>
+          </div>
+          <pre class="ds-code" data-label="HTML"><code>&lt;div class="progress"&gt;
+  &lt;progress class="bar" max="31" value="19"&gt;19 of 31&lt;/progress&gt;
+  &lt;p class="cap"&gt;19 of 31 recordings transcribed&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="ds-section" id="navigation">
+      <div class="ds-section-head">
+        <h2>Navigation &amp; printed objects</h2>
+        <p>Primary navigation is always four destinations in one order. Segmented controls switch the
+          Timeline zoom only. Dates use the same printed-key/written-value construction everywhere.</p>
+      </div>
+      <div class="ds-grid">
+        <article class="ds-panel full">
+          <h3>Destinations</h3>
+          <div class="ds-demo">
+            <nav class="dest ds-nav-demo" aria-label="Destinations">
+              <a href="#navigation" aria-current="page">Today</a><a href="#navigation">Timeline</a>
+              <a href="#navigation">Ask</a><a href="#navigation">You</a>
+            </nav>
+          </div>
+          <pre class="ds-code" data-label="HTML"><code>&lt;nav class="dest" aria-label="Destinations"&gt;
+  &lt;a href="/" aria-current="page"&gt;Today&lt;/a&gt;
+  &lt;a href="/timeline"&gt;Timeline&lt;/a&gt;
+  &lt;a href="/ask"&gt;Ask&lt;/a&gt;
+  &lt;a href="/you"&gt;You&lt;/a&gt;
+&lt;/nav&gt;</code></pre>
+        </article>
+        <article class="ds-panel">
+          <h3>Keyline box</h3>
+          <div class="ds-demo"><div class="keybox"><span class="k">Day</span><span class="v printed">Sun 9 Aug ’26</span></div></div>
+        </article>
+        <article class="ds-panel">
+          <h3>Timeline zoom</h3>
+          <div class="ds-demo" data-journal-component="timeline-view">
+            <div class="seg ds-seg-demo" aria-label="Timeline view">
+              <button type="button" data-view="list" aria-pressed="true">List</button>
+              <button type="button" data-view="calendar" aria-pressed="false">Calendar</button>
+            </div>
+            <p class="ds-caption" data-view-panel="list">The list view is active.</p>
+            <p class="ds-caption" data-view-panel="calendar" hidden>The calendar view is active.</p>
+          </div>
+          <pre class="ds-code" data-label="Application markup"><code>&lt;section data-journal-component="timeline-view"&gt;
+  &lt;div class="seg" aria-label="Timeline view"&gt;
+    &lt;button data-view="list" type="button" aria-pressed="true"&gt;List&lt;/button&gt;
+    &lt;button data-view="calendar" type="button" aria-pressed="false"&gt;Calendar&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div data-view-panel="list"&gt;…&lt;/div&gt;
+  &lt;div data-view-panel="calendar" hidden&gt;…&lt;/div&gt;
+&lt;/section&gt;</code></pre>
+          <p class="ds-note">This changes the view in place and does not add a browser history entry.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="ds-section" id="motion">
+      <div class="ds-section-head">
+        <h2>Motion</h2>
+        <p>Motion belongs to product-authored action, never the record. Durations are derived from travel
+          and legibility constraints, so changing a duration requires re-deriving it, not tuning by taste.</p>
+      </div>
+      <div class="ds-panel">
+        <h3>C3 glide: the complete sequence</h3>
+        <p>The record never moves and the header never arrives. This is the current Today screen,
+          using the product selectors and timings from <code>lock.css</code>. Scroll inside the specimen,
+          focus its field, and open and close a note. The field demonstrates focus only; it does not save or record.</p>
+        <div class="ds-motion-tools">
+          <button class="btn keyline" type="button" id="ds-motion-replay">Replay arrival</button>
+          <p id="ds-motion-status" role="status">Motion preview is enabled independently of your Windows animation setting.</p>
+        </div>
+        <div id="ds-motion-specimen">
+<!-- MOTION SPECIMEN START -->
+<div class="ds-motion-viewport" tabindex="0" aria-label="Today motion specimen, scroll to test the composer">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+
+  <div class="app">
+    <div class="rail" aria-hidden="true"></div>
+
+    <div class="page">
+
+      
+<div class="journal-header">
+<header class="mast">
+        <h1 class="wordmark">Journal</h1>
+        <div class="keybox">
+          <span class="k">Day</span>
+          <span class="v">Sun 9 Aug '26</span>
+        </div>
+      </header>
+
+      <nav class="dest" aria-label="Destinations">
+        <a href="#motion" aria-current="page">Today</a>
+        <a href="#motion">Timeline</a>
+        <a href="#motion">Ask</a>
+        <a href="#motion">You</a>
+      </nav>
+</div>
+
+
+
+      
+
+      <main class="sheet">
+
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-09T09:20">09:20</time></div>
+          <div class="ccol">
+            <p class="prose">The flat people said Tuesday, and it's Sunday, so I've
+              decided not to think about it until Tuesday. That lasted about an hour.
+              I keep opening the email to check I read it right.</p><div class="entry-actions" aria-label="Entry actions"><div class="entry-tools"><a class="btn quiet entry-icon" data-entry-action="edit" href="#motion" aria-label="Edit entry"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15z"/></svg></a><a class="btn quiet entry-icon" data-entry-action="delete" href="#motion" aria-label="Delete entry"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></a></div><details class="entry-memory-dropdown" data-excluded="false"><summary class="entry-memory-trigger" aria-label="Entry memory settings: in memory"><span class="memory-state">In memory</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="entry-memory-menu"><button class="opt" type="button" data-entry-action="memory" aria-pressed="true"><span class="tick" aria-hidden="true"></span><span>Use in memory</span></button></div></details></div>
+          </div>
+        </div>
+
+        <aside class="said" aria-label="From your record">
+          <div class="tcol">From your record</div>
+          <div class="ccol">
+            <details>
+              <summary>
+                <span class="lblbox"><span class="lbl shut">Read the note</span>
+                <span class="lbl open">Hide the note</span></span>
+                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </summary>
+              <div class="note">
+                <p>You wrote something close to this in March, about the job. That you'd
+                   decided not to think about it until Thursday.</p>
+                <div class="said-foot">
+                  <a class="cite" href="#motion">12 March</a>
+                  <button class="wrong" type="button">That's not right</button>
+                </div>
+              </div>
+            </details>
+          </div>
+        </aside>
+
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"><time datetime="2026-08-09T14:05">14:05</time></div>
+            <div class="ccol">
+              <button class="play" type="button"
+                      aria-label="Play recording, 2 minutes 41 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/>
+                </svg>
+              </button>
+              <svg class="wave" viewBox="0 0 174 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="18" width="2" height="8"/><rect x="7" y="13" width="2" height="18"/>
+                  <rect x="14" y="4" width="2" height="36"/><rect x="21" y="15" width="2" height="14"/>
+                  <rect x="28" y="19" width="2" height="6"/><rect x="35" y="7" width="2" height="30"/>
+                  <rect x="42" y="16" width="2" height="12"/><rect x="49" y="2" width="2" height="40"/>
+                  <rect x="56" y="12" width="2" height="20"/><rect x="63" y="19" width="2" height="6"/>
+                  <rect x="70" y="8" width="2" height="28"/><rect x="77" y="16" width="2" height="12"/>
+                  <rect x="84" y="5" width="2" height="34"/><rect x="91" y="18" width="2" height="8"/>
+                  <rect x="98" y="12" width="2" height="20"/><rect x="105" y="3" width="2" height="38"/>
+                  <rect x="112" y="19" width="2" height="6"/><rect x="119" y="14" width="2" height="16"/>
+                  <rect x="126" y="8" width="2" height="28"/><rect x="133" y="18" width="2" height="8"/>
+                  <rect x="140" y="11" width="2" height="22"/><rect x="147" y="2" width="2" height="40"/>
+                  <rect x="154" y="16" width="2" height="12"/><rect x="161" y="19" width="2" height="6"/>
+                  <rect x="168" y="12" width="2" height="20"/><rect x="175" y="6" width="2" height="32"/>
+                  <rect x="182" y="18" width="2" height="8"/><rect x="189" y="14" width="2" height="16"/>
+                  <rect x="196" y="4" width="2" height="36"/><rect x="203" y="19" width="2" height="6"/>
+                  <rect x="210" y="13" width="2" height="18"/><rect x="217" y="9" width="2" height="26"/>
+                  <rect x="224" y="17" width="2" height="10"/><rect x="231" y="6" width="2" height="32"/>
+                </g>
+              </svg>
+              <span class="dur">2:41</span>
+            </div>
+          </div>
+          <div class="body">
+            <div class="tcol"></div>
+            <div class="ccol">
+              <p class="prose">Walked the canal as far as the second bridge and back.
+                Didn't listen to anything. There were two swans that have been there
+                all summer and I've never once seen them move.</p><div class="entry-actions" aria-label="Voice memo actions"><div class="entry-tools"><a class="btn quiet entry-icon" data-entry-action="delete" href="#motion" aria-label="Delete voice memo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></a></div><details class="entry-memory-dropdown" data-excluded="false"><summary class="entry-memory-trigger" aria-label="Voice memo memory settings: in memory"><span class="memory-state">In memory</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="entry-memory-menu"><button class="opt" type="button" data-entry-action="memory" aria-pressed="true"><span class="tick" aria-hidden="true"></span><span>Use in memory</span></button></div></details></div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="said" aria-label="From your record">
+          <div class="tcol">From your record</div>
+          <div class="ccol">
+            <details>
+              <summary>
+                <span class="lblbox"><span class="lbl shut">Read the note</span>
+                <span class="lbl open">Hide the note</span></span>
+                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </summary>
+              <div class="note">
+                <p>That stretch of canal is in your entry from 3 July too. What keeps
+                   taking you there?</p>
+                <div class="said-foot">
+                  <a class="cite" href="#motion">3 July</a>
+                  <button class="wrong" type="button">That's not right</button>
+                </div>
+              </div>
+            </details>
+          </div>
+        </aside>
+
+        <div class="srow">
+          <div class="tcol"><time datetime="2026-08-09T21:40">21:40</time></div>
+          <div class="ccol">
+            <p class="prose">Priya rang. We talked for an hour about nothing. I'd
+              forgotten that's a thing you can do.</p><div class="entry-actions" aria-label="Entry actions"><div class="entry-tools"><a class="btn quiet entry-icon" data-entry-action="edit" href="#motion" aria-label="Edit entry"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15z"/></svg></a><a class="btn quiet entry-icon" data-entry-action="delete" href="#motion" aria-label="Delete entry"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></a></div><details class="entry-memory-dropdown" data-excluded="true"><summary class="entry-memory-trigger" aria-label="Entry memory settings: out of memory"><span class="memory-state">Out of memory</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="entry-memory-menu"><button class="opt" type="button" data-entry-action="memory" aria-pressed="false"><span class="tick" aria-hidden="true"></span><span>Use in memory</span></button></div></details></div>
+            <span class="mark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   aria-hidden="true">
+                <rect x="5" y="11" width="14" height="10" rx="1"/>
+                <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+              </svg>
+              Private, out of memory
+            </span>
+          </div>
+        </div>
+
+        <section class="moodrow ruled-mood"><div class="tcol"><h2>Today felt</h2></div><div class="ccol"><div class="chips" role="group" aria-label="How was this day?"><button data-mood="light" type="button" aria-pressed="false">Light</button><button data-mood="good" type="button" aria-pressed="false">Good</button><button data-mood="even" type="button" aria-pressed="false">Even</button><button data-mood="low" type="button" aria-pressed="false">Low</button><button data-mood="hard" type="button" aria-pressed="false">Hard</button></div>
+        </div></section>
+
+      </main>
+
+      <div class="composer writing-companion"><section class="journal-overview" aria-label="Recent overview"><h2>Recent overview</h2><p class="glance"><span class="gline">Sleep has come up on four of the last six days.</span></p></section>
+        <div class="crow">
+          <input class="field" aria-label="Add to today, motion specimen only" placeholder="Add to today">
+          <button class="mic" type="button" aria-label="Record">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="2.5" width="6" height="11.5" rx="3"/>
+              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/>
+            </svg>
+          </button>
+        </div>
+        <div class="composer-tools"><button class="opt" type="button" aria-pressed="false">
+          <span class="tick" aria-hidden="true"></span> Keep this out of memory
+        </button><a class="btn quiet" href="#motion">More options</a></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- MOTION SPECIMEN END -->
+        </div>
+        <h3 class="ds-motion-heading">The four permitted load patterns</h3>
+        <div class="ds-motion-grid">
+          <div class="ds-motion-item"><b>Date writes</b><p>Handwritten values only. Printed prices and labels remain still.</p><small><code>--g-date</code> · 500ms</small></div>
+          <div class="ds-motion-item"><b>Product line types</b><p>Only text wrapped in <code>.gline</code>. Never the user's question.</p><small><code>--g-type</code> · 820ms / 48 steps</small></div>
+          <div class="ds-motion-item"><b>Waveform draws</b><p>Starts at 110ms. Desktop duration is a descendant override at a 1200px app width.</p><small><code>--g-wave</code> · 360ms / 520ms desktop</small></div>
+          <div class="ds-motion-item"><b>Composer rises</b><p>Only when an out-of-memory option exists. The travel reveals that option.</p><small><code>--g-comp</code> · 240ms over 64px</small></div>
+        </div>
+        <p class="ds-note">The note disclosure also uses the established 420ms open/close behaviour, but
+          it is an interaction state of <code>.said</code>, not a fifth load animation. Reduced-motion removes
+          motion entirely. Error and recovery text stays still.</p>
+        <h3 class="ds-motion-heading">Timing and choreography</h3>
+        <table class="ds-inventory"><caption>Today finishes its load at 1320ms</caption>
+          <thead><tr><th>Object</th><th>Start → finish</th><th>Curve and reason</th></tr></thead>
+          <tbody>
+            <tr><td>Composer</td><td>0 → 240ms</td><td><code>--gc-rise</code>; 64px, measured to hide exactly the option.</td></tr>
+            <tr><td>Date</td><td>0 → 500ms</td><td><code>--gc</code>; widest date 225.2px, at most one character/frame at peak.</td></tr>
+            <tr><td>Wave</td><td>110 → 470ms; desktop 630ms</td><td><code>--gc</code>; at most 45px/frame at peak.</td></tr>
+            <tr><td>Product line</td><td>500 → 1320ms</td><td><code>steps(48,start)</code>; 17.08ms per step.</td></tr>
+          </tbody>
+        </table>
+        <p class="ds-note">The type delay exists only when a handwritten date is present in the same
+          <code>.app</code>. Mobile and tablet Timeline start their total at 0ms and finish at 820ms.
+          Load animations use <code>backwards</code>, so ordinary CSS owns the finished state.</p>
+        <table class="ds-inventory"><caption>Shared tokens and interaction state</caption>
+          <thead><tr><th>Token or rule</th><th>Value</th><th>Use</th></tr></thead><tbody>
+            <tr><td><code>--gc</code></td><td><code>cubic-bezier(.42,0,.58,1)</code></td><td>Symmetric; approximately 1.724× peak speed; no overshoot.</td></tr>
+            <tr><td><code>--gc-rise</code></td><td><code>cubic-bezier(.25,.46,.45,.94)</code></td><td>Composer entrance and focus recovery.</td></tr>
+            <tr><td><code>--g-step</code></td><td>110ms</td><td>Wave delay.</td></tr>
+            <tr><td><code>--g-note / --g-note-lift</code></td><td>420ms / 20px</td><td>Opaque note lift, labels and supported height growth; open and close.</td></tr>
+            <tr><td><code>--g-roll</code></td><td>0 → -1</td><td>One registered number moves both labels, exactly one label height apart.</td></tr>
+            <tr><td><code>--g-tuckable</code></td><td>1 → 0 on focus</td><td>Multiplies 64px tuck distance; returns to 1 on blur.</td></tr>
+            <tr><td>Press / release</td><td>160ms / 280ms</td><td>Current C3: <code>scale(.97)</code>, using <code>--gc</code>. Hover colour is immediate.</td></tr>
+          </tbody>
+        </table>
+        <h3 class="ds-motion-heading">Composer: four occasions, no extra entrance</h3>
+        <p>Open the app: rise. Scroll further into the journal: tuck. Scroll back: reveal.
+          Interact while tucked: rise. Interact while already open: stay still. The scroll timeline
+          scrubs linearly from 24 to 120px; it has no timed easing. Focus transitions the registered
+          <code>--g-tuckable</code> value over 240ms. Keep the scroll animation running.</p>
+        <p class="ds-note">The integrated scroll rule uses <code>forwards</code> fill for the tuck.
+          It stays tucked after 120px and does not apply before 24px, preserving the opening rise.
+          Typing and saved-state fixtures suppress all load effects while retaining scroll interaction.</p>
+        <h3 class="ds-motion-heading">Note: one clock in both directions</h3>
+        <p>Keep native <code>details</code> and the <code>.lblbox</code> wrapper inside its summary.
+          The labels roll together while the fully opaque content lifts 20px, all over 420ms.
+          Reverse on close. Height growth uses <code>interpolate-size</code> where supported;
+          otherwise height steps open and the content remains available. Do not replace it with a fixed height.</p>
+        <h3 class="ds-motion-heading">Product motion preference and capability fallbacks</h3>
+        <p>In production without the review override, reduced motion removes every animation and transition, including scroll tuck and note travel.
+          No fade, no shortened duration, no preference override. Press feedback is an instant state.
+          Without scroll timelines the composer stays open. Without interpolated height the note steps open.
+          The original review measured those fallbacks in Gecko; capability checks remain the authority.</p>
+        <p>The handover files explicitly enable <code>data-motion-review="play"</code> on their
+          root element at the user's request. This lets the full design and Replay run even when
+          Windows animations are disabled. Remove that review attribute when building the product.</p>
+        <h3 class="ds-motion-heading">What a build must preserve</h3>
+        <p>Back restores a drawn screen. Typing and Save update Today in place. None may replay any of
+          the four load effects. Static walkthroughs cannot enforce that lifecycle: <code>.restate</code>
+          suppresses only their composer entrance. Keep accessible input labels, keyboard focus and drafts;
+          never delay an action for animation. The runtime adapter does not own route arrival policy.</p>
+        <h3 class="ds-motion-heading">Later account and flow pages</h3>
+        <p>The completed v2 <code>_motion</code> files are the implementation reference for all three
+          platforms. New handover pages reuse their product-line gesture on the first introductory
+          sentence: <code>g-draw</code> with stepped progress, one step per character, at
+          <code>820ms / 48</code> per character. The span's <code>--g-copy-count</code> determines its
+          duration. Existing copy, line wrapping, fields and navigation are retained.</p>
+        <p>Errors, recovery warnings, permission failures, form fields and notices remain immediately
+          readable. Pages without introductory copy use the same 160ms press and 280ms release feedback.
+          The printed account masthead stays still. There is no new page entrance or loading loop.</p>
+        <p class="ds-note">Review the full integrated handover:
+          <a href="../journal-prototype.html">mobile</a>,
+          <a href="../journal-prototype-tablet.html">tablet</a>,
+          <a href="../journal-prototype-desktop.html">desktop</a>.
+          Each reflects the current v3 states. The Today specimen above illustrates the primitives;
+          it is not the full implementation.</p>
+        <p class="ds-note">Never animate the user's record, transcripts, restated questions, masthead,
+          error state or progress. No ambient loops or breathing microphone. Privacy settings and the
+          account mastheads remain still. Preserve <code>.gline</code>: it identifies the product's own words.</p>
+        <pre class="ds-code" data-label="Required application structure"><code>&lt;div class="journal-app"&gt;
+  &lt;div class="app"&gt;
+    &lt;!-- Motion tokens live here, not on :root. --&gt;
+    &lt;p class="glance"&gt;&lt;span class="gline"&gt;Product-authored line&lt;/span&gt;&lt;/p&gt;
+    &lt;!-- Reuse lock.css or journal-components.bundle.css. --&gt;
+    &lt;!-- Keep this instance for Back and same-screen updates. --&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+        <p class="ds-note">Full handover: <code>MOTION-HANDOVER.md</code>. Screen coverage:
+          <code>motion-index.html</code>. Full mobile walkthrough: <code>journal-prototype.html</code>.
+          The earlier v2 phone export used obsolete A5 motion and must not be used for implementation.</p>
+      </div>
+    </section>
+
+    <section class="ds-section" id="inventory">
+      <div class="ds-section-head">
+        <h2>Closed inventory</h2>
+        <p>The implementation inventory is closed at 37 components. The grouped list below is a quick map;
+          detailed behavioural rules remain in <code>direction-lock.md</code> §6 and §7.</p>
+      </div>
+      <div class="ds-panel">
+        <table class="ds-inventory">
+          <thead><tr><th>Group</th><th>Approved components</th><th>Boundary</th></tr></thead>
+          <tbody>
+            <tr><td>Shell</td><td><code>.app .page .rail .mast .wordmark</code></td><td>Graph page, binding and masthead.</td></tr>
+            <tr><td>Navigation</td><td><code>.dest .seg .back</code></td><td>Four destinations; Timeline zoom; pushed-page back.</td></tr>
+            <tr><td>Form</td><td><code>.sheet .srow .recrow .said .moodrow</code></td><td>One ruled rectangle; only recordings carry tone.</td></tr>
+            <tr><td>Printed</td><td><code>.keybox .glance .total .mark .foot .shead</code></td><td>Product-owned facts and labels.</td></tr>
+            <tr><td>Controls</td><td><code>.composer .crow .btn .field .play .wave .srowlink .opt .readout .stack .actions .send</code></td><td>Three button grades; two icon-only controls.</td></tr>
+            <tr><td>Notices</td><td><code>.notice .card .empty .progress</code></td><td>No illustration; progress is native and still.</td></tr>
+            <tr><td>Overlays</td><td><code>.panel .dialog</code></td><td>Exactly one dialog: delete everything.</td></tr>
+            <tr><td>Timeline / answer</td><td><code>.dayrow .cal .excerpt</code></td><td>Empty days are numbers, not interactive rows.</td></tr>
+          </tbody>
+        </table>
+        <p class="ds-note">The visual inventory remains closed. The runtime adapters add behavior to these
+          components; they do not introduce new visual objects.</p>
+        <p class="ds-note">Explicitly excluded: generic tabs, badges, avatars, tooltips, toasts, skeletons,
+          spinners, carousels, extra chip styles, extra card styles, extra icon-only buttons, extra dialogs,
+          illustrations, gradients and shadows.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="ds-footer">Journal design system · visual reference · source of truth: lock.css revision 49</footer>
+</div>
+<script type="module">
+import { mountJournalComponents } from "./components/journal-components.js";
+mountJournalComponents(document);
+</script>
+<script>
+// User-requested documentation override. Product usage without the root attribute respects reduced motion.
+(() => {
+  const specimen = document.getElementById('ds-motion-specimen');
+  const status = document.getElementById('ds-motion-status');
+  const preference = matchMedia('(prefers-reduced-motion: reduce)');
+  const isReduced = () => preference.matches && document.documentElement.dataset.motionReview !== "play";
+  const describe = () => { status.textContent = isReduced()
+    ? 'Reduced motion is on. The specimen stays finished and still, including on replay.'
+    : 'Motion preview is enabled, including when Windows animations are off. Replay Today, scroll inside it, or open a note.'; };
+  describe();
+  preference.addEventListener('change', describe);
+  document.getElementById('ds-motion-replay').addEventListener('click', () => {
+    const viewport = specimen.querySelector('.ds-motion-viewport');
+    viewport.scrollTop = 0;
+    if (isReduced()) { describe(); return; }
+    // Finished backwards-filled effects are absent from getAnimations(). Restart via
+    // their existing CSS, with scroll reset above; leave all note transitions alone.
+    const targets = specimen.querySelectorAll('.keybox .v:not(.printed), .gline, .wave, .composer:has(.opt)');
+    targets.forEach(target => { target.style.animation = 'none'; });
+    void specimen.offsetHeight;
+    targets.forEach(target => { target.style.removeProperty('animation'); });
+    status.textContent = 'Arrival replayed. Today finishes at 1320ms; the record and header remain still.';
+  });
+  specimen.addEventListener('click', event => {
+    if (event.target.closest('a')) event.preventDefault();
+    const option = event.target.closest('.opt');
+    if (option) option.setAttribute('aria-pressed', String(option.getAttribute('aria-pressed') !== 'true'));
+    if (event.target.closest('.mic,.play,.wrong,.chips button')) status.textContent = 'Motion specimen only: saving, recording and record changes are demonstrated in the component sections.';
+  });
+})();
+</script>
+</body>
+</html>

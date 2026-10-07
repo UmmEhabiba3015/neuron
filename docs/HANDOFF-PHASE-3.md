@@ -1,220 +1,160 @@
 # Neuron — handoff, written for a fresh reader
 
-> **Out of date since the session of 2026-10-04.** The mobile app is now out
-> of scope, there are no tiers, and user deletion and the timezone are
-> decided. The current record is `docs/master-state.md`, sections *How to open
-> the next session with her* and *What her husband decided on 2026-10-04*.
-
-**Written 2026-10-04**, at the end of Day 14 and the start of Phase 3.
-**Every number in this file was re-run on the day it was written**, not copied
-from an earlier report.
+**Written 2026-10-07**, at the close of Day 17, in the middle of Phase 3.
+**Every number in this file was re-run on the day it was written**, not
+copied from an earlier report.
 
 You do not need to have followed this project to read this. It assumes you
 know software but not this codebase.
 
 **This is not the document for restarting a Master Thread.** That is
-`docs/master-state.md`, which carries the full continuity record and is read
-after `master-prompt.md`, `constitution.md` and `roadmap.md`. This file is for
-a person.
+`docs/master-state.md`, read after `master-prompt.md`, `constitution.md` and
+`roadmap.md`. This file is for a person.
 
 ---
 
 ## 1. What this is
 
-**Neuron is a journalling API, built as a deliberate learning project.**
-Umm E Habiba is building it to return to backend engineering. The product is
-real and the code is production-standard, but the *purpose* is understanding
-rather than shipping — which explains several things that would otherwise look
-odd, such as hand-writing database migrations a tool could generate.
+Neuron is a private journal: typed entries, a mood for each day, and later
+voice memos, search and a memory the person can ask questions of. It is being
+built as a deliberate learning project by Umm E Habiba, a 2022 computer
+engineering graduate returning after a career break. The aim is that she can
+explain every decision in it, and the product is the vehicle for that.
 
-The governing document is `docs/constitution.md`. Its central rule:
-
-> Implementation is never the first step. Understand → research → discuss →
-> compare → decide → design → implement → review → refactor → document.
-
-A second rule shapes the whole repository: **learning debt**. If code is
-introduced that its owner cannot explain, that is tracked like technical debt
-and must be repaid before the next day's work begins.
+She works with an AI "Master Thread" that teaches, writes decision records
+and audits. Separate AI "workers" write the code from written prompts. She
+makes the decisions. Her husband, a senior engineer, sets scope and
+guardrails from time to time.
 
 ---
 
 ## 2. Where it stands today
 
-| | |
+**It is a working product for one feature: writing.** A person can create an
+account, sign in, stay signed in across a reload, type an entry, see it
+appear, and delete it. That is true on her own laptop against her own
+database.
+
+| Part | State |
 |---|---|
-| **Days complete** | 0–14 of a 40-day plan |
-| **Phase** | Phase 2 (identity and ownership) closed. Phase 3 (the interface) just opened |
-| **Tests** | **149 unit, 160 end-to-end**, all passing |
-| **Code** | 55 production files, ~2,400 lines, excluding tests |
-| **ADRs** | 17 architecture decision records |
-| **Branch** | `main`, clean, everything committed |
+| `apps/api`, NestJS on SQLite | Accounts, sessions with rotating refresh tokens, entries, days with a 4am boundary, mood, pagination, soft delete |
+| `apps/web`, Next.js | Sign in, create account, and the Today screen, reading and writing real data |
+| `packages/contracts` | One file holding every fact both applications state: wire shapes, the mood words, page sizes, the password minimum |
 
-Typecheck, lint and both application builds are clean.
+**The numbers.** 211 API unit tests, 279 API end-to-end tests, 41 web tests,
+6 checks on the shared package. Lint, typecheck and build clean for both
+applications. 21 architecture decision records. Ten migrations.
 
-### What works
-
-A journal API with real multi-tenant identity.
-
-- **Accounts.** Register and log in with an email and a password. Passwords are
-  hashed with argon2id and are not recoverable by design.
-- **Sessions.** 15-minute access tokens, 30-day refresh tokens that rotate on
-  every use. Logging out takes effect on the **next request**, not whenever the
-  token happens to expire. "Log out everywhere" works. Replaying a rotated
-  refresh token revokes every session for that user.
-- **Ownership.** Every read and write is scoped to its owner inside the SQL
-  `WHERE` clause rather than checked afterwards. Asking for someone else's
-  entry returns 404, never 403 — a 403 would confirm the entry exists.
-- **Days.** A day is a first-class object with its own row, and **the day ends
-  at 4am rather than midnight**, because something written at 1am belongs to
-  the night before. Mood attaches to the day, not to an entry.
-- **Entries.** Create, read, update, delete, keyword search, pagination.
-
-### The two applications
-
-```
-apps/api     NestJS + TypeORM + SQLite.  Everything above.
-apps/web     Next.js.  One screen, three breakpoints, WIRED TO NOTHING.
-```
-
-`apps/web` renders the designs faithfully and makes **zero network calls**.
-Connecting the two is what Phase 3 is for, and it is where the project is
-stopped right now.
+**Not built, said plainly.** No AI of any kind. No voice. No search screen.
+No Timeline and no way to see any day except today. No sign-out control. No
+forgot-password. No export and no account deletion. The mood buttons and the
+"keep this out of memory" option are drawn and do nothing.
 
 ---
 
-## 3. The decision that is open, and why she paused
+## 3. What happened in Days 15 to 17
 
-**This is the live question, and it is the thing most worth your input.**
+**Day 15, the browser.** The refresh credential lives in an `HttpOnly`,
+`SameSite=Strict` cookie and the access token in memory. Her reason: an
+attacker who gets script onto the page should not be able to carry the
+long-lived credential away. CORS allows one origin, which has no default.
+ADR-018.
 
-A browser has to keep a credential somewhere so a user stays logged in after
-closing the tab. There are two realistic options and they are not equivalent.
+**Day 16, two applications.** The same facts were written in both
+applications with nothing connecting them, so a shared package now holds
+them. Her rule for it: *facts about data crossing the boundary between the
+two apps, not implementation or behaviour belonging to either app.* This
+reversed part of the Day 1 decision, which expected generated types, and the
+record says so. ADR-019.
 
-| | `localStorage` | HttpOnly cookie |
-|---|---|---|
-| Can page JavaScript read it? | **Yes** | **No** |
-| If an attacker gets JS on the page | Steals the 30-day token, uses it from **their own machine** | Can act as the user **only inside the open tab** |
-| Attack window | 30 days, survives closing the tab and shipping a fix | Page lifetime, plus 15 minutes |
-| Complexity | Low. The API already works this way | Higher. API change, CORS with credentials, CSRF |
+**Day 17, the first real user.** She used the screen and reported what felt
+wrong, which changed the day. Writing an entry waits for the API, because
+the server decides an entry's time and day. Deleting an entry shows at once.
+Deleting is a soft delete with an automatic filter. ADR-020 and ADR-021.
 
-Her own analysis of this was thorough and is the reason the decision is close
-rather than obvious. Two findings from it worth repeating:
-
-1. **Refresh-token reuse detection does not save `localStorage`.** It only
-   fires when the real client and the thief collide. A patient attacker waits
-   until the user stops using that device, and then nothing stale is ever
-   presented. *"Reuse detection catches a careless thief. A patient one gets
-   through."*
-2. **An HttpOnly cookie does not prevent the attack, it bounds it.** The
-   attacker's JavaScript can still call `/auth/refresh` and get a fresh access
-   token, because the browser attaches the cookie automatically. What they
-   cannot do is carry the credential off the device. *"HttpOnly doesn't prevent
-   XSS. It bounds XSS in time and place."*
-
-### The complication she raised last
-
-**There will be a mobile app**, using this same backend. That is in the brief
-— *"mobile is the product"* — and one native screen is already designed.
-
-A native app cannot use a browser cookie. iOS stores credentials in the
-**Keychain**, which is stronger than either option above. So the two clients
-were never going to share a mechanism.
-
-**My recommendation, for what it is worth:** cookie for web, token-in-body for
-native, with `/auth/refresh` accepting either. The native app does not make
-`localStorage` better; it makes the body path necessary regardless, and adding
-it does not require weakening the web.
-
-**Nothing has been built either way.** No ADR written, no code committed. The
-decision is genuinely open.
+**The designer replied on Day 17.** `designs/AIJournal-v3/` is his answer to
+`docs/ui-handover.md`, and it accepts every scope decision: no guests, no
+tiers, no offline, an account required.
 
 ---
 
-## 4. Things that are deliberately unfinished
+## 4. What comes next
 
-These are decisions, not oversights. Each is recorded in the roadmap or an ADR.
+| Day | What it is |
+|---|---|
+| 17a | Bring the web app in line with the new designs |
+| 17b | A timezone for each user. Today the day ends at 4am UTC, which is 9am for her |
+| 17c | Seeing a day other than today |
+| 18 | Drafts, saving as she types, editing an entry |
+| 19–20 | Responsive layout and accessibility; forgot password |
+| 21–27 | Search, embeddings, background work, and answers from her own entries |
+| 28–39 | Scheduled work, deployment, export and account deletion, hardening |
 
-| | What | Where it is decided |
-|---|---|---|
-| **A user cannot be deleted** | Every foreign key is `ON DELETE NO ACTION`, so accounts with sessions or entries cannot be removed. That is the ORM generator's default rather than anyone's decision | Open question since Day 8. Has slipped past Days 10, 11 and 14 |
-| **No timezone** | The 4am day boundary is computed in UTC. For a user at UTC+5 that is 9am local — wrong in the way this will eventually need fixing | ADR-015, with its revisit trigger |
-| **`entries.day_id` is nullable** | The last step of expand-backfill-contract is pending | Roadmap, Day 27 |
-| **No AI** | The product's whole differentiator. Phase 4, Days 21–27 | Roadmap |
-| **Voice memos, import, export, tiers** | All decided as in-scope or deferred, none built | ADR-016, `docs/feature-reconciliation.md` |
-
-**The oldest and sharpest of these is user deletion.** It has now slipped three
-times. A product holding people's private journals should have a position on
-what happens when someone wants their account gone — cascade, orphan, or refuse
-account deletion entirely. The last is a legitimate answer but has to be said
-out loud rather than arrived at by a generator default.
+The lettered days were inserted during Days 16 and 17. The plan is no longer
+held to forty days; her husband said so on 2026-10-04.
 
 ---
 
-## 5. How this project works, if you want to judge it
+## 5. Things that are deliberately unfinished
 
-Three habits, all of which have caught real defects:
+- **A failed delete can be missed** if the person has scrolled away. She kept
+  this design after the worker and the Master Thread both advised against it.
+- **Deleted writing is still stored**, hidden, until the account is deleted.
+  Every later feature that reads entries must leave it out.
+- **The day boundary is in UTC.** Day 17b.
+- **The web app is drawn on the previous stylesheet.** Day 17a.
+- **No test proves that an out-of-date answer about today is thrown away.**
+  Found by the Day 17 audit, and scheduled as the first part of Day 17a.
+- **The built API reads a TypeScript file from `packages/` at runtime.** A
+  deployment that copies only the build folder will not start.
+- **Worker prompts and reports are not in git.** They exist on one laptop.
 
-**Every day ends with a mutation test.** Delete the line that makes the day's
-work load-bearing and run everything. If the suite still passes, the day
-shipped untested wiring. This exists because it happened three times in three
-days early on. Day 14 ran 20 such mutations across the whole phase: 17 were
-caught, and the 3 that were not became the day's work.
-
-**Generated migrations are read before they are run.** TypeORM's generator
-produced broken or destructive SQL on **five** migrations — one would have
-dropped a unique index, another created a `NOT NULL` column and then copied
-rows without a value, which passes on an empty database and fails the moment
-one user exists. All five were hand-written instead. One went from 506
-generated lines to 96. The five are listed in
-`docs/handbook/phase-2-identity-and-ownership.md` §6; the migration files
-themselves mostly no longer say so, because a later pass stripped comments
-project-wide.
-
-**Mistakes are recorded rather than tidied away.** Day 14's commit log contains
-a bug I reported that did not exist, and the reason my test was wrong. That is
-on purpose: `git log` is part of the documentation here.
+The full list is the *Known Debt* table in `docs/master-state.md`.
 
 ---
 
-## 6. Where to look
+## 6. How this project works, if you want to judge it
 
-```
-docs/constitution.md              why this project exists and how it works
-docs/roadmap.md                   all 40 days, current status, open questions
-docs/handbook/                    the arguments, one entry per completed phase
-docs/decisions/ADR-*.md           17 decisions, each with alternatives rejected
-docs/feature-reconciliation.md    the designs' features vs the roadmap's
-designs/AIJournal-handover/       40 screens, a brief, a flow, a direction lock
-```
+- **No day begins with code.** Problem, questions to her, a decision, a
+  written record, then a worker prompt.
+- **Every worker is audited by re-running everything**, and by one deliberate
+  break of the day's work to see whether a test notices. On Day 17 one such
+  break went unnoticed, and it is written down, not smoothed over.
+- **A concept a worker introduced is not done until she can explain it.**
+  Open items block the next day.
+- **Each day opens by asking two of the previous day's ideas from memory.**
+- **Decisions are hers and are recorded with her reasons**, including the
+  ones made against advice.
 
-**If you read three things:** `docs/handbook/phase-2-identity-and-ownership.md`
-for what has actually been learned, `docs/roadmap.md` §"Where The Project
-Actually Stands" for the current state, and `docs/decisions/ADR-014-sessions-and-revocation.md`
-for the best example of how decisions get made here — it opens by quoting her
-own objection to an earlier decision, in her words, and then answers it.
-
-**To run it:**
-
-```
-pnpm install
-pnpm --filter @neuron/api start:dev     # localhost:3000
-pnpm --filter @neuron/web dev           # localhost:3001
-pnpm --filter @neuron/api test          # 149
-pnpm --filter @neuron/api test:e2e      # 160
-```
-
-Note the frontend does not call the backend yet. That is Phase 3.
+What to be honest about: the sessions are long, her answers get shorter late
+in them, and many arrive as pasted text. The memory questions at the start
+of each day are how the project checks that the understanding is real.
 
 ---
 
-## 7. Questions worth asking
+## 7. Where to look
 
-If you want to pressure-test the project rather than admire it:
+```
+docs/master-state.md        where the project is; start with its first two sections
+docs/roadmap.md             the plan, day by day
+docs/decisions/             ADR-001 to ADR-021, the reason for every decision
+docs/handbook/              one entry per completed phase
+docs/ui-handover.md         what was asked of the designer
+docs/SETUP.md               running it on a new machine
+designs/AIJournal-v3/       the designer's current delivery; V3-REVISION.md first
+apps/api/                   the API
+apps/web/                   the web app; lib/session.ts and lib/today.ts hold its logic
+packages/contracts/         what both applications agree on
+```
 
-- **Why SQLite?** (ADR-003. It has a stated expiry: Postgres on Day 31.)
-- **Why hand-write migrations a tool can generate?** (§5 above.)
-- **Why 404 instead of 403 for another user's entry?** (ADR-013.)
-- **What happens when someone asks for their account to be deleted?** (Nothing
-  good. §4.)
-- **The designs describe a free and a paid tier, voice memos and transcription.
-  None of it is built. Is the scope real?** (`docs/feature-reconciliation.md`
-  lists both feature sets side by side and marks every conflict.)
+---
+
+## 8. Questions worth asking her
+
+1. Why does writing an entry wait for the server, while deleting one does
+   not?
+2. What can a shared type not catch, and what catches it instead?
+3. Why does the API, and not the browser, decide which day it is?
+4. What does CORS protect, and what does it not?
+5. Why is the soft-delete filter automatic, and where does it still have
+   holes?

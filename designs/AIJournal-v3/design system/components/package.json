@@ -1,0 +1,22 @@
+{
+  "name": "@journal/runtime-components",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": ["./journal-components.bundle.css"],
+  "exports": {
+    ".": {
+      "types": "./journal-components.d.ts",
+      "import": "./journal-components.js"
+    },
+    "./styles.css": "./journal-components.bundle.css",
+    "./runtime-styles.css": "./journal-components.css"
+  },
+  "files": [
+    "journal-components.js",
+    "journal-components.css",
+    "journal-components.bundle.css",
+    "journal-components.d.ts",
+    "README.md"
+  ]
+}

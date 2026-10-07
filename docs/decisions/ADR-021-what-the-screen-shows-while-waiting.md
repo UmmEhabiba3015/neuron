@@ -50,6 +50,28 @@ Three rules follow for writing:
   belong to a different day than the one on the screen, and only the API
   knows.
 - **A second press while a save is in flight sends nothing.**
+- **The composer sends the text without the spaces and blank lines at its two
+  ends.** Spaces and line breaks inside the text are kept. The owner's
+  decision, on the worker's argument that a person who presses Enter after
+  their last sentence did not mean to store an empty line. The API is
+  unchanged: it still stores exactly what it is sent and trims nothing
+  (ADR-005). The trimming is the browser's choice about what to send.
+
+---
+
+## The delete choice was challenged, and stands
+
+The worker who built it disagreed for one case. The failure sentence has to
+appear in the entry's own row, because the designer forbids anything that
+floats over the page. On a long day a person may delete an entry near the top
+and scroll away. If the delete then fails, the sentence appears where they
+are no longer looking, and they leave believing a private entry is gone. The
+worker and the Master Thread both recommended changing delete to "wait, then
+show".
+
+The owner heard the argument and kept "show at once". It is recorded here as
+her decision made with the cost known, and as the first revisit condition
+below.
 
 ---
 
@@ -66,6 +88,10 @@ Three rules follow for writing:
 ---
 
 ## Revisit when
+
+- **A person is misled by a failed delete**, or the Timeline and day pages
+  make long lists ordinary. That is the case the delete choice was challenged
+  on.
 
 - **Mood is wired.** The designer's rule already describes it as optimistic:
   the choice shows at once and "returns to what it was, with a sentence".

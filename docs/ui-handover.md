@@ -16,6 +16,20 @@ carry information.
 
 ---
 
+## Answered by the designer on 2026-10-07
+
+The designer replied with a full revision, now in `designs/AIJournal-v3/`.
+His `V3-REVISION.md` is the current design contract, and
+`verification/recommendedchanges-review.md` goes through all twelve sections
+below and marks each as covered. Section 13 of this document is satisfied by
+that delivery. This document is kept as the record of what was asked.
+
+Three things in the revision were approved by the owner directly with the
+designer: registration asks for the password twice; the mood words run Light,
+Good, Even, Low, Hard, each with a colour; and the recorder's Start control
+is disabled when no microphone is available, as a stated exception to the
+no-disabled-controls rule.
+
 ## Status of each section
 
 | # | Section | Status |

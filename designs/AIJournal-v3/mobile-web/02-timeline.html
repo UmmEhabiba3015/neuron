@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en" data-motion-review="play">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journal / Timeline · list and calendar / mobile-web</title>
+<!-- Journal v3 design of record: 02-timeline.html. Product scope is V3-REVISION.md; visual and motion rules remain in lock.css. -->
+<link rel="stylesheet" href="../lock.css">
+</head>
+<body><p class="caption motion-review-status"><b>Motion preview is on.</b><br>This handover plays its animations even when Windows animation effects are disabled. Your device settings are unchanged.</p>
+
+<!-- ============================ LIST ZOOM ============================ -->
+<div class="device">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+
+  <div class="app">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+
+      
+<div class="journal-header">
+<header class="mast">
+        <h1 class="wordmark">Timeline</h1>
+        <div class="seg" role="group" aria-label="Zoom">
+          <button type="button" aria-pressed="true">List</button>
+          <button type="button" aria-pressed="false">Calendar</button>
+        </div>
+      </header>
+
+      <nav class="dest" aria-label="Destinations">
+        <a href="00-prototype.html#today">Today</a>
+        <a href="00-prototype.html#timeline" aria-current="page">Timeline</a>
+        <a href="00-prototype.html#ask">Ask</a>
+        <a href="00-prototype.html#you">You</a>
+      </nav>
+</div>
+
+
+
+      
+
+      <main class="sheet">
+
+        <h2 class="shead">August 2026</h2>
+
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-08-09">Sun 9</time></div>
+          <div class="ccol">
+            <p class="lede">The flat people said Tuesday, and it's Sunday, so I've
+              decided not to think about it until Tuesday.</p>
+          </div>
+        </div>
+
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"></div>
+            <div class="ccol">
+              <button class="play" type="button"
+                      aria-label="Play recording from Sunday 9 August, 2 minutes 41 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/></svg>
+              </button>
+              <svg class="wave" viewBox="0 0 174 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="18" width="2" height="8"/><rect x="7" y="13" width="2" height="18"/>
+                  <rect x="14" y="4" width="2" height="36"/><rect x="21" y="15" width="2" height="14"/>
+                  <rect x="28" y="19" width="2" height="6"/><rect x="35" y="7" width="2" height="30"/>
+                  <rect x="42" y="16" width="2" height="12"/><rect x="49" y="2" width="2" height="40"/>
+                  <rect x="56" y="12" width="2" height="20"/><rect x="63" y="19" width="2" height="6"/>
+                  <rect x="70" y="8" width="2" height="28"/><rect x="77" y="16" width="2" height="12"/>
+                  <rect x="84" y="5" width="2" height="34"/><rect x="91" y="18" width="2" height="8"/>
+                  <rect x="98" y="12" width="2" height="20"/><rect x="105" y="3" width="2" height="38"/>
+                  <rect x="112" y="19" width="2" height="6"/><rect x="119" y="14" width="2" height="16"/>
+                  <rect x="126" y="8" width="2" height="28"/><rect x="133" y="18" width="2" height="8"/>
+                  <rect x="140" y="11" width="2" height="22"/><rect x="147" y="2" width="2" height="40"/>
+                  <rect x="154" y="16" width="2" height="12"/><rect x="161" y="19" width="2" height="6"/>
+                  <rect x="168" y="12" width="2" height="20"/><rect x="175" y="6" width="2" height="32"/>
+                  <rect x="182" y="18" width="2" height="8"/><rect x="189" y="14" width="2" height="16"/>
+                  <rect x="196" y="4" width="2" height="36"/><rect x="203" y="19" width="2" height="6"/>
+                  <rect x="210" y="13" width="2" height="18"/><rect x="217" y="9" width="2" height="26"/>
+                  <rect x="224" y="17" width="2" height="10"/><rect x="231" y="6" width="2" height="32"/>
+                </g>
+              </svg>
+              <span class="dur">2:41</span>
+            </div>
+          </div>
+        <div class="body"><div class="tcol"></div><div class="ccol"><p class="prose">Voice memo</p><div class="entry-actions" aria-label="Voice memo actions"><div class="entry-tools"><a class="btn quiet entry-icon" data-entry-action="delete" href="00-prototype.html#recording-delete-confirm" aria-label="Delete voice memo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></a></div><details class="entry-memory-dropdown" data-excluded="false"><summary class="entry-memory-trigger" aria-label="Voice memo memory settings: in memory"><span class="memory-state">In memory</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="entry-memory-menu"><button class="opt" type="button" data-entry-action="memory" aria-pressed="true"><span class="tick" aria-hidden="true"></span><span>Use in memory</span></button></div></details></div></div></div></div>
+
+        <!-- third item of the same day. the date column is PRESENT AND EMPTY,
+             because the date is a property of the day and this is not a new
+             one. It used to be omitted entirely, which pulled this entry 58px
+             left of every other entry on the screen and broke the vertical
+             rule that runs down the column. Empty is not the same as absent.
+             The Private mark belongs to this entry and to no other. -->
+        <div class="dayrow">
+          <div class="tcol"></div>
+          <div class="ccol">
+            <p class="lede">Priya rang. We talked for an hour about nothing. I'd
+              forgotten that's a thing you can do.</p>
+            <span class="mark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="1"/>
+                <path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+              Private, out of memory
+            </span>
+          </div>
+        </div>
+
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"><time datetime="2026-08-08">Sat 8</time></div>
+            <div class="ccol">
+              <button class="play" type="button"
+                      aria-label="Play recording from Saturday 8 August, 5 minutes 8 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/></svg>
+              </button>
+              <svg class="wave" viewBox="0 0 174 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="15" width="2" height="14"/><rect x="7" y="8" width="2" height="28"/>
+                  <rect x="14" y="17" width="2" height="10"/><rect x="21" y="5" width="2" height="34"/>
+                  <rect x="28" y="13" width="2" height="18"/><rect x="35" y="19" width="2" height="6"/>
+                  <rect x="42" y="9" width="2" height="26"/><rect x="49" y="16" width="2" height="12"/>
+                  <rect x="56" y="3" width="2" height="38"/><rect x="63" y="18" width="2" height="8"/>
+                  <rect x="70" y="12" width="2" height="20"/><rect x="77" y="6" width="2" height="32"/>
+                  <rect x="84" y="19" width="2" height="6"/><rect x="91" y="14" width="2" height="16"/>
+                  <rect x="98" y="4" width="2" height="36"/><rect x="105" y="17" width="2" height="10"/>
+                  <rect x="112" y="11" width="2" height="22"/><rect x="119" y="2" width="2" height="40"/>
+                  <rect x="126" y="18" width="2" height="8"/><rect x="133" y="13" width="2" height="18"/>
+                  <rect x="140" y="7" width="2" height="30"/><rect x="147" y="19" width="2" height="6"/>
+                  <rect x="154" y="12" width="2" height="20"/><rect x="161" y="5" width="2" height="34"/>
+                  <rect x="168" y="16" width="2" height="12"/><rect x="175" y="18" width="2" height="8"/>
+                  <rect x="182" y="9" width="2" height="26"/><rect x="189" y="15" width="2" height="14"/>
+                  <rect x="196" y="3" width="2" height="38"/><rect x="203" y="17" width="2" height="10"/>
+                  <rect x="210" y="11" width="2" height="22"/><rect x="217" y="6" width="2" height="32"/>
+                  <rect x="224" y="19" width="2" height="6"/><rect x="231" y="13" width="2" height="18"/>
+                </g>
+              </svg>
+              <span class="dur">5:08</span>
+            </div>
+          </div>
+        <div class="body"><div class="tcol"></div><div class="ccol"><p class="prose">Voice memo</p><div class="entry-actions" aria-label="Voice memo actions"><div class="entry-tools"><a class="btn quiet entry-icon" data-entry-action="delete" href="00-prototype.html#recording-delete-confirm" aria-label="Delete voice memo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></a></div><details class="entry-memory-dropdown" data-excluded="false"><summary class="entry-memory-trigger" aria-label="Voice memo memory settings: in memory"><span class="memory-state">In memory</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="entry-memory-menu"><button class="opt" type="button" data-entry-action="memory" aria-pressed="true"><span class="tick" aria-hidden="true"></span><span>Use in memory</span></button></div></details></div></div></div></div>
+
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-08-06">Thu 6</time></div>
+          <div class="ccol">
+            <p class="lede">Slept badly again. I've stopped counting which night this is.</p>
+          </div>
+        </div>
+
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"><time datetime="2026-08-05">Wed 5</time></div>
+            <div class="ccol">
+              <button class="play" type="button"
+                      aria-label="Play recording from Wednesday 5 August, 11 minutes 47 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/></svg>
+              </button>
+              <svg class="wave" viewBox="0 0 167 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="12" width="2" height="20"/><rect x="7" y="18" width="2" height="8"/>
+                  <rect x="14" y="6" width="2" height="32"/><rect x="21" y="16" width="2" height="12"/>
+                  <rect x="28" y="3" width="2" height="38"/><rect x="35" y="19" width="2" height="6"/>
+                  <rect x="42" y="13" width="2" height="18"/><rect x="49" y="8" width="2" height="28"/>
+                  <rect x="56" y="17" width="2" height="10"/><rect x="63" y="5" width="2" height="34"/>
+                  <rect x="70" y="15" width="2" height="14"/><rect x="77" y="19" width="2" height="6"/>
+                  <rect x="84" y="10" width="2" height="24"/><rect x="91" y="4" width="2" height="36"/>
+                  <rect x="98" y="16" width="2" height="12"/><rect x="105" y="12" width="2" height="20"/>
+                  <rect x="112" y="2" width="2" height="40"/><rect x="119" y="18" width="2" height="8"/>
+                  <rect x="126" y="14" width="2" height="16"/><rect x="133" y="7" width="2" height="30"/>
+                  <rect x="140" y="19" width="2" height="6"/><rect x="147" y="11" width="2" height="22"/>
+                  <rect x="154" y="5" width="2" height="34"/><rect x="161" y="17" width="2" height="10"/>
+                  <rect x="168" y="13" width="2" height="18"/><rect x="175" y="3" width="2" height="38"/>
+                  <rect x="182" y="16" width="2" height="12"/><rect x="189" y="9" width="2" height="26"/>
+                  <rect x="196" y="18" width="2" height="8"/><rect x="203" y="14" width="2" height="16"/>
+                  <rect x="210" y="6" width="2" height="32"/><rect x="217" y="19" width="2" height="6"/>
+                  <rect x="224" y="12" width="2" height="20"/><rect x="231" y="8" width="2" height="28"/>
+                </g>
+              </svg>
+              <span class="dur">11:47</span>
+            </div>
+          </div>
+        <div class="body"><div class="tcol"></div><div class="ccol"><p class="prose">Voice memo</p><div class="entry-actions" aria-label="Voice memo actions"><div class="entry-tools"><a class="btn quiet entry-icon" data-entry-action="delete" href="00-prototype.html#recording-delete-confirm" aria-label="Delete voice memo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></a></div><details class="entry-memory-dropdown" data-excluded="false"><summary class="entry-memory-trigger" aria-label="Voice memo memory settings: in memory"><span class="memory-state">In memory</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="entry-memory-menu"><button class="opt" type="button" data-entry-action="memory" aria-pressed="true"><span class="tick" aria-hidden="true"></span><span>Use in memory</span></button></div></details></div></div></div></div>
+
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-08-03">Mon 3</time></div>
+          <div class="ccol">
+            <p class="lede">Went in early to avoid the heat. Nobody else in the office
+              until ten.</p>
+          </div>
+        </div>
+
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-08-01">Sat 1</time></div>
+          <div class="ccol">
+            <p class="lede">Bank holiday. Did nothing on purpose and it took most of the
+              day to stop feeling odd about it.</p>
+          </div>
+        </div>
+
+        <div class="recrow">
+          <div class="head dated">
+            <div class="tcol"></div>
+            <div class="ccol">
+              <button class="play" type="button"
+                      aria-label="Play recording from Saturday 1 August, 3 minutes 26 seconds">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5.5v13l11-6.5z"/></svg>
+              </button>
+              <svg class="wave" viewBox="0 0 174 44" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="currentColor">
+                  <rect x="0" y="17" width="2" height="10"/><rect x="7" y="10" width="2" height="24"/>
+                  <rect x="14" y="19" width="2" height="6"/><rect x="21" y="4" width="2" height="36"/>
+                  <rect x="28" y="14" width="2" height="16"/><rect x="35" y="8" width="2" height="28"/>
+                  <rect x="42" y="18" width="2" height="8"/><rect x="49" y="12" width="2" height="20"/>
+                  <rect x="56" y="2" width="2" height="40"/><rect x="63" y="16" width="2" height="12"/>
+                  <rect x="70" y="19" width="2" height="6"/><rect x="77" y="9" width="2" height="26"/>
+                  <rect x="84" y="13" width="2" height="18"/><rect x="91" y="5" width="2" height="34"/>
+                  <rect x="98" y="18" width="2" height="8"/><rect x="105" y="11" width="2" height="22"/>
+                  <rect x="112" y="15" width="2" height="14"/><rect x="119" y="3" width="2" height="38"/>
+                  <rect x="126" y="17" width="2" height="10"/><rect x="133" y="12" width="2" height="20"/>
+                  <rect x="140" y="6" width="2" height="32"/><rect x="147" y="19" width="2" height="6"/>
+                  <rect x="154" y="14" width="2" height="16"/><rect x="161" y="7" width="2" height="30"/>
+                  <rect x="168" y="18" width="2" height="8"/><rect x="175" y="10" width="2" height="24"/>
+                  <rect x="182" y="4" width="2" height="36"/><rect x="189" y="16" width="2" height="12"/>
+                  <rect x="196" y="19" width="2" height="6"/><rect x="203" y="13" width="2" height="18"/>
+                  <rect x="210" y="8" width="2" height="28"/><rect x="217" y="15" width="2" height="14"/>
+                  <rect x="224" y="2" width="2" height="40"/><rect x="231" y="17" width="2" height="10"/>
+                </g>
+              </svg>
+              <span class="dur">3:26</span>
+            </div>
+          </div>
+        <div class="body"><div class="tcol"></div><div class="ccol"><p class="prose">Voice memo</p><div class="entry-actions" aria-label="Voice memo actions"><div class="entry-tools"><a class="btn quiet entry-icon" data-entry-action="delete" href="00-prototype.html#recording-delete-confirm" aria-label="Delete voice memo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></a></div><details class="entry-memory-dropdown" data-excluded="false"><summary class="entry-memory-trigger" aria-label="Voice memo memory settings: in memory"><span class="memory-state">In memory</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="entry-memory-menu"><button class="opt" type="button" data-entry-action="memory" aria-pressed="true"><span class="tick" aria-hidden="true"></span><span>Use in memory</span></button></div></details></div></div></div></div>
+
+        <h2 class="shead">July 2026</h2>
+
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-07-21">Tue 21</time></div>
+          <div class="ccol">
+            <p class="lede">The flat viewing. Smaller than the photos, better light.</p>
+            
+          </div>
+        </div>
+
+        <div class="dayrow">
+          <div class="tcol"><time datetime="2026-07-17">Fri 17</time></div>
+          <div class="ccol">
+            <p class="lede">Last day before the shutdown. Everyone left early and the
+              building went quiet by three.</p>
+          </div>
+        </div>
+
+      </main>
+
+      <p class="foot">Since March 2026</p>
+
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ========================== CALENDAR ZOOM ========================== -->
+<div class="device">
+  <div class="chrome" aria-hidden="true"><span>journal.app</span></div>
+
+  <div class="app">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="page">
+
+      
+<div class="journal-header">
+<header class="mast">
+        <h1 class="wordmark">Timeline</h1>
+        <div class="seg" role="group" aria-label="Zoom">
+          <button type="button" aria-pressed="false">List</button>
+          <button type="button" aria-pressed="true">Calendar</button>
+        </div>
+      </header>
+
+      <nav class="dest" aria-label="Destinations">
+        <a href="00-prototype.html#today">Today</a>
+        <a href="00-prototype.html#timeline" aria-current="page">Timeline</a>
+        <a href="00-prototype.html#ask">Ask</a>
+        <a href="00-prototype.html#you">You</a>
+      </nav>
+</div>
+
+
+
+      
+
+      <main class="sheet">
+        <h2 class="shead">August 2026</h2>
+      </main>
+
+      <div class="cal" role="grid" aria-label="August 2026">
+        <div class="dow">M</div><div class="dow">T</div><div class="dow">W</div>
+        <div class="dow">T</div><div class="dow">F</div><div class="dow">S</div>
+        <div class="dow">S</div>
+
+        <div class="day out">27</div><div class="day out">28</div>
+        <div class="day out">29</div><div class="day out">30</div>
+        <div class="day out">31</div>
+        <a class="day has audio" href="00-prototype.html#day" aria-label="1 August, writing and a recording">1</a>
+        <div class="day">2</div>
+
+        <a class="day has" href="00-prototype.html#day" aria-label="3 August, writing">3</a>
+        <div class="day">4</div>
+        <a class="day has audio" href="00-prototype.html#day" aria-label="5 August, a recording">5</a>
+        <a class="day has" href="00-prototype.html#day" aria-label="6 August, writing">6</a>
+        <div class="day">7</div>
+        <a class="day has audio" href="00-prototype.html#day" aria-label="8 August, a recording">8</a>
+        <a class="day has audio" href="00-prototype.html#day" aria-label="9 August, writing and a recording">9</a>
+
+        <div class="day">10</div><div class="day">11</div><div class="day">12</div>
+        <div class="day">13</div><div class="day">14</div><div class="day">15</div>
+        <div class="day">16</div>
+
+        <div class="day">17</div><div class="day">18</div><div class="day">19</div>
+        <div class="day">20</div><div class="day">21</div><div class="day">22</div>
+        <div class="day">23</div>
+
+        <div class="day">24</div><div class="day">25</div><div class="day">26</div>
+        <div class="day">27</div><div class="day">28</div><div class="day">29</div>
+        <div class="day">30</div>
+
+        <div class="day">31</div>
+        <div class="day out">1</div><div class="day out">2</div><div class="day out">3</div>
+        <div class="day out">4</div><div class="day out">5</div><div class="day out">6</div>
+      </div>
+
+      <p class="foot">Since March 2026</p>
+
+    </div>
+  </div>
+</div>
+
+
+<p class="caption"><b>Timeline · list and calendar</b><br>Journal v3 design of record. Product behavior and state transitions are specified in V3-REVISION.md.</p>
+</body>
+</html>

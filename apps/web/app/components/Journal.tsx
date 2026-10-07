@@ -201,6 +201,150 @@ export function Composer({
 }
 
 /*
+ * The entry on the live screen, with the control that deletes it. The first
+ * button is one element in both states, "Delete" and "Keep entry", so the
+ * keyboard's focus stays on it and a second press of the same spot keeps the
+ * entry. Which state it is in, and what was not deleted, is decided in
+ * lib/today.ts.
+ */
+export function LiveEntry({
+  time,
+  datetime,
+  children,
+  confirming,
+  notDeleted,
+  onAsk,
+  onKeep,
+  onGoAhead,
+}: {
+  time: string;
+  datetime: string;
+  children: ReactNode;
+  confirming: boolean;
+  notDeleted?: string;
+  onAsk: () => void;
+  onKeep: () => void;
+  onGoAhead: () => void;
+}) {
+  return (
+    <div className="srow">
+      <div className="tcol">
+        <time dateTime={datetime}>{time}</time>
+      </div>
+      <div className="ccol">
+        <p className="prose">{children}</p>
+        {notDeleted ? (
+          <div className="notice" role="alert">
+            {notDeleted}
+          </div>
+        ) : null}
+        <div className="entry-foot">
+          {confirming ? (
+            <p className="entry-ask">
+              Delete this entry? This cannot be undone.
+            </p>
+          ) : null}
+          <button
+            className={confirming ? 'btn solid' : 'wrong'}
+            type="button"
+            onClick={confirming ? onKeep : onAsk}
+          >
+            {confirming ? 'Keep entry' : 'Delete'}
+          </button>
+          {confirming ? (
+            <button className="btn quiet" type="button" onClick={onGoAhead}>
+              Delete entry
+            </button>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/*
+ * One control, two states (direction-lock.md 7.4): the record control while
+ * the field holds no words, and Save once it does. It is one button element
+ * throughout. Neither it nor the field is ever disabled; a second press while
+ * a save is in flight is stopped in lib/today.ts.
+ */
+export function LiveComposer({
+  text,
+  holdsWords,
+  line,
+  problem,
+  onType,
+  onSave,
+}: {
+  text: string;
+  holdsWords: boolean;
+  line?: string;
+  problem?: string;
+  onType: (text: string) => void;
+  onSave: () => void;
+}) {
+  return (
+    <div className="composer">
+      {problem ? (
+        <div className="notice" role="alert">
+          {problem}
+        </div>
+      ) : null}
+      {line ? (
+        <p className="composer-line" role="status">
+          {line}
+        </p>
+      ) : null}
+      <form
+        className="crow"
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSave();
+        }}
+      >
+        {/* The placeholder disappears on focus, so it cannot be the field's
+            only name (direction-lock.md 7.4, build obligation 1). */}
+        <textarea
+          className="field"
+          rows={1}
+          aria-label="Add to today"
+          placeholder="Add to today"
+          value={text}
+          onChange={(event) => onType(event.target.value)}
+        />
+        <button
+          className={holdsWords ? 'send' : 'mic'}
+          type={holdsWords ? 'submit' : 'button'}
+          aria-label={holdsWords ? undefined : 'Record'}
+        >
+          {holdsWords ? (
+            'Save'
+          ) : (
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="9" y="2.5" width="6" height="11.5" rx="3" />
+              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0" />
+              <path d="M12 18v3.5" />
+            </svg>
+          )}
+        </button>
+      </form>
+      <button className="opt" type="button" aria-pressed="false">
+        <span className="tick" aria-hidden="true" />
+        Keep this out of memory
+      </button>
+    </div>
+  );
+}
+
+/*
  * All three authored waveforms. live.css shows the one that matches the
  * width; see the note there and direction-lock.md 12.7.
  */

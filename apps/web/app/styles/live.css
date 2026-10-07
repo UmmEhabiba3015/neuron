@@ -164,3 +164,79 @@ body {
   align-items: center;
   gap: var(--s4) var(--s6);
 }
+
+/*
+ * TEMPORARY, until the designer has drawn these (docs/ui-handover.md
+ * sections 5 and 6).
+ *
+ * Two things the comps cannot show. In a comp the composer's field is a div,
+ * and here it is a textarea that a person types into. And no comp has a
+ * control for deleting an entry. As with the form above, only layout and the
+ * choice of existing tokens are declared: no colour literal and no new size.
+ * The field, the buttons and the notice are lock.css's own.
+ */
+
+/*
+ * .field is a flex box that centres a div's one line. A textarea needs the
+ * same line centred by padding, and grows with what is typed where the
+ * browser can do that. The focus treatment is lock.css 2.2, which names
+ * input and not textarea.
+ */
+.composer textarea.field {
+  display: block;
+  min-width: 0;
+  max-height: calc(var(--ctl) * 4);
+  padding-block: calc(
+    (var(--ctl) - 2 * var(--w) - var(--t-field) * var(--lh-note)) / 2
+  );
+  line-height: var(--lh-note);
+  resize: none;
+  field-sizing: content;
+}
+
+.composer textarea.field::placeholder {
+  color: var(--rule-2);
+  opacity: 1;
+}
+
+.composer textarea.field:focus-visible {
+  outline: 2px solid var(--block);
+  outline-offset: 2px;
+}
+
+.composer .notice {
+  margin: 0 0 var(--s5);
+}
+
+.composer-line,
+.entry-ask {
+  font-family: var(--f-prose);
+  font-size: var(--t-note);
+  line-height: var(--lh-note);
+  color: var(--rule);
+}
+
+.composer-line {
+  margin-bottom: var(--s4);
+}
+
+/* An entry typed on several lines is shown on several lines. */
+.srow .prose {
+  white-space: pre-wrap;
+}
+
+.srow .notice {
+  margin: var(--s4) 0 0;
+}
+
+.entry-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s4) var(--s6);
+}
+
+.entry-ask {
+  flex: 1 0 100%;
+  margin-top: var(--s4);
+}
