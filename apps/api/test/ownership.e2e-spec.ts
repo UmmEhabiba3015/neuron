@@ -153,7 +153,7 @@ describe('entry ownership (e2e)', () => {
       await request(app.getHttpServer())
         .delete(`/entries/${aliceEntryId}`)
         .set('Authorization', alice)
-        .expect(200);
+        .expect(204);
     });
   });
 

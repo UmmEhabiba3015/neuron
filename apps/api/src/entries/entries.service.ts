@@ -67,15 +67,15 @@ export class EntriesService {
     return this.entriesRepository.update(id, content, userId);
   }
 
-  async delete(id: string, userId: string): Promise<JournalEntry | undefined> {
-    const existing = await this.entriesRepository.findWithDay(id, userId);
-
-    const deleted = await this.entriesRepository.delete(id, userId);
-
-    if (deleted && existing?.dayId) {
-      await this.daysService.discardIfEmpty(existing.dayId, userId);
-    }
-
-    return deleted;
+  /*
+   * The entry's day is left alone, mood included. An emptied day is kept off
+   * the calendar by the range listing and not by removing its row.
+   */
+  delete(id: string, userId: string): Promise<boolean> {
+    return this.entriesRepository.markDeleted(
+      id,
+      userId,
+      new Date().toISOString(),
+    );
   }
 }

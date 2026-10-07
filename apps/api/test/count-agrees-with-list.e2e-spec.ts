@@ -174,6 +174,70 @@ describe('count agrees with the listing (e2e)', () => {
     expect(await countFor('?word=sister')).toBe(2);
   });
 
+  /*
+   * Three of Alice's ten are deleted: one from each day, and one of the two
+   * that mention her sister. The same ten queries are then asked again. The
+   * row of a deleted entry is still in the table, so a count or a listing
+   * that forgot about deleted_at would be one too many somewhere here.
+   */
+  describe('when some entries are deleted', () => {
+    const DELETED = [
+      'sister again, briefly',
+      'the flat people said Tuesday',
+      'the day before, second, about the flat',
+    ];
+
+    beforeEach(async () => {
+      const all = await request(app.getHttpServer())
+        .get('/entries?limit=50')
+        .set('Authorization', alice)
+        .expect(200);
+
+      for (const entry of all.body as { id: string; content: string }[]) {
+        if (DELETED.includes(entry.content)) {
+          await request(app.getHttpServer())
+            .delete(`/entries/${entry.id}`)
+            .set('Authorization', alice)
+            .expect(204);
+        }
+      }
+    });
+
+    it.each([
+      ['no filter', ''],
+      ['a word that matched twice and now matches once', '?word=sister'],
+      ['a word whose matches are all deleted but one', '?word=flat'],
+      ['a word that only a deleted entry has', '?word=Tuesday'],
+      ['an empty word', '?word='],
+      ['a date that lost two entries', '?date=2026-08-09'],
+      ['a date that lost one entry', '?date=2026-08-08'],
+      ['a date and a word together', '?date=2026-08-09&word=flat'],
+    ])('agrees for %s', async (_label, query) => {
+      const counted = await countFor(query);
+      const walked = await walk(query);
+
+      expect(counted).toBe(walked.length);
+      for (const content of DELETED) {
+        expect(walked).not.toContain(content);
+      }
+    });
+
+    it('counts what is left, and not the rows in the table', async () => {
+      expect(await countFor('')).toBe(7);
+      expect(await countFor('?date=2026-08-09')).toBe(5);
+      expect(await countFor('?date=2026-08-08')).toBe(2);
+      expect(await countFor('?word=sister')).toBe(1);
+      expect(await countFor('?word=flat')).toBe(1);
+      expect(await countFor('?word=Tuesday')).toBe(0);
+      expect(await countFor('?date=2026-08-09&word=flat')).toBe(1);
+
+      const rows = await dataSource.query<{ c: number }[]>(
+        'SELECT COUNT(*) AS c FROM entries',
+      );
+      expect(Number(rows[0].c)).toBe(11);
+    });
+  });
+
   it('refuses a misspelled filter rather than counting everything', async () => {
     await request(app.getHttpServer())
       .get('/entries/count?wrod=sister')

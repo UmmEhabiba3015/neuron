@@ -47,3 +47,26 @@ export interface WireAuthenticated {
   accessToken: string;
   user: WireUser;
 }
+
+/*
+ * The shapes below are what the web app sends. Each one is the body of one
+ * request, and the API's DTO class for that request declares that it
+ * implements it. The rules about what a valid value is stay in the API.
+ */
+
+/* The body of POST /entries. */
+export interface WireNewEntry {
+  content: string;
+}
+
+/* The body of POST /auth/login. */
+export interface WireLogin {
+  email: string;
+  password: string;
+}
+
+/* The body of POST /auth/register. */
+export interface WireRegistration {
+  email: string;
+  password: string;
+}

@@ -357,7 +357,7 @@ describe('EntriesController (e2e)', () => {
       expect(reread.content).toBe('unchanged');
     });
 
-    it('DELETE /entries/:id returns 200 with the deleted entry, which is then gone', async () => {
+    it('DELETE /entries/:id returns 204 with no body, and the entry is then gone', async () => {
       const created = entryFrom(
         await api()
           .post('/entries')
@@ -365,11 +365,9 @@ describe('EntriesController (e2e)', () => {
           .expect(201),
       );
 
-      const deleted = entryFrom(
-        await api().delete(`/entries/${created.id}`).expect(200),
-      );
+      const deleted = await api().delete(`/entries/${created.id}`).expect(204);
 
-      expect(deleted).toEqual(created);
+      expect(deleted.text).toBe('');
 
       await api().get(`/entries/${created.id}`).expect(404);
     });

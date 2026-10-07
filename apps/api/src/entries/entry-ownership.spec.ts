@@ -29,7 +29,7 @@ describe('entry ownership', () => {
    * the thing it is testing.
    */
   const dayOf = async (userId: string): Promise<string> => {
-    const days = new DaysRepository(dataSource.getRepository(Day), dataSource);
+    const days = new DaysRepository(dataSource.getRepository(Day));
 
     return (await days.findOrCreate(userId, '2026-09-02')).id;
   };
@@ -199,9 +199,7 @@ describe('entry ownership', () => {
 
       const service = new EntriesService(
         new EntriesRepository(dataSource.getRepository(JournalEntry)),
-        new DaysService(
-          new DaysRepository(dataSource.getRepository(Day), dataSource),
-        ),
+        new DaysService(new DaysRepository(dataSource.getRepository(Day))),
         dataSource,
       );
 

@@ -144,8 +144,13 @@ describe('RequireEntryDay', () => {
       `SELECT name, sql FROM sqlite_master ORDER BY name`,
     );
 
-  it('is the last migration, so "before" in these tests means what it says', () => {
-    expect(position).toBe(migrations.length - 1);
+  /*
+   * indexOf answers -1 for a migration that is not in the list, and
+   * slice(0, -1) would then quietly mean "all but the last".
+   */
+  it('is in the list of migrations, so "before" in these tests means what it says', () => {
+    expect(position).toBeGreaterThanOrEqual(0);
+    expect(migrationsThrough).toHaveLength(migrationsBefore.length + 1);
   });
 
   describe('once every migration has run', () => {

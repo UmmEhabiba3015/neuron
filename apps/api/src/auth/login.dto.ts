@@ -1,3 +1,4 @@
+import type { WireLogin } from '@neuron/contracts';
 import { IsString } from 'class-validator';
 
 /*
@@ -7,7 +8,7 @@ import { IsString } from 'class-validator';
  * different error would tell an attacker which addresses were never valid,
  * and every failure on this route has to look the same -- see ADR-012.
  */
-export class LoginDto {
+export class LoginDto implements WireLogin {
   @IsString()
   email: string;
 

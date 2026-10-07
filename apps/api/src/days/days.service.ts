@@ -49,13 +49,4 @@ export class DaysService {
   ): Promise<Day | undefined> {
     return this.daysRepository.setMood(userId, date, mood);
   }
-
-  /*
-   * "An empty day does not exist" -- 00-flow.md section 0. A day whose last
-   * item is deleted stops being a day, or the calendar grows marks for days
-   * with nothing in them.
-   */
-  discardIfEmpty(dayId: string, userId: string): Promise<boolean> {
-    return this.daysRepository.deleteIfEmpty(dayId, userId);
-  }
 }

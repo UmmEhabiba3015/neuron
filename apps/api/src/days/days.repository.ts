@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, DataSource, QueryFailedError, Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import type { Mood } from '@neuron/contracts';
+import { JournalEntry } from '../entries/entry.entity';
 import { Day } from './day.entity';
 
 @Injectable()
@@ -9,7 +10,6 @@ export class DaysRepository {
   constructor(
     @InjectRepository(Day)
     private readonly days: Repository<Day>,
-    private readonly dataSource: DataSource,
   ) {}
 
   async findByDate(userId: string, date: string): Promise<Day | undefined> {
@@ -73,31 +73,37 @@ export class DaysRepository {
     return this.findByDate(userId, date);
   }
 
-  async findInRange(userId: string, from: string, to: string): Promise<Day[]> {
-    return this.days.find({
-      where: { userId, date: Between(from, to) },
-      order: { date: 'DESC' },
-    });
-  }
-
   /*
-   * The count is scoped by user as well as by day, and that is not redundant:
-   * ownership belongs in the WHERE clause rather than in the caller
-   * (ADR-013).
+   * A date is listed only if it has at least one entry that is not deleted
+   * (ADR-020). A mood alone does not list a date, and neither does a day
+   * whose entries were all deleted: the row is still there, and this is
+   * what keeps it off the calendar.
+   *
+   * Nothing here mentions deleted_at. The subquery selects from the
+   * JournalEntry entity, so @DeleteDateColumn adds the condition to it. The
+   * same query written as raw SQL would count deleted entries.
+   *
+   * The entry is matched on its owner as well as its day, because ownership
+   * belongs in the WHERE clause (ADR-013).
    */
-  async deleteIfEmpty(dayId: string, userId: string): Promise<boolean> {
-    const result = await this.dataSource.query<{ count: number }[]>(
-      `SELECT COUNT(*) AS count FROM entries WHERE day_id = ? AND user_id = ?`,
-      [dayId, userId],
-    );
+  async findInRange(userId: string, from: string, to: string): Promise<Day[]> {
+    return this.days
+      .createQueryBuilder('day')
+      .where('day.userId = :userId', { userId })
+      .andWhere('day.date BETWEEN :from AND :to', { from, to })
+      .andWhere((query) => {
+        const liveEntry = query
+          .subQuery()
+          .select('1')
+          .from(JournalEntry, 'entry')
+          .where('entry.dayId = day.id')
+          .andWhere('entry.userId = :userId')
+          .getQuery();
 
-    if (Number(result[0]?.count ?? 0) > 0) {
-      return false;
-    }
-
-    const deleted = await this.days.delete({ id: dayId, userId });
-
-    return deleted.affected === 1;
+        return `EXISTS ${liveEntry}`;
+      })
+      .orderBy('day.date', 'DESC')
+      .getMany();
   }
 }
 

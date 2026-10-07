@@ -45,7 +45,7 @@ export async function seedEntries(
    * would have filed it under. dayFor is the only place the 4am rule is
    * written, and it is asked here rather than copied.
    */
-  const days = new DaysRepository(dataSource.getRepository(Day), dataSource);
+  const days = new DaysRepository(dataSource.getRepository(Day));
 
   for (const entry of entries) {
     const day = await days.findOrCreate(userId, dayFor(entry.createdAt));

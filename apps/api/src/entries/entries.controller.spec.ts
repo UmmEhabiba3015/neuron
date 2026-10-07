@@ -187,13 +187,13 @@ describe('EntriesController', () => {
   });
 
   describe('delete', () => {
-    it('should return the deleted entry and leave it gone', async () => {
+    it('should return nothing and leave the entry gone', async () => {
       const created = await controller.create(
         { content: 'here for a moment' },
         caller,
       );
 
-      expect(await controller.delete(created.id, caller)).toEqual(created);
+      expect(await controller.delete(created.id, caller)).toBeUndefined();
       await expect(controller.findById(created.id, caller)).rejects.toThrow(
         NotFoundException,
       );

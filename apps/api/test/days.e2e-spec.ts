@@ -99,16 +99,16 @@ describe('days (e2e)', () => {
     ]);
   });
 
-  it('deletes the day when its last entry is deleted', async () => {
+  it('keeps the day when its last entry is deleted', async () => {
     const created = await write(alice, 'the only thing today');
     expect(await countDays()).toBe(1);
 
     await request(app.getHttpServer())
       .delete(`/entries/${(created.body as { id: string }).id}`)
       .set('Authorization', alice)
-      .expect(200);
+      .expect(204);
 
-    expect(await countDays()).toBe(0);
+    expect(await countDays()).toBe(1);
   });
 
   it('keeps the day while any entry on it survives', async () => {
@@ -118,12 +118,12 @@ describe('days (e2e)', () => {
     await request(app.getHttpServer())
       .delete(`/entries/${(first.body as { id: string }).id}`)
       .set('Authorization', alice)
-      .expect(200);
+      .expect(204);
 
     expect(await countDays()).toBe(1);
   });
 
-  it("does not delete another user's day", async () => {
+  it('deletes no day at all, whoever deletes an entry', async () => {
     await write(alice, "alice's");
     const bobEntry = await write(bob, "bob's");
     expect(await countDays()).toBe(2);
@@ -131,11 +131,8 @@ describe('days (e2e)', () => {
     await request(app.getHttpServer())
       .delete(`/entries/${(bobEntry.body as { id: string }).id}`)
       .set('Authorization', bob)
-      .expect(200);
+      .expect(204);
 
-    const remaining = await dataSource.query<{ user_id: string }[]>(
-      'SELECT user_id FROM days',
-    );
-    expect(remaining).toHaveLength(1);
+    expect(await countDays()).toBe(2);
   });
 });

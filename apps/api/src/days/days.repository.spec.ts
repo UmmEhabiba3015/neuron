@@ -3,7 +3,6 @@ import { entities } from '../database/entities';
 import { migrations } from '../database/migrations';
 import { Day } from './day.entity';
 import { DaysRepository } from './days.repository';
-import { JournalEntry } from '../entries/entry.entity';
 import { User } from '../users/user.entity';
 
 describe('DaysRepository', () => {
@@ -30,7 +29,7 @@ describe('DaysRepository', () => {
       });
     }
 
-    repository = new DaysRepository(dataSource.getRepository(Day), dataSource);
+    repository = new DaysRepository(dataSource.getRepository(Day));
   });
 
   afterEach(async () => {
@@ -72,53 +71,69 @@ describe('DaysRepository', () => {
     });
   });
 
-  describe('deleteIfEmpty', () => {
-    const entryOn = (id: string, dayId: string, userId: string) =>
-      dataSource.getRepository(JournalEntry).insert({
-        id,
-        content: 'something',
-        createdAt: '2026-08-09T12:00:00.000Z',
-        userId,
-        dayId,
-      });
+  /*
+   * The listing is asked through the repository, and the entries are written
+   * with raw SQL, so that a deleted entry can be put in place without going
+   * through the code that is being tested.
+   */
+  describe('findInRange', () => {
+    const entryOn = (
+      id: string,
+      dayId: string,
+      userId: string,
+      deletedAt: string | null = null,
+    ) =>
+      dataSource.query(
+        `INSERT INTO entries (id, content, created_at, user_id, day_id, deleted_at)
+         VALUES (?, 'something', '2026-08-09T12:00:00.000Z', ?, ?, ?)`,
+        [id, userId, dayId, deletedAt],
+      );
 
-    it('deletes a day with nothing on it', async () => {
+    const datesListed = async (userId: string) =>
+      (await repository.findInRange(userId, '2026-08-01', '2026-08-31')).map(
+        (day) => day.date,
+      );
+
+    it('lists a day that has an entry', async () => {
       const day = await repository.findOrCreate('alice', '2026-08-09');
+      await entryOn('e1', day.id, 'alice');
 
-      expect(await repository.deleteIfEmpty(day.id, 'alice')).toBe(true);
-      expect(
-        await repository.findByDate('alice', '2026-08-09'),
-      ).toBeUndefined();
+      expect(await datesListed('alice')).toEqual(['2026-08-09']);
     });
 
-    it('keeps a day that still has an entry', async () => {
-      const day = await repository.findOrCreate('alice', '2026-08-09');
-      await entryOn('alice-entry', day.id, 'alice');
+    it('does not list a day that has only a mood', async () => {
+      await repository.setMood('alice', '2026-08-09', 'Even');
 
-      expect(await repository.deleteIfEmpty(day.id, 'alice')).toBe(false);
+      expect(await datesListed('alice')).toEqual([]);
+    });
+
+    it('does not list a day whose entries are all deleted', async () => {
+      const day = await repository.findOrCreate('alice', '2026-08-09');
+      await entryOn('e1', day.id, 'alice', '2026-08-09T13:00:00.000Z');
+      await entryOn('e2', day.id, 'alice', '2026-08-09T14:00:00.000Z');
+
+      expect(await datesListed('alice')).toEqual([]);
+    });
+
+    it('lists a day once, however many entries it has', async () => {
+      const day = await repository.findOrCreate('alice', '2026-08-09');
+      await entryOn('e1', day.id, 'alice');
+      await entryOn('e2', day.id, 'alice');
+      await entryOn('e3', day.id, 'alice', '2026-08-09T13:00:00.000Z');
+
+      expect(await datesListed('alice')).toEqual(['2026-08-09']);
     });
 
     /*
-     * The count has to be scoped by user as well as by day. An unscoped count
-     * would answer `false` and never reach the delete. The scoped count
-     * ignores Bob's entry, the delete is attempted, and the foreign key on
-     * entries.day_id is what refuses it.
+     * This cannot happen through the API, which always files an entry under
+     * the caller's own day. It is here because the subquery names the owner
+     * of the entry, and nothing else would notice if it stopped.
      */
-    it("ignores another user's entry when deciding the day is empty, and the database then refuses the delete", async () => {
+    it("does not list a day because of another user's entry on it", async () => {
       const day = await repository.findOrCreate('alice', '2026-08-09');
       await entryOn('bobs-entry', day.id, 'bob');
 
-      await expect(repository.deleteIfEmpty(day.id, 'alice')).rejects.toThrow(
-        'FOREIGN KEY constraint failed',
-      );
-      expect(await repository.findByDate('alice', '2026-08-09')).toBeDefined();
-    });
-
-    it("refuses to delete another user's day", async () => {
-      const day = await repository.findOrCreate('bob', '2026-08-09');
-
-      expect(await repository.deleteIfEmpty(day.id, 'alice')).toBe(false);
-      expect(await repository.findByDate('bob', '2026-08-09')).toBeDefined();
+      expect(await datesListed('alice')).toEqual([]);
     });
   });
 });

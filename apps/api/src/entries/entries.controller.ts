@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   NotFoundException,
   Patch,
   Post,
@@ -95,17 +97,16 @@ export class EntriesController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async delete(
     @Param('id') id: string,
     @Req() request: AuthenticatedRequest,
-  ): Promise<WireEntry> {
+  ): Promise<void> {
     const deleted = await this.entriesService.delete(id, request.user.id);
 
     if (!deleted) {
       throw new NotFoundException(`Entry with ID ${id} not found`);
     }
-
-    return deleted;
   }
 }
 

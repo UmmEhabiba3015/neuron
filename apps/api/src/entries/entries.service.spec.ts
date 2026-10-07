@@ -309,10 +309,10 @@ describe('EntriesService', () => {
   });
 
   describe('delete', () => {
-    it('should return the deleted entry and remove it', async () => {
+    it('should say it deleted the entry, which is then gone', async () => {
       const created = await service.create('here for a moment', CALLER_ID);
 
-      expect(await service.delete(created.id, CALLER_ID)).toEqual(created);
+      expect(await service.delete(created.id, CALLER_ID)).toBe(true);
       expect(await service.findById(created.id, CALLER_ID)).toBeUndefined();
       expect(await service.count(CALLER_ID)).toBe(0);
     });
@@ -326,8 +326,8 @@ describe('EntriesService', () => {
       expect(await service.find(CALLER_ID)).toEqual([survivor]);
     });
 
-    it('should return undefined when the id does not exist', async () => {
-      expect(await service.delete('no-such-id', CALLER_ID)).toBeUndefined();
+    it('should say it deleted nothing when the id does not exist', async () => {
+      expect(await service.delete('no-such-id', CALLER_ID)).toBe(false);
     });
   });
 

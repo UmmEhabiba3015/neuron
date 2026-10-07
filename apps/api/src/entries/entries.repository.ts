@@ -36,23 +36,6 @@ export class EntriesRepository {
     return (await this.entries.findOneBy({ id, userId })) ?? undefined;
   }
 
-  /*
-   * findById hides day_id, because select:false keeps it off every response.
-   * Deleting a day when its last entry goes needs the id, so this is the one
-   * read that asks for it explicitly.
-   */
-  async findWithDay(
-    id: string,
-    userId: string,
-  ): Promise<JournalEntry | undefined> {
-    return (
-      (await this.entries.findOne({
-        where: { id, userId },
-        select: { id: true, dayId: true },
-      })) ?? undefined
-    );
-  }
-
   async save(entry: JournalEntry): Promise<void> {
     await this.entries.insert(entry);
   }
@@ -62,7 +45,14 @@ export class EntriesRepository {
     content: string,
     userId: string,
   ): Promise<JournalEntry | undefined> {
-    const result = await this.entries.update({ id, userId }, { content });
+    /*
+     * @DeleteDateColumn filters reads and does not filter an update. Without
+     * the condition on deletedAt this would change a deleted entry.
+     */
+    const result = await this.entries.update(
+      { id, userId, deletedAt: IsNull() },
+      { content },
+    );
 
     if (result.affected === 0) {
       return undefined;
@@ -71,20 +61,27 @@ export class EntriesRepository {
     return this.findById(id, userId);
   }
 
-  async delete(id: string, userId: string): Promise<JournalEntry | undefined> {
-    const existing = await this.findById(id, userId);
+  /*
+   * A soft delete (ADR-020): the row stays and deleted_at is set. This is an
+   * update and not TypeORM's softDelete, which writes the database's
+   * CURRENT_TIMESTAMP. Every other time in this project is an ISO 8601
+   * string from the application's clock, so the caller passes one in.
+   *
+   * The condition on deletedAt is written by hand for the same reason as in
+   * update. It is what makes a second delete find nothing and leave the
+   * first time in place.
+   */
+  async markDeleted(
+    id: string,
+    userId: string,
+    deletedAt: string,
+  ): Promise<boolean> {
+    const result = await this.entries.update(
+      { id, userId, deletedAt: IsNull() },
+      { deletedAt },
+    );
 
-    if (!existing) {
-      return undefined;
-    }
-
-    const result = await this.entries.delete({ id, userId });
-
-    if (result.affected === 0) {
-      return undefined;
-    }
-
-    return existing;
+    return result.affected !== 0;
   }
 }
 
