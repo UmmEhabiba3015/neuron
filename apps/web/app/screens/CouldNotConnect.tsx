@@ -19,29 +19,27 @@ export function CouldNotConnect({
 }) {
   return (
     <AuthScreen>
-      <main className="sheet auth-sheet">
-        <div className="auth-content">
-          <h2 className="auth-heading">Could not connect</h2>
-          <p className="auth-copy" role="alert">
-            We could not finish that request.
-            {asked > 1 ? ` Asked ${asked} times.` : null}
-          </p>
-          {asking ? (
-            <p className="auth-help" role="status">
-              Asking again.
-            </p>
-          ) : null}
-          <div className="auth-actions">
-            <button
-              className="btn solid"
-              type="button"
-              onClick={() => void session.restore()}
-            >
-              Try again
-            </button>
-          </div>
-        </div>
-      </main>
+      <h2 className="auth-heading" id="auth-heading">
+        Could not connect
+      </h2>
+      <div className="notice" role="alert">
+        We could not reach the server.
+        {asked > 1 ? ` Asked ${asked} times.` : null}
+      </div>
+      {asking ? (
+        <p className="auth-copy" role="status">
+          Asking again.
+        </p>
+      ) : null}
+      <div className="auth-actions">
+        <button
+          className="btn solid"
+          type="button"
+          onClick={() => void session.restore()}
+        >
+          Try again
+        </button>
+      </div>
     </AuthScreen>
   );
 }

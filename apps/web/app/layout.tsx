@@ -1,5 +1,10 @@
 import type { Metadata } from 'next';
+/*
+ * In this order: lock.css is the designer's and is never edited, and live.css
+ * is what a running app needs on top of it.
+ */
 import './styles/lock.css';
+import './styles/live.css';
 
 export const metadata: Metadata = {
   title: 'Journal',

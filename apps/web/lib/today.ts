@@ -75,8 +75,11 @@ export interface Today {
   look(): Promise<void>;
   type(text: string): void;
   save(): Promise<void>;
+  /* Also takes away the sentence of a delete that failed. */
   askToDelete(id: string): void;
   keep(): void;
+  /* Takes away the sentence of a delete that failed. The entry stays. */
+  dismiss(id: string): void;
   /* Deletes the entry the person was asked about, and no other. */
   goAhead(): Promise<void>;
 }
@@ -98,11 +101,19 @@ function statusOf(
   return kind === 'rejected' ? 'failed' : kind;
 }
 
+/*
+ * The most pages of one day that are asked for. At the API's largest page
+ * this is 4,000 entries, which is one every 22 seconds for a whole day, so
+ * a day that needs more is an API that is not answering properly.
+ */
+export const MAX_PAGES = 20;
+
 export function createToday(config: {
   request: Request;
   pageSize: number;
+  maxPages?: number;
 }): Today {
-  const { request, pageSize } = config;
+  const { request, pageSize, maxPages = MAX_PAGES } = config;
 
   let fetched: { day: WireDay; entries: WireEntry[] } | undefined;
   let trouble: 'unreachable' | 'failed' | undefined;
@@ -164,7 +175,15 @@ export function createToday(config: {
 
     const entries: WireEntry[] = [];
 
-    for (;;) {
+    /*
+     * A short page is the last one. An API that never sent a short page
+     * would be asked for ever, so the pages are counted.
+     */
+    for (let pages = 0; ; pages += 1) {
+      if (pages === maxPages) {
+        return { status: 'failed' };
+      }
+
       const page = await request<WireEntry[]>(
         `/entries?date=${day.data.date}&limit=${pageSize}&offset=${entries.length}`,
       );
@@ -285,6 +304,12 @@ export function createToday(config: {
 
   function askToDelete(id: string): void {
     confirming = id;
+    notDeleted = without(notDeleted, id);
+    publish();
+  }
+
+  function dismiss(id: string): void {
+    notDeleted = without(notDeleted, id);
     publish();
   }
 
@@ -345,6 +370,7 @@ export function createToday(config: {
     save: saveEntry,
     askToDelete,
     keep: keepEntry,
+    dismiss,
     goAhead,
   };
 }

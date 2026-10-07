@@ -7,7 +7,7 @@
  */
 
 /* The five words a day's mood may be. null, not a sixth word, clears it. */
-export const MOODS = ['Hard', 'Low', 'Even', 'Good', 'Light'] as const;
+export const MOODS = ['Light', 'Good', 'Even', 'Low', 'Hard'] as const;
 
 export type Mood = (typeof MOODS)[number];
 

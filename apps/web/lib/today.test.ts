@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import type { ApiResult } from './session.ts';
-import { createToday, isBlank, type Request } from './today.ts';
+import { createToday, isBlank, MAX_PAGES, type Request } from './today.ts';
 
 /*
  * A stand-in for the API. It holds a day's entries, answers the four routes
@@ -404,6 +404,41 @@ test('pressing delete again on an entry that came back takes its sentence away',
   assert.deepEqual(shown(today), []);
 });
 
+test('an entry that came back can be kept, and its sentence leaves without anything being sent', async () => {
+  const { api, today } = await openToday(['a', 'b']);
+  api.answer('DELETE /entries/a', () => NO_ANSWER);
+
+  today.askToDelete('a');
+  await today.goAhead();
+  assert.deepEqual(today.getState().notDeleted, { a: 'unreachable' });
+
+  today.dismiss('a');
+
+  assert.deepEqual(today.getState().notDeleted, {});
+  assert.deepEqual(shown(today), ['a', 'b']);
+  assert.equal(api.count('DELETE', '/entries'), 1);
+});
+
+test('trying again after a failed delete asks first, and keeping then leaves no sentence behind', async () => {
+  const { api, today } = await openToday(['a']);
+  api.answer('DELETE /entries/a', () => NO_ANSWER);
+
+  today.askToDelete('a');
+  await today.goAhead();
+
+  today.askToDelete('a');
+
+  assert.equal(today.getState().confirming, 'a');
+  assert.deepEqual(today.getState().notDeleted, {});
+  assert.equal(api.count('DELETE', '/entries'), 1);
+
+  today.keep();
+
+  assert.equal(today.getState().confirming, null);
+  assert.deepEqual(today.getState().notDeleted, {});
+  assert.deepEqual(shown(today), ['a']);
+});
+
 /* ---- Asking ----------------------------------------------------------- */
 
 test('asking again says so while it asks, and counts the question when the answer is the same', async () => {
@@ -453,4 +488,50 @@ test('a day is read oldest first, across more than one page', async () => {
 
   assert.deepEqual(shown(today), ['a', 'b', 'c']);
   assert.equal(api.count('GET', '/entries'), 2);
+});
+
+test('of two questions in flight, the answer to the older one is thrown away when it arrives last', async () => {
+  const { api, today } = await openToday(['a']);
+  const older = held();
+
+  /* Only the first question is held. The one after it is answered at once. */
+  api.answer('GET /entries', () => {
+    api.restore('GET /entries');
+    return older.reply;
+  });
+
+  const looking = today.look();
+  await settle();
+
+  /* A save asks its own question, whatever is already in flight. */
+  today.type('words');
+  await today.save();
+
+  assert.deepEqual(shown(today), ['a', 'new1']);
+
+  /* The older answer left the API before the entry existed. */
+  older.release({ kind: 'ok', data: [entry('a', 1)] });
+  await looking;
+
+  assert.deepEqual(shown(today), ['a', 'new1']);
+  assert.equal(today.getState().asking, false);
+});
+
+test('an API that never sends a short page is asked a counted number of times, and no more', async () => {
+  const api = fakeApi();
+  const today = createToday({ request: api.request, pageSize: 2 });
+
+  api.answer('GET /entries', () => {
+    const asked = api.count('GET', '/entries');
+
+    return {
+      kind: 'ok',
+      data: [entry(`p${asked}a`, 1), entry(`p${asked}b`, 2)],
+    };
+  });
+
+  await today.open();
+
+  assert.equal(api.count('GET', '/entries'), MAX_PAGES);
+  assert.deepEqual(today.getState().day, { status: 'failed', asked: 1 });
 });

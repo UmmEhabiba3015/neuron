@@ -2,7 +2,7 @@
 
 import { MAX_PAGE_SIZE } from '@neuron/contracts';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { BlankScreen } from '@/app/components/AuthScreen';
 import { KeyBox, LiveScreen } from '@/app/components/LiveScreen';
 import { LiveComposer, LiveEntry, MoodRow } from '@/app/components/Journal';
@@ -109,6 +109,45 @@ export function LiveToday() {
     };
   }, [signedIn, today]);
 
+  /*
+   * A deleted entry leaves the page at once, and its buttons leave with it.
+   * Focus would be left on nothing, and the next press of Tab would start
+   * again from the top of the page. So before the entry goes, the place focus
+   * should go to is written down here, and it is moved once the page has been
+   * drawn without the entry: to the delete control of the entry after it, or
+   * of the one before it, or to the line that says the day is empty.
+   */
+  const emptyLine = useRef<HTMLParagraphElement>(null);
+  const focusNext = useRef<{ entry: string | null } | null>(null);
+  const shownEntries = view.day.status === 'open' ? view.day.entries : null;
+
+  useEffect(() => {
+    const next = focusNext.current;
+
+    if (!next || !shownEntries) {
+      return;
+    }
+
+    focusNext.current = null;
+
+    const control = next.entry
+      ? document.querySelector<HTMLElement>(
+          `[data-entry-id="${next.entry}"] [data-entry-action="delete"]`,
+        )
+      : null;
+
+    (control ?? emptyLine.current)?.focus();
+  }, [shownEntries]);
+
+  function goAhead(id: string) {
+    const entries = shownEntries ?? [];
+    const at = entries.findIndex((entry) => entry.id === id);
+    const neighbour = entries[at + 1] ?? entries[at - 1];
+
+    focusNext.current = { entry: neighbour?.id ?? null };
+    void today.goAhead();
+  }
+
   if (state.status === 'unreachable') {
     return <CouldNotConnect asking={state.asking} asked={state.asked} />;
   }
@@ -129,33 +168,49 @@ export function LiveToday() {
   return (
     <LiveScreen current="Today" aside={<KeyBox label="Day" value={date} />}>
       {day.status === 'opening' ? (
-        <p className="empty" role="status">
-          Opening today.
-        </p>
+        <main className="sheet">
+          <div className="state-message">
+            <p className="auth-help state-message" role="status">
+              Opening your journal.
+            </p>
+          </div>
+        </main>
       ) : null}
 
       {day.status === 'unreachable' || day.status === 'failed' ? (
-        <div className="notice" role="alert">
-          <p>
-            {save.status === 'saved' ? 'Your entry was saved. ' : null}
-            {day.status === 'unreachable'
-              ? 'Could not connect. We could not open today.'
-              : 'Something went wrong on our side. We could not open today.'}
-            {day.asked > 1 ? ` Asked ${day.asked} times.` : null}
-          </p>
-          {view.asking ? <p role="status">Asking again.</p> : null}
-          <button
-            className="btn quiet"
-            type="button"
-            onClick={() => void today.open()}
-          >
-            Try again
-          </button>
-        </div>
+        <main className="sheet">
+          <div className="state-message">
+            <div className="notice" role="alert">
+              {save.status === 'saved' ? 'Your entry was saved. ' : null}
+              {day.status === 'unreachable'
+                ? 'We could not reach the server. Try loading it again.'
+                : 'Something went wrong on our side. Try loading it again.'}
+              {day.asked > 1 ? ` Asked ${day.asked} times.` : null}
+            </div>
+            {view.asking ? (
+              <p className="auth-help" role="status">
+                Asking again.
+              </p>
+            ) : null}
+            <div className="auth-actions">
+              <button
+                className="btn solid"
+                type="button"
+                onClick={() => void today.open()}
+              >
+                Try again
+              </button>
+            </div>
+          </div>
+        </main>
       ) : null}
 
+      {/* It can take focus, and is not a stop for the Tab key: it is where
+          focus goes when the last entry of the day has been deleted. */}
       {day.status === 'open' && day.entries.length === 0 ? (
-        <p className="empty">What&apos;s today been like?</p>
+        <p className="empty" tabIndex={-1} ref={emptyLine}>
+          What&apos;s today been like?
+        </p>
       ) : null}
 
       {day.status === 'open' && day.entries.length > 0 ? (
@@ -166,13 +221,18 @@ export function LiveToday() {
             return (
               <LiveEntry
                 key={entry.id}
+                id={entry.id}
                 time={formatTime(entry.createdAt)}
                 datetime={entry.createdAt}
                 confirming={view.confirming === entry.id}
                 notDeleted={why ? NOT_DELETED[why] : undefined}
                 onAsk={() => today.askToDelete(entry.id)}
-                onKeep={today.keep}
-                onGoAhead={() => void today.goAhead()}
+                onKeep={() =>
+                  view.confirming === entry.id
+                    ? today.keep()
+                    : today.dismiss(entry.id)
+                }
+                onGoAhead={() => goAhead(entry.id)}
               >
                 {entry.content}
               </LiveEntry>

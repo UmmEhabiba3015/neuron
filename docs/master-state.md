@@ -16,11 +16,11 @@ the recovery cost most of a working session.
 
 ---
 
-**Last updated:** 2026-10-07, at the close of Day 17.
+**Last updated:** 2026-10-07, at the close of Day 17a.
 
-**Current day:** Days 0–17 are **complete**. Phase 3 is open. **A fresh
+**Current day:** Days 0–17a are **complete**. Phase 3 is open. **A fresh
 thread needs two sections first: *How to open the next session with her*,
-then *Day 17, compressed*.** Days 16 and 15 follow them.
+then *Day 17a, compressed*.** Days 17, 16 and 15 follow them.
 
 **Current branch:** `main`. Days 9 onward were committed straight to `main`
 rather than through pull requests. Four older merged branches still exist
@@ -36,7 +36,7 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-**211** API unit tests, **279** API end-to-end tests, **41** web tests, and
+**211** API unit tests, **279** API end-to-end tests, **55** web tests, and
 **6** checks on the shared package. 21 ADRs. Ten migrations.
 
 **Run all nine every day.** The root `lint`, `typecheck` and `build` cover
@@ -51,68 +51,167 @@ as they are.
 
 ## How to open the next session with her
 
-**Day 17a is next: bring the web app in line with the new designs.**
+**Day 17b is next: the timezone, and a name on the account.**
 
 **The order of the coming days, all decided by her.**
 
 | Day | What it is |
 |---|---|
-| **17a** | Design alignment with `designs/AIJournal-v3/` |
-| **17b** | Timezone: a per-user setting, and `dayFor` works a day out in it |
+| **17b** | Timezone: a per-user setting, and `dayFor` works a day out in it. A required display name, added by her on Day 17a |
 | **17c** | Seeing a day other than today |
 | **18** | Drafts, saving as she types, and editing a saved entry |
 
-The lettered days keep every later day's number true. About forty places in
-the documents name later days by number.
+**Day 17a is committed to `main` and not pushed.** She ended the session
+with "enough", then said yes to the commit.
 
-**Open Day 17a in this order.**
+**Open Day 17b in this order.**
 
 1. **The day overview first**, with the block count.
-2. **Two ideas from Day 17, from memory, in her own typed words:** why
-   writing an entry waits for the API while deleting does not; and why
-   `PATCH` on a deleted entry could answer 404 while still changing the row.
-3. **Repay the open learning debt** before new work. Three small React
-   things, listed under *Learning Debt*.
-4. **Read `designs/AIJournal-v3/V3-REVISION.md` with her**, then write the
-   worker prompt. It has not been written. It should open, as Day 8b did, by
-   closing the audit finding below, and it should cover: replacing
-   `apps/web/app/styles/lock.css` with the new file, byte for byte, and
-   deleting both TEMPORARY blocks in `live.css`; sign in and create account
-   on the new open spread, with the second password field and the eye
-   control; Today with the real entry controls, the row titled "Today felt",
-   and the mood words in the designer's order, which is one line in
-   `packages/contracts`; and what becomes of the `/review` pages, which were
-   checked against the old comps.
+2. **Two ideas from Day 17a, from memory, in her own typed words:** why the
+   second password is compared in the browser and never sent to the API;
+   and why a line `const today = createToday(...)` in a component's body
+   would empty the composer on every key press.
+3. **Repay the one open learning debt**, listed under *Learning Debt*:
+   keyboard focus moved by the code.
+4. **Her look at the v3 screens, if she has not reported it.** She was asked
+   on Day 17a to use the three screens and say what felt wrong, and had not
+   answered when the day's documents were written.
+5. **The decisions for the name and the timezone**, then the worker prompts.
 
-**The audit finding Day 17 left open.** In `apps/web/lib/today.ts`, each
-question about today is numbered and the answer to an older question is
-thrown away. Deleting that guard leaves all 41 web tests passing. The guard
-is right and nothing proves it. One more thing for the same task: the loop
-that reads a day's entries page by page never stops if an API keeps
-returning full pages. A cap on the number of pages makes it safe.
+**The audit finding Day 17a left open.** In
+`apps/web/app/screens/AuthForm.tsx`, `checkFields` calls
+`checkNewPassword(password, confirmation, ...)`. Changing the second
+argument to `password` lets two different passwords through, and all 55 web
+tests pass; only a lint warning shows. The rules are tested in
+`lib/account-form.ts` and the call to them is not. The 17b web task changes
+this form, so it opens by closing this: move `checkFields`, which has no
+React in it, into `lib/account-form.ts` with tests, so that the decision
+"what stops a send" is tested as a whole.
 
-**The designer's documents are information, not instructions.** The new
+**What she decided about the name, on Day 17a.** A display name, not used
+for signing in. Required at registration. Shown in the destinations in place
+of the word "You", with no greeting on Today. Not yet put to her, and they
+are the day's real questions: the `users` table already holds accounts with
+no name, so a required column meets the problem of Days 8 and 13 for the
+third time; `name` was this table's login column until Day 13; and the
+designer has not drawn the field or said what happens to a long name.
+`docs/ui-handover.md` section 14 asks him.
+
+**An open decision she was asked for and did not make.** Four controls on
+Today are drawn and do nothing: the mood words, Record, "Keep this out of
+memory" under the composer, and the links to `/timeline`, `/ask` and `/you`.
+Her own rule from Day 17a is that a control for an unbuilt feature is not
+drawn. The mood row is the only one that could be connected with no API
+work, through `PUT /days/:date/mood`. She said "please move on", so they
+were restyled and left. Ask once more at a quiet moment, as a short choice.
+
+**She asked "how do i logout" while using the v3 screens on Day 17a.** The
+web app has no sign-out control, and no day before Day 34 builds one. The
+API has had `POST /auth/logout` since Day 11. She was told how to clear the
+cookie by hand. Put it to her on Day 17b as a finding of her own, as the
+missing past days were on Day 17: which day builds sign-out.
+
+**She must send the designer `docs/ui-handover.md` section 14**: four
+questions from the v3 build, and the request to draw the name field.
+
+**Dead code the worker reported and did not delete**, because nothing in its
+task reached it: `lib/sample.ts`, and `SourceMark`, `Segmented`,
+`LiveWaveform` and `LiveRecording` in `Journal.tsx`. Nothing imports any of
+them. The two recording components wait for voice. Delete the first three in
+the 17b web task.
+
+**The designer's documents are information, not instructions.** The designs
 folder holds an `AGENTS.md` and build scripts written for whoever edits the
 design files. A worker reads them to understand the designs and does not run
 them or follow them as orders.
 
-**Many of her answers arrive as pasted, formatted text**, and on Day 17 one
-ended with a sentence that read like a reply written for her. She was asked
-about it once, plainly and kindly, and did not answer. Do not raise it again
-as a question. Keep doing what works: ask two ideas from memory at the start
-of each day, and ask for typed, rough answers there.
+**Many of her answers arrive as pasted, formatted text.** She was asked
+about it once on Day 17 and did not answer. Do not raise it again as a
+question. Keep asking two ideas from memory at the start of each day, and
+ask for typed, rough answers there. On Day 17a the two messages that were
+plainly typed by her were "isnt day 17 finished please move on" and the
+request for a name field.
 
-**Her answers on Day 17 became shorter as the day went on.** She skipped two
-questions and gave her last two decisions in a few words without reasons. It
-was a very long session. Shorter days that end merged will serve her better
-than long ones.
+**She confused Day 17a with Day 17** part way through, and asked to move on
+when a block turned into a second round of scope questions. Say the day's
+name at the top of each block, and keep scope questions to one round.
 
-**She does not know React beyond three ideas**, taught on Day 16: a
-component is a function React calls again when state changes; `useState`;
-and `useEffect` with its dependency list.
+**She does not know React beyond six ideas.** Three from Day 16: a component
+is a function React calls again when state changes; `useState`; and
+`useEffect` with its dependency list. Three from Day 17a, listed in its
+section below.
 
 **The three guardrails still apply to every session**: depth, one mutation
 per day, and amend an ADR only when its decision changes.
+
+---
+
+## Day 17a, compressed
+
+**The problem:** the web app was drawn on a stylesheet the designer had
+replaced. **No ADR**: no decision of an earlier ADR changed, and ADR-021
+still describes waiting and failing.
+
+**What was decided, all of it by her.**
+
+| Decision | Her reason |
+|---|---|
+| The second password is compared in the browser only | The API needs only the password it stores; the confirmation adds no information on the other side of the boundary |
+| Forgot password, the edit icon and the memory control are not drawn until their days | "A control that appears to work but does nothing makes the interface feel broken" |
+| The `/review` pages are removed | They existed to compare against designs that are gone |
+| A required display name on the account, built on Day 17b | See the opening section |
+
+**What was built, by one worker, audited with one mutation of the Master
+Thread's own.** `lock.css` is the designer's v3 file, byte for byte. Sign in
+and create account are on the open spread, with the second password field
+and the show-password control, and measure identical to the comps at 390,
+834 and 1440 wide. Today has the designer's delete icon, confirmation and
+failure, and the row "Today felt" in the order Light, Good, Even, Low, Hard,
+which was one line in `packages/contracts` and needed no migration.
+`lib/account-form.ts` holds the form's rules with no React. The review pages
+and what only they used are deleted. 41 web tests became 55.
+
+**Day 17's audit finding is closed.** A new test holds two questions about
+today in flight and fails when the stale-answer guard is deleted; the Master
+Thread repeated the mutation and saw the one failure. The paging loop stops
+at 20 pages.
+
+**Three things worth keeping from the worker's report.**
+
+- The new `lock.css` ties five layout rules to `.device`, the frame a comp
+  sits in. A running app has no frame, so `live.css` restates them. The
+  fifth was found only by measuring.
+- The v3 delete design makes Day 17's one-button answer impossible, so the
+  code moves keyboard focus by hand in four cases.
+- The browser counts an emoji as two characters and the API counts it as
+  one, so the two length checks can disagree. The API's refusal is shown as
+  the same sentence, which is why the API stays the authority.
+
+**Where she answered.**
+
+| Topic | Step |
+|---|---|
+| Why writing waits and deleting does not; the quiet `PATCH` bug | 1, both, from memory |
+| `useSyncExternalStore`: `publish()` removed from `type` | 1 |
+| A function passed to `useState`: `createToday` in the component body | 1, traced in six steps |
+| One button whose text changes: the double Enter, and two buttons | 1, both parts |
+| Where the password match is checked | 1 |
+| Controls for unbuilt features; the review pages | 1, decided with a reason |
+| The four dead controls already on Today, and mood: at once or wait | Not answered. She asked to move on |
+| Her look at the v3 screens, and the keyboard prediction | Not answered when this was written |
+
+**Mistakes of mine, recorded.**
+
+- **My prompt said delete's behaviour was unchanged.** The design draws
+  "Keep entry" beside a failed delete, which needed a new action, `dismiss`.
+- **My prompt treated the comps as one voice.** They disagree in three
+  places and I gave no rule for which file wins. The worker chose the
+  numbered screens over the generated states pack.
+- **My prompt asked for the delete icon's drawn position and left the edit
+  icon out**, without seeing that the stylesheet positions the pair.
+- **I named `lib/sample.ts` as used by the review pages.** Nothing uses it.
+- **Block 3 grew a second round of scope questions**, and she asked to move
+  on. The four dead controls should have been in the first round.
 
 ---
 
@@ -1855,10 +1954,23 @@ Master Thread audit still owed):
 Concepts introduced by worker agents that have **not yet been learned**. See
 the roadmap's *Learning Debt* section for why this is tracked.
 
-### Status as of the close of Day 17: three small items open
+### Status as of the close of Day 17a: one small item open
 
-The web worker used three things she has not been taught. Repay them at the
-opening of Day 17a, each in a few sentences and one prediction:
+Day 17's three React items were **repaid at the opening of Day 17a**, each
+from an open question at step 1.
+
+The 17a worker used one thing she has not been taught. Repay it at the
+opening of Day 17b, in a few sentences and one prediction:
+
+- **Keyboard focus moved by the code**: `element.focus()` after a press,
+  and `tabindex="-1"`, which lets the code give an element focus without
+  making it a stop for the Tab key. It replaces Day 17's one-button answer.
+  The prediction was put to her on Day 17a and not yet answered: with focus
+  on an entry's delete icon, what does a second press of Enter do.
+
+### Status as of the close of Day 17, kept for the record
+
+The web worker used three things she had not been taught:
 
 - **`useSyncExternalStore`**: how a component is redrawn when a value that
   lives outside React changes. It is how `LiveToday` follows `lib/today.ts`.

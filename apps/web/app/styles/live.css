@@ -1,76 +1,132 @@
 /*
- * lock.css section 2.1 is the presentation stage for comps, not product.
- * Every rule below overrides a declaration from 2.1 or hides .chrome, and
- * nothing else: no component, colour, type scale, rule weight or spacing
- * token is touched.
+ * What a running app needs on top of lock.css, which is the designer's file
+ * and is never edited here.
+ *
+ * Sections 1 to 4 take a comp's stage away and put a viewport in its place.
+ * No component, colour, type scale, rule weight or spacing token is touched.
+ * Section 5 is marked TEMPORARY: rules for things lock.css does not yet
+ * draw, each one a question for the designer.
  *
  * Sections 4 and 5 of lock.css are container queries keyed on .app, so
  * letting .app be the viewport is the designed behaviour, not an override of
  * it.
  */
 
+/*
+ * 1. The stage.
+ *
+ * lock.css 2.1 sets a comp on a grey desk with space around it, and gives
+ * .app the height of a phone. In the product the page is the app and the
+ * viewport is its height, which is what lock.css itself does for the sign-in
+ * spread (.app.auth-paper).
+ *
+ * body is made a container so that section 3 can style .app by width. A
+ * container query cannot style its own container, and .app is one.
+ */
+
 body {
   background: var(--paper);
   display: block;
   padding: 0;
+  container-type: inline-size;
 }
 
-.device {
-  width: 100%;
-  max-width: none;
-  margin-inline: 0;
-  box-shadow: none;
-}
-
-.chrome {
-  display: none;
+.app {
+  min-height: 100dvh;
 }
 
 /*
- * The desktop comp hoists the wordmark, date box, destinations and glance out
- * of .page into .title, which is a change of markup and not of style. A
- * single live page therefore renders both, and the container query chooses
- * between them.
+ * 2. One page, two headers.
  *
- * .mast is only hidden, never given a display value. lock.css turns it into a
- * flex row itself at the 700 threshold, and declaring display:flex here put
- * the tablet masthead on the 390 layout.
+ * The desktop comp puts the wordmark, date box and destinations in .title,
+ * outside .page. The other two widths put them in .journal-header, inside
+ * it. That is a change of markup and not of style, so a single live page
+ * renders both and the width chooses between them.
+ *
+ * .journal-header is only hidden, never given a display value of its own.
  */
 
-.app > .title { display: none; }
-
-@container (min-width: 1200px) {
-  .app > .title { display: block; }
-  .app .page > .mast,
-  .app .page > .dest,
-  .app .page > .glance { display: none; }
+@container (max-width: 1199.98px) {
+  .app > .title { display: none; }
 }
 
-/*
- * A consequence of rendering both headers. On desktop lock.css gives the
- * page's first child a top margin, --lead, so that the content starts on the
- * date box's line. In a comp the first child is the content. Here the first
- * child is .mast, which the rule above has just hidden, so the margin was
- * spent on something invisible and the content started at the top edge.
- *
- * This gives the same margin, from the same token, to the first thing that
- * is actually shown. The exclusions are lock.css's own: a split page carries
- * the lead as padding, and a stack centres itself.
- */
-
 @container (min-width: 1200px) {
-  .app .page:not(.split) > .mast + :not(.dest):not(.stack),
-  .app .page:not(.split) > .mast + .dest + :not(.glance):not(.stack),
-  .app .page:not(.split) > .mast + .dest + .glance + :not(.stack) {
+  .app > .title ~ .page > .journal-header { display: none; }
+
+  /*
+   * On desktop lock.css gives the page's first child a top margin, --lead,
+   * so that the content starts on the date box's line. In a comp the first
+   * child is the content. Here it is .journal-header, which the rule above
+   * has just hidden, so the margin would be spent on something invisible.
+   * This gives the same margin, from the same token, to the first thing that
+   * is shown. The exclusions are lock.css's own.
+   */
+  .app > .title ~ .page:not(.split) > .journal-header + :not(.stack) {
     margin-top: var(--lead);
   }
 }
 
 /*
- * The waveform is authored per platform rather than scaled (direction-lock.md
- * 12.7), so three are rendered and the width picks one, on the same two
- * thresholds lock.css already uses. Scaling one SVG would draw the same
- * recording at more than twice the tick weight at 1440.
+ * 3. What stays in place while the page scrolls.
+ *
+ * lock.css has these five rules, with these values, and keys them on
+ * `.device.d` and `.device:not(.d)`. .device is the comp's stage: a frame of
+ * a fixed width that a running app does not have and cannot know to ask
+ * for. They are restated here on the width instead. QUESTION FOR THE
+ * DESIGNER: can lock.css key them on the 1200 container threshold, as the
+ * rest of its desktop rules are? This section is then deleted.
+ */
+
+/* Below desktop, a masthead that is the page's own child. Sign in is one. */
+@container (max-width: 1199.98px) {
+  .page > .mast {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--paper);
+  }
+}
+
+/* On desktop, the binding column. */
+
+@container (min-width: 1200px) {
+  .app:has(> .title) {
+    display: grid;
+    grid-template-columns: var(--website-sidebar, 360px) minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .app > .title {
+    position: sticky;
+    top: 0;
+    bottom: auto;
+    left: auto;
+    align-self: start;
+    transform: translateX(calc(-1 * var(--rail)));
+    max-height: 100dvh;
+    overflow-y: auto;
+    background: var(--paper);
+    z-index: 3;
+  }
+
+  .app:has(> .title) > .page {
+    min-width: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .app:has(> .page > .composer) > .title {
+      max-height: calc(100dvh - var(--g-hide));
+    }
+  }
+}
+
+/*
+ * 4. The waveform is authored per platform rather than scaled
+ * (direction-lock.md 12.7), so three are rendered and the width picks one,
+ * on the same two thresholds lock.css already uses. Scaling one SVG would
+ * draw the same recording at more than twice the tick weight at 1440.
  */
 
 .wave[data-w="tablet"],
@@ -87,100 +143,19 @@ body {
 }
 
 /*
- * TEMPORARY, until the designer's new lock.css arrives.
- *
- * The designer has delivered the sign-in and create-account screens, and the
- * stylesheet that goes with them has not arrived. lock.css may not be edited,
- * so the form's layout lives here under the class names the designer used.
- * When the new lock.css defines these classes, this whole block is deleted
- * and nothing else in this file changes.
- *
- * Only layout and the choice of existing tokens are declared. No colour
- * literal and no new size: every value is a token lock.css already has. The
- * sheet, the field, the buttons and the notice are lock.css's own.
- */
-
-.auth-sheet {
-  align-self: flex-start;
-  width: calc(100% - 2 * var(--gut));
-  max-width: 420px;
-}
-
-.auth-content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s6);
-  padding: var(--s7) var(--s6);
-}
-
-.auth-content .notice {
-  margin: 0;
-}
-
-.auth-heading {
-  font-family: var(--f-prose);
-  font-size: var(--t-hand-s);
-  font-weight: 400;
-  line-height: var(--lh-tight);
-  color: var(--rule);
-}
-
-.auth-copy,
-.auth-help {
-  font-family: var(--f-prose);
-  font-size: var(--t-note);
-  line-height: var(--lh-note);
-  color: var(--rule);
-}
-
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s6);
-}
-
-.auth-field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s3);
-}
-
-.auth-field label {
-  font-family: var(--f-label);
-  font-size: var(--t-print);
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--rule);
-}
-
-.auth-field .field {
-  flex: 0 0 auto;
-  width: 100%;
-}
-
-.auth-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s4) var(--s6);
-}
-
-/*
- * TEMPORARY, until the designer has drawn these (docs/ui-handover.md
- * sections 5 and 6).
- *
- * Two things the comps cannot show. In a comp the composer's field is a div,
- * and here it is a textarea that a person types into. And no comp has a
- * control for deleting an entry. As with the form above, only layout and the
- * choice of existing tokens are declared: no colour literal and no new size.
- * The field, the buttons and the notice are lock.css's own.
+ * 5. TEMPORARY. Three things lock.css has no rule for. Each is the smallest
+ * rule that works, uses only tokens lock.css already has, and is a question
+ * for the designer (docs/learning/day-17a/report.md).
  */
 
 /*
- * .field is a flex box that centres a div's one line. A textarea needs the
- * same line centred by padding, and grows with what is typed where the
- * browser can do that. The focus treatment is lock.css 2.2, which names
- * input and not textarea.
+ * 5.1 The composer's field is a textarea.
+ *
+ * In every comp it is a div, and lock.css's .field is a flex box that
+ * centres a div's one line. A textarea needs the same line centred by
+ * padding, and grows with what is typed where the browser can do that.
+ * lock.css draws a textarea for the entry editor and for the account forms,
+ * and not for the composer.
  */
 .composer textarea.field {
   display: block;
@@ -194,49 +169,24 @@ body {
   field-sizing: content;
 }
 
+/* The comp's prompt is .field.placeholder, and this is its colour. */
 .composer textarea.field::placeholder {
   color: var(--rule-2);
   opacity: 1;
 }
 
-.composer textarea.field:focus-visible {
-  outline: 2px solid var(--block);
-  outline-offset: 2px;
-}
-
-.composer .notice {
-  margin: 0 0 var(--s5);
-}
-
-.composer-line,
-.entry-ask {
-  font-family: var(--f-prose);
-  font-size: var(--t-note);
-  line-height: var(--lh-note);
-  color: var(--rule);
-}
-
-.composer-line {
-  margin-bottom: var(--s4);
-}
-
-/* An entry typed on several lines is shown on several lines. */
+/* 5.2 An entry typed on several lines is shown on several lines. */
 .srow .prose {
   white-space: pre-wrap;
 }
 
-.srow .notice {
-  margin: var(--s4) 0 0;
-}
-
-.entry-foot {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s4) var(--s6);
-}
-
-.entry-ask {
-  flex: 1 0 100%;
-  margin-top: var(--s4);
+/*
+ * 5.3 The delete icon stands where it is drawn, at the right edge.
+ *
+ * lock.css reserves room for two icons, edit and then delete, and lays them
+ * out from the left. Edit is not built until Day 18, so without this the
+ * delete icon would stand in edit's place. Deleted when edit arrives.
+ */
+.srow .entry-tools {
+  justify-content: flex-end;
 }

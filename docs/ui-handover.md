@@ -630,3 +630,61 @@ them.
    and not "Log in again". The product cannot tell the two cases apart at
    that moment. "Log in again" appears only when a session ends while the
    page is open. Is that acceptable?
+
+---
+
+## 14. After building on v3 — four questions and one new field
+
+Sign in, create account and Today were rebuilt on `AIJournal-v3` on
+2026-10-07. Sign in and create account match your screens exactly at all
+three widths. These are the things we could not settle without you.
+
+### Four questions
+
+1. **Five layout rules are tied to the frame your drawings sit in.** In
+   `lock.css` they begin with `.device.d` or `.device:not(.d)`: the desktop
+   two-column page and its pinned binding column, and the header that stays
+   at the top below desktop. A running product has no `.device` frame, so we
+   had to repeat those five rules in our own file, keyed on the 1200px
+   container width that the rest of your desktop rules use. Can `lock.css`
+   key them on the container width? We found the fifth only by measuring,
+   and a sixth could arrive the same way on a screen not yet built.
+2. **The composer's field with more than one line.** In every screen it is
+   drawn holding one line. In the product it is a real text field. How tall
+   should it be with two, three and many lines, and where does it stop
+   growing? Today it grows to four times the control height and then
+   scrolls.
+3. **An entry typed on several lines.** We show it on several lines. No
+   screen has such an entry. Is that what you want?
+4. **Three places where two of your files disagree.** The button says
+   "Log in" in `13-login.html` and "Sign in" in five states of
+   `15-auth-states.html`. Under create account, `14-register.html` has the
+   words "Already have an account?" followed by a link "Log in", and
+   `15-auth-states.html` has one link holding all of it. The composer has
+   the class `composer` on Empty Today and `composer writing-companion` on
+   Today. In each case we followed the first file named. Which is right?
+
+### One sentence we did not use, and why
+
+"You were signed out. Sign in again to return to your draft; what you typed
+is still here." That is not true until drafts are built. Until then the
+product says "You were signed out. Sign in again to open your journal."
+
+### A new field: the person's name
+
+Decided by the owner on 2026-10-07, after your delivery. Create account
+asks for a **name** as well as an email and a password. It is a display
+name and is not used for signing in. It is required.
+
+The name is shown in the destinations in place of the word "You":
+`Today | Timeline | Ask | Muhammad`.
+
+What needs drawing:
+
+- The name field on create account, with its position among the other
+  fields and its sentence when left empty.
+- The destinations with a name in the fourth place, at all three widths,
+  with a short name and a long one. Please say what happens to a name that
+  is too long for its place.
+- Where a person changes their name afterwards, if anywhere. The Account
+  page in section 9 is the likely place.
