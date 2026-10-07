@@ -1,7 +1,5 @@
 import type { ReactNode } from 'react';
-import { Destinations, KeyBox, Wordmark } from './Chrome';
-
-type Destination = 'Today' | 'Timeline' | 'Ask' | 'You';
+import { Destinations, KeyBox, Wordmark, type Destination } from './Chrome';
 
 /*
  * Both headers are rendered because the desktop comp puts the header in

@@ -49,7 +49,7 @@ describe('the refresh cookie (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/auth/register')
-      .send(credentials)
+      .send({ ...credentials, name: 'Somebody', timezone: 'UTC' })
       .expect(201);
   });
 

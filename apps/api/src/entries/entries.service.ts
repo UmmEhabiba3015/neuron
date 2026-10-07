@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
+import type { DayOwner } from '../days/day-boundary';
 import { DaysService } from '../days/days.service';
 import { EntriesRepository } from './entries.repository';
 import { JournalEntry } from './entry.entity';
@@ -33,17 +34,17 @@ export class EntriesService {
    * empty day behind, and 00-flow.md is explicit that an empty day does not
    * exist.
    */
-  async create(content: string, userId: string): Promise<JournalEntry> {
+  async create(content: string, author: DayOwner): Promise<JournalEntry> {
     const createdAt = new Date().toISOString();
 
     const id = await this.dataSource.transaction(async (manager) => {
-      const day = await this.daysService.resolveFor(userId, createdAt);
+      const day = await this.daysService.resolveFor(author, createdAt);
 
       const entry: JournalEntry = {
         id: crypto.randomUUID(),
         content,
         createdAt,
-        userId,
+        userId: author.id,
         dayId: day.id,
       };
 
@@ -52,7 +53,7 @@ export class EntriesService {
       return entry.id;
     });
 
-    return (await this.entriesRepository.findById(id, userId))!;
+    return (await this.entriesRepository.findById(id, author.id))!;
   }
 
   findById(id: string, userId: string): Promise<JournalEntry | undefined> {

@@ -25,7 +25,12 @@
  * user has (ADR-014).
  */
 
-import type { WireAuthenticated, WireUser } from '@neuron/contracts';
+import type {
+  WireAuthenticated,
+  WireLogin,
+  WireRegistration,
+  WireUser,
+} from '@neuron/contracts';
 
 /*
  * `unknown` means the first refresh has not answered yet. `unreachable` means
@@ -76,13 +81,16 @@ export interface Session {
   subscribe(listener: () => void): () => void;
   restore(): Promise<SessionState>;
   login(email: string, password: string): Promise<ApiResult<WireUser>>;
-  register(email: string, password: string): Promise<ApiResult<WireUser>>;
+  /*
+   * The timezone is part of what is handed in. This file never asks the
+   * browser for it, and never puts another in its place.
+   */
+  register(details: WireRegistration): Promise<ApiResult<WireUser>>;
   request<T>(path: string, options?: RequestOptions): Promise<ApiResult<T>>;
 }
 
 type Answer =
-  | { kind: 'answered'; status: number; body: unknown }
-  | { kind: 'unreachable' };
+  { kind: 'answered'; status: number; body: unknown } | { kind: 'unreachable' };
 
 type RefreshOutcome = 'refreshed' | 'ended' | 'unreachable';
 
@@ -305,14 +313,20 @@ export function createSession(config: {
   /*
    * Login and register do not go through `request`. A 401 from login means
    * the details were wrong, and refreshing would be the wrong answer to it.
+   *
+   * Each body is given the contract's type and is built one field at a time.
+   * `send` takes any body at all, so without the type a field that the
+   * contract gains would be missing here and nothing would say so (ADR-019).
    */
   async function login(
     email: string,
     password: string,
   ): Promise<ApiResult<WireUser>> {
+    const body: WireLogin = { email, password };
+
     const answer = await send(
       '/auth/login',
-      { method: 'POST', body: { email, password } },
+      { method: 'POST', body },
       { withCookie: true },
     );
 
@@ -324,15 +338,17 @@ export function createSession(config: {
   }
 
   async function register(
-    email: string,
-    password: string,
+    details: WireRegistration,
   ): Promise<ApiResult<WireUser>> {
+    const body: WireRegistration = {
+      email: details.email,
+      password: details.password,
+      name: details.name,
+      timezone: details.timezone,
+    };
+
     return resultOf<WireUser>(
-      await send(
-        '/auth/register',
-        { method: 'POST', body: { email, password } },
-        {},
-      ),
+      await send('/auth/register', { method: 'POST', body }, {}),
     );
   }
 

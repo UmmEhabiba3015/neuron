@@ -2,6 +2,8 @@
 
 **Status:** Accepted
 **Date:** 2026-09-23 (Day 12)
+**Amended:** 2026-10-07 (Day 17b). Points 3 and 5 of the decision are
+replaced. See *Amendment — 2026-10-07*, at the end.
 
 **Amends:** the roadmap's Day 13, which planned to model mood as a property of
 an entry. Mood is a property of a *day*.
@@ -123,3 +125,69 @@ boundary is visibly wrong on a screen.
   offers this, and adding it makes `day_id` user-editable.
 - Timezone-aware backfill becomes user-visible — the first support question
   about an entry on the wrong day.
+
+---
+
+## Amendment — 2026-10-07: midnight, in the person's own timezone
+
+Two points of the decision change. Both were decided by the owner on
+Day 17b. Everything else in this ADR stands, above all point 2: a day is
+resolved once, at write time, and an entry never moves.
+
+### Point 3 is replaced: a day ends at midnight, not at 04:00
+
+The owner chose midnight and gave no reason beyond the choice. The section
+*Why 4am, and why that is not arbitrary* is kept as the argument that was
+made on Day 12. It is no longer the rule.
+
+**The cost she accepted.** A sitting that crosses midnight is split. A
+person who writes at 23:40 and again at 00:30 has two entries on two days.
+That is the case 4am existed to prevent, and it is the first thing to look
+at again if a real person reports an entry "on the wrong day".
+
+**What it bought.** One rule fewer to explain, and one calculation fewer to
+get wrong: `dayFor` asks for the calendar date of an instant in a timezone
+and does no arithmetic on hours.
+
+### Point 5 is replaced: the boundary is in the user's timezone
+
+This answers the question the section *The timezone is deferred* left open,
+with the third of its three options: the timezone is stored on the user.
+
+- **It is an IANA name**, such as `Asia/Karachi`. Not a country, because one
+  country can hold several timezones. Not an offset such as `+05:00`,
+  because an offset is true for only part of the year where clocks change
+  for summer. Node accepts an offset as a timezone, so the API's check
+  refuses one by name.
+- **It comes from the browser at registration**, in the request body. Nobody
+  is asked for it.
+- **There is no default.** A registration with a missing or invalid timezone
+  is a 400. A default would start a person on the wrong days and nothing
+  would ever report it.
+- **Existing accounts were given `UTC`** by the migration, because that is
+  the zone their days were worked out in.
+- **Nothing already written moved.** Days and entries written under the 4am
+  UTC rule keep the dates they were given.
+- **The timezone leaves the API in no response.** No screen reads it.
+
+### What is wrong now, stated plainly
+
+- **A timezone cannot be changed.** No route sets it after registration. A
+  person who moves keeps the old one, and an account the migration set to
+  `UTC` stays there. The owner's own first account is one of these.
+- **A browser that hides its timezone and reports `UTC`** creates an account
+  in `UTC` with no refusal. This is the silent wrong day that "no default"
+  was meant to stop, arriving another way.
+- **A timezone name the browser knows and the server's Node does not** is
+  refused, and the person can do nothing about it.
+
+All three have the same repair: a way to set the timezone after
+registration. It is drawn in the designs (`docs/ui-handover.md` §12) and no
+day builds it yet.
+
+### Revisit when
+
+- A real person reports an entry on the wrong day. Check first whether it
+  crossed midnight, and second whether their stored timezone is right.
+- The settings route for the timezone is scheduled. Until it is, the three
+  items above stay true.

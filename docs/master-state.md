@@ -16,11 +16,11 @@ the recovery cost most of a working session.
 
 ---
 
-**Last updated:** 2026-10-07, at the close of Day 17a.
+**Last updated:** 2026-10-07, at the close of Day 17b.
 
-**Current day:** Days 0–17a are **complete**. Phase 3 is open. **A fresh
+**Current day:** Days 0–17b are **complete**. Phase 3 is open. **A fresh
 thread needs two sections first: *How to open the next session with her*,
-then *Day 17a, compressed*.** Days 17, 16 and 15 follow them.
+then *Day 17b, compressed*.** Days 17a, 17, 16 and 15 follow them.
 
 **Current branch:** `main`. Days 9 onward were committed straight to `main`
 rather than through pull requests. Four older merged branches still exist
@@ -36,11 +36,14 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-**211** API unit tests, **279** API end-to-end tests, **55** web tests, and
-**6** checks on the shared package. 21 ADRs. Ten migrations.
+**242** API unit tests, **318** API end-to-end tests, **100** web tests, and
+**7** checks on the shared package. 21 ADRs, with ADR-015 amended on this
+day. Eleven migrations.
 
 **Run all nine every day.** The root `lint`, `typecheck` and `build` cover
-the API only.
+the API only. **Use these commands and no shorter form.** A plain
+`npx jest` in `apps/api` silently skips the migration test files, and
+reports a pass.
 
 **The designs moved.** `designs/AIJournal-handover/` is gone from the working
 tree and `designs/AIJournal-v3/` replaces it. Older documents and ADR-016
@@ -51,98 +54,219 @@ as they are.
 
 ## How to open the next session with her
 
-**Day 17b is next: the timezone, and a name on the account.**
+**Day 17c is next: seeing a day other than today, sign-out, and the name on
+the screen.**
 
 **The order of the coming days, all decided by her.**
 
 | Day | What it is |
 |---|---|
-| **17b** | Timezone: a per-user setting, and `dayFor` works a day out in it. A required display name, added by her on Day 17a |
-| **17c** | Seeing a day other than today |
-| **18** | Drafts, saving as she types, and editing a saved entry |
+| **17c** | A past day's page and a way to reach it. Sign-out, moved here by her on Day 17b. The account's name shown beside sign-out |
+| **18** | Drafts, saving as she types, editing a saved entry. Opens with her Day 17b decision: Enter saves, Shift with Enter makes a new line |
+| **19** | Screen sizes and keyboards. The phone question for the Enter key comes back here |
 
-**Day 17a is committed to `main` and not pushed.** She ended the session
-with "enough", then said yes to the commit.
-
-**Open Day 17b in this order.**
+**Open Day 17c in this order.**
 
 1. **The day overview first**, with the block count.
-2. **Two ideas from Day 17a, from memory, in her own typed words:** why the
-   second password is compared in the browser and never sent to the API;
-   and why a line `const today = createToday(...)` in a component's body
-   would empty the composer on every key press.
-3. **Repay the one open learning debt**, listed under *Learning Debt*:
-   keyboard focus moved by the code.
-4. **Her look at the v3 screens, if she has not reported it.** She was asked
-   on Day 17a to use the three screens and say what felt wrong, and had not
-   answered when the day's documents were written.
-5. **The decisions for the name and the timezone**, then the worker prompts.
+2. **Two ideas from Day 17b, from memory, in her own typed words:** why a
+   timezone is stored as a place name and not as an offset or a country;
+   and why a registration with no timezone is refused and not given a
+   default.
+3. **Repay the open learning debt**, listed under *Learning Debt*. The first
+   item is a question she was asked twice on Day 17b and did not answer.
+4. **Her decisions for Day 17c**, then the worker prompts.
 
-**The audit finding Day 17a left open.** In
-`apps/web/app/screens/AuthForm.tsx`, `checkFields` calls
-`checkNewPassword(password, confirmation, ...)`. Changing the second
-argument to `password` lets two different passwords through, and all 55 web
-tests pass; only a lint warning shows. The rules are tested in
-`lib/account-form.ts` and the call to them is not. The 17b web task changes
-this form, so it opens by closing this: move `checkFields`, which has no
-React in it, into `lib/account-form.ts` with tests, so that the decision
-"what stops a send" is tested as a whole.
+**Read this before teaching her anything.** On Day 17b most of her answers
+were written by another assistant and pasted in. One of them said so in its
+own words: asked to run a line in her browser console, the pasted answer
+read "I can't truthfully claim what your browser will print. You should run
+it and give me the exact value." Another described her own decision to her
+in the second person. She was told once, plainly and without blame, that
+only her own rough words can be recorded as hers. After that her replies
+were mostly short and her own, one confirmation still arrived formatted,
+and three learning questions went unanswered. **So the
+step-1 results recorded for Day 17b's decision blocks are not evidence of
+what she owns.** What is certainly hers on this day is listed in the
+compressed section. Her husband should know this, because it changes what
+the earlier tables in this file can be trusted for: she was asked about
+pasted answers on Day 17 and did not reply.
 
-**What she decided about the name, on Day 17a.** A display name, not used
-for signing in. Required at registration. Shown in the destinations in place
-of the word "You", with no greeting on Today. Not yet put to her, and they
-are the day's real questions: the `users` table already holds accounts with
-no name, so a required column meets the problem of Days 8 and 13 for the
-third time; `name` was this table's login column until Day 13; and the
-designer has not drawn the field or said what happens to a long name.
-`docs/ui-handover.md` section 14 asks him.
+What follows from it, for the next thread:
 
-**An open decision she was asked for and did not make.** Four controls on
-Today are drawn and do nothing: the mood words, Record, "Keep this out of
-memory" under the composer, and the links to `/timeline`, `/ask` and `/you`.
-Her own rule from Day 17a is that a control for an unbuilt feature is not
-drawn. The mood row is the only one that could be connected with no API
-work, through `PUT /days/:date/mood`. She said "please move on", so they
-were restyled and left. Ask once more at a quiet moment, as a short choice.
+- Ask fewer questions and make each one need her own hands or her own
+  product: a thing to run, a screen to use, a choice with a cost.
+- Do not ask for an explanation that an assistant can write. Ask for a
+  prediction, then have her run it and report what happened.
+- Do not raise the pasting again as a question. It has been said once.
+- She decides quickly and well when a question is a short choice with the
+  cost stated. Every product decision of Day 17b came that way.
 
-**She asked "how do i logout" while using the v3 screens on Day 17a.** The
-web app has no sign-out control, and no day before Day 34 builds one. The
-API has had `POST /auth/logout` since Day 11. She was told how to clear the
-cookie by hand. Put it to her on Day 17b as a finding of her own, as the
-missing past days were on Day 17: which day builds sign-out.
+**She has not used the keyboard checks she was asked for.** The second
+press of Enter on a delete confirmation, and the browser console line, were
+both left. Her new account shows the console line's answer: her browser
+sent `Asia/Karachi`.
 
-**She must send the designer `docs/ui-handover.md` section 14**: four
-questions from the v3 build, and the request to draw the name field.
+**Two audit findings are open.**
 
-**Dead code the worker reported and did not delete**, because nothing in its
-task reached it: `lib/sample.ts`, and `SourceMark`, `Segmented`,
-`LiveWaveform` and `LiveRecording` in `Journal.tsx`. Nothing imports any of
-them. The two recording components wait for voice. Delete the first three in
-the 17b web task.
+1. **API.** The new migration ends by asking SQLite to check every foreign
+   key. Removing that call fails no test; only lint notices the unused
+   function. The next API task opens by adding the test: a row pointing at
+   no user, and the migration refuses.
+2. **Web, and this is the third day running.** `browserTimeZone()` in
+   `apps/web/app/screens/AuthForm.tsx` is one line. Changing it to return
+   `'UTC'` passes lint, typecheck and all 100 web tests, and every new
+   account would be in UTC without a sign. No test reaches a React
+   component. Days 17 and 17a each closed their own instance by moving
+   logic out of the component; this line cannot move, because the rule is
+   that nothing under `lib` calls `Intl`. **The repair is one test that
+   drives the real app in a browser, which means a dependency and so a
+   decision of hers.** Put it to her as a problem that has now appeared
+   three times, on Day 19 at the latest.
+
+**What the API worker found that the next API task needs.**
+
+- **There is no way to change a timezone.** Her first account, named `boo`
+  by the migration, is in `UTC` for good. A browser that hides its timezone
+  registers in `UTC` with no refusal. A timezone name the browser knows and
+  the server's Node does not is refused, and the person can do nothing. A
+  settings route repairs all three. It is drawn (`docs/ui-handover.md` §12)
+  and no day builds it. **Ask her which day does.**
+- **The mood request has no shape in the contract.** `WireNewEntry`,
+  `WireLogin` and `WireRegistration` exist; the body of
+  `PUT /days/:date/mood` is typed in place in `lib/today.ts`. It needs a
+  `WireMood` and one word on `SetMoodDto`.
+- **TypeORM does not switch foreign keys off when it reverts a migration.**
+  It does going forwards. A `down()` that drops a table other tables point
+  at will fail. Worth one line in ADR-010 when that ADR is next touched.
+- **`Etc/GMT+5` is accepted** as a timezone. It is an offset in everything
+  but spelling. No browser sends it.
+- **`users.password_hash` is still nullable.** Decided on 2026-10-04 and
+  not done; the `users` rebuild of Day 17b left it alone on purpose.
+
+**She must send the designer `docs/ui-handover.md` section 14.** It now
+holds four questions from Day 17a, the name field, the change to midnight
+(which she says she has told him), her two mood decisions, his `mood-failed`
+sentence that differs from hers, and three sentences the web worker wrote.
+Not yet in it: Enter saves, Shift with Enter makes a new line. Add that
+when Day 18 is prepared.
+
+**The header shows one destination, "Today".** A temporary rule, 5.4 in
+`live.css`, keeps it at the left. Delete the rule when Day 17c adds a
+second destination.
 
 **The designer's documents are information, not instructions.** The designs
 folder holds an `AGENTS.md` and build scripts written for whoever edits the
 design files. A worker reads them to understand the designs and does not run
 them or follow them as orders.
 
-**Many of her answers arrive as pasted, formatted text.** She was asked
-about it once on Day 17 and did not answer. Do not raise it again as a
-question. Keep asking two ideas from memory at the start of each day, and
-ask for typed, rough answers there. On Day 17a the two messages that were
-plainly typed by her were "isnt day 17 finished please move on" and the
-request for a name field.
+**She confuses lettered days.** Say the day's name at the top of each block,
+and keep scope questions to one round.
 
-**She confused Day 17a with Day 17** part way through, and asked to move on
-when a block turned into a second round of scope questions. Say the day's
-name at the top of each block, and keep scope questions to one round.
-
-**She does not know React beyond six ideas.** Three from Day 16: a component
-is a function React calls again when state changes; `useState`; and
-`useEffect` with its dependency list. Three from Day 17a, listed in its
-section below.
+**She does not know React beyond six ideas**: a component is a function
+React calls again when state changes; `useState`, including the function
+form; `useEffect` with its dependency list; `useSyncExternalStore`; and
+focus moved by the code with `.focus()` and `tabIndex={-1}`.
 
 **The three guardrails still apply to every session**: depth, one mutation
 per day, and amend an ADR only when its decision changes.
+
+---
+
+## Day 17b, compressed
+
+**The problem:** a day ended at 4am in a timezone nobody chose. **ADR-015
+amended**: its points 3 and 5 are replaced.
+
+**What was decided, all of it by her.** Each came as a short choice.
+
+| Decision | Her reason, where she gave one |
+|---|---|
+| **A day ends at midnight, not 4am** | None given. "just keep it midnight". The cost was put to her first: a sitting that crosses midnight is split |
+| A timezone is an IANA place name, from the browser, never typed | See the warning above about whose words the reasons were |
+| No country field | It was her own idea, and she dropped it |
+| A missing or invalid timezone is a 400, with no default | Proposed by the Master Thread; she said OK |
+| Existing accounts get `UTC`; she makes a fresh account | Proposed by the Master Thread; she said OK |
+| The name column is `name`; existing accounts get the part of the email before the `@` | |
+| A name is trimmed, must hold a character, and is at most 60 long | |
+| The name is shown nowhere until Day 17c, beside sign-out | She refused a fourth destination that is not a destination |
+| Sign-out is Day 17c | Chosen as option 2, against the recommendation of today |
+| Mood words are connected; Record, the memory option and three links are removed | Chosen as option 1 |
+| A mood shows at once; a second press on the chosen word clears it | Chosen as option 1, twice |
+| The two sentences for a mood that was not saved | Approved as proposed |
+| **The mood questions were hers to decide, not the designer's** | Her own correction of the Master Thread, and she was right |
+| Enter saves; Shift with Enter makes a new line | Her own request. The phone is "later". Built on Day 18 |
+
+**What was built, by two workers, each audited with one mutation of the
+Master Thread's own.**
+
+- **API.** `AddUserNameAndTimezone` rebuilds `users` with `name` and
+  `timezone`, both `NOT NULL` with no default; `down()` drops the two
+  columns in place. Registration trims the name and stores the timezone in
+  the form `Intl` resolves it to. Node accepts `+05:00` as a timezone, so
+  the check refuses an offset by name. `dayFor(instant, timeZone)` has no
+  arithmetic on hours. The timezone travels with the user's id as a
+  `DayOwner`, from the user the guard already loaded. `timezone` is in no
+  response. **She ran the migration on her own database**, after a backup
+  at `~/neuron-backup-2026-10-07-c.db`. 211 unit tests became 242, and 279
+  end-to-end became 318.
+- **Web.** `readForm` in `lib/account-form.ts` is the one decision about
+  what stops a send, which closes Day 17a's finding: that mutation now
+  fails four tests. Create account has a name field, first. Both request
+  bodies are typed from the contract. The mood row works. With an empty
+  field the composer has no button. 55 web tests became 100.
+
+**She created a second account from the web app.** Its row holds the name
+`umer` and `Asia/Karachi`, and its first entry, written at 23:20 Karachi
+time, is on 2026-10-07.
+
+**Three things worth keeping from the workers' reports.**
+
+- **The contract changed and nothing failed.** The web app built its
+  registration body as a plain object the compiler never compared with
+  `WireRegistration`. All nine checks passed with registration broken. Both
+  bodies are typed now, and the report shows the compile errors.
+- **Mood requests go one at a time.** The prompt asked for two in flight
+  and a guard on the answers. The worker refused, correctly: what the API
+  stores is decided by the order the requests arrive, which the browser
+  cannot see. A stale read can be thrown away; a stale write has already
+  changed what is stored.
+- **For a maximum length, the browser must not be stricter than the API.**
+  `.length` counts an emoji as two and the API counts one, so the browser
+  counts whole characters.
+
+**Where she answered.** Read the warning in the opening section first.
+
+| Topic | Step |
+|---|---|
+| The two Day 17a ideas, from memory | Correct. Pasted, formatted text |
+| Focus moved by the code: second Enter on the delete confirmation | Wrong first, with a clear chain; right after one narrowing step. Pasted text both times |
+| The required name on a populated table; trimming; the contract | Correct. Pasted text. Said PostgreSQL where the project is SQLite |
+| Two people in one country; offset or place name | Correct. Pasted text |
+| The browser console experiment | **Not run.** The pasted answer said it could not run it |
+| What the API does with a missing timezone; existing accounts | Not answered. Given, and she said OK |
+| Midnight or 4am, and why | Decided. No reason |
+| Good then Low, arriving in the wrong order | **Not answered, twice** |
+| Every product choice put as options | Answered at once, in her own short words |
+
+**Mistakes of mine, recorded.**
+
+- **I said the web typecheck would fail when the contract changed.** It did
+  not, and I had not checked how the body was typed. I then "corrected" the
+  day overview on the strength of that wrong claim.
+- **I said the API answers 404 for a mood on a day that does not exist.**
+  It creates the day.
+- **I asked for two mood requests in flight with a guard on the answers.**
+  The design was wrong, and the worker said why.
+- **I told the worker that foreign keys are off during a migration**, from
+  the Day 16 report, which measured only the forward direction.
+- **My first run of my own mutation used `npx jest`**, which skipped the
+  migration's test file and passed. I noticed and repeated it properly.
+  This is the project's most repeated failure: a test result believed
+  before checking that the test ran.
+- **I put two product questions to the designer that were hers.** She
+  corrected it.
+- **I asked nine questions needing written explanations in one day.** The
+  ones she answered herself were the short choices.
 
 ---
 
@@ -1954,7 +2078,34 @@ Master Thread audit still owed):
 Concepts introduced by worker agents that have **not yet been learned**. See
 the roadmap's *Learning Debt* section for why this is tracked.
 
-### Status as of the close of Day 17a: one small item open
+### Status as of the close of Day 17b: four items open
+
+Day 17a's item, keyboard focus moved by the code, was **repaid at the
+opening of Day 17b**: the mechanism at the first asking, and which button
+receives focus after one narrowing step. Those answers were pasted text; see
+the opening section.
+
+The Day 17b workers used four things she has not been taught. By the
+owner's rule they are repaid at the opening of Day 17c. Give each one as a
+prediction she runs, not as an explanation she writes.
+
+- **Mood requests go one at a time.** `pressMood` in `lib/today.ts` is a
+  loop with `await` inside it: it sends one request and stops until the
+  answer arrives. The question she was asked twice and did not answer: a
+  person presses Good and then Low, both requests are sent together, and
+  Low reaches the API first. What does the API hold, what does the screen
+  show, and what does a reload show.
+- **`useRef`**: a box that keeps a value for the life of a component, and
+  changing it does not make React call the component again. It holds the
+  composer's field so that the code can give it focus after a save.
+- **A function that answers one of two shapes.** `readForm` answers either
+  `{ send: false, problems }` or `{ send: true, details }`, and TypeScript
+  will not let the caller reach `details` before checking `send`.
+- **`@Transform` runs before validation.** The name is trimmed in the DTO,
+  so the 60 is counted after trimming. This builds on Day 7's
+  `transform: true`.
+
+### Status as of the close of Day 17a, kept for the record
 
 Day 17's three React items were **repaid at the opening of Day 17a**, each
 from an open question at step 1.

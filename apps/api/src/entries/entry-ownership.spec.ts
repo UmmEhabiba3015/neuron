@@ -40,12 +40,14 @@ describe('entry ownership', () => {
     >(`PRAGMA table_info(${table})`);
 
   describe('the users table', () => {
-    it('should have exactly id, email, created_at and password_hash', async () => {
+    it('should have exactly id, email, created_at, password_hash, name and timezone', async () => {
       expect((await columnsOf('users')).map((column) => column.name)).toEqual([
         'id',
         'email',
         'created_at',
         'password_hash',
+        'name',
+        'timezone',
       ]);
     });
 
@@ -72,6 +74,8 @@ describe('entry ownership', () => {
         id: 'user-1',
         email: 'habiba@example.com',
         createdAt: '2026-09-02T09:00:00.000Z',
+        name: 'Somebody',
+        timezone: 'UTC',
       });
 
       await expect(
@@ -79,6 +83,8 @@ describe('entry ownership', () => {
           id: 'user-2',
           email: 'habiba@example.com',
           createdAt: '2026-09-02T09:00:01.000Z',
+          name: 'Somebody',
+          timezone: 'UTC',
         }),
       ).rejects.toThrow(/UNIQUE constraint failed/);
     });
@@ -111,6 +117,8 @@ describe('entry ownership', () => {
         id: 'user-1',
         email: 'habiba@example.com',
         createdAt: '2026-09-02T09:00:00.000Z',
+        name: 'Somebody',
+        timezone: 'UTC',
       });
 
       await expect(
@@ -131,6 +139,8 @@ describe('entry ownership', () => {
         id: 'user-1',
         email: 'habiba@example.com',
         createdAt: '2026-09-02T09:00:00.000Z',
+        name: 'Somebody',
+        timezone: 'UTC',
       });
 
       const entries = dataSource.getRepository(JournalEntry);
@@ -170,6 +180,8 @@ describe('entry ownership', () => {
         email: 'somebody@example.com',
         createdAt: '2026-09-01T00:00:00.000Z',
         passwordHash: null,
+        name: 'Somebody',
+        timezone: 'UTC',
       });
 
       await entries.insert({
@@ -195,6 +207,8 @@ describe('entry ownership', () => {
         email: 'the-owner@example.com',
         createdAt: '2026-09-01T00:00:00.000Z',
         passwordHash: null,
+        name: 'Somebody',
+        timezone: 'UTC',
       });
 
       const service = new EntriesService(
@@ -203,7 +217,10 @@ describe('entry ownership', () => {
         dataSource,
       );
 
-      const created = await service.create('an owned entry', 'owner-1');
+      const created = await service.create('an owned entry', {
+        id: 'owner-1',
+        timezone: 'UTC',
+      });
 
       const [row] = await dataSource.query<{ user_id: string | null }[]>(
         `SELECT user_id FROM entries WHERE id = '${created.id}'`,

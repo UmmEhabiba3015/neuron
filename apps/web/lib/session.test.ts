@@ -11,7 +11,13 @@ import { createSession, type Fetch } from './session.ts';
 const API = 'http://api.test';
 const MAX_CALLS = 20;
 
-type Sent = { path: string; method: string; token?: string; cookie: boolean };
+type Sent = {
+  path: string;
+  method: string;
+  token?: string;
+  cookie: boolean;
+  body?: unknown;
+};
 type Reply = { status: number; body?: unknown } | 'no answer';
 type Handler = (sent: Sent) => Reply | Promise<Reply>;
 
@@ -24,6 +30,7 @@ function fakeApi(handlers: Record<string, Handler>) {
       method: init.method,
       token: init.headers['Authorization']?.replace('Bearer ', ''),
       cookie: init.credentials === 'include',
+      ...(init.body !== undefined ? { body: JSON.parse(init.body) } : {}),
     };
 
     calls.push(sent);
@@ -54,7 +61,19 @@ function fakeApi(handlers: Record<string, Handler>) {
   };
 }
 
-const USER = { id: 'u1', email: 'a@b.test', createdAt: '2026-10-06T09:00:00Z' };
+const USER = {
+  id: 'u1',
+  email: 'a@b.test',
+  name: 'Mubeen',
+  createdAt: '2026-10-06T09:00:00Z',
+};
+
+const NEW_ACCOUNT = {
+  email: USER.email,
+  password: 'a password',
+  name: USER.name,
+  timezone: 'Asia/Karachi',
+};
 
 const signedInAs = (accessToken: string): Reply => ({
   status: 200,
@@ -277,7 +296,7 @@ test('only login and refresh ask the browser to store and attach the cookie', as
     '/entries': onlyNewToken,
   });
 
-  await session.register(USER.email, 'a password');
+  await session.register(NEW_ACCOUNT);
   await session.request('/entries');
 
   assert.deepEqual(
@@ -322,7 +341,7 @@ test('a validation failure carries every message the API sent', async () => {
   });
   const session = createSession({ apiUrl: API, fetch: api.fetch });
 
-  assert.deepEqual(await session.register('x', 'y'), {
+  assert.deepEqual(await session.register(NEW_ACCOUNT), {
     kind: 'rejected',
     status: 400,
     messages,
@@ -347,4 +366,103 @@ test('subscribers are told when the state changes, and not after they leave', as
   leave();
   await session.login(USER.email, 'a password');
   assert.equal(told, 1);
+});
+
+/* ---- What is sent, and who is signed in ------------------------------- */
+
+function registering() {
+  const api = fakeApi({
+    '/auth/register': () => ({ status: 201, body: USER }),
+  });
+
+  return { api, session: createSession({ apiUrl: API, fetch: api.fetch }) };
+}
+
+test('a registration carries the email, the password, the name and the timezone, each as it was handed in', async () => {
+  const { api, session } = registering();
+
+  await session.register({
+    email: 'mubeen@example.com',
+    password: 'correct horse',
+    name: 'Mubeen',
+    timezone: 'Asia/Karachi',
+  });
+
+  assert.deepEqual(api.sentTo('/auth/register')[0].body, {
+    email: 'mubeen@example.com',
+    password: 'correct horse',
+    name: 'Mubeen',
+    timezone: 'Asia/Karachi',
+  });
+});
+
+test('the timezone that is sent is the one that was handed in, whichever it is', async () => {
+  for (const timezone of ['America/Los_Angeles', 'Europe/London', 'UTC']) {
+    const { api, session } = registering();
+
+    await session.register({ ...NEW_ACCOUNT, timezone });
+
+    assert.equal(
+      (api.sentTo('/auth/register')[0].body as { timezone: string }).timezone,
+      timezone,
+    );
+  }
+});
+
+test('a browser that reports no timezone sends none, and nothing is put in its place', async () => {
+  const { api, session } = registering();
+  const browserSays = undefined as unknown as string;
+
+  await session.register({ ...NEW_ACCOUNT, timezone: browserSays });
+
+  assert.equal(
+    'timezone' in (api.sentTo('/auth/register')[0].body as object),
+    false,
+  );
+});
+
+test('a registration sends nothing but the four fields of the contract', async () => {
+  const { api, session } = registering();
+
+  await session.register({
+    ...NEW_ACCOUNT,
+    confirmation: 'a password',
+  } as never);
+
+  assert.deepEqual(
+    Object.keys(api.sentTo('/auth/register')[0].body as object).sort(),
+    ['email', 'name', 'password', 'timezone'],
+  );
+});
+
+test('a login carries the email and the password, and nothing else', async () => {
+  const api = fakeApi({ '/auth/login': () => signedInAs('token') });
+  const session = createSession({ apiUrl: API, fetch: api.fetch });
+
+  await session.login('mubeen@example.com', 'correct horse');
+
+  assert.deepEqual(api.sentTo('/auth/login')[0].body, {
+    email: 'mubeen@example.com',
+    password: 'correct horse',
+  });
+});
+
+test('the name the API sends is carried with the signed-in user, after a login and after a refresh', async () => {
+  const api = fakeApi({
+    '/auth/login': () => signedInAs('token'),
+    '/auth/refresh': () => signedInAs('token'),
+  });
+
+  const afterLogin = createSession({ apiUrl: API, fetch: api.fetch });
+  const result = await afterLogin.login(USER.email, 'a password');
+
+  assert.deepEqual(result, { kind: 'ok', data: USER });
+  assert.deepEqual(afterLogin.getState(), { status: 'signedIn', user: USER });
+
+  const afterRefresh = createSession({ apiUrl: API, fetch: api.fetch });
+
+  assert.deepEqual(await afterRefresh.restore(), {
+    status: 'signedIn',
+    user: USER,
+  });
 });

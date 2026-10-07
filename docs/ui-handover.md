@@ -538,8 +538,9 @@ memory can be changed after the fact; this is where that change is made.
 
 ### What the product will do
 
-Each person has a timezone, and the product works out their days in it. A day
-still ends at 4am, and it is now 4am where the person is.
+Each person has a timezone, and the product works out their days in it.
+**Changed on 2026-10-07: a day now ends at midnight, not 4am**, and it is
+midnight where the person is. See section 14.
 
 1. **It is set without asking.** When an account is created, the timezone is
    taken from the person's browser. Nothing is added to the create-account
@@ -555,7 +556,7 @@ still ends at 4am, and it is now 4am where the person is.
 |---|---|
 | **Where the setting lives** | Probably the Account page from section 9, as one more row showing the current timezone in plain words, for example "Karachi (UTC+5)". Your decision. |
 | **Changing it** | A way to pick a timezone from the full list. The inventory is closed, so please say which existing component carries a long list of choices, or whether this needs a conversation. |
-| **The sentence that goes with it** | One sentence saying that a day ends at 4am in this timezone, and that changing it does not move what is already written. |
+| **The sentence that goes with it** | One sentence saying that a day ends at midnight in this timezone, and that changing it does not move what is already written. |
 | **Could not reach the server** | The setting stays as it was, with a sentence. |
 
 ---
@@ -688,3 +689,60 @@ What needs drawing:
   is too long for its place.
 - Where a person changes their name afterwards, if anywhere. The Account
   page in section 9 is the likely place.
+
+### Decided after the questions above were written
+
+These were decided by the owner on 2026-10-07, the same day, while the
+timezone and the name were being built.
+
+1. **A day ends at midnight, not at 4am.** It is midnight in the person's
+   own timezone. The owner has already told you this; it is written
+   here for the record. `V3-REVISION.md` says "A day ends at 4am in the selected
+   timezone", and `00-flow.md` argues for 4am. Both need to change, and so
+   does any screen or sentence that mentions 4am. One result to be aware of:
+   a person who writes at 23:40 and again at 00:30 now has those two entries
+   on two different days.
+2. **The timezone is never asked for.** It is taken from the browser when
+   the account is created, as section 12 says. A country field was
+   considered and refused. Nothing changes on the create-account screen for
+   this.
+3. **The name field is being built before you have drawn it.** It uses your
+   existing field, placed first, above the email. A name can be up to 60
+   characters. Please treat what is built as a placeholder and draw the
+   real one.
+4. **For now the name is not shown in the destinations.** Timeline, Ask and
+   You are not built, so their links are hidden until they are, and only
+   Today is shown. This is temporary and needs no drawing. The request above,
+   the name in the fourth place, still stands for when those pages exist.
+
+### The mood words, decided by the owner
+
+The mood words now work. These are decisions, sent so that the drawings
+can follow them.
+
+5. **Pressing a word marks it at once.** Pressing the chosen word a second
+   time clears the mood, and the day has no mood again.
+6. **A mood that could not be saved.** The mark goes back to what it was,
+   and a sentence sits directly under the row of mood words: "Your mood was
+   not saved. We could not reach the server." or "Your mood was not saved.
+   Something went wrong on our side."
+   Your `mood-failed` state has a different sentence, "Mood was not
+   changed. We could not reach the server; the saved mood is still Low.
+   Choose a mood to try again." The owner's two sentences are the ones in
+   the product. Please bring the drawing into line with them.
+
+### Built on 2026-10-07, for you to see
+
+- **Three sentences we wrote.** Under the name field: "Enter your name."
+  and "Enter a name with at most 60 characters." For the whole form, when
+  the browser gives no usable timezone: "This browser did not give us a
+  timezone we can use, so your account was not created. Nothing you typed
+  is wrong. Try again in another browser."
+- **The composer has no button while its field is empty.** Save appears
+  with the first letter. This follows your own note in `lock.css` about a
+  send button sitting dead on an empty screen. The Record control takes
+  that place when voice is built.
+- **One destination is shown, Today.** `lock.css` sets the last destination
+  apart, so a single one was drawn at the far right. We added one temporary
+  rule to bring it back to the left, and it goes when a second destination
+  exists.

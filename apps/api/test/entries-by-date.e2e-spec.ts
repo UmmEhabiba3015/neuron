@@ -130,13 +130,12 @@ describe('entries for one day (e2e)', () => {
   });
 
   /*
-   * The day ends at 4am. Both entries carry a created_at on the 12th, so a
-   * filter that compared created_at against midnight would put both on the
-   * 12th and this would fail.
+   * The day ends at midnight, and alice is in UTC. The two entries are two
+   * minutes apart and on two dates.
    */
-  it('puts 03:59 on the previous date and 04:01 on the current one', async () => {
-    await writeAt('alice', '2026-08-12T03:59:00.000Z', 'still last night');
-    await writeAt('alice', '2026-08-12T04:01:00.000Z', 'the new day');
+  it('puts 23:59 on the old date and 00:01 on the new one', async () => {
+    await writeAt('alice', '2026-08-11T23:59:00.000Z', 'still last night');
+    await writeAt('alice', '2026-08-12T00:01:00.000Z', 'the new day');
 
     alice = await login(app.getHttpServer(), 'alice');
 

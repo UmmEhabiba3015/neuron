@@ -12,6 +12,7 @@ import { formatDay, formatTime } from '@/lib/format';
 import {
   createToday,
   isBlank,
+  type MoodNotSaved,
   type NotDeleted,
   type TodayState,
 } from '@/lib/today';
@@ -20,6 +21,12 @@ import { CouldNotConnect } from './CouldNotConnect';
 const NOT_DELETED: Record<NotDeleted, string> = {
   unreachable: 'We could not reach the server. The entry is still here.',
   refused: 'Something went wrong on our side. The entry is still here.',
+};
+
+/* The owner's words. */
+const MOOD_NOT_SAVED: Record<MoodNotSaved, string> = {
+  unreachable: 'Your mood was not saved. We could not reach the server.',
+  refused: 'Your mood was not saved. Something went wrong on our side.',
 };
 
 /*
@@ -93,7 +100,7 @@ export function LiveToday() {
     void today.open();
 
     /*
-     * A tab left open across 4am still holds yesterday's date, so the
+     * A tab left open across midnight still holds yesterday's date, so the
      * question is asked again whenever the tab is looked at again.
      */
     const onVisible = () => {
@@ -239,7 +246,13 @@ export function LiveToday() {
             );
           })}
 
-          <MoodRow />
+          <MoodRow
+            chosen={day.mood}
+            problem={
+              view.moodNotSaved ? MOOD_NOT_SAVED[view.moodNotSaved] : undefined
+            }
+            onPress={(mood) => void today.pressMood(mood)}
+          />
         </main>
       ) : null}
 

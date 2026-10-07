@@ -98,9 +98,9 @@ function whereFor(
 
   /*
    * "Written on that day" is the day row the entry points at, not a window
-   * on created_at. The 4am boundary was applied once, when the entry was
-   * assigned its day, and comparing instants here would apply it again in a
-   * second place that could come to disagree with the first.
+   * on created_at. Midnight in the author's timezone was applied once, when
+   * the entry was assigned its day. Comparing instants here would apply it
+   * again, in a second place, with whatever timezone the author has now.
    *
    * The owner is still the entry's own user_id, above. The day is only ever
    * consulted for its date.

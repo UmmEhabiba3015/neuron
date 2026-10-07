@@ -44,7 +44,12 @@ describe('the built API (e2e)', () => {
     fetch(`${baseUrl}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'built@example.com', password }),
+      body: JSON.stringify({
+        email: 'built@example.com',
+        password,
+        name: 'Built',
+        timezone: 'UTC',
+      }),
     });
 
   beforeAll(async () => {

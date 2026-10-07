@@ -5,6 +5,7 @@ import {
   closeTestDataSource,
   createTestDataSource,
   seedUser,
+  SEEDED_TIMEZONE,
 } from '../../test/test-database';
 import { EntriesController } from './entries.controller';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -14,7 +15,7 @@ import { entriesProviders } from '../../test/entries-providers';
 const CALLER_ID = 'caller-id';
 
 const caller = {
-  user: { id: CALLER_ID },
+  user: { id: CALLER_ID, timezone: SEEDED_TIMEZONE },
 } as unknown as AuthenticatedRequest;
 
 describe('EntriesController', () => {

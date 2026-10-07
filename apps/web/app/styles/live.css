@@ -143,7 +143,7 @@ body {
 }
 
 /*
- * 5. TEMPORARY. Three things lock.css has no rule for. Each is the smallest
+ * 5. TEMPORARY. Four things lock.css has no rule for. Each is the smallest
  * rule that works, uses only tokens lock.css already has, and is a question
  * for the designer (docs/learning/day-17a/report.md).
  */
@@ -189,4 +189,19 @@ body {
  */
 .srow .entry-tools {
   justify-content: flex-end;
+}
+
+/*
+ * 5.4 One destination stands where the first one is drawn.
+ *
+ * lock.css sets the last destination apart from the others, because in
+ * every comp the last one is You: at the far right below desktop, and under
+ * a wider gap in the binding column. Today is the only destination that
+ * exists (Day 17b), so it is the first and also the last, and without this
+ * it would stand in You's place. Deleted when a second destination arrives.
+ */
+.dest a:only-child,
+.title .dest a:only-child {
+  margin-left: 0;
+  margin-top: 0;
 }

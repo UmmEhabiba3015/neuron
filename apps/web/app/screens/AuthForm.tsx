@@ -1,6 +1,6 @@
 'use client';
 
-import { PASSWORD_MIN_LENGTH } from '@neuron/contracts';
+import { NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@neuron/contracts';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -13,19 +13,22 @@ import {
 import { AuthScreen, BlankScreen } from '@/app/components/AuthScreen';
 import { useSession } from '@/app/components/useSession';
 import {
-  checkNewPassword,
-  fieldOf,
-  looksLikeEmail,
-  type PasswordProblem,
+  FIELDS,
+  placeMessages,
+  readForm,
+  type Details,
+  type FieldName,
+  type FormProblems,
+  type Mode,
 } from '@/lib/account-form';
 import { session } from '@/lib/api';
 import type { ApiResult } from '@/lib/session';
 import { CouldNotConnect } from './CouldNotConnect';
 
-type Mode = 'in' | 'new';
-
-/* `confirmation` exists on create account only, and is never sent. */
-type FieldName = 'email' | 'password' | 'confirmation';
+/*
+ * `name` and `confirmation` exist on create account only, and the
+ * confirmation is never sent.
+ */
 type FieldSentences = Partial<Record<FieldName, string>>;
 
 /*
@@ -43,12 +46,44 @@ type Outcome =
 const NO_EMAIL = 'Enter an email address.';
 const TOO_SHORT = `Enter a password with at least ${PASSWORD_MIN_LENGTH} characters.`;
 
-const PASSWORD_SENTENCES: Record<PasswordProblem, string> = {
+const NO_NAME = 'Enter your name.';
+const NAME_TOO_LONG = `Enter a name with at most ${NAME_MAX_LENGTH} characters.`;
+
+/*
+ * What is wrong is decided in lib/account-form.ts. This puts each problem in
+ * words.
+ */
+const SENTENCES: Record<NonNullable<FormProblems[FieldName]>, string> = {
+  noName: NO_NAME,
+  nameTooLong: NAME_TOO_LONG,
+  notAnEmail: NO_EMAIL,
+  noPassword: 'Enter your password.',
   tooShort: TOO_SHORT,
   notRepeated: 'Enter your password again.',
   notMatching:
     'The passwords do not match. Enter the same password in both fields.',
 };
+
+/*
+ * No field is at fault here, and nothing the person types can change it, so
+ * it is said where failures of the whole form are said.
+ */
+const NO_TIMEZONE =
+  'This browser did not give us a timezone we can use, so your account was not created. Nothing you typed is wrong. Try again in another browser.';
+
+const LIMITS = {
+  passwordMinLength: PASSWORD_MIN_LENGTH,
+  nameMaxLength: NAME_MAX_LENGTH,
+};
+
+/*
+ * The one place the browser is asked which timezone the person is in. The
+ * answer is handed to the session as it is. Nothing is put in its place when
+ * it is missing: the API refuses the registration, and the form says so.
+ */
+function browserTimeZone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
 
 const WORDS = {
   in: {
@@ -75,6 +110,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const state = useSession();
   const router = useRouter();
 
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
@@ -119,25 +155,39 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
     setPressed(true);
 
-    const address = email.trim();
-    const sentences = checkFields(mode, address, password, confirmation);
-    const first = (['email', 'password', 'confirmation'] as const).find(
-      (name) => sentences[name],
+    const reading = readForm(
+      mode,
+      { name, email, password, confirmation },
+      LIMITS,
     );
 
-    if (first) {
+    if (!reading.send) {
+      const sentences: FieldSentences = {};
+
+      for (const field of FIELDS) {
+        const problem = reading.problems[field];
+
+        if (problem) {
+          sentences[field] = SENTENCES[problem];
+        }
+      }
+
       setOutcome({ kind: 'fields', sentences, other: [] });
-      document.getElementById(first)?.focus();
+      document.getElementById(reading.first)?.focus();
       return;
     }
 
     inFlight.current = true;
     setSending(true);
 
+    const { details } = reading;
     const next =
       mode === 'in'
-        ? outcomeOf(await session.login(address, password), 'login')
-        : await createAccount(address, password);
+        ? outcomeOf(
+            await session.login(details.email, details.password),
+            'login',
+          )
+        : await createAccount(details);
 
     inFlight.current = false;
     setSending(false);
@@ -213,6 +263,34 @@ export function AuthForm({ mode }: { mode: Mode }) {
       {/* noValidate: the browser's own bubbles would replace the sentence
           that belongs beside the field. */}
       <form className="auth-form" noValidate onSubmit={submit}>
+        {mode === 'new' ? (
+          <div className="auth-field">
+            <label htmlFor="name">Name</label>
+            <div className="field-inner">
+              <input
+                className="field"
+                id="name"
+                name="name"
+                type="text"
+                autoComplete="name"
+                required
+                value={name}
+                onChange={(event) => {
+                  setName(event.target.value);
+                  typed('name');
+                }}
+                aria-invalid={sentences.name ? true : undefined}
+                aria-describedby={sentences.name ? 'name-help' : undefined}
+              />
+              {sentences.name ? (
+                <p className="auth-help" id="name-help">
+                  {sentences.name}
+                </p>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
         <div className="auth-field">
           <label htmlFor="email">Email</label>
           <div className="field-inner">
@@ -377,12 +455,9 @@ function PasswordField({
  * signed in at once (docs/ui-handover.md 3.2), so this registers and then
  * logs in.
  */
-async function createAccount(
-  email: string,
-  password: string,
-): Promise<Outcome> {
+async function createAccount(details: Details): Promise<Outcome> {
   const registered = outcomeOf(
-    await session.register(email, password),
+    await session.register({ ...details, timezone: browserTimeZone() }),
     'register',
   );
 
@@ -390,7 +465,10 @@ async function createAccount(
     return registered;
   }
 
-  return outcomeOf(await session.login(email, password), 'login');
+  return outcomeOf(
+    await session.login(details.email, details.password),
+    'login',
+  );
 }
 
 function outcomeOf(
@@ -422,62 +500,36 @@ function outcomeOf(
   return { kind: 'failed' };
 }
 
-/* What is wrong is decided in lib/account-form.ts. This puts it in words. */
-function checkFields(
-  mode: Mode,
-  email: string,
-  password: string,
-  confirmation: string,
-): FieldSentences {
-  const sentences: FieldSentences = {};
-
-  if (!looksLikeEmail(email)) {
-    sentences.email = NO_EMAIL;
-  }
-
-  if (mode === 'in') {
-    if (password === '') {
-      sentences.password = 'Enter your password.';
-    }
-
-    return sentences;
-  }
-
-  const problem = checkNewPassword(password, confirmation, PASSWORD_MIN_LENGTH);
-
-  if (problem) {
-    sentences[fieldOf(problem)] = PASSWORD_SENTENCES[problem];
-  }
-
-  return sentences;
-}
-
 /*
- * Each message begins with the name of the field it is about, which is how it
- * finds its place. The two the API sends in practice are replaced with this
- * product's own wording.
+ * Which field each message is about is decided in lib/account-form.ts. The
+ * messages the API sends in practice are replaced with this product's own
+ * wording.
  */
 function fromApiMessages(messages: string[]): Outcome {
-  const sentences: FieldSentences = {};
-  const other: string[] = [];
-
-  for (const message of messages) {
-    const field = (['email', 'password'] as const).find((name) =>
-      message.startsWith(`${name} `),
-    );
-
-    if (!field) {
-      other.push(asSentence(message));
-    } else if (!sentences[field]) {
-      sentences[field] = inProductWords(message);
-    }
-  }
-
   if (messages.length === 0) {
     return { kind: 'failed' };
   }
 
-  return { kind: 'fields', sentences, other };
+  const refusal = placeMessages(messages);
+  const sentences: FieldSentences = {};
+
+  for (const field of FIELDS) {
+    const message =
+      field === 'confirmation' ? undefined : refusal.fields[field];
+
+    if (message) {
+      sentences[field] = inProductWords(message);
+    }
+  }
+
+  return {
+    kind: 'fields',
+    sentences,
+    other: [
+      ...(refusal.timezone ? [NO_TIMEZONE] : []),
+      ...refusal.other.map(asSentence),
+    ],
+  };
 }
 
 function inProductWords(message: string): string {
@@ -487,6 +539,14 @@ function inProductWords(message: string): string {
 
   if (message.startsWith('password must be longer than or equal to')) {
     return TOO_SHORT;
+  }
+
+  if (message.startsWith('name must contain at least one character')) {
+    return NO_NAME;
+  }
+
+  if (message.startsWith('name must be shorter than or equal to')) {
+    return NAME_TOO_LONG;
   }
 
   return asSentence(message);

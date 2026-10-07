@@ -13,6 +13,7 @@ import {
   closeTestDataSource,
   createTestDataSource,
   login,
+  SEEDED_TIMEZONE,
 } from './test-database';
 
 /*
@@ -65,27 +66,34 @@ describe('today (e2e)', () => {
   });
 
   /*
-   * The expected date is written out and also asked of dayFor, so the test
-   * fails if the endpoint stops using the 4am rule and also if somebody
-   * changes the rule without meaning to change this.
+   * Alice is in UTC, so her day ends at 00:00Z. The expected date is written
+   * out and also asked of dayFor, so the test fails if the endpoint stops
+   * using the rule and also if somebody changes the rule without meaning to
+   * change this.
    */
   it.each([
     ['an ordinary afternoon', '2026-08-09T15:00:00.000Z', '2026-08-09'],
-    ['just after midnight', '2026-08-09T00:00:01.000Z', '2026-08-08'],
-    ['just before 04:00', '2026-08-09T03:59:59.999Z', '2026-08-08'],
-    ['04:00 exactly', '2026-08-09T04:00:00.000Z', '2026-08-09'],
-    ['just after 04:00', '2026-08-09T04:00:01.000Z', '2026-08-09'],
-    ['the small hours of new year', '2027-01-01T02:00:00.000Z', '2026-12-31'],
+    ['just before midnight', '2026-08-08T23:59:59.999Z', '2026-08-08'],
+    ['midnight exactly', '2026-08-09T00:00:00.000Z', '2026-08-09'],
+    ['just after midnight', '2026-08-09T00:00:01.000Z', '2026-08-09'],
+    [
+      '04:00, which used to be the boundary',
+      '2026-08-09T03:59:59.999Z',
+      '2026-08-09',
+    ],
+    ['the small hours of new year', '2027-01-01T02:00:00.000Z', '2027-01-01'],
   ])('at %s, today is the date dayFor gives', async (_label, instant, date) => {
     const response = await todayAt('alice', instant);
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ date, mood: null });
-    expect((response.body as { date: string }).date).toBe(dayFor(instant));
+    expect((response.body as { date: string }).date).toBe(
+      dayFor(instant, SEEDED_TIMEZONE),
+    );
   });
 
   it('carries the mood of today once one is set', async () => {
-    moveClockTo('2026-08-10T01:30:00.000Z');
+    moveClockTo('2026-08-09T23:30:00.000Z');
     const alice = await login(app.getHttpServer(), 'alice');
 
     await request(app.getHttpServer())
@@ -128,7 +136,7 @@ describe('today (e2e)', () => {
     expect(Number(rows[0].c)).toBe(0);
   });
 
-  it.each([['2026-08-09T03:59:00.000Z'], ['2026-08-09T04:01:00.000Z']])(
+  it.each([['2026-08-08T23:59:00.000Z'], ['2026-08-09T00:01:00.000Z']])(
     'names the date an entry written at %s is filed under',
     async (instant) => {
       moveClockTo(instant);

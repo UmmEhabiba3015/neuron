@@ -13,6 +13,8 @@
  *   Deleting  show at once. The entry leaves the screen before any answer,
  *             and returns to its place if the delete fails.
  *   Asking    wait, and say that the question is being asked.
+ *   Mood      show at once. The word is marked before any answer, and goes
+ *             back to what the API last confirmed if the request fails.
  */
 
 import type { Mood, WireDay, WireEntry, WireNewEntry } from '@neuron/contracts';
@@ -54,6 +56,11 @@ export type Save =
 
 export type NotDeleted = 'unreachable' | 'refused';
 
+export type MoodNotSaved = 'unreachable' | 'refused';
+
+/* A press on a mood word: the day it was pressed on, and what it asks for. */
+type MoodPress = { date: string; mood: Mood | null };
+
 export interface TodayState {
   day: Day;
   /* A question about today is in flight. */
@@ -64,6 +71,8 @@ export interface TodayState {
   confirming: string | null;
   /* Entries whose delete failed, and that are back on the screen. */
   notDeleted: Readonly<Record<string, NotDeleted>>;
+  /* The last mood press failed, and the mood shown is the one before it. */
+  moodNotSaved: MoodNotSaved | null;
 }
 
 export interface Today {
@@ -82,6 +91,11 @@ export interface Today {
   dismiss(id: string): void;
   /* Deletes the entry the person was asked about, and no other. */
   goAhead(): Promise<void>;
+  /*
+   * Marks the word at once and sends it. Pressing the word that is already
+   * marked clears the mood.
+   */
+  pressMood(mood: Mood): Promise<void>;
 }
 
 /* Text that is only spaces or blank lines is not an entry. */
@@ -137,8 +151,27 @@ export function createToday(config: {
   let confirming: string | null = null;
   let notDeleted: Record<string, NotDeleted> = {};
 
+  /*
+   * The mood the person last pressed, until the API has answered about it.
+   * While it is here it is what the screen shows. The mood the API last
+   * confirmed stays in `fetched`, which is what the screen goes back to.
+   */
+  let wanted: MoodPress | undefined;
+  let sendingMood = false;
+  let moodNotSaved: MoodNotSaved | null = null;
+
+  /*
+   * Counts the answers about a mood, so that an answer about today that was
+   * asked for before one of them can be told apart.
+   */
+  let moodAnswers = 0;
+
   const listeners = new Set<() => void>();
   let state = snapshot();
+
+  function moodShown(day: WireDay): Mood | null {
+    return wanted && wanted.date === day.date ? wanted.mood : day.mood;
+  }
 
   function snapshot(): TodayState {
     let day: Day = { status: 'opening' };
@@ -149,12 +182,12 @@ export function createToday(config: {
       day = {
         status: 'open',
         date: fetched.day.date,
-        mood: fetched.day.mood,
+        mood: moodShown(fetched.day),
         entries: fetched.entries.filter((entry) => !hidden.has(entry.id)),
       };
     }
 
-    return { day, asking, text, save, confirming, notDeleted };
+    return { day, asking, text, save, confirming, notDeleted, moodNotSaved };
   }
 
   function publish(): void {
@@ -219,6 +252,7 @@ export function createToday(config: {
     asking = true;
     publish();
 
+    const moodAnswersBefore = moodAnswers;
     const answer = await fetchToday();
 
     if (mine !== question) {
@@ -228,7 +262,21 @@ export function createToday(config: {
     asking = false;
 
     if (answer.status === 'loaded') {
-      fetched = { day: answer.day, entries: answer.entries };
+      /*
+       * If a mood was being sent, or was answered, while this question was
+       * out, its answer may have left the API before the mood arrived there.
+       * The mood already held is the newer one, and is kept.
+       */
+      const moodIsOlder =
+        fetched?.day.date === answer.day.date &&
+        (sendingMood || moodAnswers !== moodAnswersBefore);
+
+      fetched = {
+        day: moodIsOlder
+          ? { ...answer.day, mood: fetched!.day.mood }
+          : answer.day,
+        entries: answer.entries,
+      };
       trouble = undefined;
       asked = 0;
 
@@ -295,8 +343,8 @@ export function createToday(config: {
 
     /*
      * The entry is not added to the page here. Its time and its day are the
-     * API's to decide, and near 4am it may not belong to the day on the
-     * screen. This question replaces any that is already in flight, because
+     * API's to decide, and near midnight it may not belong to the day on
+     * the screen. This question replaces any that is already in flight, because
      * that one may have been answered before the entry existed.
      */
     await ask(false);
@@ -353,6 +401,67 @@ export function createToday(config: {
     publish();
   }
 
+  /*
+   * One request at a time, in the order of the presses. Two requests sent
+   * together can reach the API in either order, and the API keeps whichever
+   * arrives last, which need not be the one pressed last. So a press made
+   * while a request is out is not sent until that request is answered. The
+   * screen does not wait for any of this: the word is marked at once.
+   */
+  async function pressMood(mood: Mood): Promise<void> {
+    if (!fetched || trouble) {
+      return;
+    }
+
+    const { date } = fetched.day;
+
+    wanted = { date, mood: moodShown(fetched.day) === mood ? null : mood };
+    moodNotSaved = null;
+    publish();
+
+    if (sendingMood) {
+      return;
+    }
+
+    sendingMood = true;
+
+    while (wanted) {
+      const sent: MoodPress = wanted;
+      const body: { mood: Mood | null } = { mood: sent.mood };
+
+      const result = await request<WireDay>(`/days/${sent.date}/mood`, {
+        method: 'PUT',
+        body,
+      });
+
+      moodAnswers += 1;
+
+      if (result.kind === 'ok' && fetched?.day.date === sent.date) {
+        fetched = { ...fetched, day: { ...fetched.day, mood: sent.mood } };
+      }
+
+      /*
+       * The last press wins. If the person has pressed again since this
+       * request left, this answer changes nothing they can see, whether it
+       * is a good one or not, and the newer press is sent next.
+       */
+      if (wanted !== sent) {
+        continue;
+      }
+
+      wanted = undefined;
+
+      if (result.kind === 'unreachable') {
+        moodNotSaved = 'unreachable';
+      } else if (result.kind === 'rejected') {
+        moodNotSaved = 'refused';
+      }
+    }
+
+    sendingMood = false;
+    publish();
+  }
+
   return {
     getState: () => state,
     subscribe(listener) {
@@ -372,6 +481,7 @@ export function createToday(config: {
     keep: keepEntry,
     dismiss,
     goAhead,
+    pressMood,
   };
 }
 

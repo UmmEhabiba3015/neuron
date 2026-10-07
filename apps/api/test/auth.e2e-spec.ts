@@ -13,6 +13,13 @@ import { closeTestDataSource, createTestDataSource } from './test-database';
 const messagesFrom = (res: request.Response): string[] =>
   (res.body as { message: string[] }).message;
 
+/*
+ * What a registration needs besides its credentials. Every body sent to
+ * /auth/register in this file carries it, so that a test about one field is
+ * not answered 400 because of another.
+ */
+const profile = { name: 'Umer', timezone: 'Asia/Karachi' };
+
 describe('AuthController (e2e)', () => {
   let app: INestApplication<App>;
   let dataSource: DataSource;
@@ -41,7 +48,11 @@ describe('AuthController (e2e)', () => {
     it('should create a user and return it with an id', async () => {
       const response = await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ email: 'umer@example.com', password: 'a-long-enough-password' })
+        .send({
+          email: 'umer@example.com',
+          password: 'a-long-enough-password',
+          ...profile,
+        })
         .expect(201);
 
       const body = response.body as { id: string; email: string };
@@ -53,13 +64,18 @@ describe('AuthController (e2e)', () => {
     it('should never put a credential in the response body', async () => {
       const response = await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ email: 'umer@example.com', password: 'a-long-enough-password' })
+        .send({
+          email: 'umer@example.com',
+          password: 'a-long-enough-password',
+          ...profile,
+        })
         .expect(201);
 
       expect(Object.keys(response.body as object).sort()).toEqual([
         'createdAt',
         'email',
         'id',
+        'name',
       ]);
 
       expect(JSON.stringify(response.body)).not.toContain('$argon2');
@@ -70,7 +86,7 @@ describe('AuthController (e2e)', () => {
 
       await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ email: 'umer@example.com', password })
+        .send({ email: 'umer@example.com', password, ...profile })
         .expect(201);
 
       const stored = await dataSource
@@ -88,11 +104,11 @@ describe('AuthController (e2e)', () => {
 
       await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ email: 'alice@example.com', password })
+        .send({ email: 'alice@example.com', password, ...profile })
         .expect(201);
       await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ email: 'bob@example.com', password })
+        .send({ email: 'bob@example.com', password, ...profile })
         .expect(201);
 
       const users = await dataSource.getRepository(User).find();
@@ -104,12 +120,20 @@ describe('AuthController (e2e)', () => {
     it('should reject an email that is already registered with 409', async () => {
       await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ email: 'umer@example.com', password: 'a-long-enough-password' })
+        .send({
+          email: 'umer@example.com',
+          password: 'a-long-enough-password',
+          ...profile,
+        })
         .expect(201);
 
       await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ email: 'umer@example.com', password: 'a-different-password' })
+        .send({
+          email: 'umer@example.com',
+          password: 'a-different-password',
+          ...profile,
+        })
         .expect(409);
 
       expect(await dataSource.getRepository(User).count()).toBe(1);
@@ -119,7 +143,7 @@ describe('AuthController (e2e)', () => {
       it('should reject a password shorter than 8 characters', async () => {
         const response = await request(app.getHttpServer())
           .post('/auth/register')
-          .send({ email: 'umer@example.com', password: 'short' })
+          .send({ email: 'umer@example.com', password: 'short', ...profile })
           .expect(400);
 
         expect(messagesFrom(response)).toContainEqual(
@@ -130,7 +154,11 @@ describe('AuthController (e2e)', () => {
       it('should reject a whitespace-only email', async () => {
         await request(app.getHttpServer())
           .post('/auth/register')
-          .send({ email: '   ', password: 'a-long-enough-password' })
+          .send({
+            email: '   ',
+            password: 'a-long-enough-password',
+            ...profile,
+          })
           .expect(400);
       });
 
@@ -138,6 +166,7 @@ describe('AuthController (e2e)', () => {
         await request(app.getHttpServer())
           .post('/auth/register')
           .send({
+            ...profile,
             email: 'umer@example.com',
             password: 'a-long-enough-password',
             isAdmin: true,
@@ -148,7 +177,7 @@ describe('AuthController (e2e)', () => {
       it('should reject a missing password', async () => {
         await request(app.getHttpServer())
           .post('/auth/register')
-          .send({ email: 'umer@example.com' })
+          .send({ email: 'umer@example.com', ...profile })
           .expect(400);
       });
     });
@@ -163,7 +192,7 @@ describe('AuthController (e2e)', () => {
     const registerUser = () =>
       request(app.getHttpServer())
         .post('/auth/register')
-        .send(credentials)
+        .send({ ...credentials, ...profile })
         .expect(201);
 
     it('should return a token and the user for correct credentials', async () => {
@@ -282,6 +311,8 @@ describe('AuthController (e2e)', () => {
         email: 'legacy@example.com',
         createdAt: '2026-09-01T00:00:00.000Z',
         passwordHash: null,
+        name: 'Somebody',
+        timezone: 'UTC',
       });
 
       await request(app.getHttpServer())
@@ -309,7 +340,7 @@ describe('AuthController (e2e)', () => {
     const login = async (): Promise<string> => {
       await request(app.getHttpServer())
         .post('/auth/register')
-        .send(credentials)
+        .send({ ...credentials, ...profile })
         .expect(201);
 
       const response = await request(app.getHttpServer())
@@ -345,6 +376,7 @@ describe('AuthController (e2e)', () => {
         'createdAt',
         'email',
         'id',
+        'name',
       ]);
     });
 

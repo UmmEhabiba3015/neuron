@@ -1,6 +1,6 @@
 import { IsString, ValidateIf } from 'class-validator';
 import { ContainsAtLeastOneField } from './contains-at-least-one-field.decorator';
-import { ContainsNonWhitespace } from './contains-non-whitespace.decorator';
+import { ContainsNonWhitespace } from '../validation/contains-non-whitespace.decorator';
 
 @ContainsAtLeastOneField()
 export class UpdateEntryDto {

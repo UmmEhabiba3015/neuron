@@ -144,3 +144,9 @@ test('the password minimum is not written as a number in either application', ()
     [],
   );
 });
+
+test('the name maximum is not written as a number in either application', () => {
+  const aboutNames = /\bname\b|MaxLength/i;
+
+  assert.deepEqual(linesThatRestate(contract.NAME_MAX_LENGTH, aboutNames), []);
+});

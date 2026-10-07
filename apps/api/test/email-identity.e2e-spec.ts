@@ -37,7 +37,7 @@ describe('email as the identifier (e2e)', () => {
   const register = (email: string) =>
     request(app.getHttpServer())
       .post('/auth/register')
-      .send({ email, password });
+      .send({ email, password, name: 'Somebody', timezone: 'UTC' });
 
   const login = (email: string) =>
     request(app.getHttpServer()).post('/auth/login').send({ email, password });
@@ -62,10 +62,10 @@ describe('email as the identifier (e2e)', () => {
 
     await expect(
       dataSource.query(
-        `INSERT INTO users (id, email, created_at, password_hash)
-         VALUES ('sneaky', 'UMMI@EXAMPLE.COM', '2026-01-01T00:00:00.000Z', 'x')`,
+        `INSERT INTO users (id, email, created_at, password_hash, name, timezone)
+         VALUES ('sneaky', 'UMMI@EXAMPLE.COM', '2026-01-01T00:00:00.000Z', 'x', 'Sneaky', 'UTC')`,
       ),
-    ).rejects.toThrow(/UNIQUE/i);
+    ).rejects.toThrow(/UNIQUE constraint failed/i);
   });
 
   it('still keeps different addresses apart', async () => {

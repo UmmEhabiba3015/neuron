@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { dayFor } from './day-boundary';
+import { dayFor, type DayOwner } from './day-boundary';
 import { DaysRepository } from './days.repository';
 import type { Mood } from '@neuron/contracts';
 import type { Day } from './day.entity';
@@ -13,9 +13,15 @@ export class DaysService {
    * decides this rather than the client: a client-supplied date would let a
    * caller file an entry under any day it liked, which is the same category
    * of mistake ADR-013 refused for ownership.
+   *
+   * The owner is the user the guard loaded for this request, so the timezone
+   * costs no query.
    */
-  async resolveFor(userId: string, instant: string): Promise<Day> {
-    return this.daysRepository.findOrCreate(userId, dayFor(instant));
+  async resolveFor(owner: DayOwner, instant: string): Promise<Day> {
+    return this.daysRepository.findOrCreate(
+      owner.id,
+      dayFor(instant, owner.timezone),
+    );
   }
 
   findByDate(userId: string, date: string): Promise<Day | undefined> {
@@ -23,19 +29,19 @@ export class DaysService {
   }
 
   /*
-   * Which date "today" is, decided here rather than in a browser. The 4am
-   * boundary lives on this side, and so will the user's timezone when there
-   * is one, so a client that worked the date out for itself would be writing
-   * the rule a second time and getting it wrong the day the rule changes.
+   * Which date "today" is, decided here rather than in a browser. The rule
+   * and the user's timezone both live on this side, so a client that worked
+   * the date out for itself would be writing the rule a second time, from a
+   * timezone that may not be the stored one.
    *
    * Reading a day does not create it. An empty day does not exist.
    */
   async findToday(
-    userId: string,
+    owner: DayOwner,
   ): Promise<{ date: string; day: Day | undefined }> {
-    const date = dayFor(new Date());
+    const date = dayFor(new Date(), owner.timezone);
 
-    return { date, day: await this.daysRepository.findByDate(userId, date) };
+    return { date, day: await this.daysRepository.findByDate(owner.id, date) };
   }
 
   findInRange(userId: string, from: string, to: string): Promise<Day[]> {

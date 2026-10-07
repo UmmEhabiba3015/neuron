@@ -17,6 +17,9 @@ export const MAX_PAGE_SIZE = 200;
 
 export const PASSWORD_MIN_LENGTH = 8;
 
+/* The most characters a display name may have, counted after it is trimmed. */
+export const NAME_MAX_LENGTH = 60;
+
 /*
  * The shapes below are what travels over HTTP, which is why each name starts
  * with Wire. They are not the API's entities: an entity also holds columns
@@ -39,6 +42,8 @@ export interface WireDay {
 export interface WireUser {
   id: string;
   email: string;
+  /* What the person is called on screen. Never used for signing in. */
+  name: string;
   createdAt: string;
 }
 
@@ -69,4 +74,10 @@ export interface WireLogin {
 export interface WireRegistration {
   email: string;
   password: string;
+  name: string;
+  /*
+   * An IANA name such as Asia/Karachi, read from the browser and never typed
+   * by a person. Not a country, and not an offset such as +05:00.
+   */
+  timezone: string;
 }

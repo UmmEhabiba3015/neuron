@@ -1,6 +1,6 @@
 'use client';
 
-import { MOODS } from '@neuron/contracts';
+import { MOODS, type Mood } from '@neuron/contracts';
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { WAVEFORMS } from '@/lib/waveform';
 
@@ -149,8 +149,24 @@ export function LiveEntry({
 /*
  * The words are the contract's, in the contract's order. lock.css finds each
  * one's colour by the word in small letters.
+ *
+ * Which word is chosen is decided in lib/today.ts, and is already the new
+ * one by the time a press is drawn. It is said with `aria-pressed`, so a
+ * screen reader hears "pressed" and does not need the colour. Each word is
+ * the same button before and after a press, so focus stays on it.
+ *
+ * `problem` is a press that failed. It is drawn directly under the words,
+ * where 18-entry-system-states.html draws `mood-failed`.
  */
-export function MoodRow() {
+export function MoodRow({
+  chosen,
+  problem,
+  onPress,
+}: {
+  chosen: Mood | null;
+  problem?: string;
+  onPress: (mood: Mood) => void;
+}) {
   return (
     <section className="moodrow ruled-mood">
       <div className="tcol">
@@ -163,22 +179,29 @@ export function MoodRow() {
               key={mood}
               type="button"
               data-mood={mood.toLowerCase()}
-              aria-pressed="false"
+              aria-pressed={mood === chosen}
+              onClick={() => onPress(mood)}
             >
               {mood}
             </button>
           ))}
         </div>
+        {problem ? (
+          <p className="auth-help state-message" role="alert">
+            {problem}
+          </p>
+        ) : null}
       </div>
     </section>
   );
 }
 
 /*
- * One control, two states (direction-lock.md 7.4): the record control while
- * the field holds no words, and Save once it does. It is one button element
- * throughout. Neither it nor the field is ever disabled; a second press while
- * a save is in flight is stopped in lib/today.ts.
+ * The field, and Save once the field holds words. With no words there is
+ * nothing to save, and no button is drawn: a control is on the screen only
+ * while a press of it does something. Neither the field nor the button is
+ * ever disabled; a second press while a save is in flight is stopped in
+ * lib/today.ts.
  *
  * `line` is the request in flight and `problem` is a save that failed. Both
  * are drawn where 18-entry-system-states.html draws `save-failed`.
@@ -198,6 +221,23 @@ export function LiveComposer({
   onType: (text: string) => void;
   onSave: () => void;
 }) {
+  const field = useRef<HTMLTextAreaElement>(null);
+  const hadButton = useRef(holdsWords);
+
+  /*
+   * A save that succeeds empties the field, and Save leaves the page. If
+   * the keyboard's focus was on Save, it would be left on nothing, so it is
+   * moved to the field, which is where the next entry is typed.
+   */
+  useEffect(() => {
+    const left = hadButton.current && !holdsWords;
+    hadButton.current = holdsWords;
+
+    if (left && document.activeElement === document.body) {
+      field.current?.focus();
+    }
+  }, [holdsWords]);
+
   return (
     <div className="composer writing-companion">
       <form
@@ -212,41 +252,18 @@ export function LiveComposer({
         <textarea
           className="field"
           rows={1}
+          ref={field}
           aria-label="Add to today"
           placeholder="Add to today"
           value={text}
           onChange={(event) => onType(event.target.value)}
         />
-        <button
-          className={holdsWords ? 'send' : 'mic'}
-          type={holdsWords ? 'submit' : 'button'}
-          aria-label={holdsWords ? 'Save entry' : 'Record'}
-        >
-          {holdsWords ? (
-            'Save'
-          ) : (
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.9"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <rect x="9" y="2.5" width="6" height="11.5" rx="3" />
-              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0" />
-              <path d="M12 18v3.5" />
-            </svg>
-          )}
-        </button>
+        {holdsWords ? (
+          <button className="send" type="submit" aria-label="Save entry">
+            Save
+          </button>
+        ) : null}
       </form>
-      <div className="composer-tools">
-        <button className="opt" type="button" aria-pressed="false">
-          <span className="tick" aria-hidden="true" />
-          Keep this out of memory
-        </button>
-      </div>
       {problem ? (
         <p className="auth-help state-message" role="alert">
           {problem}
@@ -327,34 +344,6 @@ export function LiveRecording({
           </div>
         </div>
       ) : null}
-    </div>
-  );
-}
-
-export function SourceMark({ source }: { source: string }) {
-  return <span className="mark">{source}</span>;
-}
-
-export function Segmented({
-  label,
-  options,
-  active,
-}: {
-  label: string;
-  options: string[];
-  active: string;
-}) {
-  return (
-    <div className="seg" role="group" aria-label={label}>
-      {options.map((option) => (
-        <button
-          key={option}
-          type="button"
-          aria-pressed={option === active ? 'true' : 'false'}
-        >
-          {option}
-        </button>
-      ))}
     </div>
   );
 }

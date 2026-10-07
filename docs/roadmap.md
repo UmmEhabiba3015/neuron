@@ -30,21 +30,23 @@
 
 ---
 
-## Where The Project Stands At The Close Of Day 17a (verified 2026-10-07)
+## Where The Project Stands At The Close Of Day 17b (verified 2026-10-07)
 
-A person can create an account, sign in, stay signed in across a reload,
-type an entry, see it appear, and delete it, on screens drawn from the
-designer's v3 delivery. `apps/api`, `apps/web` and
-`packages/contracts` are all real. 211 API unit tests, 279 API end-to-end
-tests, 55 web tests and 6 checks on the shared package pass, and lint,
-typecheck and build are clean for both applications. 21 ADRs.
+A person can create an account with a name, sign in, stay signed in across
+a reload, type an entry, see it appear, delete it, and say how the day
+felt, on screens drawn from the designer's v3 delivery. A day ends at
+midnight in the person's own timezone, which the browser supplies when the
+account is created. `apps/api`, `apps/web` and `packages/contracts` are all
+real. 242 API unit tests, 318 API end-to-end tests, 100 web tests and 7
+checks on the shared package pass, and lint, typecheck and build are clean
+for both applications. 21 ADRs, with ADR-015 amended.
 
-**The next days, in order:** 17b (timezone, and a name on the account), 17c (seeing a day other than
-today), then 18. The lettered days were inserted on Days 16 and 17 and are
-in the Phase 3 table below.
+**The next days, in order:** 17c (seeing a day other than today, sign-out,
+and the name on the screen), then 18. The lettered days were inserted on
+Days 16 and 17 and are in the Phase 3 table below.
 
-Still not built: any AI, voice, search, Timeline, sign-out, forgot password,
-export and account deletion.
+Still not built: any AI, voice, search, Timeline, sign-out, a way to change
+the timezone or the name, forgot password, export and account deletion.
 
 The section that follows is the record as it stood at Day 14 and is kept for
 its account of the test suite's structural weakness.
@@ -269,10 +271,10 @@ a product.
 | 16 | Two apps now describe the same data, in two places, and they will drift. | **Done, 2026-10-07.** `packages/contracts` exists and earns the workspace ADR-001 argued for on Day 1. Her rule for it: *facts about data crossing the boundary between the two apps, not implementation or behaviour belonging to either app.* By that rule the mood words, the page sizes, the password minimum and four wire shapes went in, and `dayFor` stayed out. She chose it over a generated client, which **reverses part of ADR-001**, and ADR-019 says so. The day opened by making `entries.day_id` `NOT NULL`, with a foreign key to `days` that had never existed. ADR-019. 194 unit, 236 e2e, 15 web, 6 contract checks. |
 | 17 | The journal screen works and feels broken. | **Done, 2026-10-07, and reshaped by what she found.** She used the screen as its first real user: the composer could not be typed into, "Try again" gave no sign of being pressed, and yesterday's entry could not be reached at all. So the day built the first real action, writing an entry, and designed waiting and failing on it. **Writing waits for the API**, because the server owns an entry's time and day. **Deleting shows at once**, challenged by the worker and kept by her. Deleting is a soft delete: `deleted_at` with TypeORM's `@DeleteDateColumn`, so the filter is automatic and not remembered; a deleted entry is a 404 everywhere; `DELETE` answers 204; the day row stays; a date is listed only if it has a live entry. Request shapes joined the shared package. ADR-020, ADR-021. 211 unit, 279 e2e, 41 web. |
 | 17a | The web app is drawn on a stylesheet the designer has replaced. | **Done, 2026-10-07.** `lock.css` is the designer's v3 file byte for byte, and sign in and create account match his screens exactly at three widths. She ruled that the second password is compared in the browser only, because it guards against a typing slip and nothing about it crosses to the API; and that a control for a feature that is not built is not drawn, so forgot password, the edit icon and the memory control wait for their days. The `/review` pages are gone. Day 17's audit finding is closed: a test now fails when the stale-answer guard is removed, and the paging loop is capped at 20 pages. **The Master Thread's mutation was not caught**: the form's call to the password rules is inside a component and no test reaches it. 211 unit, 279 e2e, 55 web. What follows is the plan as it was written. **Inserted on Day 17 by her decision.** The designer answered the handover with `designs/AIJournal-v3/`. Replace `lock.css`, rebuild sign in and create account on the new spread with its second password field, and restyle Today with the real entry controls and the new mood order. Opens by closing Day 17's audit finding: no test proves that an out-of-date answer about today is thrown away. |
-| 17b | A day ends at 4am in a timezone nobody chose. | **Inserted on Day 16 by her decision.** The per-user timezone decided on 2026-10-04: a setting on the user, taken from the browser at registration, and `dayFor` works a day out in it. It comes before Day 18 because the composer is where real entries begin, and an entry never moves once it is filed (ADR-015). **Added on Day 17a by her decision: a required display name on the account**, asked for at registration and shown in the destinations in place of the word "You". It is the same shape of work in the same files. Opens by closing Day 17a's audit finding. Numbered 17b so that every later day keeps its number. `docs/ui-handover.md` §12. |
-| 17c | A person can see today and nothing else. | **Inserted on Day 17 by her decision**, after her own finding that no day in Phase 3 built a way to look at any day but today. A past day's page and a way to reach it, built after the timezone so that the days it shows are the right ones. The API already has `GET /days/:date`, `GET /days?from=&to=` and `GET /entries?date=`. |
-| 18 | Writing an entry is the product, and the editor is an afterthought. | The core writing experience. Autosave and what it means for the API — does a draft hit the server, and if so how often, and what happens on a failed save. This is likely to produce a real API change. **Added 2026-10-04: editing a saved entry from the interface.** `PATCH /entries/:id` has existed since Day 5 and nothing calls it. `docs/ui-handover.md` §11. |
-| 19 | It works on her laptop, at her screen size, signed in as herself. | Responsive layout, keyboard access, and a genuine pass at accessibility rather than a checklist. |
+| 17b | A day ends at 4am in a timezone nobody chose. | **Done, 2026-10-07, and the rule itself changed.** She ruled that a day ends at **midnight**, not 4am, and accepted that a sitting which crosses midnight is split. The timezone is an IANA place name on the user, sent by the browser at registration and never typed; a missing or invalid one is a 400 with no default, because a default would start a person on the wrong days without a sign. Node accepts `+05:00` as a timezone, so the check refuses an offset by name. The account has a required name, trimmed, at most 60 characters. `users` was rebuilt with both columns `NOT NULL` and no default, and existing accounts took the part of their email before the `@` and `UTC`. The mood words became the web app's second real action, shown at once, and Record, the memory option and three dead links were removed under her Day 17a rule. **The contract changed and no check failed**: the web app's registration body was never typed against it, so all nine commands passed with registration broken, and both bodies are typed now. The worker refused the prompt's design for mood requests and sent them one at a time, correctly. Day 17a's audit finding is closed. **Both of the Master Thread's mutations went uncaught**: the migration's final foreign key check, and the one line that reads the browser's timezone. There is still no way to change a timezone. ADR-015 amended. 242 unit, 318 e2e, 100 web. What follows is the plan as it was written. **Inserted on Day 16 by her decision.** The per-user timezone decided on 2026-10-04: a setting on the user, taken from the browser at registration, and `dayFor` works a day out in it. It comes before Day 18 because the composer is where real entries begin, and an entry never moves once it is filed (ADR-015). **Added on Day 17a by her decision: a required display name on the account**, asked for at registration and shown in the destinations in place of the word "You". It is the same shape of work in the same files. Opens by closing Day 17a's audit finding. Numbered 17b so that every later day keeps its number. `docs/ui-handover.md` §12. |
+| 17c | A person can see today and nothing else. | **Added on Day 17b by her decision: sign-out**, which she found missing by asking how to log out, **and the account's name shown beside it.** Opens by repaying four learning debts from Day 17b. **Inserted on Day 17 by her decision**, after her own finding that no day in Phase 3 built a way to look at any day but today. A past day's page and a way to reach it, built after the timezone so that the days it shows are the right ones. The API already has `GET /days/:date`, `GET /days?from=&to=` and `GET /entries?date=`. |
+| 18 | Writing an entry is the product, and the editor is an afterthought. | The core writing experience. Autosave and what it means for the API — does a draft hit the server, and if so how often, and what happens on a failed save. This is likely to produce a real API change. **Added on Day 17b by her decision: Enter saves, and Shift with Enter makes a new line.** **Added 2026-10-04: editing a saved entry from the interface.** `PATCH /entries/:id` has existed since Day 5 and nothing calls it. `docs/ui-handover.md` §11. |
+| 19 | It works on her laptop, at her screen size, signed in as herself. | Responsive layout, keyboard access, and a genuine pass at accessibility rather than a checklist. **Carried here from Day 17b:** a phone's keyboard cannot press Shift with Enter, so under the Day 18 rule a person on a phone could not make a new line; she put the question aside until this day. **Also carried here: no test reaches a React component**, which let a mutation through on Days 17, 17a and 17b. One test that drives the app in a browser is a dependency and so her decision. |
 | 20 | A person who forgets their password is locked out of their own journal for good. | **Forgot password**, added 2026-10-04. A reset link sent by email: what a mail service is and why the application does not send mail itself, why the reset token is stored hashed, used once and expires, why the answer is the same whether or not the account exists, and why a password change revokes every session. The screens are specified in `docs/ui-handover.md` §2. **This day was slack.** Phase 3 now has no overflow day of its own, so an overrun goes to Day 27. |
 
 ---
@@ -522,6 +524,8 @@ an optimisation. Day 14's audit closed the two oldest open rows below.
 | Where validation belongs — boundary vs service | Day 4 | ✅ **Closed on Day 14, by her own audit.** The re-test never happened on Day 10, so it was overdue. She predicted the ownership hole would be "a mutation path that loads by id, then acts without scoping", and gave the method: grep every query, and each hit either mentions `userId` or is a bug. That found `deleteIfEmpty`'s unscoped `COUNT(*)` — the exact shape she named. The distinction is derived now rather than given. |
 | Reading and judging a whole suite unprompted | Day 4 | ✅ **Closed on Day 14.** Asked for three audit predictions before any code was read, she produced ranked hypotheses with confidence levels, a mechanical check per hypothesis, and a mutation to prove each. Two of three were right; the third was right about the structure and wrong about the direction. She also specified the fix for it — one shared query builder, strict query params, the invariant as a test, and a named limit on what `/count` may grow into — which became ADR-017's five conditions. |
 | Jest — runners, matchers, mocking | Day 1 | 🟡 **Basics only.** Sufficient for now and not worth a dedicated day. |
+| Mood requests one at a time: a loop with `await` in it, and why a stale write differs from a stale read | Day 17b | 🔴 **Open.** Asked twice on the day and not answered. Repay at the opening of Day 17c, as a prediction she runs. |
+| `useRef`; a function that answers one of two shapes; `@Transform` before validation | Day 17b | 🔴 **Open.** Three small items, same opening. |
 
 ### Closed, with how it closed
 
@@ -643,6 +647,11 @@ the explanation happens.
 - **Does an entry move if the user changes timezone?** ADR-015 says no, by
   resolving the day at write time. First support question about an entry on
   the wrong day is the revisit trigger.
+- **Which day builds a way to change the timezone?** Opened on Day 17b. The
+  timezone is set at registration and nothing can change it. An account the
+  migration set to `UTC` stays there, and so does one made in a browser
+  that hides its timezone. Drawn in `docs/ui-handover.md` §12; scheduled
+  nowhere.
 - **Where does audio live, and when?** Object storage, and it arrives around
   Day 18 rather than Day 31. ADR-016.
 - Which AI provider, and does that decision need to be reversible? Phase 4.

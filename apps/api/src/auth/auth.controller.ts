@@ -38,7 +38,7 @@ export class AuthController {
   @Public()
   @Post('register')
   async register(@Body() dto: RegisterDto): Promise<WireUser> {
-    const user = await this.usersService.register(dto.email, dto.password);
+    const user = await this.usersService.register(dto);
 
     if (!user) {
       throw new ConflictException('That email address is already registered');

@@ -34,7 +34,7 @@ function held() {
 
 const settle = () => new Promise((resolve) => setImmediate(resolve));
 
-function fakeApi(ids: string[] = []) {
+function fakeApi(ids: string[] = [], mood: string | null = null) {
   let stored = ids.map((id, index) => entry(id, index + 1));
   const sent: Sent[] = [];
   const overrides: Record<string, () => Reply | Promise<Reply>> = {};
@@ -50,7 +50,12 @@ function fakeApi(ids: string[] = []) {
     }
 
     if (key === 'GET /days/today') {
-      return { kind: 'ok', data: { date: '2026-10-07', mood: null } };
+      return { kind: 'ok', data: { date: '2026-10-07', mood } };
+    }
+
+    if (key === 'PUT /days/2026-10-07/mood') {
+      mood = (options.body as { mood: string | null }).mood;
+      return { kind: 'ok', data: { date: '2026-10-07', mood } };
     }
 
     if (key === 'GET /entries') {
@@ -98,8 +103,8 @@ function fakeApi(ids: string[] = []) {
   };
 }
 
-async function openToday(ids: string[] = []) {
-  const api = fakeApi(ids);
+async function openToday(ids: string[] = [], mood: string | null = null) {
+  const api = fakeApi(ids, mood);
   const today = createToday({ request: api.request, pageSize: 200 });
 
   await today.open();
@@ -534,4 +539,272 @@ test('an API that never sends a short page is asked a counted number of times, a
 
   assert.equal(api.count('GET', '/entries'), MAX_PAGES);
   assert.deepEqual(today.getState().day, { status: 'failed', asked: 1 });
+});
+
+/* ---- Mood ------------------------------------------------------------- */
+
+const PUT_MOOD = 'PUT /days/2026-10-07/mood';
+
+function moodOf(today: { getState(): { day: unknown } }): string | null {
+  const day = today.getState().day as { status: string; mood: string | null };
+
+  assert.equal(day.status, 'open');
+  return day.mood;
+}
+
+/* The moods the API was sent, in the order it was sent them. */
+function moodsSent(api: { sent: Sent[] }): (string | null)[] {
+  return api.sent
+    .filter((s) => s.method === 'PUT')
+    .map((s) => (s.body as { mood: string | null }).mood);
+}
+
+test('the mood the API reports for the day is the one shown when today opens', async () => {
+  assert.equal(moodOf((await openToday(['a'], 'Low')).today), 'Low');
+  assert.equal(moodOf((await openToday(['a'], null)).today), null);
+});
+
+test('a pressed word is marked at once, before the API has answered, and is sent for the day on the screen', async () => {
+  const { api, today } = await openToday(['a']);
+  const put = held();
+  api.answer(PUT_MOOD, () => put.reply);
+
+  const pressing = today.pressMood('Good');
+
+  assert.equal(moodOf(today), 'Good');
+  assert.deepEqual(api.sent.at(-1), {
+    method: 'PUT',
+    path: '/days/2026-10-07/mood',
+    body: { mood: 'Good' },
+  });
+
+  put.release({ kind: 'ok', data: { date: '2026-10-07', mood: 'Good' } });
+  await pressing;
+
+  assert.equal(moodOf(today), 'Good');
+  assert.equal(today.getState().moodNotSaved, null);
+});
+
+test('pressing the chosen word a second time clears the mood: null is sent, and no word is shown, at once', async () => {
+  const { api, today } = await openToday(['a'], 'Good');
+  const put = held();
+  api.answer(PUT_MOOD, () => put.reply);
+
+  const pressing = today.pressMood('Good');
+
+  assert.equal(moodOf(today), null);
+  assert.deepEqual(moodsSent(api), [null]);
+
+  put.release({ kind: 'ok', data: { date: '2026-10-07', mood: null } });
+  await pressing;
+
+  assert.equal(moodOf(today), null);
+});
+
+test('pressing another word changes the mood and does not clear it', async () => {
+  const { api, today } = await openToday(['a'], 'Good');
+
+  await today.pressMood('Low');
+
+  assert.equal(moodOf(today), 'Low');
+  assert.deepEqual(moodsSent(api), ['Low']);
+});
+
+for (const [reply, why] of [
+  [NO_ANSWER, 'unreachable'],
+  [SERVER_ERROR, 'refused'],
+  [NOT_FOUND, 'refused'],
+] as const) {
+  test(`a mood that fails (${reply.kind}${'status' in reply ? ` ${reply.status}` : ''}) goes back to what it was, and says why`, async () => {
+    const { api, today } = await openToday(['a'], 'Good');
+    const put = held();
+    api.answer(PUT_MOOD, () => put.reply);
+
+    const pressing = today.pressMood('Low');
+    assert.equal(moodOf(today), 'Low');
+
+    put.release(reply);
+    await pressing;
+
+    assert.equal(moodOf(today), 'Good');
+    assert.equal(today.getState().moodNotSaved, why);
+  });
+}
+
+test('a mood that fails on a day with none goes back to none, and a clear that fails goes back to the word', async () => {
+  const none = await openToday(['a'], null);
+  none.api.answer(PUT_MOOD, () => NO_ANSWER);
+  await none.today.pressMood('Hard');
+  assert.equal(moodOf(none.today), null);
+
+  const some = await openToday(['a'], 'Hard');
+  some.api.answer(PUT_MOOD, () => NO_ANSWER);
+  await some.today.pressMood('Hard');
+  assert.equal(moodOf(some.today), 'Hard');
+  assert.equal(some.today.getState().moodNotSaved, 'unreachable');
+});
+
+test('the next press takes the sentence of a failed mood away, and can succeed', async () => {
+  const { api, today } = await openToday(['a']);
+  api.answer(PUT_MOOD, () => NO_ANSWER);
+  await today.pressMood('Even');
+  assert.equal(today.getState().moodNotSaved, 'unreachable');
+
+  api.restore(PUT_MOOD);
+  const pressing = today.pressMood('Even');
+  assert.equal(today.getState().moodNotSaved, null);
+  await pressing;
+
+  assert.equal(moodOf(today), 'Even');
+  assert.equal(today.getState().moodNotSaved, null);
+});
+
+test('a session that ended while a mood was being sent leaves no sentence', async () => {
+  const { api, today } = await openToday(['a']);
+  api.answer(PUT_MOOD, () => ENDED);
+
+  await today.pressMood('Even');
+
+  assert.equal(today.getState().moodNotSaved, null);
+});
+
+/*
+ * Two presses, Good and then Low, with the first request still out. The four
+ * tests below are the four ways the two requests can end.
+ */
+async function goodThenLow(first: Reply, second: Reply) {
+  const { api, today } = await openToday(['a'], 'Even');
+  const replies = [held(), held()];
+  let asked = 0;
+  api.answer(PUT_MOOD, () => replies[asked++].reply);
+
+  const good = today.pressMood('Good');
+  const low = today.pressMood('Low');
+
+  /* The second word is marked at once, though its request has not left. */
+  assert.equal(moodOf(today), 'Low');
+  assert.deepEqual(moodsSent(api), ['Good']);
+
+  replies[0].release(first);
+  await settle();
+
+  /* The answer to the older press changes nothing on the screen. */
+  assert.equal(moodOf(today), 'Low');
+  assert.equal(today.getState().moodNotSaved, null);
+  assert.deepEqual(moodsSent(api), ['Good', 'Low']);
+
+  replies[1].release(second);
+  await Promise.all([good, low]);
+
+  return today;
+}
+
+const SAVED: Reply = { kind: 'ok', data: {} };
+
+test('the last press wins: of Good and then Low, the row ends on Low, and the API is sent them in the order they were pressed', async () => {
+  const today = await goodThenLow(SAVED, SAVED);
+
+  assert.equal(moodOf(today), 'Low');
+  assert.equal(today.getState().moodNotSaved, null);
+});
+
+test('the last press wins: when the first request fails and the second succeeds, the row stays on Low and nothing is undone or said', async () => {
+  for (const failure of [NO_ANSWER, SERVER_ERROR]) {
+    const today = await goodThenLow(failure, SAVED);
+
+    assert.equal(moodOf(today), 'Low');
+    assert.equal(today.getState().moodNotSaved, null);
+  }
+});
+
+test('when the first request succeeds and the second fails, the row goes back to Good, which is what the API holds', async () => {
+  const today = await goodThenLow(SAVED, NO_ANSWER);
+
+  assert.equal(moodOf(today), 'Good');
+  assert.equal(today.getState().moodNotSaved, 'unreachable');
+});
+
+test('when both requests fail, the row goes back to the mood from before both presses', async () => {
+  const today = await goodThenLow(NO_ANSWER, SERVER_ERROR);
+
+  assert.equal(moodOf(today), 'Even');
+  assert.equal(today.getState().moodNotSaved, 'refused');
+});
+
+test('of several presses made while one request is out, only the last is sent after it', async () => {
+  const { api, today } = await openToday(['a']);
+  const first = held();
+  api.answer(PUT_MOOD, () => first.reply);
+
+  const presses = [
+    today.pressMood('Light'),
+    today.pressMood('Good'),
+    today.pressMood('Even'),
+    today.pressMood('Hard'),
+  ];
+
+  assert.equal(moodOf(today), 'Hard');
+
+  api.restore(PUT_MOOD);
+  first.release(SAVED);
+  await Promise.all(presses);
+  await settle();
+
+  assert.deepEqual(moodsSent(api), ['Light', 'Hard']);
+  assert.equal(moodOf(today), 'Hard');
+});
+
+test('the same word pressed twice in a row is set and then cleared, even while the first request is out', async () => {
+  const { api, today } = await openToday(['a']);
+  const first = held();
+  api.answer(PUT_MOOD, () => first.reply);
+
+  const presses = [today.pressMood('Good'), today.pressMood('Good')];
+  assert.equal(moodOf(today), null);
+
+  api.restore(PUT_MOOD);
+  first.release(SAVED);
+  await Promise.all(presses);
+  await settle();
+
+  assert.deepEqual(moodsSent(api), ['Good', null]);
+  assert.equal(moodOf(today), null);
+});
+
+test('an answer about today that left the API before the mood was saved does not undo the mood', async () => {
+  const { api, today } = await openToday(['a']);
+  const old = held();
+  api.answer('GET /days/today', () => old.reply);
+
+  const looking = today.look();
+  await settle();
+  await today.pressMood('Good');
+
+  old.release({ kind: 'ok', data: { date: '2026-10-07', mood: null } });
+  await looking;
+
+  assert.equal(moodOf(today), 'Good');
+});
+
+test('an answer about today that was asked for after the mood was saved is believed', async () => {
+  const { api, today } = await openToday(['a']);
+  await today.pressMood('Good');
+
+  /* Another tab has changed it since. */
+  api.answer('GET /days/today', () => ({
+    kind: 'ok',
+    data: { date: '2026-10-07', mood: 'Hard' },
+  }));
+  await today.look();
+
+  assert.equal(moodOf(today), 'Hard');
+});
+
+test('a press before today has opened sends nothing', async () => {
+  const api = fakeApi(['a']);
+  const today = createToday({ request: api.request, pageSize: 200 });
+
+  await today.pressMood('Good');
+
+  assert.equal(api.sent.length, 0);
 });

@@ -33,7 +33,7 @@ export class DaysController {
    */
   @Get('today')
   async findToday(@Req() request: AuthenticatedRequest): Promise<WireDay> {
-    const { date, day } = await this.daysService.findToday(request.user.id);
+    const { date, day } = await this.daysService.findToday(request.user);
 
     return day ? toResponse(day) : { date, mood: null };
   }

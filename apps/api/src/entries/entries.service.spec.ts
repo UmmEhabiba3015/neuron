@@ -5,11 +5,15 @@ import {
   createTestDataSource,
   seedEntries,
   seedUser,
+  SEEDED_TIMEZONE,
 } from '../../test/test-database';
 import { EntriesService } from './entries.service';
 import { entriesProviders } from '../../test/entries-providers';
 
 const CALLER_ID = 'caller-id';
+
+/* create() takes the author with their timezone. seedUser stores the same zone. */
+const CALLER = { id: CALLER_ID, timezone: SEEDED_TIMEZONE };
 
 describe('EntriesService', () => {
   let service: EntriesService;
@@ -40,10 +44,7 @@ describe('EntriesService', () => {
     });
 
     it('should return an entry that was created', async () => {
-      const created = await service.create(
-        'a thought worth keeping',
-        CALLER_ID,
-      );
+      const created = await service.create('a thought worth keeping', CALLER);
 
       expect(await service.find(CALLER_ID)).toContainEqual(created);
     });
@@ -77,7 +78,7 @@ describe('EntriesService', () => {
     it('should return the entry it stored, with a server-generated id and timestamp', async () => {
       const created = await service.create(
         'the client supplied only this text',
-        CALLER_ID,
+        CALLER,
       );
 
       expect(created.content).toBe('the client supplied only this text');
@@ -87,8 +88,8 @@ describe('EntriesService', () => {
     });
 
     it('should give each entry a distinct id', async () => {
-      const a = await service.create('same text', CALLER_ID);
-      const b = await service.create('same text', CALLER_ID);
+      const a = await service.create('same text', CALLER);
+      const b = await service.create('same text', CALLER);
 
       expect(a.id).not.toBe(b.id);
     });
@@ -96,7 +97,7 @@ describe('EntriesService', () => {
     it('should store the content verbatim, including SQL syntax', async () => {
       const hostile = `'); DROP TABLE entries; --`;
 
-      await service.create(hostile, CALLER_ID);
+      await service.create(hostile, CALLER);
 
       expect((await service.find(CALLER_ID)).map((e) => e.content)).toEqual([
         hostile,
@@ -108,7 +109,7 @@ describe('EntriesService', () => {
     it('should store content verbatim, without trimming surrounding whitespace', async () => {
       const padded = '  spacing the user chose  ';
 
-      const created = await service.create(padded, CALLER_ID);
+      const created = await service.create(padded, CALLER);
 
       expect(created.content).toBe(padded);
       expect((await service.findById(created.id, CALLER_ID))?.content).toBe(
@@ -119,7 +120,7 @@ describe('EntriesService', () => {
 
   describe('findById', () => {
     it('should return the entry that was created', async () => {
-      const created = await service.create('findable by its id', CALLER_ID);
+      const created = await service.create('findable by its id', CALLER);
 
       expect(await service.findById(created.id, CALLER_ID)).toEqual(created);
     });
@@ -256,7 +257,7 @@ describe('EntriesService', () => {
 
   describe('update', () => {
     it('should change the content and leave the entry findable', async () => {
-      const created = await service.create('the first draft', CALLER_ID);
+      const created = await service.create('the first draft', CALLER);
 
       const updated = await service.update(
         created.id,
@@ -271,7 +272,7 @@ describe('EntriesService', () => {
     });
 
     it('should not change id or createdAt', async () => {
-      const created = await service.create('written once', CALLER_ID);
+      const created = await service.create('written once', CALLER);
 
       const updated = await service.update(
         created.id,
@@ -284,7 +285,7 @@ describe('EntriesService', () => {
     });
 
     it('should store the new content verbatim, without trimming', async () => {
-      const created = await service.create('before', CALLER_ID);
+      const created = await service.create('before', CALLER);
       const padded = '  the spacing the user chose  ';
 
       expect(
@@ -310,7 +311,7 @@ describe('EntriesService', () => {
 
   describe('delete', () => {
     it('should say it deleted the entry, which is then gone', async () => {
-      const created = await service.create('here for a moment', CALLER_ID);
+      const created = await service.create('here for a moment', CALLER);
 
       expect(await service.delete(created.id, CALLER_ID)).toBe(true);
       expect(await service.findById(created.id, CALLER_ID)).toBeUndefined();
@@ -318,8 +319,8 @@ describe('EntriesService', () => {
     });
 
     it('should leave other entries alone', async () => {
-      const doomed = await service.create('the one being removed', CALLER_ID);
-      const survivor = await service.create('the one that stays', CALLER_ID);
+      const doomed = await service.create('the one being removed', CALLER);
+      const survivor = await service.create('the one that stays', CALLER);
 
       await service.delete(doomed.id, CALLER_ID);
 
@@ -337,9 +338,9 @@ describe('EntriesService', () => {
     });
 
     it('should return the number of entries', async () => {
-      await service.create('one', CALLER_ID);
-      await service.create('two', CALLER_ID);
-      await service.create('three', CALLER_ID);
+      await service.create('one', CALLER);
+      await service.create('two', CALLER);
+      await service.create('three', CALLER);
 
       expect(await service.count(CALLER_ID)).toBe(3);
     });

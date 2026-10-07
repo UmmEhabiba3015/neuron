@@ -47,7 +47,7 @@ export class EntriesController {
     @Body() dto: CreateEntryDto,
     @Req() request: AuthenticatedRequest,
   ): Promise<WireEntry> {
-    return this.entriesService.create(dto.content, request.user.id);
+    return this.entriesService.create(dto.content, request.user);
   }
 
   @Get('count')

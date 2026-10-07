@@ -1,11 +1,11 @@
-type Destination = 'Today' | 'Timeline' | 'Ask' | 'You';
+/*
+ * Only destinations that exist are listed. Timeline, Ask and You join this
+ * list on the day each is built, and not before: a link to a page that is
+ * not there is a control that does nothing.
+ */
+const DESTINATIONS = [{ label: 'Today', href: '/' }] as const;
 
-const DESTINATIONS: { label: Destination; href: string }[] = [
-  { label: 'Today', href: '/' },
-  { label: 'Timeline', href: '/timeline' },
-  { label: 'Ask', href: '/ask' },
-  { label: 'You', href: '/you' },
-];
+export type Destination = (typeof DESTINATIONS)[number]['label'];
 
 export function Wordmark() {
   return <h1 className="wordmark">Journal</h1>;

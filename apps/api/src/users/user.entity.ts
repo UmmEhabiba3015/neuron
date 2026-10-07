@@ -20,4 +20,20 @@ export class User {
 
   @Column({ name: 'created_at', type: 'text' })
   createdAt: string;
+
+  /* What the person is called on screen. Never used for signing in. */
+  @Column({ type: 'text' })
+  name: string;
+
+  /*
+   * An IANA name such as Asia/Karachi. It decides which date an instant
+   * falls on for this person (ADR-015), and it is read on every request that
+   * needs a date, so it is loaded with the user.
+   *
+   * Excluded from every response: no screen reads it, and WireUser does not
+   * have it.
+   */
+  @Exclude()
+  @Column({ type: 'text' })
+  timezone: string;
 }

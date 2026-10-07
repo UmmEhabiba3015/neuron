@@ -37,7 +37,7 @@ describe('stale credentials (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/auth/register')
-      .send(credentials)
+      .send({ ...credentials, name: 'Somebody', timezone: 'UTC' })
       .expect(201);
 
     const login = await request(app.getHttpServer())
