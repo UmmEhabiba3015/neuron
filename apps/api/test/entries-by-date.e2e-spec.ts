@@ -195,14 +195,19 @@ describe('entries for one day (e2e)', () => {
     expect(await countOf(alice, '')).toBe(5);
   });
 
-  it('still returns an entry as id, content and createdAt, and no day', async () => {
+  it('still returns an entry as id, content, createdAt and date, and no day', async () => {
     const response = await request(app.getHttpServer())
       .get('/entries?date=2026-08-09')
       .set('Authorization', alice)
       .expect(200);
 
     for (const entry of response.body as object[]) {
-      expect(Object.keys(entry).sort()).toEqual(['content', 'createdAt', 'id']);
+      expect(Object.keys(entry).sort()).toEqual([
+        'content',
+        'createdAt',
+        'date',
+        'id',
+      ]);
     }
   });
 

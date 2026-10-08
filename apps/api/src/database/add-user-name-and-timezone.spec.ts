@@ -504,6 +504,76 @@ describe('AddUserNameAndTimezone', () => {
   });
 
   /*
+   * up() runs with foreign keys switched off, so nothing checks a key while
+   * users is rebuilt. Its last step asks SQLite to check every key, and that
+   * step is the only thing that would notice a row left pointing at nobody.
+   *
+   * No path through the application writes such a row. Each one here is
+   * written with foreign keys switched off for one statement, which is how
+   * it would arrive in real life: from outside.
+   */
+  describe('refusing a row that points at no user', () => {
+    const ORPHANS = {
+      sessions: `
+        INSERT INTO sessions (id, user_id, refresh_token_hash, created_at, expires_at)
+        VALUES ('s-orphan', 'nobody', 'h', '2026-08-09T10:00:00.000Z', '2026-09-08T10:00:00.000Z')`,
+      days: `
+        INSERT INTO days (id, date, mood, created_at, user_id)
+        VALUES ('d-orphan', '2026-08-11', NULL, '2026-08-11T10:00:00.000Z', 'nobody')`,
+      entries: `
+        INSERT INTO entries (id, content, created_at, user_id, day_id)
+        VALUES ('e-orphan', 'no such user', '2026-08-09T10:00:00.000Z', 'nobody', 'alice-9th')`,
+    };
+
+    const withAnOrphanIn = async (
+      table: keyof typeof ORPHANS,
+    ): Promise<DataSource> => {
+      const database = await beforeTheMigration();
+
+      await database.query(`PRAGMA foreign_keys = OFF`);
+      await database.query(ORPHANS[table]);
+      await database.query(`PRAGMA foreign_keys = ON`);
+
+      expect(await database.query(`PRAGMA foreign_key_check`)).toHaveLength(1);
+
+      return database;
+    };
+
+    it.each(CHILDREN)(
+      'refuses to finish when a row of %s points at a user that does not exist',
+      async (table) => {
+        await withAnOrphanIn(table);
+
+        const database = await open(migrationsThrough);
+
+        await expect(database.runMigrations()).rejects.toThrow(
+          /Rebuilding users left 1 rows pointing at a user that does not exist/,
+        );
+      },
+    );
+
+    it('leaves the database exactly as it was when it refuses for that reason', async () => {
+      let database = await withAnOrphanIn('sessions');
+
+      const schemaBefore = await storedSchema(database);
+      const appliedBefore = await appliedMigrations(database);
+      const rowsBefore: Record<string, unknown> = {};
+      for (const table of TABLES) {
+        rowsBefore[table] = await rowsOf(database, table);
+      }
+
+      database = await open(migrationsThrough);
+      await expect(database.runMigrations()).rejects.toThrow();
+
+      expect(await storedSchema(database)).toEqual(schemaBefore);
+      expect(await appliedMigrations(database)).toEqual(appliedBefore);
+      for (const table of TABLES) {
+        expect(await rowsOf(database, table)).toEqual(rowsBefore[table]);
+      }
+    });
+  });
+
+  /*
    * TypeORM does not switch foreign keys off for a revert, although it means
    * to: it opens the transaction first, and SQLite ignores the switch inside
    * one. down() therefore runs with every key enforced, and the rows that

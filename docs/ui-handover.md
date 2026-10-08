@@ -746,3 +746,69 @@ can follow them.
   apart, so a single one was drawn at the far right. We added one temporary
   rule to bring it back to the left, and it goes when a second destination
   exists.
+
+### Built on 2026-10-08: Timeline, a past day, You and Account
+
+Three destinations are shown now: Today, Timeline and You. Ask is not
+built and is not listed. The temporary rule for a single destination is
+gone.
+
+**Decided by the owner. These are decisions, sent so that the drawings can
+follow them.**
+
+7. **The Timeline is the list only, for now.** The calendar, and the control
+   that switches between list and calendar, are not built and not drawn.
+8. **On the Timeline everything runs newest first**: months, days, and the
+   entries inside a day. On a day's own page the entries read oldest first,
+   from morning to night.
+9. **A past day can be changed.** Its mood can be set and an entry can be
+   deleted, exactly as on Today. It has no composer.
+10. **A day that has not happened yet is "Page not found."** So is a day
+    with no entries, as your `V3-REVISION.md` says.
+11. **A person who is not signed in and types an address that leads
+    nowhere is sent to sign in first.** They see "Page not found" only
+    after signing in.
+12. **Account shows the name, the email and "Sign out of this device".**
+    The timezone row, the list of devices, "Sign out everywhere" and the
+    sentence about a new password are left off until each is built.
+13. **Your line "Mood can be changed here, and only here." is kept** under
+    a past day's mood row.
+
+**Things you have not drawn, which we built. Please draw the real ones.**
+
+- **The way from the Timeline list to a day.** In `02-timeline` the date is
+  plain text, and a day is reached from the calendar. We made each day's
+  date a link to that day's page, underlined so that it is not told apart
+  by colour alone, and 44px tall. Today's own row leads to Today.
+- **The name row on Account**, built like your email row: "Name", with
+  "What you are called here." under it.
+- **The address of today's own date.** `/d/` with today's date sends the
+  person to Today. `V3-REVISION.md` does not say what it should do.
+- **The mobile Timeline header.** Your comp has the List and Calendar
+  switch where Today has its date box. With the switch not drawn, we show
+  the date box there, so that the header keeps its height.
+
+**Sentences we wrote, approved by the owner.**
+
+| Where | Sentence |
+|---|---|
+| Timeline, a journal with no entries | "Nothing is written yet. Your days will be listed here." |
+| Timeline, when the list is cut at 4,000 entries | "This list stops here. Your earlier days are still in your journal, and are not listed yet." |
+| A past day, when our side fails | "Something went wrong on our side. Try loading this day again." |
+| You, under Account | "Your name, your email, and sign out." |
+| Account, the name row | "Name" and "What you are called here." |
+| Account, sign-out could not reach the server | "We could not reach the server. You are still signed in on this device. Try signing out again." |
+| Account, sign-out failed on our side | "Something went wrong on our side. You are still signed in on this device. Try signing out again." |
+| Account, while signing out | "Signing out." |
+
+**Three questions.**
+
+1. **"Page not found" and "Nothing on this day" mark Today as the current
+   destination in your comps.** A person on either screen is not on Today.
+   We marked none. Which is right?
+2. **A Timeline row shows the whole entry, however long.** Your sample
+   entries are short. Should a long entry be cut on the Timeline, and
+   where?
+3. **`00-flow.md` gives a day the address `/d/2026-08-04`, and
+   `V3-REVISION.md` writes the area as `/day`.** We used the first. Please
+   make the two agree.

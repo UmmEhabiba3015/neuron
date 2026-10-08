@@ -54,6 +54,15 @@ body {
   .app > .title ~ .page > .journal-header { display: none; }
 
   /*
+   * A pushed page has no .journal-header. Its header below desktop is a
+   * masthead that is the page's own child, holding the way back and the
+   * date box (06-conversation.html), and on desktop the same two things
+   * stand in .title. Sign in has such a masthead too and has no .title, so
+   * this does not reach it.
+   */
+  .app > .title ~ .page > .mast { display: none; }
+
+  /*
    * On desktop lock.css gives the page's first child a top margin, --lead,
    * so that the content starts on the date box's line. In a comp the first
    * child is the content. Here it is .journal-header, which the rule above
@@ -61,7 +70,8 @@ body {
    * This gives the same margin, from the same token, to the first thing that
    * is shown. The exclusions are lock.css's own.
    */
-  .app > .title ~ .page:not(.split) > .journal-header + :not(.stack) {
+  .app > .title ~ .page:not(.split) > .journal-header + :not(.stack),
+  .app > .title ~ .page:not(.split) > .mast + :not(.stack) {
     margin-top: var(--lead);
   }
 }
@@ -192,16 +202,20 @@ body {
 }
 
 /*
- * 5.4 One destination stands where the first one is drawn.
+ * 5.4 The date of a Timeline day is the link to that day's page.
  *
- * lock.css sets the last destination apart from the others, because in
- * every comp the last one is You: at the far right below desktop, and under
- * a wider gap in the binding column. Today is the only destination that
- * exists (Day 17b), so it is the first and also the last, and without this
- * it would stand in You's place. Deleted when a second destination arrives.
+ * 02-timeline.html draws the date as plain text and draws no way from the
+ * list to a day: in the comps a day is reached from the calendar, which is
+ * not built. The link keeps the column's own colour and size, is underlined
+ * so that it is not told apart by colour alone, and is stretched over the
+ * column's padding so that it is at least as tall as a control may be.
  */
-.dest a:only-child,
-.title .dest a:only-child {
-  margin-left: 0;
-  margin-top: 0;
+.dayrow .tcol a {
+  display: block;
+  min-height: var(--tap);
+  margin-block: calc(-1 * var(--s6));
+  padding-block: var(--s6);
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }

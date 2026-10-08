@@ -1,14 +1,24 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
+import type { WireEntry } from '@neuron/contracts';
 import type { ApiResult } from './session.ts';
-import { createToday, isBlank, MAX_PAGES, type Request } from './today.ts';
+import {
+  createPastDay,
+  createToday,
+  isBlank,
+  MAX_PAGES,
+  type Request,
+} from './today.ts';
 
 /*
- * A stand-in for the API. It holds a day's entries, answers the four routes
- * Today uses, and can be told to give one route a different answer, or to
- * hold an answer back until the test releases it.
+ * A stand-in for the API. It holds entries, each filed on a date, answers
+ * the routes a day's page uses, and can be told to give one route a
+ * different answer, or to hold an answer back until the test releases it.
+ *
+ * Its today is TODAY. Entries are on TODAY unless `file` puts them elsewhere.
  */
+const TODAY = '2026-10-07';
 type Reply = ApiResult<unknown>;
 type Sent = { method: string; path: string; body?: unknown };
 
@@ -17,10 +27,11 @@ const SERVER_ERROR: Reply = { kind: 'rejected', status: 500, messages: [] };
 const ENDED: Reply = { kind: 'ended' };
 const NOT_FOUND: Reply = { kind: 'rejected', status: 404, messages: [] };
 
-const entry = (id: string, minute: number) => ({
+const entry = (id: string, minute: number, date = TODAY): WireEntry => ({
   id,
   content: `entry ${id}`,
-  createdAt: `2026-10-07T09:${String(minute).padStart(2, '0')}:00.000Z`,
+  createdAt: `${date}T09:${String(minute).padStart(2, '0')}:00.000Z`,
+  date,
 });
 
 function held() {
@@ -36,6 +47,7 @@ const settle = () => new Promise((resolve) => setImmediate(resolve));
 
 function fakeApi(ids: string[] = [], mood: string | null = null) {
   let stored = ids.map((id, index) => entry(id, index + 1));
+  const moods: Record<string, string | null> = { [TODAY]: mood };
   const sent: Sent[] = [];
   const overrides: Record<string, () => Reply | Promise<Reply>> = {};
 
@@ -50,12 +62,18 @@ function fakeApi(ids: string[] = [], mood: string | null = null) {
     }
 
     if (key === 'GET /days/today') {
-      return { kind: 'ok', data: { date: '2026-10-07', mood } };
+      return { kind: 'ok', data: { date: TODAY, mood: moods[TODAY] } };
     }
 
-    if (key === 'PUT /days/2026-10-07/mood') {
-      mood = (options.body as { mood: string | null }).mood;
-      return { kind: 'ok', data: { date: '2026-10-07', mood } };
+    const day = /^(GET|PUT) \/days\/(\d{4}-\d{2}-\d{2})(\/mood)?$/.exec(key);
+
+    if (day && day[1] === 'PUT' && day[3]) {
+      moods[day[2]] = (options.body as { mood: string | null }).mood;
+      return { kind: 'ok', data: { date: day[2], mood: moods[day[2]] } };
+    }
+
+    if (day && day[1] === 'GET' && !day[3]) {
+      return { kind: 'ok', data: { date: day[2], mood: moods[day[2]] ?? null } };
     }
 
     if (key === 'GET /entries') {
@@ -63,10 +81,14 @@ function fakeApi(ids: string[] = [], mood: string | null = null) {
       const query = new URLSearchParams(path.split('?')[1]);
       const offset = Number(query.get('offset'));
       const limit = Number(query.get('limit'));
+      const on = query.get('date');
 
       return {
         kind: 'ok',
-        data: [...stored].reverse().slice(offset, offset + limit),
+        data: stored
+          .filter((item) => on === null || item.date === on)
+          .reverse()
+          .slice(offset, offset + limit),
       };
     }
 
@@ -99,6 +121,14 @@ function fakeApi(ids: string[] = [], mood: string | null = null) {
     },
     restore(key: string) {
       delete overrides[key];
+    },
+    /* Puts entries on another date, and gives that day a mood. */
+    file(date: string, others: string[], felt: string | null = null) {
+      stored = [
+        ...stored,
+        ...others.map((id, index) => entry(id, index + 1, date)),
+      ];
+      moods[date] = felt;
     },
   };
 }
@@ -807,4 +837,266 @@ test('a press before today has opened sends nothing', async () => {
   await today.pressMood('Good');
 
   assert.equal(api.sent.length, 0);
+});
+
+/* ---- The page of a date that is not today ------------------------------ */
+
+const PAST = '2026-08-06';
+const PUT_PAST_MOOD = `PUT /days/${PAST}/mood`;
+
+async function openPast(
+  ids: string[] = ['a', 'b'],
+  mood: string | null = null,
+  date = PAST,
+) {
+  const api = fakeApi(['today1']);
+  api.file(PAST, ids, mood);
+
+  const page = createPastDay({ request: api.request, pageSize: 200, date });
+
+  await page.open();
+
+  return { api, page };
+}
+
+const statusOf = (page: { getState(): { day: { status: string } } }) =>
+  page.getState().day.status;
+
+test('the page of a past date opens with that day`s entries, oldest first, and no other day`s', async () => {
+  const { api, page } = await openPast(['a', 'b', 'c']);
+
+  assert.deepEqual(shown(page), ['a', 'b', 'c']);
+  assert.equal(
+    (page.getState().day as { date: string }).date,
+    PAST,
+    'the date shown is the one the API answered with',
+  );
+  assert.deepEqual(
+    api.sent.map((s) => s.path),
+    ['/days/today', `/days/${PAST}`, `/entries?date=${PAST}&limit=200&offset=0`],
+  );
+});
+
+test('the page of a past date shows the mood the API holds for that day, and not today`s', async () => {
+  const api = fakeApi(['today1'], 'Hard');
+  api.file(PAST, ['a'], 'Low');
+
+  const page = createPastDay({ request: api.request, pageSize: 200, date: PAST });
+  await page.open();
+
+  assert.equal(moodOf(page), 'Low');
+});
+
+test('a mood pressed on a past date is marked at once and is sent for that date, in the contract`s shape', async () => {
+  const { api, page } = await openPast(['a'], 'Low');
+  const put = held();
+  api.answer(PUT_PAST_MOOD, () => put.reply);
+
+  const pressing = page.pressMood('Good');
+  assert.equal(moodOf(page), 'Good', 'before any answer');
+
+  put.release({ kind: 'ok', data: { date: PAST, mood: 'Good' } });
+  await pressing;
+
+  api.restore(PUT_PAST_MOOD);
+  await page.pressMood('Good');
+
+  const puts = api.sent.filter((s) => s.method === 'PUT');
+
+  assert.deepEqual(
+    puts.map((s) => s.path),
+    [`/days/${PAST}/mood`, `/days/${PAST}/mood`],
+  );
+
+  /* Exactly one field, named mood: a word, and null to clear it. */
+  assert.deepEqual(
+    puts.map((s) => s.body),
+    [{ mood: 'Good' }, { mood: null }],
+  );
+  assert.equal(moodOf(page), null);
+});
+
+test('a mood that fails on a past date goes back to what the API holds, with its reason', async () => {
+  const { api, page } = await openPast(['a'], 'Low');
+  api.answer(PUT_PAST_MOOD, () => NO_ANSWER);
+
+  await page.pressMood('Good');
+
+  assert.equal(moodOf(page), 'Low');
+  assert.equal(page.getState().moodNotSaved, 'unreachable');
+});
+
+test('an entry of a past date is deleted as on Today: asked first, gone at once, and sent for that entry', async () => {
+  const { api, page } = await openPast(['a', 'b']);
+  const del = held();
+  api.answer('DELETE /entries/a', () => del.reply);
+
+  page.askToDelete('a');
+  assert.deepEqual(shown(page), ['a', 'b'], 'asking deletes nothing');
+
+  const going = page.goAhead();
+  assert.deepEqual(shown(page), ['b'], 'before any answer');
+
+  del.release({ kind: 'ok', data: undefined });
+  await going;
+
+  assert.deepEqual(shown(page), ['b']);
+  assert.equal(api.count('DELETE', '/entries/a'), 1);
+});
+
+for (const [name, reply, why] of [
+  ['gets no answer', NO_ANSWER, 'unreachable'],
+  ['is refused', SERVER_ERROR, 'refused'],
+] as const) {
+  test(`a delete on a past date that ${name} puts the entry back where it was, with its reason`, async () => {
+    const { api, page } = await openPast(['a', 'b', 'c']);
+    api.answer('DELETE /entries/b', () => reply);
+
+    page.askToDelete('b');
+    await page.goAhead();
+
+    assert.deepEqual(shown(page), ['a', 'b', 'c']);
+    assert.deepEqual(page.getState().notDeleted, { b: why });
+  });
+}
+
+test('the page of a past date cannot write: it has no save and no type, and sends no entry', async () => {
+  const { api, page } = await openPast();
+
+  assert.equal('save' in page, false);
+  assert.equal('type' in page, false);
+  assert.equal(api.count('POST', '/entries'), 0);
+});
+
+for (const address of [
+  'yesterday',
+  '2026-8-6',
+  '2026-02-31',
+  '2026-13-01',
+  '2026-08-06x',
+  ' 2026-08-06',
+  '',
+]) {
+  test(`an address that is not a calendar date is not found, and nothing is asked: "${address}"`, async () => {
+    const { api, page } = await openPast(['a'], null, address);
+
+    assert.equal(statusOf(page), 'notFound');
+
+    await page.look();
+    assert.deepEqual(api.sent, []);
+  });
+}
+
+test('a day the API answers 404 for is not found, whatever the message says', async () => {
+  for (const messages of [[], ['Day with date 2027-01-01 not found'], ['x', 'y']]) {
+    const api = fakeApi();
+    api.answer('GET /days/2027-01-01', () => ({
+      kind: 'rejected',
+      status: 404,
+      messages,
+    }));
+
+    const page = createPastDay({
+      request: api.request,
+      pageSize: 200,
+      date: '2027-01-01',
+    });
+    await page.open();
+
+    assert.equal(statusOf(page), 'notFound');
+    assert.equal(api.count('GET', '/entries'), 0);
+  }
+});
+
+test('a day that has no entries is not found', async () => {
+  const { page } = await openPast([]);
+
+  assert.equal(statusOf(page), 'notFound');
+});
+
+test('a failure to reach the server is not shown as not found, and neither is a failure on our side', async () => {
+  for (const [key, reply, status] of [
+    ['GET /days/today', NO_ANSWER, 'unreachable'],
+    [`GET /days/${PAST}`, NO_ANSWER, 'unreachable'],
+    ['GET /entries', NO_ANSWER, 'unreachable'],
+    [`GET /days/${PAST}`, SERVER_ERROR, 'failed'],
+    ['GET /entries', SERVER_ERROR, 'failed'],
+  ] as const) {
+    const api = fakeApi();
+    api.file(PAST, ['a']);
+    api.answer(key, () => reply);
+
+    const page = createPastDay({ request: api.request, pageSize: 200, date: PAST });
+    await page.open();
+
+    assert.equal(statusOf(page), status, key);
+
+    /* And asking again, once the server answers, opens the day. */
+    api.restore(key);
+    await page.open();
+    assert.deepEqual(shown(page), ['a'], key);
+  }
+});
+
+test('a session that ends while a past date is opening is neither not found nor a failure', async () => {
+  const api = fakeApi();
+  api.file(PAST, ['a']);
+  api.answer(`GET /days/${PAST}`, () => ENDED);
+
+  const page = createPastDay({ request: api.request, pageSize: 200, date: PAST });
+  await page.open();
+
+  assert.equal(statusOf(page), 'opening');
+});
+
+test('the address of today`s own date says so, and asks for no entries', async () => {
+  const { api, page } = await openPast(['a'], null, TODAY);
+
+  assert.equal(statusOf(page), 'isToday');
+  assert.deepEqual(
+    api.sent.map((s) => s.path),
+    ['/days/today'],
+  );
+});
+
+test('deleting the last entry of a past date leaves a day that says it was emptied, which is not the same as not found', async () => {
+  const { page } = await openPast(['a']);
+
+  page.askToDelete('a');
+  const going = page.goAhead();
+
+  assert.deepEqual(page.getState().day, { status: 'emptied', date: PAST });
+
+  await going;
+  assert.deepEqual(page.getState().day, { status: 'emptied', date: PAST });
+
+  /* Looked at again, the API now has nothing on that day, and it stays so. */
+  await page.look();
+  assert.deepEqual(page.getState().day, { status: 'emptied', date: PAST });
+});
+
+test('when the delete of the last entry of a past date fails, the entry and the day come back', async () => {
+  const { api, page } = await openPast(['a'], 'Low');
+  api.answer('DELETE /entries/a', () => NO_ANSWER);
+
+  page.askToDelete('a');
+  await page.goAhead();
+
+  assert.deepEqual(shown(page), ['a']);
+  assert.equal(moodOf(page), 'Low');
+  assert.deepEqual(page.getState().notDeleted, { a: 'unreachable' });
+});
+
+/* ---- The mood body ------------------------------------------------------ */
+
+test('the mood body on Today is the contract`s shape too: one field, a word or null', async () => {
+  const { api, today } = await openToday(['a']);
+
+  await today.pressMood('Even');
+  await today.pressMood('Even');
+
+  assert.deepEqual(
+    api.sent.filter((s) => s.method === 'PUT').map((s) => s.body),
+    [{ mood: 'Even' }, { mood: null }],
+  );
 });

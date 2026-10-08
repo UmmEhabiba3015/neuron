@@ -53,8 +53,13 @@ describe('days in a range (e2e)', () => {
       .set('Authorization', alice)
       .expect(204);
 
+  /*
+   * The clock starts on the latest date any test here touches. A mood cannot
+   * be set on a date that has not happened yet, so every date below has to
+   * be today or earlier.
+   */
   beforeEach(async () => {
-    freezeClockAt('2026-07-01T12:00:00.000Z');
+    freezeClockAt('2026-10-05T12:00:00.000Z');
 
     dataSource = await createTestDataSource();
 

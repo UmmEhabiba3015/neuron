@@ -5,7 +5,7 @@ import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { WAVEFORMS } from '@/lib/waveform';
 
 /*
- * The entry on Today, with the control that deletes it.
+ * An entry on a day's page, with the control that deletes it.
  *
  * At rest the row holds the designer's icon. While the person is being asked,
  * or after a delete has failed, the icon's place is taken by a panel with a
@@ -159,10 +159,13 @@ export function LiveEntry({
  * where 18-entry-system-states.html draws `mood-failed`.
  */
 export function MoodRow({
+  label,
   chosen,
   problem,
   onPress,
 }: {
+  /* "Today felt" on Today, and "Day felt" on any other day. */
+  label: string;
   chosen: Mood | null;
   problem?: string;
   onPress: (mood: Mood) => void;
@@ -170,7 +173,7 @@ export function MoodRow({
   return (
     <section className="moodrow ruled-mood">
       <div className="tcol">
-        <h2>Today felt</h2>
+        <h2>{label}</h2>
       </div>
       <div className="ccol">
         <div className="chips" role="group" aria-label="How was this day?">

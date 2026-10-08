@@ -466,3 +466,214 @@ test('the name the API sends is carried with the signed-in user, after a login a
     user: USER,
   });
 });
+
+/* ---- Signing out ------------------------------------------------------- */
+
+const SIGNED_OUT: Reply = { status: 204 };
+
+test('signing out sends POST /auth/logout with the token and the cookie, drops the token, and is not a session that ended', async () => {
+  const { api, session } = await sessionHoldingToken('held', {
+    '/auth/logout': () => SIGNED_OUT,
+    '/entries': () => UNAUTHORIZED,
+  });
+
+  assert.equal(await session.signOut(), 'signedOut');
+
+  assert.deepEqual(api.sentTo('/auth/logout'), [
+    { path: '/auth/logout', method: 'POST', token: 'held', cookie: true },
+  ]);
+  assert.deepEqual(session.getState(), { status: 'signedOut', ended: false });
+
+  /* The token is gone: the next request carries none, and is not refreshed. */
+  const after = await session.request('/entries');
+
+  assert.equal(after.kind, 'ended');
+  assert.equal(api.sentTo('/entries')[0].token, undefined);
+  assert.equal(api.sentTo('/auth/refresh').length, 0);
+  assert.deepEqual(session.getState(), { status: 'signedOut', ended: false });
+});
+
+test('a 401 to signing out, with a refresh that is refused too, means the session was already over, and the person is signed out all the same', async () => {
+  const { api, session } = await sessionHoldingToken('held', {
+    '/auth/logout': () => UNAUTHORIZED,
+    '/auth/refresh': () => UNAUTHORIZED,
+  });
+
+  assert.equal(await session.signOut(), 'signedOut');
+  assert.deepEqual(session.getState(), { status: 'signedOut', ended: false });
+  assert.equal(api.sentTo('/auth/logout').length, 1);
+});
+
+test('a 401 to signing out that only means the token was old is refreshed once, and the sign-out is then sent with the new token', async () => {
+  const { api, session } = await sessionHoldingToken('old', {
+    '/auth/logout': (sent) => (sent.token === 'new' ? SIGNED_OUT : UNAUTHORIZED),
+    '/auth/refresh': () => signedInAs('new'),
+  });
+
+  assert.equal(await session.signOut(), 'signedOut');
+
+  assert.deepEqual(
+    api.sentTo('/auth/logout').map((call) => call.token),
+    ['old', 'new'],
+  );
+  assert.equal(api.sentTo('/auth/refresh').length, 1);
+  assert.deepEqual(session.getState(), { status: 'signedOut', ended: false });
+});
+
+test('when the server cannot be reached, signing out changes nothing: the person is still signed in, and a request still carries the token', async () => {
+  const { api, session } = await sessionHoldingToken('held', {
+    '/auth/logout': () => 'no answer',
+    '/entries': () => ({ status: 200, body: [] }),
+  });
+
+  assert.equal(await session.signOut(), 'unreachable');
+  assert.deepEqual(session.getState(), { status: 'signedIn', user: USER });
+
+  assert.equal((await session.request('/entries')).kind, 'ok');
+  assert.equal(api.sentTo('/entries')[0].token, 'held');
+
+  /* And the control can be pressed again: a second press is a second request. */
+  assert.equal(await session.signOut(), 'unreachable');
+  assert.equal(api.sentTo('/auth/logout').length, 2);
+});
+
+test('when the refresh that follows a 401 to signing out gets no answer, nothing has changed either', async () => {
+  const { session } = await sessionHoldingToken('held', {
+    '/auth/logout': () => UNAUTHORIZED,
+    '/auth/refresh': () => 'no answer',
+  });
+
+  assert.equal(await session.signOut(), 'unreachable');
+  assert.equal(session.getState().status, 'signedIn');
+});
+
+test('an error from the server is not a sign-out: the person is still signed in and still holds the token', async () => {
+  const { api, session } = await sessionHoldingToken('held', {
+    '/auth/logout': () => ({ status: 500, body: { message: 'boom' } }),
+    '/entries': () => ({ status: 200, body: [] }),
+  });
+
+  assert.equal(await session.signOut(), 'failed');
+  assert.equal(session.getState().status, 'signedIn');
+
+  await session.request('/entries');
+  assert.equal(api.sentTo('/entries')[0].token, 'held');
+});
+
+test('two presses of sign out while the first is in flight send one request', async () => {
+  const logout = held();
+  const { api, session } = await sessionHoldingToken('held', {
+    '/auth/logout': () => logout.reply,
+  });
+
+  const first = session.signOut();
+  const second = session.signOut();
+
+  await settle();
+  logout.release(SIGNED_OUT);
+
+  assert.deepEqual(await Promise.all([first, second]), [
+    'signedOut',
+    'signedOut',
+  ]);
+  assert.equal(api.sentTo('/auth/logout').length, 1);
+});
+
+test('a refresh that is in flight when sign-out is pressed is waited for, so it cannot finish afterwards and sign the person back in', async () => {
+  const refresh = held();
+  const { api, session } = await sessionHoldingToken('old', {
+    '/auth/refresh': () => refresh.reply,
+    '/auth/logout': () => SIGNED_OUT,
+    '/entries': onlyNewToken,
+  });
+
+  /* A request is refused, and its refresh is now in flight. */
+  const entries = session.request('/entries');
+  await settle();
+  assert.equal(api.sentTo('/auth/refresh').length, 1);
+
+  const leaving = session.signOut();
+  await settle();
+
+  assert.equal(
+    api.sentTo('/auth/logout').length,
+    0,
+    'the sign-out is not sent beside the refresh',
+  );
+
+  refresh.release(signedInAs('new'));
+
+  assert.equal(await leaving, 'signedOut');
+  await entries;
+
+  /* The refresh came first, and the sign-out carried the token it gave. */
+  assert.deepEqual(
+    api.calls
+      .filter((call) => call.path.startsWith('/auth/') && call.path !== '/auth/login')
+      .map((call) => `${call.path} ${call.token ?? '-'}`),
+    ['/auth/refresh -', '/auth/logout new'],
+  );
+  assert.deepEqual(session.getState(), { status: 'signedOut', ended: false });
+
+  /* Nothing is left that could carry a token. */
+  await session.request('/entries');
+  assert.equal(api.sentTo('/entries').at(-1)!.token, undefined);
+  assert.equal(api.sentTo('/auth/refresh').length, 1);
+});
+
+test('a request that was in flight when the person signed out, and is then refused, does not refresh and does not say the session ended', async () => {
+  const slow = held();
+  const { api, session } = await sessionHoldingToken('held', {
+    '/auth/logout': () => SIGNED_OUT,
+    '/auth/refresh': () => signedInAs('new'),
+    '/entries': () => slow.reply,
+  });
+
+  const entries = session.request('/entries');
+  await settle();
+
+  assert.equal(await session.signOut(), 'signedOut');
+
+  slow.release(UNAUTHORIZED);
+
+  assert.equal((await entries).kind, 'ended');
+  assert.equal(api.sentTo('/auth/refresh').length, 0);
+  assert.equal(api.sentTo('/entries').length, 1);
+  assert.deepEqual(session.getState(), { status: 'signedOut', ended: false });
+});
+
+test('a request refused while a sign-out is in flight waits for it, and does not refresh once the person is signed out', async () => {
+  const logout = held();
+  const { api, session } = await sessionHoldingToken('held', {
+    '/auth/logout': () => logout.reply,
+    '/auth/refresh': () => signedInAs('new'),
+    '/entries': () => UNAUTHORIZED,
+  });
+
+  const leaving = session.signOut();
+  await settle();
+
+  const entries = session.request('/entries');
+  await settle();
+
+  assert.equal(api.sentTo('/auth/refresh').length, 0);
+
+  logout.release(SIGNED_OUT);
+
+  assert.equal(await leaving, 'signedOut');
+  assert.equal((await entries).kind, 'ended');
+  assert.equal(api.sentTo('/auth/refresh').length, 0);
+  assert.deepEqual(session.getState(), { status: 'signedOut', ended: false });
+});
+
+test('after signing out, signing in again works', async () => {
+  const { session } = await sessionHoldingToken('held', {
+    '/auth/logout': () => SIGNED_OUT,
+  });
+
+  await session.signOut();
+  const again = await session.login(USER.email, 'a password');
+
+  assert.equal(again.kind, 'ok');
+  assert.deepEqual(session.getState(), { status: 'signedIn', user: USER });
+});

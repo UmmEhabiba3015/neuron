@@ -39,9 +39,26 @@ export class DaysService {
   async findToday(
     owner: DayOwner,
   ): Promise<{ date: string; day: Day | undefined }> {
-    const date = dayFor(new Date(), owner.timezone);
+    const date = this.todayFor(owner);
 
     return { date, day: await this.daysRepository.findByDate(owner.id, date) };
+  }
+
+  /*
+   * A date later than today has not happened yet for this person, and a day
+   * that has not happened does not exist. Today is the same today that
+   * findToday answers with, so two people in two timezones can get two
+   * different answers for one date at one moment.
+   *
+   * Two dates in YYYY-MM-DD form compare correctly as text.
+   */
+  hasHappened(owner: DayOwner, date: string): boolean {
+    return date <= this.todayFor(owner);
+  }
+
+  /* The one place that says which date is today for a person. */
+  private todayFor(owner: DayOwner): string {
+    return dayFor(new Date(), owner.timezone);
   }
 
   findInRange(userId: string, from: string, to: string): Promise<Day[]> {

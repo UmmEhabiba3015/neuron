@@ -1,10 +1,15 @@
 /*
- * Today: what the screen holds, and what each press does to it.
+ * A day: what the screen holds, and what each press does to it.
  *
- * Like session.ts, this file imports nothing that exists when it runs, so it
- * is tested with Node alone. The function that sends a request and the size
- * of a page are handed in. The components draw what `getState()` says and
- * decide nothing.
+ * One store serves Today and the page of any other date. The two differ in
+ * two places only: which day is asked for, and whether an entry can be
+ * written. `createToday` and `createPastDay`, at the foot of the file, are
+ * the two ways in.
+ *
+ * Like session.ts, this file is tested with Node alone. The function that
+ * sends a request and the size of a page are handed in, and the one thing
+ * imported that runs is a function of plain text. The components draw what
+ * `getState()` says and decide nothing.
  *
  * The three choices are ADR-021's:
  *
@@ -17,7 +22,14 @@
  *             back to what the API last confirmed if the request fails.
  */
 
-import type { Mood, WireDay, WireEntry, WireNewEntry } from '@neuron/contracts';
+import type {
+  Mood,
+  WireDay,
+  WireEntry,
+  WireMood,
+  WireNewEntry,
+} from '@neuron/contracts';
+import { isCalendarDate } from './format.ts';
 import type { ApiResult, RequestOptions } from './session.ts';
 
 export type Request = <T>(
@@ -38,7 +50,20 @@ export type Day =
       entries: readonly WireEntry[];
     }
   | { status: 'unreachable'; asked: number }
-  | { status: 'failed'; asked: number };
+  | { status: 'failed'; asked: number }
+  /*
+   * The three below are only ever the page of a date, and never Today.
+   *
+   * `notFound`  the address is not a date, the API answered 404 for it, or
+   *             the day has no entries. A day with nothing on it has no page.
+   * `emptied`   the day had entries when this page opened, and the last of
+   *             them has been deleted here.
+   * `isToday`   the date in the address is today's, and Today has its own
+   *             address.
+   */
+  | { status: 'notFound' }
+  | { status: 'emptied'; date: string }
+  | { status: 'isToday' };
 
 /*
  * `unreachable`, `refused` and `ended` are never merged: no answer from the
@@ -75,15 +100,22 @@ export interface TodayState {
   moodNotSaved: MoodNotSaved | null;
 }
 
-export interface Today {
-  getState(): TodayState;
+/* What the page of a date shows: everything Today shows but the composer. */
+export type DayState = Omit<TodayState, 'text' | 'save'>;
+
+/*
+ * The page of a date that is not today. It has no `type` and no `save`, and
+ * not only in this type: the object itself does not carry them. The server
+ * files an entry on the day it is written, so there is nothing a past day
+ * could do with one.
+ */
+export interface DayPage {
+  getState(): DayState;
   subscribe(listener: () => void): () => void;
-  /* Asks the API for today. A press while it is asking sends nothing. */
+  /* Asks the API for the day. A press while it is asking sends nothing. */
   open(): Promise<void>;
   /* Asks again without disturbing what is on the screen. */
   look(): Promise<void>;
-  type(text: string): void;
-  save(): Promise<void>;
   /* Also takes away the sentence of a delete that failed. */
   askToDelete(id: string): void;
   keep(): void;
@@ -98,6 +130,12 @@ export interface Today {
   pressMood(mood: Mood): Promise<void>;
 }
 
+export interface Today extends DayPage {
+  getState(): TodayState;
+  type(text: string): void;
+  save(): Promise<void>;
+}
+
 /* Text that is only spaces or blank lines is not an entry. */
 export function isBlank(text: string): boolean {
   return text.trim() === '';
@@ -107,7 +145,9 @@ type Fetched =
   | { status: 'loaded'; day: WireDay; entries: WireEntry[] }
   | { status: 'unreachable' }
   | { status: 'failed' }
-  | { status: 'ended' };
+  | { status: 'ended' }
+  | { status: 'notFound' }
+  | { status: 'isToday' };
 
 function statusOf(
   kind: 'rejected' | 'ended' | 'unreachable',
@@ -122,15 +162,29 @@ function statusOf(
  */
 export const MAX_PAGES = 20;
 
-export function createToday(config: {
+interface DayConfig {
   request: Request;
   pageSize: number;
   maxPages?: number;
-}): Today {
+}
+
+/* `date` is the date in the address, and is left out for Today. */
+function createDay(config: DayConfig, date?: string): Today {
   const { request, pageSize, maxPages = MAX_PAGES } = config;
 
   let fetched: { day: WireDay; entries: WireEntry[] } | undefined;
   let trouble: 'unreachable' | 'failed' | undefined;
+
+  /*
+   * An address that is not a calendar date is not found before anything is
+   * asked, and nothing is ever sent for it.
+   */
+  let outcome: 'notFound' | 'isToday' | undefined =
+    date !== undefined && !isCalendarDate(date) ? 'notFound' : undefined;
+  const neverAsked = outcome !== undefined;
+
+  /* The day has had at least one entry while this page has been open. */
+  let hadEntries = false;
   let asked = 0;
   let asking = false;
 
@@ -178,13 +232,27 @@ export function createToday(config: {
 
     if (trouble) {
       day = { status: trouble, asked };
+    } else if (outcome) {
+      day = { status: outcome };
     } else if (fetched) {
-      day = {
-        status: 'open',
-        date: fetched.day.date,
-        mood: moodShown(fetched.day),
-        entries: fetched.entries.filter((entry) => !hidden.has(entry.id)),
-      };
+      const entries = fetched.entries.filter((entry) => !hidden.has(entry.id));
+
+      /*
+       * An empty today is a real screen. An empty day of any other date is
+       * not: it was never there, or its last entry has just been deleted.
+       */
+      if (date !== undefined && entries.length === 0) {
+        day = hadEntries
+          ? { status: 'emptied', date: fetched.day.date }
+          : { status: 'notFound' };
+      } else {
+        day = {
+          status: 'open',
+          date: fetched.day.date,
+          mood: moodShown(fetched.day),
+          entries,
+        };
+      }
     }
 
     return { day, asking, text, save, confirming, notDeleted, moodNotSaved };
@@ -197,13 +265,41 @@ export function createToday(config: {
 
   /*
    * The date is the API's: the browser never works out which day "today" is
-   * (ADR-015).
+   * (ADR-015). The page of a date asks too, because that is the only way to
+   * learn that the date in its address is today's.
+   *
+   * Not found is decided by the status and never by the message. A 404 is a
+   * day that has not happened yet. A 400 is an address the API does not read
+   * as a date, which `isCalendarDate` should already have stopped.
    */
-  async function fetchToday(): Promise<Fetched> {
-    const day = await request<WireDay>('/days/today');
+  async function fetchDay(): Promise<Fetched> {
+    const today = await request<WireDay>('/days/today');
 
-    if (day.kind !== 'ok') {
-      return { status: statusOf(day.kind) };
+    if (today.kind !== 'ok') {
+      return { status: statusOf(today.kind) };
+    }
+
+    let day = today;
+
+    if (date !== undefined) {
+      if (date === today.data.date) {
+        return { status: 'isToday' };
+      }
+
+      const asked = await request<WireDay>(`/days/${date}`);
+
+      if (
+        asked.kind === 'rejected' &&
+        (asked.status === 404 || asked.status === 400)
+      ) {
+        return { status: 'notFound' };
+      }
+
+      if (asked.kind !== 'ok') {
+        return { status: statusOf(asked.kind) };
+      }
+
+      day = asked;
     }
 
     const entries: WireEntry[] = [];
@@ -253,7 +349,7 @@ export function createToday(config: {
     publish();
 
     const moodAnswersBefore = moodAnswers;
-    const answer = await fetchToday();
+    const answer = await fetchDay();
 
     if (mine !== question) {
       return;
@@ -278,11 +374,18 @@ export function createToday(config: {
         entries: answer.entries,
       };
       trouble = undefined;
+      outcome = undefined;
       asked = 0;
+      hadEntries = hadEntries || answer.entries.length > 0;
 
       if (save.status === 'saved') {
         save = { status: 'idle' };
       }
+    } else if (answer.status === 'notFound' || answer.status === 'isToday') {
+      outcome = answer.status;
+      fetched = undefined;
+      trouble = undefined;
+      asked = 0;
     } else if (answer.status !== 'ended' && (!keep || !fetched || trouble)) {
       trouble = answer.status;
       asked += 1;
@@ -292,7 +395,7 @@ export function createToday(config: {
   }
 
   async function open(): Promise<void> {
-    if (asking) {
+    if (asking || neverAsked) {
       return;
     }
 
@@ -300,7 +403,7 @@ export function createToday(config: {
   }
 
   async function look(): Promise<void> {
-    if (asking) {
+    if (asking || neverAsked) {
       return;
     }
 
@@ -409,13 +512,13 @@ export function createToday(config: {
    * screen does not wait for any of this: the word is marked at once.
    */
   async function pressMood(mood: Mood): Promise<void> {
-    if (!fetched || trouble) {
+    if (!fetched || trouble || outcome) {
       return;
     }
 
-    const { date } = fetched.day;
+    const on = fetched.day.date;
 
-    wanted = { date, mood: moodShown(fetched.day) === mood ? null : mood };
+    wanted = { date: on, mood: moodShown(fetched.day) === mood ? null : mood };
     moodNotSaved = null;
     publish();
 
@@ -427,7 +530,7 @@ export function createToday(config: {
 
     while (wanted) {
       const sent: MoodPress = wanted;
-      const body: { mood: Mood | null } = { mood: sent.mood };
+      const body: WireMood = { mood: sent.mood };
 
       const result = await request<WireDay>(`/days/${sent.date}/mood`, {
         method: 'PUT',
@@ -482,6 +585,30 @@ export function createToday(config: {
     dismiss,
     goAhead,
     pressMood,
+  };
+}
+
+export function createToday(config: DayConfig): Today {
+  return createDay(config);
+}
+
+/*
+ * The same store, asked for one date, and handed over without the two
+ * functions that write an entry.
+ */
+export function createPastDay(config: DayConfig & { date: string }): DayPage {
+  const day = createDay(config, config.date);
+
+  return {
+    getState: day.getState,
+    subscribe: day.subscribe,
+    open: day.open,
+    look: day.look,
+    askToDelete: day.askToDelete,
+    keep: day.keep,
+    dismiss: day.dismiss,
+    goAhead: day.goAhead,
+    pressMood: day.pressMood,
   };
 }
 

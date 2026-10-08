@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Raw, Repository, type FindOptionsWhere } from 'typeorm';
-import { JournalEntry } from './entry.entity';
+import { JournalEntry, type FiledEntry } from './entry.entity';
 import type { EntryFilters } from './entry-filters';
 import type { Page } from './page';
 
@@ -16,24 +16,46 @@ export class EntriesRepository {
     userId: string,
     filters: EntryFilters,
     page: Page,
-  ): Promise<JournalEntry[]> {
-    return this.entries.find({
-      where: whereFor(userId, filters),
-      order: { createdAt: 'DESC' },
-      take: page.limit,
-      skip: page.offset,
-    });
+  ): Promise<FiledEntry[]> {
+    return this.filed(whereFor(userId, filters))
+      .limit(page.limit)
+      .offset(page.offset)
+      .getMany() as Promise<FiledEntry[]>;
   }
 
   count(userId: string, filters: EntryFilters): Promise<number> {
     return this.entries.count({ where: whereFor(userId, filters) });
   }
 
-  async findById(
-    id: string,
-    userId: string,
-  ): Promise<JournalEntry | undefined> {
-    return (await this.entries.findOneBy({ id, userId })) ?? undefined;
+  async findById(id: string, userId: string): Promise<FiledEntry | undefined> {
+    const entry = await this.filed({ id, userId }).getOne();
+
+    return (entry as FiledEntry | null) ?? undefined;
+  }
+
+  /*
+   * Every read of an entry, with the date of its day joined on, in one
+   * query however many entries come back.
+   *
+   * The columns are named, so user_id, day_id and deleted_at are not read,
+   * and of the day only its date is.
+   *
+   * limit and offset count rows of the joined result. That is the same as
+   * counting entries here, because an entry points at exactly one day, so
+   * the join never turns one entry into two rows.
+   */
+  private filed(where: FindOptionsWhere<JournalEntry>) {
+    return this.entries.createQueryBuilder('entry').setFindOptions({
+      where,
+      relations: { day: true },
+      select: {
+        id: true,
+        content: true,
+        createdAt: true,
+        day: { date: true },
+      },
+      order: { createdAt: 'DESC' },
+    });
   }
 
   async save(entry: JournalEntry): Promise<void> {
@@ -44,7 +66,7 @@ export class EntriesRepository {
     id: string,
     content: string,
     userId: string,
-  ): Promise<JournalEntry | undefined> {
+  ): Promise<FiledEntry | undefined> {
     /*
      * @DeleteDateColumn filters reads and does not filter an update. Without
      * the condition on deletedAt this would change a deleted entry.
