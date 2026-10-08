@@ -85,6 +85,7 @@ describe('days (e2e)', () => {
     expect(Object.keys(created.body as object).sort()).toEqual([
       'content',
       'createdAt',
+      'date',
       'id',
     ]);
 
@@ -95,6 +96,7 @@ describe('days (e2e)', () => {
     expect(Object.keys(fetched.body as object).sort()).toEqual([
       'content',
       'createdAt',
+      'date',
       'id',
     ]);
   });

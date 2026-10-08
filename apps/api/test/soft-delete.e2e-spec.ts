@@ -379,6 +379,7 @@ describe('a deleted entry (e2e)', () => {
           expect(Object.keys(entry).sort()).toEqual([
             'content',
             'createdAt',
+            'date',
             'id',
           ]);
         }

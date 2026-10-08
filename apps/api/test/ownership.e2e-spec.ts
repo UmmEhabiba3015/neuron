@@ -186,6 +186,7 @@ describe('entry ownership (e2e)', () => {
     expect(Object.keys((list.body as object[])[0]).sort()).toEqual([
       'content',
       'createdAt',
+      'date',
       'id',
     ]);
   });

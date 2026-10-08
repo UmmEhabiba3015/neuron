@@ -72,7 +72,7 @@ describe('EntriesController (e2e)', () => {
       });
   });
 
-  it('/entries (POST) returns exactly id, content and createdAt', async () => {
+  it('/entries (POST) returns exactly id, content, createdAt and date', async () => {
     const created = await api()
       .post('/entries')
       .send({ content: 'written over HTTP' })
@@ -82,11 +82,12 @@ describe('EntriesController (e2e)', () => {
       'id',
       'content',
       'createdAt',
+      'date',
     ]);
 
     const [listed] = (await api().get('/entries').expect(200)).body as object[];
 
-    expect(Object.keys(listed)).toEqual(['id', 'content', 'createdAt']);
+    expect(Object.keys(listed)).toEqual(['id', 'content', 'createdAt', 'date']);
   });
 
   describe('status codes', () => {

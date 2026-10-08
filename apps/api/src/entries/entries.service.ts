@@ -3,7 +3,7 @@ import { DataSource } from 'typeorm';
 import type { DayOwner } from '../days/day-boundary';
 import { DaysService } from '../days/days.service';
 import { EntriesRepository } from './entries.repository';
-import { JournalEntry } from './entry.entity';
+import { JournalEntry, type FiledEntry } from './entry.entity';
 import type { EntryFilters } from './entry-filters';
 import { FULL_PAGE, type Page } from './page';
 
@@ -19,7 +19,7 @@ export class EntriesService {
     userId: string,
     filters: EntryFilters = {},
     page: Page = FULL_PAGE,
-  ): Promise<JournalEntry[]> {
+  ): Promise<FiledEntry[]> {
     return this.entriesRepository.find(userId, filters, page);
   }
 
@@ -34,7 +34,7 @@ export class EntriesService {
    * empty day behind, and 00-flow.md is explicit that an empty day does not
    * exist.
    */
-  async create(content: string, author: DayOwner): Promise<JournalEntry> {
+  async create(content: string, author: DayOwner): Promise<FiledEntry> {
     const createdAt = new Date().toISOString();
 
     const id = await this.dataSource.transaction(async (manager) => {
@@ -56,7 +56,7 @@ export class EntriesService {
     return (await this.entriesRepository.findById(id, author.id))!;
   }
 
-  findById(id: string, userId: string): Promise<JournalEntry | undefined> {
+  findById(id: string, userId: string): Promise<FiledEntry | undefined> {
     return this.entriesRepository.findById(id, userId);
   }
 
@@ -64,7 +64,7 @@ export class EntriesService {
     id: string,
     content: string,
     userId: string,
-  ): Promise<JournalEntry | undefined> {
+  ): Promise<FiledEntry | undefined> {
     return this.entriesRepository.update(id, content, userId);
   }
 

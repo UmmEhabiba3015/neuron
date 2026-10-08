@@ -86,8 +86,20 @@ export interface Session {
    * browser for it, and never puts another in its place.
    */
   register(details: WireRegistration): Promise<ApiResult<WireUser>>;
+  /* Signs out of this device, and of no other. */
+  signOut(): Promise<SignOut>;
   request<T>(path: string, options?: RequestOptions): Promise<ApiResult<T>>;
 }
+
+/*
+ * What a press of "Sign out of this device" came to.
+ *
+ * `signedOut`    the server has ended the session, or it was already over.
+ * `unreachable`  no answer arrived. Nothing has changed: the person is still
+ *                signed in, here and on the server.
+ * `failed`       the server answered, and not with a yes. Nothing has changed.
+ */
+export type SignOut = 'signedOut' | 'unreachable' | 'failed';
 
 type Answer =
   { kind: 'answered'; status: number; body: unknown } | { kind: 'unreachable' };
@@ -167,7 +179,26 @@ export function createSession(config: {
     }
   }
 
+  /* While a sign-out is in flight, this is it. */
+  let signOutInFlight: Promise<SignOut> | undefined;
+
+  /*
+   * A refresh and a sign-out carry the same cookie, so they never run
+   * together, for the reason rule 4 gives. A refresh that is asked for while
+   * a sign-out is out waits for it, and is not sent at all if the person is
+   * then signed out.
+   */
   function refresh(): Promise<RefreshOutcome> {
+    if (signOutInFlight) {
+      return signOutInFlight.then((outcome) =>
+        outcome === 'signedOut' ? 'ended' : refreshNow(),
+      );
+    }
+
+    return refreshNow();
+  }
+
+  function refreshNow(): Promise<RefreshOutcome> {
     if (refreshInFlight) {
       return refreshInFlight;
     }
@@ -248,9 +279,16 @@ export function createSession(config: {
     return attempt;
   }
 
+  /*
+   * A person who signed out on purpose is not told that their session ended,
+   * so a request that was in flight when they did changes nothing here.
+   */
   function endSession(): ApiResult<never> {
     accessToken = undefined;
-    setState({ status: 'signedOut', ended: true });
+
+    if (state.status !== 'signedOut') {
+      setState({ status: 'signedOut', ended: true });
+    }
 
     return { kind: 'ended' };
   }
@@ -281,6 +319,14 @@ export function createSession(config: {
 
     if (first.kind === 'unreachable' || first.status !== 401) {
       return resultOf<T>(first);
+    }
+
+    /*
+     * The person has signed out since this request left. Refreshing now is
+     * the one thing that could sign them back in, so it is not tried.
+     */
+    if (state.status === 'signedOut') {
+      return { kind: 'ended' };
     }
 
     /*
@@ -352,6 +398,84 @@ export function createSession(config: {
     );
   }
 
+  /*
+   * POST /auth/logout ends the session on the server and clears the cookie.
+   * It is sent with the access token, which is how the API knows whose
+   * session to end, and with the cookie, which is the only way a browser
+   * accepts the instruction to clear it.
+   *
+   * Only an answer changes anything here. With no answer the cookie is still
+   * in the browser and the session is still good on the server, so dropping
+   * the token would only look like signing out: a reload would sign the
+   * person straight back in.
+   */
+  function signOut(): Promise<SignOut> {
+    if (signOutInFlight) {
+      return signOutInFlight;
+    }
+
+    const attempt = (async (): Promise<SignOut> => {
+      /*
+       * A refresh that is already out is waited for. Sent beside it, the
+       * sign-out could be answered first, and the refresh would then sign
+       * the person back in and leave a new cookie behind.
+       */
+      if (refreshInFlight) {
+        await refreshInFlight;
+      }
+
+      const sendIt = () =>
+        send(
+          '/auth/logout',
+          { method: 'POST' },
+          { token: accessToken, withCookie: true },
+        );
+
+      let answer = await sendIt();
+
+      /*
+       * A 401 may only mean that the access token is old while the session
+       * is still good. So it gets rule 3: one refresh, and the request once
+       * more. If the refresh is refused too, the session was already over.
+       */
+      if (answer.kind === 'answered' && answer.status === 401) {
+        const outcome = await refreshNow();
+
+        if (outcome === 'unreachable') {
+          return 'unreachable';
+        }
+
+        if (outcome === 'refreshed') {
+          answer = await sendIt();
+        }
+      }
+
+      if (answer.kind === 'unreachable') {
+        return 'unreachable';
+      }
+
+      const over =
+        (answer.status >= 200 && answer.status < 300) || answer.status === 401;
+
+      if (!over) {
+        return 'failed';
+      }
+
+      accessToken = undefined;
+      setState({ status: 'signedOut', ended: false });
+
+      return 'signedOut';
+    })();
+
+    signOutInFlight = attempt;
+
+    void attempt.finally(() => {
+      signOutInFlight = undefined;
+    });
+
+    return attempt;
+  }
+
   return {
     getState: () => state,
     subscribe(listener) {
@@ -363,6 +487,7 @@ export function createSession(config: {
     restore,
     login,
     register,
+    signOut,
     request,
   };
 }

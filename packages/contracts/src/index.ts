@@ -31,6 +31,12 @@ export interface WireEntry {
   content: string;
   /* An instant, as an ISO 8601 string. */
   createdAt: string;
+  /*
+   * The calendar date, YYYY-MM-DD, of the day the entry was filed on. The
+   * API decided it once, when the entry was written. It is not worked out
+   * from createdAt, and the two can disagree.
+   */
+  date: string;
 }
 
 export interface WireDay {
@@ -62,6 +68,11 @@ export interface WireAuthenticated {
 /* The body of POST /entries. */
 export interface WireNewEntry {
   content: string;
+}
+
+/* The body of PUT /days/:date/mood. null clears the mood. */
+export interface WireMood {
+  mood: Mood | null;
 }
 
 /* The body of POST /auth/login. */

@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Put, Query, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Put,
+  Query,
+  Req,
+} from '@nestjs/common';
 import type { WireDay } from '@neuron/contracts';
 import type { AuthenticatedRequest } from '../auth/authenticated-request';
 import type { Day } from './day.entity';
@@ -43,12 +52,17 @@ export class DaysController {
    * It is a real day with nothing on it yet, and the screen for it has to
    * render. ADR-005 settled the same question for an empty collection: an
    * empty answer is a complete answer.
+   *
+   * A day that has not happened yet is different. It is not an empty day,
+   * it is no day at all, and it is a 404.
    */
   @Get(':date')
   async findByDate(
     @Param() params: DayDateParamDto,
     @Req() request: AuthenticatedRequest,
   ): Promise<WireDay> {
+    this.refuseADayThatHasNotHappened(params.date, request);
+
     const day = await this.daysService.findByDate(request.user.id, params.date);
 
     return day ? toResponse(day) : { date: params.date, mood: null };
@@ -57,6 +71,9 @@ export class DaysController {
   /*
    * Setting a mood creates the day if it does not exist, which is the one
    * place a day is born without an entry.
+   *
+   * The date is checked before anything is written, so a refused request
+   * leaves no day row behind.
    */
   @Put(':date/mood')
   async setMood(
@@ -64,6 +81,8 @@ export class DaysController {
     @Body() dto: SetMoodDto,
     @Req() request: AuthenticatedRequest,
   ): Promise<WireDay> {
+    this.refuseADayThatHasNotHappened(params.date, request);
+
     const day = await this.daysService.setMood(
       request.user.id,
       params.date,
@@ -71,6 +90,20 @@ export class DaysController {
     );
 
     return day ? toResponse(day) : { date: params.date, mood: dto.mood };
+  }
+
+  /*
+   * Whether a date is in the future depends on who is asking, so this takes
+   * the request and not only the date. The message has the same form as the
+   * one for an entry that is not there.
+   */
+  private refuseADayThatHasNotHappened(
+    date: string,
+    request: AuthenticatedRequest,
+  ): void {
+    if (!this.daysService.hasHappened(request.user, date)) {
+      throw new NotFoundException(`Day with date ${date} not found`);
+    }
   }
 }
 

@@ -2,32 +2,16 @@
 
 import { MAX_PAGE_SIZE } from '@neuron/contracts';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { BlankScreen } from '@/app/components/AuthScreen';
 import { KeyBox, LiveScreen } from '@/app/components/LiveScreen';
-import { LiveComposer, LiveEntry, MoodRow } from '@/app/components/Journal';
+import { LiveComposer } from '@/app/components/Journal';
 import { useSession } from '@/app/components/useSession';
 import { session } from '@/lib/api';
-import { formatDay, formatTime } from '@/lib/format';
-import {
-  createToday,
-  isBlank,
-  type MoodNotSaved,
-  type NotDeleted,
-  type TodayState,
-} from '@/lib/today';
+import { formatDay } from '@/lib/format';
+import { createToday, isBlank, type TodayState } from '@/lib/today';
 import { CouldNotConnect } from './CouldNotConnect';
-
-const NOT_DELETED: Record<NotDeleted, string> = {
-  unreachable: 'We could not reach the server. The entry is still here.',
-  refused: 'Something went wrong on our side. The entry is still here.',
-};
-
-/* The owner's words. */
-const MOOD_NOT_SAVED: Record<MoodNotSaved, string> = {
-  unreachable: 'Your mood was not saved. We could not reach the server.',
-  refused: 'Your mood was not saved. Something went wrong on our side.',
-};
+import { DaySheet, useFocusAfterDelete } from './DaySheet';
 
 /*
  * An ended session has no sentence here: the screen leaves for /in, and that
@@ -116,44 +100,12 @@ export function LiveToday() {
     };
   }, [signedIn, today]);
 
-  /*
-   * A deleted entry leaves the page at once, and its buttons leave with it.
-   * Focus would be left on nothing, and the next press of Tab would start
-   * again from the top of the page. So before the entry goes, the place focus
-   * should go to is written down here, and it is moved once the page has been
-   * drawn without the entry: to the delete control of the entry after it, or
-   * of the one before it, or to the line that says the day is empty.
-   */
-  const emptyLine = useRef<HTMLParagraphElement>(null);
-  const focusNext = useRef<{ entry: string | null } | null>(null);
-  const shownEntries = view.day.status === 'open' ? view.day.entries : null;
-
-  useEffect(() => {
-    const next = focusNext.current;
-
-    if (!next || !shownEntries) {
-      return;
-    }
-
-    focusNext.current = null;
-
-    const control = next.entry
-      ? document.querySelector<HTMLElement>(
-          `[data-entry-id="${next.entry}"] [data-entry-action="delete"]`,
-        )
-      : null;
-
-    (control ?? emptyLine.current)?.focus();
-  }, [shownEntries]);
-
-  function goAhead(id: string) {
-    const entries = shownEntries ?? [];
-    const at = entries.findIndex((entry) => entry.id === id);
-    const neighbour = entries[at + 1] ?? entries[at - 1];
-
-    focusNext.current = { entry: neighbour?.id ?? null };
-    void today.goAhead();
-  }
+  /* Where focus goes when an entry is deleted: see DaySheet.tsx. */
+  const shownEntries = view.day.status === 'open' ? view.day.entries : [];
+  const { whenEmpty, leaving } = useFocusAfterDelete<HTMLParagraphElement>(
+    shownEntries,
+    view.day,
+  );
 
   if (state.status === 'unreachable') {
     return <CouldNotConnect asking={state.asking} asked={state.asked} />;
@@ -215,45 +167,20 @@ export function LiveToday() {
       {/* It can take focus, and is not a stop for the Tab key: it is where
           focus goes when the last entry of the day has been deleted. */}
       {day.status === 'open' && day.entries.length === 0 ? (
-        <p className="empty" tabIndex={-1} ref={emptyLine}>
+        <p className="empty" tabIndex={-1} ref={whenEmpty}>
           What&apos;s today been like?
         </p>
       ) : null}
 
       {day.status === 'open' && day.entries.length > 0 ? (
-        <main className="sheet">
-          {day.entries.map((entry) => {
-            const why = view.notDeleted[entry.id];
-
-            return (
-              <LiveEntry
-                key={entry.id}
-                id={entry.id}
-                time={formatTime(entry.createdAt)}
-                datetime={entry.createdAt}
-                confirming={view.confirming === entry.id}
-                notDeleted={why ? NOT_DELETED[why] : undefined}
-                onAsk={() => today.askToDelete(entry.id)}
-                onKeep={() =>
-                  view.confirming === entry.id
-                    ? today.keep()
-                    : today.dismiss(entry.id)
-                }
-                onGoAhead={() => goAhead(entry.id)}
-              >
-                {entry.content}
-              </LiveEntry>
-            );
-          })}
-
-          <MoodRow
-            chosen={day.mood}
-            problem={
-              view.moodNotSaved ? MOOD_NOT_SAVED[view.moodNotSaved] : undefined
-            }
-            onPress={(mood) => void today.pressMood(mood)}
-          />
-        </main>
+        <DaySheet
+          page={today}
+          view={view}
+          entries={day.entries}
+          mood={day.mood}
+          moodLabel="Today felt"
+          onLeaving={leaving}
+        />
       ) : null}
 
       {day.status === 'open' ? (
