@@ -1,9 +1,9 @@
 import Link from 'next/link';
 
 /*
- * Only destinations that exist are listed, in the designer's order. Ask
- * joins this list on the day it is built, and not before: a link to a page
- * that is not there is a control that does nothing.
+ * The four destinations, in the designer's order. Ask is a page now, though
+ * asking is not built (lib/unbuilt.ts): a link between screens is not a
+ * feature, and it goes somewhere.
  *
  * Each one is a Link, so moving between them does not load the page again.
  * A fresh load would drop the access token, which lives only in memory
@@ -12,6 +12,7 @@ import Link from 'next/link';
 const DESTINATIONS = [
   { label: 'Today', href: '/' },
   { label: 'Timeline', href: '/timeline' },
+  { label: 'Ask', href: '/ask' },
   { label: 'You', href: '/you' },
 ] as const;
 

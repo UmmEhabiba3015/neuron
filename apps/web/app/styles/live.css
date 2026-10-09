@@ -190,16 +190,7 @@ body {
   white-space: pre-wrap;
 }
 
-/*
- * 5.3 The delete icon stands where it is drawn, at the right edge.
- *
- * lock.css reserves room for two icons, edit and then delete, and lays them
- * out from the left. Edit is not built until Day 18, so without this the
- * delete icon would stand in edit's place. Deleted when edit arrives.
- */
-.srow .entry-tools {
-  justify-content: flex-end;
-}
+/* 5.3 was deleted on Screens Day, when the edit icon was drawn. */
 
 /*
  * 5.4 The date of a Timeline day is the link to that day's page.
@@ -218,4 +209,24 @@ body {
   color: inherit;
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+/*
+ * 5.5 A settings row that is a button.
+ *
+ * lock.css draws .srowlink on a link or a div. A row whose feature is not
+ * built yet goes nowhere, so it is a button (app/components/NotBuilt.tsx),
+ * and a button brings the browser's own border, font, width and centred
+ * text. This takes those away and nothing else. `:where` gives it no
+ * weight, so every rule of lock.css still wins, the line it draws between
+ * the rows of a sheet among them.
+ */
+:where(button.srowlink) {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
 }

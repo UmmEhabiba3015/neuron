@@ -1,11 +1,23 @@
 'use client';
 
 import { MOODS, type Mood } from '@neuron/contracts';
+import Link from 'next/link';
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { WAVEFORMS } from '@/lib/waveform';
+import { NotBuiltYet, useNotBuilt } from './NotBuilt';
 
 /*
- * An entry on a day's page, with the control that deletes it.
+ * An entry on a day's page, with the controls that edit and delete it.
+ *
+ * Editing is not built until Day 18. Its icon is drawn where
+ * 18-entry-system-states.html draws it in #entry-options, before delete, and
+ * a press says so in the row (lib/unbuilt.ts).
+ *
+ * "Keep this out of memory" is not scheduled. Its menu is drawn under the
+ * icons, as #entry-options draws it, and opens as the comp's does. An entry
+ * that is not kept out is in memory (docs/requirements.md 3.3.7), so the
+ * menu says "In memory" and its one option is pressed. A press of the
+ * option says so in the row, as edit does, and changes nothing.
  *
  * At rest the row holds the designer's icon. While the person is being asked,
  * or after a delete has failed, the icon's place is taken by a panel with a
@@ -47,6 +59,8 @@ export function LiveEntry({
   const row = useRef<HTMLDivElement>(null);
   const icon = useRef<HTMLButtonElement>(null);
   const keep = useRef<HTMLButtonElement>(null);
+  const edit = useNotBuilt('editEntry');
+  const memory = useNotBuilt('entryMemory');
 
   const panel = confirming || notDeleted !== undefined;
   const hadPanel = useRef(panel);
@@ -121,6 +135,26 @@ export function LiveEntry({
               <button
                 className="btn quiet entry-icon"
                 type="button"
+                data-entry-action="edit"
+                aria-label={edit.label}
+                onClick={edit.press}
+                {...edit.marker}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15z" />
+                </svg>
+              </button>
+              <button
+                className="btn quiet entry-icon"
+                type="button"
                 ref={icon}
                 data-entry-action="delete"
                 aria-label="Delete entry"
@@ -139,8 +173,43 @@ export function LiveEntry({
                 </svg>
               </button>
             </div>
+            <details className="entry-memory-dropdown" data-excluded="false">
+              <summary
+                className="entry-memory-trigger"
+                aria-label="Entry memory settings: in memory"
+              >
+                <span className="memory-state">In memory</span>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </summary>
+              <div className="entry-memory-menu">
+                <button
+                  className="opt"
+                  type="button"
+                  data-entry-action="memory"
+                  aria-pressed="true"
+                  onClick={memory.press}
+                  {...memory.marker}
+                >
+                  <span className="tick" aria-hidden="true" />
+                  <span>{memory.label}</span>
+                </button>
+              </div>
+            </details>
           </div>
         )}
+        {(edit.said || memory.said) && !panel ? (
+          <NotBuiltYet className="auth-help state-message" />
+        ) : null}
       </div>
     </div>
   );
@@ -201,13 +270,19 @@ export function MoodRow({
 
 /*
  * The field, and Save once the field holds words. With no words there is
- * nothing to save, and no button is drawn: a control is on the screen only
- * while a press of it does something. Neither the field nor the button is
- * ever disabled; a second press while a save is in flight is stopped in
+ * nothing to save, and the microphone stands in Save's place, as the comp's
+ * does: it leads to Talk. Neither the field nor the button is ever
+ * disabled; a second press while a save is in flight is stopped in
  * lib/today.ts.
  *
+ * Under the field, as 01-today.html draws them: "Keep this out of memory",
+ * which is not scheduled (lib/unbuilt.ts), and "More options", which leads
+ * to the composer's options. The option is not pressed, because nothing is
+ * kept out of memory.
+ *
  * `line` is the request in flight and `problem` is a save that failed. Both
- * are drawn where 18-entry-system-states.html draws `save-failed`.
+ * are drawn where 18-entry-system-states.html draws `save-failed`, and so is
+ * the sentence when the memory option is pressed.
  */
 export function LiveComposer({
   text,
@@ -226,6 +301,7 @@ export function LiveComposer({
 }) {
   const field = useRef<HTMLTextAreaElement>(null);
   const hadButton = useRef(holdsWords);
+  const memory = useNotBuilt('composerMemory');
 
   /*
    * A save that succeeds empties the field, and Save leaves the page. If
@@ -265,8 +341,38 @@ export function LiveComposer({
           <button className="send" type="submit" aria-label="Save entry">
             Save
           </button>
-        ) : null}
+        ) : (
+          <Link className="mic" href="/talk" aria-label="Record">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="9" y="2.5" width="6" height="11.5" rx="3" />
+              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0" />
+              <path d="M12 18v3.5" />
+            </svg>
+          </Link>
+        )}
       </form>
+      <div className="composer-tools">
+        <button
+          className="opt"
+          type="button"
+          aria-pressed="false"
+          onClick={memory.press}
+          {...memory.marker}
+        >
+          <span className="tick" aria-hidden="true" /> {memory.label}
+        </button>
+        <Link className="btn quiet" href="/options">
+          More options
+        </Link>
+      </div>
       {problem ? (
         <p className="auth-help state-message" role="alert">
           {problem}
@@ -275,6 +381,8 @@ export function LiveComposer({
         <p className="auth-help state-message" role="status">
           {line}
         </p>
+      ) : memory.said ? (
+        <NotBuiltYet className="auth-help state-message" />
       ) : null}
     </div>
   );

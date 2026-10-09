@@ -62,14 +62,20 @@ export function LiveScreen({
  * A pushed page: one that is reached from a destination and is not one. It
  * has a way back where a destination has its wordmark, and no destinations
  * (06-conversation.html). Both headers are rendered, for the reason above.
+ *
+ * `title` is a wordmark beside the way back, as Your data has it
+ * (#settings-data). Without one the page is lock.css's `untitled`, and its
+ * content starts higher.
  */
 export function PushedScreen({
   back,
+  title,
   aside,
   children,
 }: {
   back: { href: string; label: string };
-  aside: ReactNode;
+  title?: string;
+  aside?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -78,12 +84,14 @@ export function PushedScreen({
 
       <div className="title">
         <Back href={back.href}>{back.label}</Back>
+        {title ? <Wordmark>{title}</Wordmark> : null}
         {aside}
       </div>
 
-      <div className="page pushed untitled">
+      <div className={title ? 'page pushed' : 'page pushed untitled'}>
         <header className="mast">
           <Back href={back.href}>{back.label}</Back>
+          {title ? <Wordmark>{title}</Wordmark> : null}
           {aside}
         </header>
         {children}
