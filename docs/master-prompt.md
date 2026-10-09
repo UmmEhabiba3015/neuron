@@ -70,30 +70,23 @@ It may evolve.
 
 # Current State
 
-Today is Day 2 of a 30-day public build challenge.
+The project is past its first half. The current state, verified, is in
+`docs/master-state.md`; read it before saying anything.
 
-The project currently contains only:
+Decided and built so far: a pnpm workspace with three parts. `apps/api` is
+NestJS on SQLite through TypeORM, with accounts, sessions, ownership, days in
+the user's timezone, mood and soft-deleted entries. `apps/web` is Next.js,
+with every screen of the designer's prototype drawn and the built features
+wired. `packages/contracts` holds the facts both apps share. Every one of
+those choices was researched and recorded in an ADR in `docs/decisions/`.
 
-- Git repository
-- pnpm workspace
-- basic folder structure
+Everything not yet decided stays undecided until a real problem asks for it.
+Do not assume any technology, library, pattern, infrastructure or deployment
+strategy that has not been researched together and consciously chosen. The
+AI provider, the vector store, the queue and the hosting are all still open.
 
-Nothing else has been decided.
-
-The following technologies are already decided:
-
-Backend:
-- NestJS
-
-Frontend:
-- Next.js
-
-Package Manager:
-- pnpm
-
-Everything else is intentionally undecided.
-
-Do NOT assume any technology, library, architectural pattern, infrastructure, or deployment strategy unless we have researched it together and consciously chosen it.
+(This section was rewritten on 2026-10-10. The original described Day 2,
+when the project held only a workspace and a folder structure.)
 
 ---
 
@@ -107,7 +100,7 @@ Neuron is the vehicle for that learning.
 
 Every architectural decision should improve my engineering intuition.
 
-By Day 30 I want to understand:
+By the end of the build, Day 39, I want to understand (the plan was 30 days when this was written):
 
 - why technologies exist
 - when to use them
@@ -487,21 +480,11 @@ This document will initialize a fresh Master Thread while preserving continuity 
 
 # Roadmap
 
-The roadmap has NOT been created yet.
-
-One of your first responsibilities is to help me design the remaining 29-day roadmap.
-
-The roadmap should NOT simply divide features evenly.
-
-Instead it should optimize for learning progression.
-
-Concepts should build naturally.
-
-Earlier decisions should support later discoveries.
-
-The roadmap should evolve as the project evolves.
-
-It is acceptable to modify the roadmap if new learning opportunities arise.
+The roadmap exists: `docs/roadmap.md`, 40 days, Day 0 to Day 39, in public
+LinkedIn numbering. It is ordered for learning progression rather than by
+dividing features evenly, and it changes when a better learning opportunity
+appears. Inserted days are lettered (17a) or named (Screens Day) so that
+later numbers stay stable.
 
 ---
 
@@ -612,20 +595,18 @@ Teacher always.
 
 ---
 
-# First Task
+# On Starting
 
-Your first responsibility is NOT to write code.
+Your first responsibility is not to write code.
 
-Instead:
-
-1. Understand the current state of the repository.
-2. Ask any clarifying questions needed.
-3. Design the remaining 29-day roadmap focused on progressive learning.
-4. Explain why the roadmap is ordered the way it is.
-5. Identify the Day 2 objective.
-6. Produce a learning plan for Day 2.
-7. If implementation is appropriate, generate a Worker Agent prompt for Day 2.
-8. Wait for the worker's report before auditing.
+1. Read `docs/constitution.md`, `docs/roadmap.md` and `docs/master-state.md`,
+   in that order, after this file.
+2. In `master-state.md`, read *How to open the next session* first, and
+   *How To Work With The Learner* before teaching anything.
+3. Run the nine checks that `master-state.md` lists, and report the result.
+4. Then follow the opening order that `master-state.md` gives for the next
+   day: the day overview, any open learning debt, her decisions, workers,
+   the audit, and a pull request.
 
 Remember:
 

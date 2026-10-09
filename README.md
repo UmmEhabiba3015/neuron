@@ -1,286 +1,175 @@
 # Neuron
 
-Neuron is a journaling API being built as a learning project in backend
-architecture. It's structured as a pnpm workspace so the API (and, later,
-a web client) can share tooling and stay in one coordinated history. Right
-now it consists of a single NestJS API that reads and writes journal entries
-to a local SQLite database — everything from here (auth, search) is built up
-incrementally; see [docs/roadmap.md](docs/roadmap.md) for the plan.
+Neuron is a private journal on the web. A person writes short entries through
+the day, says how the day felt, and looks back over past days. Later phases
+add search and a way to ask questions of your own journal.
 
-## Prerequisites
+It is also a deliberate learning project, built in public over 40 days, whose
+main subject is backend architecture. Every decision is recorded with its
+reasons in [docs/decisions/](docs/decisions/). The plan is
+[docs/roadmap.md](docs/roadmap.md), and what the product must do is
+[docs/requirements.md](docs/requirements.md).
 
-- Node.js >= 24 (persistence uses the built-in `node:sqlite` module, which is
-  only stable — and available without a flag — from Node 24)
-- pnpm 11.17.0 (pinned via `packageManager` in [package.json](package.json);
-  run through [Corepack](https://nodejs.org/api/corepack.html) if you don't
-  have it installed globally)
+## What works today
 
-## Install
+- Create an account (email, password, name; the timezone is taken from the
+  browser), sign in, stay signed in across a reload, and sign out.
+- Write an entry and delete one. Set the mood of today or of a past day.
+- The Timeline: every day with entries, newest first, and a month calendar.
+  A past day has its own page.
+
+**Every screen of the final design is drawn**, including those whose features
+are not built yet. Pressing a control whose feature is not built says "This is
+not built yet." and sends nothing. The full list, with the day each one is
+wired, is [apps/web/lib/unbuilt.ts](apps/web/lib/unbuilt.ts).
+
+## The parts
+
+```
+apps/
+  api/          NestJS API on SQLite, through TypeORM
+  web/          Next.js web app
+packages/
+  contracts/    what crosses between the two apps, stated once
+designs/        the designer's screens (information, not instructions)
+docs/
+  requirements.md   what the product must do
+  roadmap.md        the 40-day plan, and where it stands
+  decisions/        Architecture Decision Records (ADRs)
+  handbook/         the reasoning across decisions, one entry per phase
+  learning/         worker reports and learning records, by day
+  master-state.md   where the project stands, for restarting the mentor session
+  SETUP.md          how to set the project up on a new machine
+  HANDOFF.md        the project explained to a reader who has not followed it
+```
+
+`packages/contracts` holds the facts both apps must agree on: the shapes that
+travel over HTTP, the mood words, the page sizes and the password minimum. It
+imports nothing and has no build step. See
+[ADR-019](docs/decisions/ADR-019-shared-contracts-package.md).
+
+## Setting it up
+
+You need Node.js 24 or newer and pnpm 11.17.0 (`corepack enable` provides it).
+Node 24 is needed because both apps load TypeScript files from
+`packages/contracts` directly. [docs/SETUP.md](docs/SETUP.md) has the full
+steps, including moving an existing journal to a new machine.
 
 ```bash
 pnpm install
-```
-
-## Run
-
-```bash
-pnpm dev
-```
-
-This starts the API in watch mode on `http://localhost:3000`. Try:
-
-```bash
-curl http://localhost:3000/entries
+cp .env.example .env                           # then set JWT_SECRET; see below
+cp apps/web/.env.example apps/web/.env.local
+pnpm migration:run                             # creates the tables
+pnpm dev                                       # the API, http://localhost:3000
+pnpm dev:web                                   # the web app, http://localhost:3001
 ```
 
 ## Configuration
 
-The API reads exactly three environment variables, all checked once when the
-application starts — a value that is set but unusable stops the boot with a
-message naming the variable, rather than being quietly corrected.
+The API reads four environment variables, checked once when it starts. A value
+that is set but unusable stops the start with a message naming the variable,
+rather than being quietly corrected
+([ADR-007](docs/decisions/ADR-007-configuration-and-boot-validation.md)).
 
-| Variable        | Default                  | Rule                                                                                                |
-| --------------- | ------------------------ | --------------------------------------------------------------------------------------------------- |
-| `PORT`          | `3000`                   | A whole number from 1 to 65535. Empty, `0`, negative, above the range, text, or a number with stray spaces around it all refuse to boot. |
-| `DATABASE_PATH` | `apps/api/data/neuron.db` | Any non-empty path; empty refuses to boot. A relative path resolves from the directory the API was started in. If the file does not exist, the API warns and creates an empty one. |
-| `JWT_SECRET`    | **none — required**       | At least 32 characters. There is no default and no fallback: the application refuses to start without it. |
-| `WEB_ORIGIN`    | **none — required**       | The one origin allowed to read this API from a browser, e.g. `http://localhost:3001`. A scheme, a host and an optional port, with no path and no trailing slash. Absent, empty or malformed refuses to boot. |
+| Variable | Default | Rule |
+|---|---|---|
+| `PORT` | `3000` | A whole number from 1 to 65535 |
+| `DATABASE_PATH` | `apps/api/data/neuron.db` | Any non-empty path. A file that does not exist is created, with a warning |
+| `JWT_SECRET` | **none, required** | At least 32 characters. It signs every access token, so a default would let anyone who reads this repository forge one |
+| `WEB_ORIGIN` | **none, required** | The one origin allowed to call the API from a browser, for example `http://localhost:3001`. No path, no trailing slash |
 
-**`JWT_SECRET` has no default on purpose.** It signs every access token, so a
-value committed to source would let anyone who can read this repository forge a
-token for any user — which is worse than having no secret, because it looks
-configured. Generating a random one at boot instead would silently invalidate
-every token in circulation on every restart. Generate one and put it in `.env`:
+Generate a secret with:
 
 ```bash
 node -e "console.log(require('node:crypto').randomBytes(48).toString('base64url'))"
 ```
 
-Note that the error for a rejected `JWT_SECRET` never quotes the value, unlike
-every other message here — printing a signing key would write it into logs,
-terminal scrollback and CI output.
+`.env` is gitignored and is loaded by Node itself, so there is no `dotenv`
+dependency. A real environment variable always wins over the file.
 
-Copy [.env.example](.env.example) to `.env` to set them locally. `.env` is
-gitignored and is loaded by Node itself (`--env-file-if-exists`), so there is no
-`dotenv` dependency and a fresh clone with no `.env` starts fine. A real
-environment variable always wins over a value in the file:
-
-```bash
-PORT=4242 pnpm dev
-```
-
-See [ADR-007](docs/decisions/ADR-007-configuration-and-boot-validation.md) for
-why these are checked at boot rather than at first use.
-
-The web app has one setting of its own, `NEXT_PUBLIC_API_URL`, the address of
-the API as the browser calls it. It is required and has no default. Copy
-[apps/web/.env.example](apps/web/.env.example) to `apps/web/.env.local`; without
-it `pnpm dev:web` and `pnpm build:web` stop with a message that names the
-variable. The value is written into the JavaScript when the web app is built,
-so changing it needs a new build.
+The web app has one setting, `NEXT_PUBLIC_API_URL`, the address of the API as
+the browser calls it. It is required, and it is written into the JavaScript at
+build time, so changing it needs a new build.
 
 ## The API
 
-Every `/entries` route requires a valid access token as of Day 9. Without one
-they answer `401` with the reason in a `WWW-Authenticate` header.
+Every route requires a signed-in user unless it is marked public. A route
+added later is closed by default
+([ADR-013](docs/decisions/ADR-013-ownership-enforcement.md)).
 
-| Method | Route            | Auth | What it does |
-| ------ | ---------------- | ---- | ------------ |
-| `POST` | `/auth/register` | —    | Creates a user. `201` with the user; `409` if the name is taken. |
-| `POST` | `/auth/login`    | —    | `200` with `{ accessToken, user }`, and the refresh credential in an `HttpOnly` cookie; `401` for any failure. |
-| `POST` | `/auth/refresh`  | —    | Reads the refresh cookie, takes no body. `200` with `{ accessToken, user }` and a rotated cookie; `401` if the cookie is missing, revoked, expired or already rotated. |
-| `POST` | `/auth/logout`   | ✅   | Revokes this session and clears the refresh cookie. `204`. |
-| `POST` | `/auth/logout-everywhere` | ✅ | Revokes every session for the caller and clears the refresh cookie. `204`. |
-| `GET`  | `/auth/sessions` | ✅   | The caller's active sessions. |
-| `GET`  | `/auth/me`       | ✅   | Returns the caller. |
-| `GET`  | `/entries`       | ✅   | The journal, newest first. `?word=` searches content. `?date=YYYY-MM-DD` narrows to the entries of one day. `?limit=` and `?offset=` page. |
-| `POST` | `/entries`       | ✅   | Creates an entry owned by the caller. |
-| `GET`  | `/entries/count` | ✅   | `{ count }`. Takes the same `?word=` and `?date=` as the listing. |
-| `GET`  | `/entries/:id`   | ✅   | One entry, or `404`. |
-| `PATCH`| `/entries/:id`   | ✅   | Updates content, or `404`. |
-| `DELETE`| `/entries/:id`  | ✅   | Deletes and returns it, or `404`. |
-| `GET`  | `/days/today`    | ✅   | `{ date, mood }` for the day the current instant falls on. The day ends at 04:00 UTC, so the API decides which date today is. |
+| Method | Route | Public | What it does |
+|---|---|---|---|
+| `POST` | `/auth/register` | yes | Creates an account from `email`, `password`, `name` and `timezone` (an IANA name such as `Asia/Karachi`). `409` if the email is taken |
+| `POST` | `/auth/login` | yes | `200` with `{ accessToken, user }`, and the refresh credential in an `HttpOnly` cookie. `401` for any failure |
+| `POST` | `/auth/refresh` | yes | Reads the refresh cookie. `200` with a new access token and a rotated cookie, or `401` |
+| `POST` | `/auth/logout` | | Ends this session. `204` |
+| `POST` | `/auth/logout-everywhere` | | Ends every session of the caller. `204` |
+| `GET` | `/auth/sessions` | | The caller's active sessions |
+| `GET` | `/auth/me` | | The caller |
+| `GET` | `/entries` | | The caller's entries, newest first. `?word=` searches, `?date=YYYY-MM-DD` narrows to one day, `?limit=` and `?offset=` page. Each entry carries its day's `date` |
+| `POST` | `/entries` | | Writes an entry. The API decides its time and its day |
+| `GET` | `/entries/count` | | `{ count }`, with the same filters as the listing |
+| `GET` | `/entries/:id` | | One entry, or `404` |
+| `PATCH` | `/entries/:id` | | Changes an entry's text, or `404` |
+| `DELETE` | `/entries/:id` | | Deletes an entry (a soft delete). `204`, or `404` |
+| `GET` | `/days?from=&to=` | | The days in a range that have at least one entry |
+| `GET` | `/days/today` | | Today's date and mood, in the caller's timezone |
+| `GET` | `/days/:date` | | One day's mood. A day that has not happened yet is a `404` |
+| `PUT` | `/days/:date/mood` | | Sets or clears a day's mood |
 
-```bash
-# register, then log in
-curl -X POST localhost:3000/auth/register \
-  -H 'Content-Type: application/json' \
-  -d '{"name":"you","password":"a-long-enough-password"}'
+The rules behind these answers:
 
-TOKEN=$(curl -s -X POST localhost:3000/auth/login \
-  -H 'Content-Type: application/json' \
-  -d '{"name":"you","password":"a-long-enough-password"}' \
-  | node -pe "JSON.parse(require('fs').readFileSync(0)).accessToken")
+- **A day ends at midnight in the person's own timezone**, which the browser
+  supplies at registration. The API, not the browser, decides which day an
+  entry belongs to, and an entry never moves once filed
+  ([ADR-015](docs/decisions/ADR-015-the-day-is-the-aggregate.md)).
+- **Each person sees only their own data.** Every query is limited to the
+  owner in its `WHERE` clause. Asking for someone else's entry is a `404`,
+  never a `403`, so "not yours" and "does not exist" look the same.
+- **Login never says which half was wrong**, and an unknown email costs the
+  same hashing time as a wrong password
+  ([ADR-012](docs/decisions/ADR-012-authentication-endpoints.md)).
+- **Access tokens last 15 minutes and live in the page's memory. Refresh
+  tokens last 30 days, rotate on every use, and live in a cookie scripts
+  cannot read.** Signing out takes effect on the very next request, and
+  reusing an old refresh token ends every session of that user
+  ([ADR-014](docs/decisions/ADR-014-sessions-and-revocation.md),
+  [ADR-018](docs/decisions/ADR-018-browser-credential-and-cors.md)).
+- **Passwords are stored as argon2id hashes**
+  ([ADR-011](docs/decisions/ADR-011-password-storage.md)).
 
-curl -H "Authorization: Bearer $TOKEN" localhost:3000/entries
-```
+## The database and migrations
 
-**Login never says which half was wrong.** A name nobody has registered and a
-wrong password produce the same `401`, the same message, and — because an unknown
-name is charged the same hashing work — the same response time. Telling them
-apart would let anyone turn a list of names into a list of confirmed accounts,
-and for a private journal the fact that somebody *has* an account is itself
-sensitive. Registration does say when a name is taken, because the caller needs
-to pick another and the same fact is obtainable by trying to register. See
-[ADR-012](docs/decisions/ADR-012-authentication-endpoints.md).
-
-**Access tokens last 15 minutes; refresh tokens last 30 days.** The access
-token goes on every request; the refresh token goes only to `/auth/refresh`,
-which is what makes a database check on it affordable. It travels in a cookie
-that JavaScript cannot read and is never in a response body; see
-[ADR-018](docs/decisions/ADR-018-browser-credential-and-cors.md).
-
-**Logging out works, immediately.** Each login creates a session row, and the
-guard checks it on every request — so revoking a session locks out its access
-token at once rather than when it expires. `logout-everywhere` does the same for
-every device, which is the stolen-laptop case.
-
-**Refresh tokens rotate on every use.** Using one invalidates it, so a stolen
-refresh token is a race rather than a 30-day credential. Replaying an
-already-rotated token is treated as evidence of theft and revokes every session
-for that user. See [ADR-014](docs/decisions/ADR-014-sessions-and-revocation.md).
-
-**Each user sees only their own entries.** Every query filters on `user_id` in
-its `WHERE` clause, so other people's rows never reach the application at all —
-lists, searches and the count are all scoped, and `PATCH`/`DELETE` match on owner
-as well as id.
-
-**Asking for somebody else's entry is a `404`, never a `403`.** "Does not exist"
-and "not yours" are deliberately indistinguishable: a caller walking ids would
-otherwise learn which ones are real.
-
-## Data
-
-Entries are stored in a SQLite database — a single file at
-`apps/api/data/neuron.db`. The **file** is created automatically on first run,
-but the **tables are not**: the schema comes from migrations, and the API never
-applies them itself. Run them once before you start it:
+The journal is a SQLite file, `apps/api/data/neuron.db`, gitignored. The API
+creates the file but **never creates or changes tables itself**: every schema
+change is a migration, and a test fails if TypeORM's `synchronize` is turned
+on ([ADR-010](docs/decisions/ADR-010-typeorm.md)).
 
 ```bash
-pnpm migration:run
-```
-
-Skip that and the API starts perfectly happily, reports
-`Nest application successfully started`, and then fails every request with
-`no such table: entries`. That is deliberate — see *Migrations* below.
-
-Set `DATABASE_PATH` to put the file somewhere else:
-
-```bash
-DATABASE_PATH=./data/scratch.db pnpm dev
-```
-
-Because a mistyped path is still a perfectly valid path, the API cannot tell
-`data/nueron.db` from `data/neuron.db` by looking at it. What it can do is
-notice that no database is there and say so, which is why pointing
-`DATABASE_PATH` at a file that does not exist prints a warning before creating
-it. No warning is printed for the default path, where a missing database just
-means this is the first run.
-
-The file is gitignored and holds nothing but local state, so deleting it resets
-the API to empty:
-
-```bash
-rm apps/api/data/neuron.db
-```
-
-Tests never touch it — they run against a throwaway database of their own. See
-[ADR-003](docs/decisions/ADR-003-sqlite.md) for why SQLite, and
-[ADR-010](docs/decisions/ADR-010-typeorm.md) for why the driver is now TypeORM
-with `better-sqlite3`.
-
-## Migrations
-
-Every schema change is a migration. Nothing changes the schema at boot — TypeORM's
-`synchronize` is `false` and there is a test that fails if anyone turns it on,
-because schema-on-boot is what this project replaced and it would silently rewrite
-tables rather than merely skipping a check.
-
-```bash
-pnpm migration:run       # apply everything pending
-pnpm migration:revert    # undo the most recent one
+pnpm migration:run        # apply everything pending; run it whenever new ones arrive
+pnpm migration:revert     # undo the most recent one
 pnpm migration:generate apps/api/src/database/migrations/<Name>
 ```
 
-`migration:generate` compares the entity classes against the database and writes
-the SQL for you. **Read what it produces before trusting it.** SQLite cannot add a
-foreign key to an existing table, so TypeORM rebuilds the whole table — creating a
-temporary copy, moving every row, dropping the original and renaming. That is
-correct, and it is not what the word "generate" suggests.
+Read a generated migration before trusting it. SQLite cannot add a constraint
+to an existing table, so TypeORM rebuilds the whole table, and twice a
+generated migration has copied a `NOT NULL` column without a value. Several of
+this project's migrations are hand-written for that reason.
 
-### A database created before migrations existed
+A database made before Day 8 has no `migrations` table and needs a one-time
+repair before migrations will run; [docs/SETUP.md](docs/SETUP.md) has it.
 
-If your database was made before Day 8 it has no `migrations` table, so TypeORM
-believes nothing has ever been applied, tries to run the initial migration, and
-stops:
+## Checks
 
-```
-Migration "InitialSchema1788262448946" failed, error: table "entries" already exists
-```
-
-Nothing is lost — the whole thing runs in a transaction and rolls back — but no
-migration is applied either. The database already *has* that initial schema; it
-simply has no record of it. So tell it, once:
-
-Run this **from `apps/api`**, not from the repository root:
+Nine commands. The first five cover the API, the last four the web app, and
+both test commands also run the shared package's checks. Every audit runs all
+nine; use exactly these, because a shorter form can skip tests and still
+report a pass.
 
 ```bash
-cd apps/api
-node -e "
-  const Database = require('better-sqlite3');
-  const db = new Database('data/neuron.db');
-  db.exec('CREATE TABLE IF NOT EXISTS migrations (id integer PRIMARY KEY AUTOINCREMENT NOT NULL, timestamp bigint NOT NULL, name varchar NOT NULL)');
-  db.prepare('INSERT INTO migrations (timestamp, name) VALUES (?, ?)')
-    .run(1788262448946, 'InitialSchema1788262448946');
-"
-pnpm migration:run
+pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
+pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-Two details that are easy to get wrong, and both were got wrong while writing
-this. There is deliberately no `sqlite3` command here: that CLI is a separate
-package this project does not require and which is not installed. And the
-directory matters — `better-sqlite3` lives in `apps/api`'s dependency tree, so the
-same command run from the repository root fails with `Cannot find module`.
-
-This is called baselining. It is needed once per database that predates
-migrations, and never for one created from scratch by `pnpm migration:run`.
-
-Other root-level scripts:
-
-```bash
-pnpm build      # compile the API
-pnpm lint       # lint the API (auto-fixes what it can)
-pnpm typecheck  # typecheck everything, including test files
-pnpm test       # run the API's unit tests
-pnpm test:e2e   # run the API's end-to-end tests
-```
-
-## Repo layout
-
-```
-apps/
-  api/    NestJS API
-  web/    Next.js web app
-packages/
-  contracts/   what crosses between the two apps, stated once
-docs/
-  decisions/        Architecture Decision Records (ADRs)
-  learning/         day-by-day learning notes and worker reports
-  workers/          task briefs handed to worker sessions
-  constitution.md   the engineering principles this project is built under
-  master-state.md   where the project currently stands
-  roadmap.md        the 40-day build plan
-  SETUP.md          how to continue this project on another machine
-```
-
-`packages/contracts` holds the facts both apps must agree on: the shape of
-an entry, a day and the signed-in user as they travel over HTTP, the mood
-words, the page sizes and the password minimum. It imports nothing and
-contains no function. Both apps import it as `@neuron/contracts`. See
-[ADR-019](docs/decisions/ADR-019-shared-contracts-package.md).
-
-The package is TypeScript source and has no build step. `pnpm install` links
-it into both apps, and that is all a fresh clone needs. `pnpm test:contracts`
-runs its two checks: that it still imports nothing, and that neither app has
-written one of its values out again by hand. `pnpm test` and `pnpm test:web`
-run those checks first.
+At the close of Screens Day: 246 API unit tests, 365 API end-to-end tests,
+171 web tests and 7 checks on the shared package, all passing.

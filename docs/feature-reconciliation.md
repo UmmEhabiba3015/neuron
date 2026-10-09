@@ -1,5 +1,11 @@
 # Feature reconciliation — the roadmap's scope against the designs'
 
+> **A record, not the live scope (2026-10-10).** This document settled scope
+> on Day 12 and on 2026-10-04, and is kept as that record. The live statement of
+> what the product does is [requirements.md](requirements.md). Some rows below
+> have since moved: the timezone was built on Day 17b and its setting is
+> Day 34; voice memos are in scope with no day yet.
+
 **Status:** Draft for decision. Nothing here is settled except where it says
 "Settled", which means an ADR already carries it.
 **Date:** 2026-09-25 (Day 12, continued)

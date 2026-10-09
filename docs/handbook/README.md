@@ -18,6 +18,7 @@ the next phase inherits.
 |---|---|---|
 | [Phase 1 — The Request](phase-1-the-request.md) | Days 2–7 | Day 14, late |
 | [Phase 2 — Identity and Ownership](phase-2-identity-and-ownership.md) | Days 8–14 | Day 14 |
+| Phase 3 — The Interface | Days 15–20 | Not yet. Due when the phase closes, and on Day 27 at the latest |
 
 **Phase 1's entry is late and says so.** The roadmap scheduled it for Day 7 and
 it was not written. It is reconstructed on Day 14 from the ADRs, the worker
@@ -41,7 +42,7 @@ problem the next one solves.
 
 | | Decision | Still standing? |
 |---|---|---|
-| [ADR-001](../decisions/ADR-001-monorepo.md) | A pnpm workspace monorepo | Yes. Earned on Day 12 when `apps/web` arrived |
+| [ADR-001](../decisions/ADR-001-monorepo.md) | A pnpm workspace monorepo | Yes. Earned on Day 16, when `packages/contracts` gave two apps one source of shared facts (ADR-019) |
 | [ADR-002](../decisions/ADR-002-nestjs.md) | NestJS for the API | Yes |
 | [ADR-003](../decisions/ADR-003-sqlite.md) | SQLite for persistence | Yes, with a stated expiry: Postgres on Day 31 |
 | [ADR-004](../decisions/ADR-004-repository-raw-sql.md) | A data-access layer, hand-written SQL | Half. The layer stands; the hand-written SQL was replaced by ADR-010 |
@@ -55,6 +56,10 @@ problem the next one solves.
 | [ADR-012](../decisions/ADR-012-authentication-endpoints.md) | Registration, login, how a request is identified | Amended by ADR-016: the identifier is now an email |
 | [ADR-013](../decisions/ADR-013-ownership-enforcement.md) | Ownership enforced in the query | Yes |
 | [ADR-014](../decisions/ADR-014-sessions-and-revocation.md) | Sessions, refresh tokens, real revocation | Yes |
-| [ADR-015](../decisions/ADR-015-the-day-is-the-aggregate.md) | The day is the aggregate, not the entry | Yes |
+| [ADR-015](../decisions/ADR-015-the-day-is-the-aggregate.md) | The day is the aggregate, not the entry | Yes. Amended on Day 17b: a day ends at midnight in the user's own timezone, not at 4am UTC |
 | [ADR-016](../decisions/ADR-016-design-alignment.md) | Aligning the API with the designs | Yes |
 | [ADR-017](../decisions/ADR-017-counting-a-filtered-collection.md) | Counting a filtered collection | Yes |
+| [ADR-018](../decisions/ADR-018-browser-credential-and-cors.md) | The refresh credential in an `HttpOnly` cookie, the access token in memory, one CORS origin | Yes |
+| [ADR-019](../decisions/ADR-019-shared-contracts-package.md) | A shared contracts package, chosen over a generated client | Yes. Reverses part of ADR-001 |
+| [ADR-020](../decisions/ADR-020-soft-delete-for-entries.md) | Deleting an entry is a soft delete | Yes |
+| [ADR-021](../decisions/ADR-021-what-the-screen-shows-while-waiting.md) | What the screen shows while waiting and when a request fails | Yes |

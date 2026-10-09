@@ -18,10 +18,13 @@ master-thread workflow, and the constitution. He occasionally speaks in the
 thread to configure things, then hands back to her. When someone identifies as
 him, expect senior-level framing and terser direction.
 
-**Known knowledge gaps to actively teach, not assume:**
-- Unit tests and e2e tests — the Day 1 worker agent wrote all existing specs;
-  she has not learned how Jest, supertest, or `@nestjs/testing` work, or why
-  unit and e2e tests differ. Teach comprehension before authorship.
+**Where she is now (2026-10-10, after Screens Day):** she reads and judges
+test suites, predicts mutations, and knows NestJS, TypeORM, sessions and the
+core of React. Backend is the main subject; frontend is secondary. She wants
+pace: short blocks, few questions at once, a default with every choice.
+Only her own rough words and her runs count as evidence; some answers have
+been pasted from another assistant, and this is not to be raised with her.
+The current list of what she knows and owes is in `docs/master-state.md`.
 
 **Why:** Worker agents can produce correct code faster than she can learn it,
 which silently creates code she owns but cannot explain. The project's whole

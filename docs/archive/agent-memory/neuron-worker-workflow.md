@@ -12,7 +12,7 @@ On Neuron, the Master Thread (this session) never implements production code
 directly. The loop is: **audit → write a worker prompt to a file → the user
 runs it in a fresh Claude Code session → re-audit the result.**
 
-Worker prompts go in `docs/workers/`. Workers produce a `report.md`.
+Worker prompts go in `docs/workers/` (gitignored). Workers write their report in `docs/learning/<day>/`. Every prompt says: write and run the tests (never tell a worker to skip them), do one mutation, walk the app in a browser, use a throwaway database and their own ports, never touch git. Ask her to stop `pnpm dev` before a worker runs. Before committing, compare `git status` with every new file the report lists.
 
 Documentation that records decisions — ADRs, the roadmap, `master-state.md`,
 learning notes — is Master Thread work and is written directly.

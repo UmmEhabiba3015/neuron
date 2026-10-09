@@ -20,7 +20,12 @@ Anchor dates:
 - Day 0 = 2026-07-27 (repo init)
 - Day 1 = 2026-07-28 (pnpm workspace + NestJS scaffold + `GET /entries`)
 - Day 2 = 2026-07-29 (persistence)
-- Day 29 = final day
+- Day 39 = final day (was Day 29 before the 2026-09-04 extension)
+
+Days inserted between numbered days take a letter (17a, 17b, 17c) or a
+name (Screens Day, inserted 2026-10-08 before Day 18), so later numbers
+never shift. She confuses lettered days: name the day at the top of every
+block.
 
 The original `docs/roadmap.md` draft was written one-indexed (its "Day 2" was
 the scaffold day), making it off by one from the public posts. The roadmap was

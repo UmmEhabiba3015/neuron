@@ -1,230 +1,132 @@
-# Continuing Neuron On A New Machine
+# Setting Neuron Up On A New Machine
 
-Everything needed to pick this project up somewhere else. Written on
-2026-09-04, at the end of Day 8.
+Everything needed to pick this project up on another computer. Rewritten on
+2026-10-10, at the close of Screens Day.
 
 ---
 
 ## 1. What the machine needs
 
-| Thing | Version here | Notes |
+| Thing | Version | Notes |
 |---|---|---|
-| Node | v24.18.0 | **Must be 24 or newer.** The built API and the web tests load TypeScript files from `packages/contracts` directly, which Node does without a flag only from version 24. |
-| pnpm | 11.17.0 | `corepack enable` is the least painful way to get it. npm and yarn will not work — this is a pnpm workspace and the lockfile is pnpm's. |
-| git | any recent | |
+| Node | 24 or newer | Both apps load TypeScript files from `packages/contracts` directly, which Node does without a flag only from version 24 |
+| pnpm | 11.17.0 | `corepack enable` provides it. npm and yarn will not work: this is a pnpm workspace with a pnpm lockfile |
+| git and `gh` | any recent | `gh` is the GitHub command line tool; each day closes with a pull request |
 
-A note on `better-sqlite3`: it is a native module and compiles on install. On
-Linux that needs build tools present (`build-essential` on Debian and Ubuntu,
-`gcc-c++ make` on Fedora). If `pnpm install` fails with a node-gyp error, this
-is why.
+`better-sqlite3` is a native module and compiles on install. On Linux that
+needs build tools (`build-essential` on Debian and Ubuntu, `gcc-c++ make` on
+Fedora). If `pnpm install` fails with a node-gyp error, this is why.
 
 ## 2. Getting it running
-
-There are two applications and one shared package: `apps/api` (NestJS),
-`apps/web` (Next.js) and `packages/contracts`. One install links all three.
 
 ```bash
 git clone <repo-url> neuron
 cd neuron
 pnpm install
-```
-
-**Two environment files are needed, and neither is in git.**
-
-```bash
 cp .env.example .env
 cp apps/web/.env.example apps/web/.env.local
 ```
 
-The root `.env` does not work as copied. Two values have no default, and the
-API refuses to start without them:
+The root `.env` does not work as copied. `JWT_SECRET` must be replaced with a
+generated value; the command is written in `.env.example`. `WEB_ORIGIN` is
+already right for local work. `apps/web/.env.local` works as copied.
 
-- `JWT_SECRET`. Generate one with the command written in `.env.example`.
-- `WEB_ORIGIN`. For local work it is `http://localhost:3001`, with no
-  trailing slash.
-
-`apps/web/.env.local` works as copied. It holds `NEXT_PUBLIC_API_URL`, the
-address of the API as the browser calls it.
-
-At this point there is **no database**, and that is expected. The file is
-created automatically on first run but the tables are not. The schema comes
-from migrations and the API never applies them itself:
+There is no database yet, and that is expected. The API creates the file but
+never the tables:
 
 ```bash
 pnpm migration:run
 ```
 
-**Run migrations before starting the API whenever new ones arrive.** Since
-Day 17 the code does not work on a database that lacks its newest column.
-
-Then, each in its own terminal:
+Run it again whenever new migrations arrive. The code does not work on a
+database that lacks its newest columns. Then, each in its own terminal:
 
 ```bash
-pnpm dev                  # the API, http://localhost:3000
-pnpm dev:web              # the web app, http://localhost:3001
+pnpm dev        # the API, http://localhost:3000
+pnpm dev:web    # the web app, http://localhost:3001
 ```
 
-Open `http://localhost:3001`, create an account, and write an entry.
-
-Verify with the full check, which is what every audit runs. It is nine
-commands, and the first five cover the API only:
+Open `http://localhost:3001` and create an account. Then run the nine checks:
 
 ```bash
 pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-Expected at the close of Day 17: everything clean, 211 API unit tests, 279
-API end-to-end tests, 41 web tests, and 6 checks on the shared package.
+Expected at the close of Screens Day: all clean, 246 API unit tests, 365 API
+end-to-end tests, 171 web tests and 7 checks on the shared package.
+
+If `typecheck:web` fails inside `apps/web/.next/` after a page folder was
+renamed, delete `apps/web/.next`. It is generated, gitignored, and rebuilt on
+the next build.
 
 ## 3. Moving the existing journal
 
-`apps/api/data/neuron.db` is gitignored, so cloning gives an empty database.
-To carry the real one across, copy the file directly and then run
-`pnpm migration:run` on the new machine.
+`apps/api/data/neuron.db` is gitignored, so a clone starts empty. To carry
+the real journal across, copy that file, then run `pnpm migration:run`.
 
-**If that database was created before Day 8** it has no `migrations` table, and
-migrations cannot run against it — TypeORM will try to create `entries`, which
-already exists. The repair is in the README under "Migrations": one row is
-inserted to record the initial schema as already applied, and then
-`pnpm migration:run` works normally. Read that section rather than improvising;
-it documents two ways of getting it wrong that were both hit in practice.
+**A database made before Day 8** has no `migrations` table, so TypeORM tries
+to create `entries` again and stops. Record the first migration as already
+applied, once, **from `apps/api`** (from the repository root the module is not
+found):
 
-## 4. What is NOT in git, and matters
+```bash
+cd apps/api
+node -e "
+  const Database = require('better-sqlite3');
+  const db = new Database('data/neuron.db');
+  db.exec('CREATE TABLE IF NOT EXISTS migrations (id integer PRIMARY KEY AUTOINCREMENT NOT NULL, timestamp bigint NOT NULL, name varchar NOT NULL)');
+  db.prepare('INSERT INTO migrations (timestamp, name) VALUES (?, ?)')
+    .run(1788262448946, 'InitialSchema1788262448946');
+"
+pnpm migration:run
+```
 
-This is the part most likely to be lost in a move.
+There is deliberately no `sqlite3` command here: that tool is not installed.
 
-**Gitignored and local-only:**
+## 4. What git does not carry
 
-- `docs/workers/` — every worker prompt ever written, about 96K
-- `docs/learning/**/report.md` — every worker report and audit result, about
-  252K of the two combined
-- `.env` — recreate it from `.env.example`
-- `apps/api/data/neuron.db` — the journal itself
-
-The worker prompts and reports are the written record of how each day's work
-was specified and what the audit found. They are not needed to run the project
-and they are the main history of how it was built. **Copy `docs/workers/` and
-`docs/learning/` across by hand** — or decide to commit them, which is an open
-question below.
-
-**Committed and safe:** all source, all tests, all ten ADRs, the roadmap, the
-constitution, the master prompt, `master-state.md`, and
-`docs/learning/day-08/study-typeorm.md`.
+- **`.env` and `apps/web/.env.local`.** Recreate them from the examples.
+- **`apps/api/data/neuron.db`**, the journal itself.
+- **`docs/workers/`**, every worker prompt. Copy it by hand if you want it.
+- **Some worker reports.** `.gitignore` ignores any file named exactly
+  `report.md` under `docs/learning/`, with a named exception for Day 8. Reports
+  with other names (`report-api.md`, `report-web.md`, `report-15b.md` and so on)
+  are committed. So the reports of Days 2 to 7, 15 and 17a are local only; the
+  Day 2 to 8 reports also have copies in `docs/archive/reports/`. Whether to
+  commit the rest is an open question in `master-state.md`.
+- **The mentor session's memory** (next section).
 
 ## 5. The Claude Code memory
 
-The mentoring thread keeps memory outside the repository, at:
+The Master Thread keeps memory outside the repository, at:
 
 ```
 ~/.claude/projects/-home-<user>-Workspace-neuron/memory/
 ```
 
-Six files live there, indexed by `MEMORY.md`: the learner profile, the worker
-workflow, the day numbering, the teaching mode, the communication style, and
-the testing approach. They are not in git and they are not automatically
-carried anywhere.
+Twelve files and an index, `MEMORY.md`. They hold the teaching rules, the
+writing style, the learner profile, the day numbering, the branch rule, and
+her rulings on who decides product questions. **A copy as of 2026-10-10 is in
+`docs/archive/agent-memory/`.** The directory name contains the username and
+the project path, so on a new machine create the new path and copy the files
+into it. Without them a new session loses the teaching rules, and the writing
+drifts back to terse status English.
 
-**Copy that whole directory to the new machine.** The path contains the
-username and the project location, so on a different machine or a different
-folder the directory name changes — create the new path and copy the six files
-plus `MEMORY.md` into it.
+## 6. How a working day runs
 
-Without them a new session loses the teaching rules, and the effect is not
-subtle: the register drifts back to terse status-report English, questions stop
-coming before answers, and the day structure disappears. Section 6 restates the
-rules so they can be rebuilt if the files are lost.
+The full rules are in `docs/master-state.md`, under *How To Work With The
+Learner*. In short:
 
-## 6. How this project is run
-
-These rules are the accumulated result of eight days, several of them learned
-by getting it wrong first.
-
-### Roles
-
-The **Master Thread** is a permanent Claude session acting as principal
-engineer, architect and mentor. It does **not** write production code. It
-teaches, writes ADRs and roadmap updates, authors worker prompts, and audits
-what workers produce by re-running every check itself rather than trusting the
-report.
-
-**Worker agents** are fresh Claude Code sessions given one prompt file from
-`docs/workers/`. They implement, run the checks, and write a report. They never
-touch git — branching, committing and merging are human actions on this
-project.
-
-**The learner** decides. Every architectural choice is put to her as a question
-before it is made, and her answer is recorded even when it was later revised.
-
-### The teaching sequence
-
-Three steps, and the trigger for moving on is **rounds, not difficulty**:
-
-1. An open question. What do you think happens, and why?
-2. If that does not land, one narrowing question.
-3. If that does not land, teach directly — then verify with a prediction and an
-   experiment she runs herself.
-
-Do not skip to step 3 because a topic seems hard. Do not linger on step 1 after
-two rounds.
-
-**Demonstrate before asking her to produce.** She raised this directly and she
-was right: being asked to generate something she has never been taught is not a
-Socratic question, it is a test with no lesson in it. Work one example first,
-then ask.
-
-### Writing style
-
-Simple, complete, descriptive English. Explain terms rather than assuming them.
-No compressed idiom.
-
-Specifically avoid, because these are the habits that keep coming back: tables
-where prose would explain better, bold used to make phrases feel important
-instead of writing an important sentence, terse status fragments like
-"Confirmed." or "No defects.", stacked em-dashes, and headings used as a
-substitute for explanation.
-
-This applies to every message in the project, including status reports to her
-husband, who has had to make the correction twice.
-
-### The shape of a day
-
-Open with a short brief — what today is about and why, in a few lines. Then
-take **one block at a time**, and do not preview later blocks. Each block opens
-with questions rather than answers.
-
-A day ends with an audit, and the audit includes a mutation: delete the line
-that makes the day's work load-bearing and run everything. If it all still
-passes, the day shipped untested wiring. This has happened three times.
-
-A day ends merged.
-
-### Testing
-
-She is not required to hand-write test suites. AI writes tests in practice, so
-the durable skill is judgement — what does this suite fail to cover? — rather
-than typing assertions. Run testing lessons as **read, predict, break,
-observe**.
-
-### Comments in code
-
-Swept on 2026-09-04, from 926 comment lines down to 218. The standard from here:
-**a comment earns its place by preventing a specific mistake.** Reasoning about
-why a decision was made belongs in an ADR; a comment is for the trap that a
-future reader would otherwise walk into — that `created_at` must stay TEXT, that
-`@ValidateIf` is not interchangeable with `@IsOptional()`, that the escape order
-in `escapeLikePattern` fails silently if reversed.
-
-Narrative comments explaining what the code does are not wanted.
-
-## 7. Open questions for whoever picks this up
-
-1. **Should `docs/workers/` and the reports be committed?** They are the record
-   of how the project was built and they are currently one disk failure from
-   gone. The original reason for ignoring them was that they are working
-   artifacts rather than source. That reason is weaker now that there are eight
-   days of them.
-2. **Four stale branches** exist locally and on the remote:
-   `day-02-persistence`, `day-06-configuration`, `day-07-validation`,
-   `day-08-identity`. All are merged. They were deliberately left alone rather
-   than deleted.
+- **The Master Thread** teaches, records decisions, writes worker prompts and
+  audits. It does not write production code.
+- **Workers** are fresh Claude Code sessions given one prompt from
+  `docs/workers/`. They implement, run all nine checks, and write a report.
+  They never touch git.
+- **She decides**, as short choices with the cost of each stated. She or her
+  husband sets the feature boundary.
+- **A day** opens with an overview and its block count, then repays any
+  learning debt, then takes one block at a time. It ends with an audit that
+  includes one mutation, and with a pull request she merges.
+- **Each day has a branch**, `day-<number>-<topic>`, made from `main` before
+  work starts.
