@@ -1,686 +1,185 @@
-# Neuron — Roadmap (v2.0)
+# Neuron — Roadmap (v3.0)
 
-**Status:** Revised 2026-09-04, replacing v1.0 (ratified 2026-07-29).
-**Numbering:** Public LinkedIn numbering, **Day 0 → Day 39**. This is canonical.
+**Status:** Rewritten 2026-10-10 at the hand-off, replacing v2.0 (2026-09-04).
+**Numbering:** Public LinkedIn numbering, **Day 0 to Day 39**. It is
+canonical, because published posts cannot be renumbered. A day inserted
+between two numbered days takes a letter (17a) or a name (Screens Day), so
+every later day keeps its number.
 
-**What changed in v2.0, and why:**
+**What changed in v3.0.** Nothing in the plan ahead moved. The document was
+cut from about 690 lines to the plan and its current state. The full v2.0,
+with the Day 12 design review, the scored predictions and the learning-debt
+history, is in git:
 
-1. **The plan is now 40 days rather than 30.** This is not a slip being
-   ratified after the fact. Days 0 through 8 delivered more than the original
-   plan asked for — migrations, an ORM, and a configuration story all arrived
-   early because real problems forced them — and the original 30 days had no
-   room for a frontend beyond a single day. Forty days is what the actual scope
-   costs at the standard this project has been holding.
-2. **Frontend designs now exist.** They are shared at a fixed point (Day 12,
-   the design review) so that the API is shaped by what the screens actually
-   need, instead of the screens being bent around whatever the API happened to
-   return.
-3. **The days are honest about where the project really is.** Day 8 did not
-   deliver authentication; it delivered ownership and a migration story.
-   Day 9 carries the difference.
+```bash
+git show 340077b:docs/roadmap.md
+```
 
-**Constraints this was designed against:**
-
-- ~7 hours/day of focused time, taken as whole days rather than spread thin
-- A learner who was a near-total beginner on the backend at Day 0 and is not
-  one now
-- Day 39 = deployed, demo-quality, publicly reachable
-- Primary learning emphasis: **backend architecture**, with frontend treated as
-  a real but secondary skill
+**Constraints:** about 7 focused hours a day, taken as whole days; Day 39 is
+deployed, demo-quality and publicly reachable; backend architecture is the
+main subject, frontend real but secondary. **The plan may be extended by as
+many days as the work needs** (her husband, 2026-10-04); finishing soon is
+still the aim.
 
 ---
 
-## Where The Project Stands At The Close Of Screens Day (verified 2026-10-09)
+## Where the project stands (2026-10-10)
 
-**Every screen of the designer's prototype now exists in the web app**, in
-its main state, apart from four that need data first: a reflection, an
-answered question, a recording's options and a draft. Each control whose
-feature is not built says "This is not built yet." when pressed and sends
-nothing, and where data does not exist yet the same sentence stands in its
-place. Every such control, 19 of them, is in one list,
-`apps/web/lib/unbuilt.ts`, with its day; five have no day yet (voice
-recording, "keep this out of memory" on an entry and in the composer, the
-support page's words, and what Privacy says about training). Ask is a
-destination, and the Timeline has its calendar, from real data. No API
-change. 246 API unit tests, 365 API end-to-end tests,
-171 web tests and 7 checks on the shared package pass; lint, typecheck and
-build are clean for both applications.
+Days 0 to 17c and Screens Day are done and merged. **The next day is 18.**
 
-**The next day is 18:** drafts, Enter saves, and editing a saved entry, wired
-into screens that already exist.
+A person can create an account, sign in, sign out, write and delete entries,
+set a day's mood, and look back through the Timeline as a list or a calendar.
+Every screen of the designer's prototype is drawn; a control whose feature is
+not built says "This is not built yet." and sends nothing, and all of them are
+listed in `apps/web/lib/unbuilt.ts` with their day. 246 API unit tests, 365
+API end-to-end tests, 171 web tests, 7 contract checks. 21 ADRs.
 
-## Where The Project Stands At The Close Of Day 17c (verified 2026-10-08)
-
-A person can create an account with a name, sign in, stay signed in across
-a reload, type an entry, see it appear, delete it, and say how the day
-felt, on screens drawn from the designer's v3 delivery. A day ends at
-midnight in the person's own timezone, which the browser supplies when the
-account is created. A person can also open the Timeline, open a past day,
-change its mood or delete from it, and sign out. `apps/api`, `apps/web` and
-`packages/contracts` are all real. 246 API unit tests, 365 API end-to-end
-tests, 154 web tests and 7
-checks on the shared package pass, and lint, typecheck and build are clean
-for both applications. 21 ADRs, with ADR-015 amended.
-
-**The next day is Screens Day**, inserted on 2026-10-08 before Day 18: every in-scope screen, built in its main state. **Then Day 18:** drafts, Enter saves, and editing a saved entry. The lettered days were inserted on
-Days 16 and 17 and are in the Phase 3 table below.
-
-Still not built: any AI, voice, search, the calendar view, a way to change
-the timezone or the name, forgot password, export and account deletion.
-
-The section that follows is the record as it stood at Day 14 and is kept for
-its account of the test suite's structural weakness.
-
-## Where The Project Actually Stands (as of Day 14, verified 2026-10-02)
-
-Everything in this section was re-run and confirmed rather than copied from a
-previous report.
-
-**Shipped and working.** A NestJS API in a pnpm workspace that stores journal
-entries in SQLite. Data access lives behind a repository. Input is validated at
-the boundary by `class-validator` and a globally registered pipe. Configuration
-is checked once at boot and the application refuses to start when it is wrong.
-Schema changes happen through TypeORM migrations and never at boot.
-
-**Identity is real.** Accounts with argon2id passwords and an email identifier.
-Sessions with rotating refresh tokens, so logout takes effect on the next
-request rather than when the token expires. Every route is closed by default
-and every read and write is scoped to its owner in the `WHERE` clause.
-
-**Days are the aggregate.** A day has a row, a 4am boundary and a mood.
-Entries belong to days. Listing is paginated and counting takes the same
-filters as listing.
-
-**The numbers.** 149 unit tests and 160 end-to-end tests, all passing.
-Seventeen architecture decision records. Typecheck, lint and build all clean.
-A handbook with an entry per completed phase.
-
-**Not built yet, and worth saying plainly.** There is no AI in the product.
-`apps/web` holds one screen at three breakpoints, static and wired to nothing.
-Voice, transcription, import, export and tiers are all decided and unbuilt
-(ADR-016, `docs/feature-reconciliation.md`). A user account cannot be deleted.
-
-**The one structural weakness in the codebase.** The test suite is good at
-checking that pieces work and has been repeatedly bad at checking that pieces
-are *connected*. Three times in three days, deleting a single line disconnected
-an entire day's work while every test stayed green: `validate,` on Day 6, the
-`APP_PIPE` provider on Day 7, and `synchronize: false` on Day 8. Each was found
-by mutation during an audit, not by a test. Each now has a test. **The rule this
-produced: a test that does not fail when the wiring is removed has not been
-written.** Every future day is expected to include one mutation check.
-
-**Day 14 measured that weakness rather than assuming it had gone.** Twenty
-mutations across Phase 2; seventeen were caught. The three that were not: an
-expired session, a deleted user, and a test that compared the thing to itself.
-The first two are states the system reaches by waiting rather than by anything
-a user does, which is a category this suite had never covered.
+Still not built: any AI, voice, real search, editing, drafts, forgot
+password, changing the timezone or name, devices, export, account deletion.
 
 ---
 
-## The Organizing Idea
+## The organizing idea
 
-This roadmap is **not** a feature checklist divided by forty. It is ordered so
-that each day creates the *problem* that the next day solves. You should rarely
-be told "today we use X." You should arrive at X because yesterday hurt.
+The roadmap is ordered so that each day creates the problem the next day
+solves. She should rarely be told "today we use X". She should arrive at X
+because yesterday hurt.
 
-The spine is five questions, in this order:
+The spine is five questions:
 
-1. **Can I store and retrieve a thought?** (persistence, data modeling, HTTP)
-2. **Whose thought is it?** (identity, ownership, multi-tenancy)
-3. **Can a person actually use this?** (frontend, the auth boundary across two apps)
-4. **Can I find a thought I half-remember?** (search → semantic search → RAG)
-5. **What do my thoughts mean together?** (aggregation, insight, scheduled work)
+1. **Can I store and retrieve a thought?** Persistence, data modelling, HTTP.
+2. **Whose thought is it?** Identity, ownership.
+3. **Can a person actually use this?** The frontend, and the auth boundary
+   across two apps.
+4. **Can I find a thought I half-remember?** Search, then semantic search,
+   then retrieval-augmented answers.
+5. **What do my thoughts mean together?** Aggregation, scheduled work,
+   deployment.
 
-Question 3 is new in v2.0 and it is deliberately placed before the AI work.
-A retrieval feature with no interface is a feature nobody can judge.
+## Scope
 
-### Scope decisions
+The live statement of scope is [requirements.md](requirements.md), hers.
+In brief:
 
-**In the core path:** journaling, mood, search, memory chat (RAG), weekly
-insights, auth, a real frontend, deployment.
-
-**Explicitly deferred:** habit tracking, notifications, monthly insights,
-rich-text editing, analytics dashboards, guest sessions. **Tiers are no longer
-deferred; they are refused** (2026-10-04, ADR-016). Everyone gets the whole
-product.
-
-~~calendar view~~, ~~file and image attachments~~ — **both amended on Day 12.**
-The calendar is a zoom level of the one timeline rather than a second screen,
-and voice memos are the brief's primary input mode and the commercial model.
-Photo and file attachments stay deferred. ADR-016.
-
-**Scope set on 2026-10-04, by her husband.** **No tiers: there is no Free and no Pro, and every user gets every feature.**
-A free trial followed by a subscription is a possible later model and is not
-decided. In: editing an entry from the interface (Day 18), forgot password
-(Day 20),
-the per-entry "keep this out of memory" option, and voice memos, confirmed.
-Out: offline use, and the native mobile app. Mobile is a later project, and
-any change it needs is made then, after this one is finished. Account deletion
-is a hard delete of that account and only that account's data. Things a user
-deletes inside their journal are soft-deleted. The record is
-`docs/feature-reconciliation.md`, and what the designer has to draw is
-`docs/ui-handover.md`.
-
-**Data model decisions, same day.** A recording is an entry: one `entries`
-table with a `kind`, and a transcript is saved into `content`. Each user has a
-timezone setting and days are worked out in it, which answers the timezone
-question ADR-015 left open; the day it is built is not yet scheduled, and it
-should come before real entries accumulate on the wrong day. Also decided: a
-day row stays when its last entry is deleted; a transcript cannot be edited;
-`users.password_hash` becomes `NOT NULL`; drafts are stored on the server
-(Day 18). The AI tables are designed when Phase 4 is built. The picture of all
-of it is the *Neuron Data Model* artifact, linked from `master-state.md`.
-
-**The day count is not a limit.** He said the same day that the plan may be
-extended by as many days as the work needs. Finishing soon is still the aim.
-A slack day that has been given real work can be replaced by adding a day.
-
-Deferred does not mean bad. It means these features teach concepts the core
-path already teaches, so they cost time without buying understanding. If a day
-ends early, pull one forward — but only if it introduces a *new* problem.
+- **In and scheduled:** journaling, mood, days in the user's timezone, the
+  Timeline and calendar, editing, drafts, forgot password, search, memory
+  chat, weekly reflections, export, account deletion, devices, deployment.
+- **In, with no day yet:** voice memos (record, store, transcribe), "keep
+  this out of memory" (before Day 22), the support page's words, what the
+  privacy page says about training, moving the calendar between months.
+- **Out:** tiers (refused, ADR-016), guest use, offline, import, a native
+  mobile app, trackers beyond mood, notifications, distress detection, rich
+  text, mood charts, monthly insights, photo and file attachments.
 
 ---
 
-## A Note On Pace
-
-Days 0 through 8 took longer than nine days. That is worth being straight about
-rather than quietly re-baselining.
-
-Some of the overrun bought something real. Day 8's detour into TypeORM and
-migrations was forced by an actual problem — a `NOT NULL` column cannot be
-added to a populated table by a `CREATE TABLE IF NOT EXISTS` at boot — and it
-made Day 13 easier rather than harder. That is the roadmap working as intended.
-
-Some of it did not. Gaps between working days cost more than the work itself,
-because every return begins with reloading context that was already paid for
-once.
-
-**The target from here is a working day that ends with something merged.** Not
-a longer day. A finished one. A day that ends with a decision made, a worker
-run, an audit done, and a merge is a day that compounds; a day that ends
-mid-block has to be partly repeated. The single highest-value change available
-right now is not working harder, it is not stopping in the middle.
-
-Days 20, 27, 34 and 38 exist as slack. They are real days with real work in
-them, but they are the first places to absorb an overrun, and using them for
-that is expected rather than a failure.
-
----
-## Phase 0 — Setup (Days 0–1) — complete
+## Phase 0 — Setup (Days 0–1) — done
 
 | Day | What happened |
 |---|---|
-| 0 | Repo initialized. Public build announced. |
-| 1 | pnpm workspace wired, NestJS scaffolded, `GET /entries` returning a hardcoded array. ADR-001 (monorepo), ADR-002 (NestJS). Not audited on the day; audited retroactively on Day 2, and the cost was real — lint failing on committed code, two contradictory ADRs, and a README describing directories that did not exist. |
+| 0 | Repository started; the build announced in public |
+| 1 | pnpm workspace, NestJS scaffold, `GET /entries` returning a fixed array. ADR-001, ADR-002 |
 
----
+## Phase 1 — The Request (Days 2–7) — done
 
-## Phase 1 — The Request (Days 2–7) — complete
+Goal: one feature end to end that she fully understands. Handbook:
+[phase-1-the-request.md](handbook/phase-1-the-request.md).
 
-**Goal: one feature, end to end, that she fully understands.**
-
-| Day | Problem solved | The idea that came out of it |
+| Day | Problem | The idea that came out of it |
 |---|---|---|
-| 2 | Restart the server and the data is gone. | Files vs SQLite vs Postgres. What a migration is. ADR-003. |
-| 3 | SQL strings scattered through the controller. | What a repository is, and what may cross its boundary. ADR-004. |
-| 4 | A client sent `{}` and the server returned a 500. | Validation at the boundary; 400 vs 404; status codes are HTTP vocabulary and belong only in the controller. The load-bearing fact was **type erasure** — she watched `{ content: string }` vanish from the compiled JavaScript. ADR-005. |
-| 5 | I changed something and don't know what I broke. | Reading and judging a suite. **Three real defects found inside a fully green 39-test suite**, all by her, all confirmed over real HTTP. The idea: **a missing test is usually a missing decision.** ADR-006. |
-| 6 | My database path is in a committed file. | Configuration checked once at boot, refusing to start when wrong. The idea: **the dangerous configuration bug is not the one that crashes — it is the one that starts.** ADR-007. |
-| 7 | 91 lines of hand-written parsing in a controller. | `class-validator` and a globally registered pipe. The idea: **a library knows about shapes; it does not know about your product** — which is why two rules stayed hand-written. ADR-008. |
+| 2 | Restart the server and the data is gone | SQLite; what a migration is. ADR-003 |
+| 3 | SQL strings scattered through the controller | A repository, and what may cross its boundary. ADR-004 |
+| 4 | `{}` answered with a 500 | Validation at the boundary; status codes live in the controller; type erasure. ADR-005 |
+| 5 | I changed something and don't know what broke | Three real defects found in a green suite: a missing test is usually a missing decision. ADR-006 |
+| 6 | The database path is in a committed file | Configuration checked once at start: the dangerous bug is the one that starts. ADR-007 |
+| 7 | 91 lines of hand-written parsing | `class-validator` and a global pipe; a library knows shapes, not your product. ADR-008 |
 
----
+## Phase 2 — Identity and Ownership (Days 8–14) — done
 
-## Phase 2 — Identity & Ownership (Days 8–14)
+Goal: data belongs to someone. Handbook:
+[phase-2-identity-and-ownership.md](handbook/phase-2-identity-and-ownership.md).
 
-**Goal: the single most important backend-architecture lesson — data belongs
-to someone.**
-
-| Day | Problem to solve | What she should be able to explain afterward |
+| Day | Problem | The idea that came out of it |
 |---|---|---|
-| 8 | Anyone can read anyone's entries. Who is making this request? | **Done, partly.** The decisions were made — sessions vs tokens, why "just use JWT" is not an answer (ADR-009) — and then the day went somewhere the plan did not. `users` needed a second table and `user_id` needed a non-additive schema change, which fired two of ADR-004's named revisit conditions at once, so the project moved to **TypeORM with migrations** (ADR-010). `users` and `entries.user_id` exist. **Nothing yet knows who is asking.** |
-| 9 | Storing a password is a liability — and there is still no way to create a user at all. | **Done, and it did not split.** Hashing vs encryption, why the answer is one-way, and why argon2 is deliberately slow (measured: SHA-256 at 578,000 guesses/sec against argon2id at 30). Registration, login, token issuing and verifying, `GET /auth/me`, and `JwtAuthGuard` on every `/entries` route. ADR-011 (password storage) and ADR-012 (endpoints). **bcrypt was chosen and then reversed** in favour of argon2id on the OWASP position. 128 unit tests, 71 e2e. |
-| 10 | Authenticated is not the same as authorized. | **Done.** Ownership enforced in the `WHERE` clause rather than after the fetch — the controller-side check was demonstrated to be a *constant*, because `select: false` makes `entry.userId` `undefined` and `undefined !== anything` denies everybody including the owner. 404 never 403, so "not yours" and "does not exist" are indistinguishable. `user_id` is now `NOT NULL`, and the guard is `APP_GUARD` with `@Public()` — a new route is closed by default. ADR-013. 131 unit, 86 e2e. |
-| 11 | Tokens don't expire, and logging out does nothing. | **Done.** Her Day 8 objection answered in code: a sessions table, 15-minute access tokens, 30-day rotating refresh tokens, and a guard that checks the session on every request so revocation is *immediate* rather than bounded by expiry. `logout`, `logout-everywhere`, `sessions`. Refresh-token reuse revokes every session for that user. ADR-014. 131 unit, 102 e2e. |
-| 12 | **Design review. The screens exist; the API was built without seeing them.** | **Done.** 40 screens reviewed against the API. The API models entries; the designs model days, and the day ends at 4am — ADR-015. Two contradictions settled: email login, and voice memos in scope — ADR-016. See the section below. **No implementation on this day.** |
-| 13 | Mood is part of the product but isn't modeled — and neither is the thing mood belongs to. | **Done.** The `days` table, with `UNIQUE(user_id, date)` as the business key and a UUID as the row key — her distinction, and she named the race the constraint closes before it was built. The 4am boundary is written twice, in SQL for the backfill and TypeScript for new writes, and the two were checked against each other over 34,000 instants. Mood, `GET /days?from=&to=`, and pagination pulled forward from Day 29. `name` became `email` with a case-insensitive index. **The generated migration carried Day 8's bug again** — a `NOT NULL` column copied without a value — and was replaced by 96 hand-written lines. 142 unit, 144 e2e. |
-| 14 | **Review day.** Audit, refactor, document. | **Done, 2026-10-01/02.** An audit, a twenty-mutation sweep, two fixes, and the handbook. Her three audit predictions found two real bugs; one of mine was wrong and is withdrawn in the commit rather than quietly dropped. The sweep found two states nobody had tested — an expired session and a deleted user — and one test that could not fail. `docs/handbook/` now exists with both phase entries, which closes the Phase 1 documentation debt. ADR-017. 149 unit, 160 e2e. |
+| 8 | Who is making this request? | Sessions versus tokens (ADR-009). A non-additive schema change forced TypeORM and migrations (ADR-010) |
+| 9 | Storing a password is a liability | argon2id, deliberately slow; registration and login. ADR-011, ADR-012 |
+| 10 | Authenticated is not authorized | Ownership in the `WHERE` clause; `404` never `403`; routes closed by default. ADR-013 |
+| 11 | Logging out does nothing | Sessions checked on every request; rotating refresh tokens; reuse ends everything. ADR-014 |
+| 12 | The designs exist and the API never saw them | The designs model days, not entries. Email login; voice in scope; no tiers. ADR-015, ADR-016 |
+| 13 | Mood has nowhere to live | The `days` table, its business key, mood, pagination |
+| 14 | Review day | A 20-mutation sweep found states nobody had tested; the handbook began. ADR-017 |
 
-**Why identity comes before AI:** a retrieval system that leaks another user's
-memories is the worst possible bug in this product, and retrieval cannot be
-designed safely while tenancy is still fuzzy.
+## Phase 3 — The Interface (Days 15–20) — open
 
-### Phase 2 is closed — 2026-10-02
+Goal: a person who is not her can use this.
 
-**Delivered.** Registration and login with argon2id. Sessions with immediate
-revocation rather than revocation bounded by token expiry. Ownership in the
-`WHERE` clause on every read and write, 404 never 403. Days as a first-class
-aggregate with a 4am boundary, and mood on the day. Pagination. Email as the
-identifier, enforced case-insensitively. Nine ADRs, 009 through 017.
-
-**The phase's own account of itself** is
-[docs/handbook/phase-2-identity-and-ownership.md](handbook/phase-2-identity-and-ownership.md).
-
-**What Phase 3 inherits, stated plainly.**
-
-- **A user cannot be deleted.** Every foreign key is `ON DELETE NO ACTION`.
-  That is the generator's default rather than a decision, and the open
-  question below has been open since Day 8.
-- **`entries.day_id` is nullable.** The contract step of
-  expand-backfill-contract is scheduled, not forgotten.
-- **No timezone.** The 4am boundary is computed in UTC. ADR-015 carries the
-  argument and the revisit trigger.
-- **Every route is closed by default.** `APP_GUARD` plus an explicit
-  `@Public()`. A new endpoint requires authentication unless someone says
-  otherwise, which is the opposite of the usual default.
-- **`apps/web` exists** with the Today screen at three breakpoints, static and
-  unwired. It was built on Day 12 against the designs rather than the API.
-
----
-
-## Phase 3 — The Interface (Days 15–20)
-
-**Goal: a person who is not her can use this.**
-
-This phase is new in v2.0. In v1.0 the frontend was one day (the old Day 12)
-and that was never realistic — it would have produced a screenshot rather than
-a product.
-
-| Day | Problem to solve | What she should be able to explain afterward |
+| Day | Problem | What was done, or is planned |
 |---|---|---|
-| 15 | There is no UI, and the token has to live somewhere in a browser. | **Done, 2026-10-05/06.** The refresh credential lives in an `HttpOnly`, `SameSite=Strict` cookie and the access token in memory; her reason is that XSS should not be able to carry the long-lived credential away. CORS allows one origin, and `WEB_ORIGIN` has no default. She predicted that a cross-origin request reaches the API and only the answer is withheld, and from that derived CSRF as the cost of a cookie. The web app signs in, survives a reload, and shows real entries; **only one refresh runs at a time**, because two together would trip Day 11's reuse detection. She found by reading the endpoint list that nothing returned one day's entries, and ruled that the API, not the browser, decides what today is. ADR-018. 175 unit, 232 e2e, 15 web. |
-| 16 | Two apps now describe the same data, in two places, and they will drift. | **Done, 2026-10-07.** `packages/contracts` exists and earns the workspace ADR-001 argued for on Day 1. Her rule for it: *facts about data crossing the boundary between the two apps, not implementation or behaviour belonging to either app.* By that rule the mood words, the page sizes, the password minimum and four wire shapes went in, and `dayFor` stayed out. She chose it over a generated client, which **reverses part of ADR-001**, and ADR-019 says so. The day opened by making `entries.day_id` `NOT NULL`, with a foreign key to `days` that had never existed. ADR-019. 194 unit, 236 e2e, 15 web, 6 contract checks. |
-| 17 | The journal screen works and feels broken. | **Done, 2026-10-07, and reshaped by what she found.** She used the screen as its first real user: the composer could not be typed into, "Try again" gave no sign of being pressed, and yesterday's entry could not be reached at all. So the day built the first real action, writing an entry, and designed waiting and failing on it. **Writing waits for the API**, because the server owns an entry's time and day. **Deleting shows at once**, challenged by the worker and kept by her. Deleting is a soft delete: `deleted_at` with TypeORM's `@DeleteDateColumn`, so the filter is automatic and not remembered; a deleted entry is a 404 everywhere; `DELETE` answers 204; the day row stays; a date is listed only if it has a live entry. Request shapes joined the shared package. ADR-020, ADR-021. 211 unit, 279 e2e, 41 web. |
-| 17a | The web app is drawn on a stylesheet the designer has replaced. | **Done, 2026-10-07.** `lock.css` is the designer's v3 file byte for byte, and sign in and create account match his screens exactly at three widths. She ruled that the second password is compared in the browser only, because it guards against a typing slip and nothing about it crosses to the API; and that a control for a feature that is not built is not drawn, so forgot password, the edit icon and the memory control wait for their days. The `/review` pages are gone. Day 17's audit finding is closed: a test now fails when the stale-answer guard is removed, and the paging loop is capped at 20 pages. **The Master Thread's mutation was not caught**: the form's call to the password rules is inside a component and no test reaches it. 211 unit, 279 e2e, 55 web. What follows is the plan as it was written. **Inserted on Day 17 by her decision.** The designer answered the handover with `designs/AIJournal-v3/`. Replace `lock.css`, rebuild sign in and create account on the new spread with its second password field, and restyle Today with the real entry controls and the new mood order. Opens by closing Day 17's audit finding: no test proves that an out-of-date answer about today is thrown away. |
-| 17b | A day ends at 4am in a timezone nobody chose. | **Done, 2026-10-07, and the rule itself changed.** She ruled that a day ends at **midnight**, not 4am, and accepted that a sitting which crosses midnight is split. The timezone is an IANA place name on the user, sent by the browser at registration and never typed; a missing or invalid one is a 400 with no default, because a default would start a person on the wrong days without a sign. Node accepts `+05:00` as a timezone, so the check refuses an offset by name. The account has a required name, trimmed, at most 60 characters. `users` was rebuilt with both columns `NOT NULL` and no default, and existing accounts took the part of their email before the `@` and `UTC`. The mood words became the web app's second real action, shown at once, and Record, the memory option and three dead links were removed under her Day 17a rule. **The contract changed and no check failed**: the web app's registration body was never typed against it, so all nine commands passed with registration broken, and both bodies are typed now. The worker refused the prompt's design for mood requests and sent them one at a time, correctly. Day 17a's audit finding is closed. **Both of the Master Thread's mutations went uncaught**: the migration's final foreign key check, and the one line that reads the browser's timezone. There is still no way to change a timezone. ADR-015 amended. 242 unit, 318 e2e, 100 web. What follows is the plan as it was written. **Inserted on Day 16 by her decision.** The per-user timezone decided on 2026-10-04: a setting on the user, taken from the browser at registration, and `dayFor` works a day out in it. It comes before Day 18 because the composer is where real entries begin, and an entry never moves once it is filed (ADR-015). **Added on Day 17a by her decision: a required display name on the account**, asked for at registration and shown in the destinations in place of the word "You". It is the same shape of work in the same files. Opens by closing Day 17a's audit finding. Numbered 17b so that every later day keeps its number. `docs/ui-handover.md` §12. |
-| 17c | A person can see today and nothing else. | **Done, 2026-10-08.** She found by reading two API answers that an entry carried an instant and nothing saying which day it was on, so **`WireEntry` gained `date`**, the stored date of the entry's day and never one worked out from `createdAt`. A day that has not happened is a 404, judged in the asker's timezone. The Timeline is the list only, newest first all the way down; a past day's page has the mood and delete and no composer, and is the same code as Today; a day with no entries has no page. You, then Account, shows the name, the email and "Sign out of this device"; an unreachable sign-out changes nothing. **The browser's clock never makes a date.** The timezone setting is Day 34, by her decision. Day 17b's API audit finding is closed. **Both of the Master Thread's mutations were caught**, the first time in four days. 246 unit, 365 e2e, 154 web. What follows is the plan as it was written. **Added on Day 17b by her decision: sign-out**, which she found missing by asking how to log out, **and the account's name shown beside it.** Opens by repaying four learning debts from Day 17b. **Inserted on Day 17 by her decision**, after her own finding that no day in Phase 3 built a way to look at any day but today. A past day's page and a way to reach it, built after the timezone so that the days it shows are the right ones. The API already has `GET /days/:date`, `GET /days?from=&to=` and `GET /entries?date=`. |
-| Screens Day | Building a screen and wiring its feature on the same day mixes frontend work into every backend day. | **Inserted on 2026-10-08 by her decision, before Day 18, with no number so that later days keep theirs.** **Every screen in the designer's prototype** is built in its main state, the AI screens included, so the app looks like the final product and each later day adds the backend behind a screen. Built in two parts: first the screens for scheduled features, then the rest. Loading, failed and empty states are built on the day each feature is wired. A control that does not work yet says "This is not built yet." when pressed and sends nothing; where data does not exist yet, the same sentence stands in its place, and no sample content is shown. Every such control is in one list, `apps/web/lib/unbuilt.ts`, with its day. **This reverses her Day 17a rule** that a control for an unbuilt feature is not drawn: until its day, a control may be on screen and not yet work, and every one must work or be gone before Day 36. Design text is placeholder, not a requirement. No API change. |
-| 18 | Writing an entry is the product, and the editor is an afterthought. | The core writing experience. Autosave and what it means for the API — does a draft hit the server, and if so how often, and what happens on a failed save. This is likely to produce a real API change. **Added on Day 17b by her decision: Enter saves, and Shift with Enter makes a new line.** **Added 2026-10-04: editing a saved entry from the interface.** `PATCH /entries/:id` has existed since Day 5 and nothing calls it. `docs/ui-handover.md` §11. |
-| 19 | It works on her laptop, at her screen size, signed in as herself. | Responsive layout, keyboard access, and a genuine pass at accessibility rather than a checklist. **Carried here from Day 17b:** a phone's keyboard cannot press Shift with Enter, so under the Day 18 rule a person on a phone could not make a new line; she put the question aside until this day. **Also carried here: no test reaches a React component**, which let a mutation through on Days 17, 17a and 17b. One test that drives the app in a browser is a dependency and so her decision. |
-| 20 | A person who forgets their password is locked out of their own journal for good. | **Forgot password**, added 2026-10-04. A reset link sent by email: what a mail service is and why the application does not send mail itself, why the reset token is stored hashed, used once and expires, why the answer is the same whether or not the account exists, and why a password change revokes every session. The screens are specified in `docs/ui-handover.md` §2. **This day was slack.** Phase 3 now has no overflow day of its own, so an overrun goes to Day 27. |
-
----
+| 15 | No UI, and the token must live somewhere in a browser | **Done.** Refresh credential in an `HttpOnly` cookie, access token in memory, one CORS origin. The web app signs in and shows entries. ADR-018 |
+| 16 | Two apps describe the same data in two places | **Done.** `packages/contracts`; `entries.day_id` made `NOT NULL`. ADR-019 |
+| 17 | The journal screen works and feels broken | **Done.** Writing (waits for the API) and deleting (soft, shows at once). ADR-020, ADR-021 |
+| 17a | The designer replaced the stylesheet | **Done.** `lock.css` from the v3 delivery, byte for byte; sign in and create account rebuilt |
+| 17b | A day ends at 4am in a timezone nobody chose | **Done.** A day ends at midnight in the user's IANA timezone, from the browser at registration; a required name. ADR-015 amended |
+| 17c | A person can see today and nothing else | **Done.** The Timeline, a past day's page, signing out; every entry carries its day's `date` |
+| Screens Day | Building a screen and its feature together mixes frontend into every backend day | **Done.** Every prototype screen in its main state; unbuilt controls say so and are listed with their day; the Timeline's calendar from real data |
+| **18** | Writing is the product and the editor is an afterthought | **Next.** Drafts saved on the server (how often, and what a failed save shows); Enter saves and Shift with Enter makes a new line; editing a saved entry through `PATCH /entries/:id`. Likely an API change and a migration |
+| 19 | It works on her laptop, at her screen size | Responsive layout, keyboard access, a real accessibility pass. How a phone makes a new line. **Her decision on one test that drives the app in a real browser**: no test reaches a React component today |
+| 20 | Forgetting a password locks a person out for good | Forgot password: a mail service, a reset token stored hashed, used once and expiring, the same answer whether or not the account exists, and every session ended on a change. **This was the phase's slack day**; an overrun now goes to Day 27 |
 
 ## Phase 4 — Memory (Days 21–27)
 
-**Goal: the product's actual differentiator. Discovered, not prescribed.**
+Goal: the product's real difference, discovered rather than prescribed.
+**"Keep this out of memory" must be built before Day 22.**
 
-| Day | Problem to solve | What she should be able to explain afterward |
+| Day | Problem | What she should be able to explain afterwards |
 |---|---|---|
-| 21 | I want to find the entry about my sister. `LIKE '%sister%'` misses it. | Keyword search, full-text search, indexes. Why lexical matching has a ceiling. **The escaping work from Day 5 dies here, and that was predicted on Day 5** — the durable artifact was the claim, not the SQL. |
-| 22 | I searched "felt overwhelmed at work" and it matched nothing, though three entries describe exactly that. | Embeddings. Vector similarity. pgvector vs a dedicated vector database, and why the boring answer usually wins. |
-| 23 | A 2000-word entry embedded as one vector retrieves badly. | Chunking, and why chunk size is a real trade-off rather than a config value to copy. |
-| 24 | The request now takes nine seconds because it waits on an AI call. | Synchronous vs asynchronous processing. Queues, workers, job state, failure and retry. |
-| 25 | I can retrieve chunks. I want an answer. | RAG end to end. Context assembly, prompt design, grounding and citation. |
-| 26 | It confidently made something up. | RAG failure modes. Evaluation. Cost and latency budgets. When retrieval is the bug and when the prompt is. |
-| 27 | **Review day + slack.** | Audit, refactor, document. Second call on absorbing an overrun. |
+| 21 | `LIKE '%sister%'` misses the entry about my sister | Keyword search, full-text search, indexes, and why lexical matching has a ceiling |
+| 22 | "Felt overwhelmed at work" matches nothing, though three entries say exactly that | Embeddings; vector similarity; pgvector versus a dedicated vector database |
+| 23 | A 2,000-word entry embedded as one vector retrieves badly | Chunking, and why chunk size is a real trade-off |
+| 24 | A request takes nine seconds because it waits on an AI call | Synchronous versus asynchronous work; queues, workers, job state, retry |
+| 25 | I can retrieve passages; I want an answer | Retrieval-augmented generation end to end: context, prompt, grounding, citation |
+| 26 | It confidently made something up | Failure modes, evaluation, cost and latency budgets |
+| 27 | **Review day and slack** | Audit, a mutation sweep, refactor, the Phase 3 handbook entry if not written. First place to absorb an overrun |
 
-**Why this order:** every step exists because the previous step visibly failed.
-Skipping Day 21 to "just do embeddings" would remove the entire reason
-embeddings are interesting.
-
----
+Every step exists because the previous one visibly failed. Skipping Day 21
+removes the reason embeddings are interesting.
 
 ## Phase 5 — Insight, Deployment, Hardening (Days 28–39)
 
-**Goal: make it real, and make it survivable.**
+Goal: make it real, and make it survivable.
 
-| Day | Problem to solve | What she should be able to explain afterward |
+| Day | Problem | What she should be able to explain afterwards |
 |---|---|---|
-| 28 | Weekly summaries have to run without a user clicking anything. | Scheduled work vs queued work. Idempotency. What happens when a job runs twice. **Added 2026-10-04: the same mechanism removes expired session rows**, which Day 11 left without one. Soft-deleted entries are *not* purged on a timer; they stay until the account is deleted. |
-| 29 | The timeline query loads every entry ever written. | Read patterns, pagination, aggregation, N+1. Measuring before optimizing. |
-| 30 | Insights exist in the database and nowhere on screen. | The insight and chat interfaces. Streaming a response into a UI, and what that costs in complexity. |
-| 31 | It only runs on my laptop. | Containers, environments, managed Postgres, build-time vs runtime configuration. **This is where SQLite is left behind, and where ADR-003's stated revisit condition finally fires.** |
-| 32 | Deploying by hand is a coin flip. | CI, running migrations in production, secret management, rollback. Day 8's migration work is what makes this a real conversation rather than a hosting tutorial. |
-| 33 | Something broke in production and I have no idea what. | Structured logging, error tracking, health checks, and what observability actually buys. |
-| 34 | A person cannot take their journal out, cannot delete their account, and cannot see where they are signed in. | **Your data and your account**, added 2026-10-04. Export as markdown, JSON and audio files. Account deletion as a hard delete of that account and only its data, which finally settles the foreign keys left at `NO ACTION` since Day 8. A device list, which needs `sessions` to record the browser and when it was last used, and an endpoint to end one session. `docs/ui-handover.md` §7–9. **This day was slack.** The remaining slack is Days 27 and 38. |
-| 35 | Anyone can hammer my AI endpoint and spend my money. | Rate limiting, abuse, input hardening, and a real security pass. |
-| 36 | Nobody has ever used this except me. | A real user test with a real person. Findings become a backlog, and the backlog gets triaged rather than implemented wholesale. |
-| 37 | The findings from Day 36. | Fix what a real person actually tripped over. |
-| 38 | **Slack / polish.** | Final buffer. |
-| 39 | **Final audit and retrospective.** | The full handbook. Every "why" from the success criteria, answered in writing. |
+| 28 | Weekly reflections must run without anyone clicking | Scheduled versus queued work; idempotency; a job that runs twice. The same mechanism removes expired sessions |
+| 29 | The Timeline loads every entry ever written | Read patterns, pagination, aggregation, N+1; measure before optimizing |
+| 30 | Insights exist and Ask is drawn but unwired | Wiring Ask and reflections; streaming an answer into a screen, and its cost |
+| 31 | It only runs on her laptop | Containers, environments, managed Postgres, build-time versus run-time configuration. SQLite is left here, as ADR-003 said |
+| 32 | Deploying by hand is a coin flip | CI, migrations in production, secrets, rollback |
+| 33 | Something broke in production and nobody knows what | Structured logs, error tracking, health checks |
+| 34 | A person cannot leave, export, or see where they are signed in | Export (Markdown, JSON, audio); account deletion as a hard delete, settling the foreign keys; the device list; **changing the timezone** (her decision, Day 17c). Was slack |
+| 35 | Anyone can hammer the AI endpoint and spend money | Rate limiting, abuse, a security pass |
+| 36 | Nobody but her has used it | A real user test. **Every control in `lib/unbuilt.ts` must work or be gone by now** |
+| 37 | What Day 36 found | Fix what a real person tripped over, triaged rather than wholesale |
+| 38 | **Slack and polish** | Final buffer |
+| 39 | **Final audit and retrospective** | The handbook complete; every "why" from the success criteria answered in writing |
 
-**Why deployment is on Day 31 and not Day 39:** first deployments fail in ways
-nobody predicts. Eight days of slack after the first deploy is the difference
-between a live demo and a screenshot of localhost.
-
----
-## Day 12 — The Design Review
-
-Frontend designs exist. They were made outside this thread and have not been
-seen by anyone who has been building the API.
-
-**This is the day they are shared.** It is placed here on purpose. Earlier, and
-the API would be shaped by screens before ownership and auth are settled, which
-are the two things most likely to change what a screen can show. Later, and the
-API would be finished and the screens would have to bend around it. Day 12 is
-after auth is real and before the frontend is built, which is the only window
-where both documents can still move.
-
-**Nothing is implemented on Day 12.** The output is an amended roadmap, an
-amended set of designs, and — if the gap is large enough — an ADR.
-
-### What has to be established on the day
-
-For each screen, three questions, asked in this order:
-
-1. **What does this screen need from the API that does not exist yet?**
-2. **What does the API already return that this screen has no place for?** An
-   unused field is a maintained field, and it is cheaper to notice now.
-3. **What is on this screen that no data model can currently support?** This is
-   the expensive category, because the answer is a migration.
-
-Then one question about the set as a whole: **is there a screen that only makes
-sense if two requests happen together?** That is where pagination, batching or
-a combined endpoint gets decided, and deciding it after the screens are built
-means rebuilding them.
-
-### Frontend changes to expect, and why
-
-These are raised now so the designs can be revisited before the day rather than
-argued about during it. Each one comes from something the API already does, or
-already cannot do.
-
-**1. Every list needs an empty state, and it is not an error.** ADR-005
-established that an empty collection is a complete answer. `GET /entries` on a
-new account returns `[]` and that is success. If the designs show a journal
-list with no "you haven't written anything yet" state, one is needed — and it
-is the first screen a new user ever sees, so it is not a minor case.
-
-**2. Search needs a "no results" state that is visibly different from an empty
-journal.** Same reason, different sentence. "You have no entries" and "no
-entries match *sister*" are different messages, and the API deliberately
-distinguishes them.
-
-**3. Search needs to show what was searched for.** ADR-006 decided that `%` and
-`_` are ordinary characters, so searching for `100%` is a legitimate query with
-a real answer. The design should not assume the search term is cosmetic.
-
-**4. Validation errors need somewhere to appear, per field.** The API answers a
-bad body with a 400 carrying an array of messages — for example `content must
-contain at least one character that is not whitespace`. If the designs only
-have room for one global error banner, that array has nowhere to go. This is
-the most likely place the designs and the API are already misaligned.
-
-**5. An entry that is only whitespace is refused.** The editor should not let a
-user write four spaces, press save, and receive an error they do not
-understand. Either the button disables, or the message is written for a person.
-
-**6. Editing does not change the entry's date.** ADR-006 decided `created_at`
-records when the entry was written, not when it was last touched. If a design
-shows "last edited", that field does not exist and would need a migration —
-which is a real decision, not a small one.
-
-**7. Deleting returns the deleted entry, which was chosen so undo is
-possible.** ADR-006 made that choice explicitly. If the designs have no undo,
-either add one or the API is returning something nobody wants.
-
-**8. There is no draft or autosave concept in the API.** Day 18 is where this
-is decided, and it will be much cheaper if the designs have already said
-whether the editor saves as you type, saves on blur, or saves on a button.
-These are three different APIs.
-
-**9. Login has to fail visibly and vaguely.** "Wrong password" tells an
-attacker the account exists. The design needs one failure state that covers
-both cases, and that constraint should be in the design rather than discovered
-in review.
-
-**10. Nothing in the API supports a calendar or a mood chart yet.** Mood
-arrives on Day 13 and analytics are explicitly deferred. If the designs contain
-either, that is a scope conversation for Day 12 rather than a surprise on
-Day 30.
-
-### What the review found — 2026-09-23
-
-**Since 2026-10-07 the designs are in `designs/AIJournal-v3/`**, the
-designer's answer to `docs/ui-handover.md`; the folder named below is in git
-history only.
-
-The designs are in `designs/AIJournal-handover/`: 40 screens, three
-breakpoints, and three binding documents. **The API supports roughly one of the
-ten routes they describe.**
-
-**The finding that mattered:** the API models *entries*; the designs model
-*days*. `/d/{date}`, the calendar zoom, mood, the monotonic total, export
-granularity and citations all hang off a day with a **4am boundary**, and
-nothing in the API could express one. ADR-015 settles it. **Day 13 was going to
-hang mood off entries and would have been wrong by Day 15.**
-
-**Two contradictions, both settled by the owner:**
-
-- **Auth.** Designs said email + code or passkey; the API built name +
-  password. **Email + password wins** — codes and passkeys deferred. ADR-016.
-- **Voice memos.** Deferred by this roadmap as "attachments"; they are the
-  brief's primary input mode *and* the commercial model. **In scope.** ADR-016.
-
-**The ten predictions, scored:** four confirmed as designed (empty states,
-search no-results, showing the search term, edit-does-not-change-date), four
-misaligned, two answered by the designs in the API's favour. Detail in ADR-016.
-
-- **Prediction 4 was right.** Validation errors return an array; the designs
-  have **no error state drawn anywhere**, and PROJECT.md §0.2 rule 7 forbids
-  disabled controls — so every failure must become a sentence in place.
-- **Prediction 7 was wrong in the other direction.** Delete returns the entry
-  for an undo that no screen draws.
-- **Prediction 9 could not be scored.** `/in`, `/new` and `/restore` are in the
-  route table and **are not among the 12 drawn screens.** The most heavily
-  tested part of the API has no interface designed for it.
-- **Prediction 2 came up empty, which is a good result.** Every field the API
-  returns is used by a screen.
-
-### Where the design's features land
-
-Recorded so "follow the designs" does not become "build all of it now." The
-roadmap's ordering principle holds: Day 22's embeddings are only interesting
-because Day 21's `LIKE` visibly fails.
-
-| Design surface | Day | Note |
-|---|---|---|
-| Days, mood, 4am boundary, timezone | **13** | ADR-015. Re-aimed, not added |
-| Email login | **13** | ADR-016 |
-| Date-range filter, pagination, day-summary for the calendar | **13–14** | **Pulled forward from Day 29.** The frontend cannot paint a calendar without it |
-| Draft / autosave | 18 | Designs answered it: persist on every keystroke |
-| Voice memo capture, storage, playback | **Not scheduled** | ADR-016. Object storage arrives before Day 31. Was written here as Days 18–19, which no later plan kept; corrected on Screens Day. The Talk screen exists and its record control waits for a day |
-| Search snippets, passage anchors `#p{n}` | 21 | |
-| Transcription | 24 | Async, external, failure-prone. Belongs with the queue work |
-| `/ask/{id}`, citations, reflections | 25–28 | The whole Pro surface |
-| Tiers, paywall, guest sessions | — | Deferred, deliberately. ADR-016 §3 |
-
-### Amendments owed to the designs
-
-The design of record is allowed to move on this day, and three things in it
-need to change:
-
-1. **Redraw first run, and draw `/in`, `/new`, `/restore`** with an email and
-   password field. One piece of work, not two: guest sessions were refused on
-   2026-09-25 (ADR-016), so `08-first-run.html`'s logged-out composer is no
-   longer the product, and auth never had screens anyway.
-2. **Draw a validation error state** — a sentence in place, no disabled control.
-3. **Decide delete's undo:** draw it, or the API stops returning the entry.
-4. **Drop state 6, the crisis card.** Detection is not being built (ADR-016).
-   The always-present resource in settings and the composer overflow stays.
-
-
-### What to bring
-
-The designs themselves, at whatever fidelity they exist, and a note of which
-screens are considered settled versus still in flux. A design that is still
-moving is more useful on this day than one that is frozen, because Day 12 is
-allowed to change both documents.
-
----
-## Learning Debt
-
-A construct specific to this project, tracked as deliberately as technical
-debt.
-
-Worker agents produce correct code faster than a human can learn the concepts
-inside it. Every time that happens, the repository gains code its owner cannot
-explain. That is **learning debt**, and unlike technical debt it shows up in no
-linter.
-
-The rule: **a concept a worker introduced is not "done" until it can be
-explained without reading the code.** Shipping is not the completion criterion;
-comprehension is.
-
-### Currently open
-
-**Day 8's TypeORM debt is repaid** (2026-09-05/06, seven topics, all step 1).
-
-**Day 9's code walkthrough is repaid** (2026-09-14 and 2026-09-21, nine topics,
-eight at step 1). Two of her answers shipped as code: `@Exclude()` over a
-response DTO, and `APP_GUARD` + `@Public()`. Record in
-`docs/learning/day-09/report.md`.
-
-**Phase 2 carried no learning debt into Day 14, and leaves none.** Days 12 and
-13 were worked through directly rather than by a worker agent, so nothing was
-introduced that had to be explained afterwards. Two of her Day 13 answers are
-load-bearing in the code: the surrogate-key/business-key split on `days`, and
-the find-or-create shape where the constraint is the guard and the pre-check is
-an optimisation. Day 14's audit closed the two oldest open rows below.
-
-
-| Concept | Introduced | Status |
-|---|---|---|
-| `transform: true` on the validation pipe | Day 7 | ✅ **Closed on Day 13, and the entry was wrong.** It has been on since Day 7 — `fbaafcd` — so it was never declined. Day 13 assumed that meant it also coerced types, wrote a test on the assumption, and the test disagreed: `transform: true` builds the DTO instance but leaves `"5"` a string unless `@Type` or `enableImplicitConversion` says otherwise. Paging declares `@Type` on its two fields; implicit conversion stays off, because it would coerce every input in the application from its declared type. |
-| Where validation belongs — boundary vs service | Day 4 | ✅ **Closed on Day 14, by her own audit.** The re-test never happened on Day 10, so it was overdue. She predicted the ownership hole would be "a mutation path that loads by id, then acts without scoping", and gave the method: grep every query, and each hit either mentions `userId` or is a bug. That found `deleteIfEmpty`'s unscoped `COUNT(*)` — the exact shape she named. The distinction is derived now rather than given. |
-| Reading and judging a whole suite unprompted | Day 4 | ✅ **Closed on Day 14.** Asked for three audit predictions before any code was read, she produced ranked hypotheses with confidence levels, a mechanical check per hypothesis, and a mutation to prove each. Two of three were right; the third was right about the structure and wrong about the direction. She also specified the fix for it — one shared query builder, strict query params, the invariant as a test, and a named limit on what `/count` may grow into — which became ADR-017's five conditions. |
-| Jest — runners, matchers, mocking | Day 1 | 🟡 **Basics only.** Sufficient for now and not worth a dedicated day. |
-| Mood requests one at a time: a loop with `await` in it, and why a stale write differs from a stale read | Day 17b | ✅ **Closed on Day 17c.** She predicted all three outcomes of Low arriving before Good, then ran a script that made it happen. |
-| `useRef`; a function that answers one of two shapes; `@Transform` before validation | Day 17b | ✅ **Closed on Day 17c**, each by a prediction she ran: focus lost with `.focus()` commented out; typecheck failing before the `send` check and passing after; seventy characters sent and sixty counted. |
-| A join that reads a column from a second table; a cast with `as`; how Next.js reads a date from an address (`[date]`, `await params`); `Link` | Day 17c | ✅ **Closed on Screens Day**, by runs: the logged SQL showed one query with `LEFT JOIN "days"` reading only `date` and `id`; 22 tests failed with the join removed while the cast hid it from the compiler; `/d/banana` gave the app's own not-found screen; a `Link` sent no refresh and a typed address did. |
-| A custom hook (`useNotBuilt`); `as const satisfies` with `keyof typeof`, so a misspelt control name is a type error | Screens Day | 🔴 **Open.** Repay at the opening of Day 18, as predictions she runs. Named and not taught: `<details>`, `role="status"`, `:where()`, `data-*` attributes. |
-
-### Closed, with how it closed
-
-**Day 9 wiring — closed 2026-09-21, eight of nine topics at step 1.** Two
-sittings. The second produced the best single answer of either: asked what
-`PasswordService` buys when argon2's cost parameters rise, she named parameter
-centralisation and then produced the **rehash-on-login migration strategy**
-unprompted, which is the strongest argument for the file existing and was not
-put to her. Two corrections were given rather than derived — that the
-`undefined` convention is ADR-005's from Day 3 rather than `TokenService`'s own,
-and that `LoginDto` omitting `@MinLength(8)` prevents an information leak as
-well as an account lockout. Her closing statement on the test layers is the
-durable one: *"Test coverage isn't just how many lines are exercised. It's which
-security and business invariants have actually been challenged."* Recorded
-because the tenancy bug Day 10 fixed was not a coverage gap — every method was
-heavily exercised, and what was missing was a second user.
-
-
-**TypeORM — closed 2026-09-06, seven topics at step 1.** The largest single
-debt this project has carried, and it closed in one session. She answered every
-topic from an open question: decorators registering at import, `select: false`,
-the repository boundary and `@InjectRepository`, `Raw()` versus `Like()`,
-`synchronize`, the baseline problem, and the cost. Two results are worth keeping.
-**She was right and the study prompt was wrong** on the `select: false`
-ownership check — the prompt claimed `entry.userId !== callerId → deny` "passes
-for everybody"; with `callerId` guaranteed to be a string it denies everybody,
-and she held that position against two rounds of pressure toward the prompt's
-answer. And on the cost question she went past what was asked, observing that
-migrations depend on the history table being *aligned* with the database, so
-adopting them onto an older database creates a one-time historical problem —
-which is the correct generalisation of the baseline bug. Where she was
-incomplete it was on physical detail invisible from the source: that
-`synchronize: true` drops and rebuilds the table rather than altering it, that
-`InitialSchema` carries no `IF NOT EXISTS`, and that lint has no boundary rule
-at all. Those had to be run to be known, and they were.
-
-Twenty-two items have been closed since Day 1. The full record is in the git
-history of this file; what matters is the pattern rather than the list.
-
-**Six items closed in a single evening on Day 4** — two of which had been owed
-since Day 1 and one offered twice before. They closed when they were asked as
-direct questions with an experiment attached, rather than explained. That is
-the most useful finding this project has produced about how she learns, and it
-is why every teaching block now carries a prediction and a command to run.
-
-**The two experiments worth repeating on later days**, because both produce a
-result that contradicts intuition:
-
-1. **Rename `@Controller('entries')` to `'journal'`.** The application is
-   completely broken — every existing client gets a 404 — and all unit tests
-   still pass. Unit tests verify that the pieces work; end-to-end verifies that
-   the pieces are connected.
-2. **Delete `EntriesRepository` from the module's `providers` array.**
-   Typecheck passes, build passes, the server crashes at boot, and the unit
-   tests still pass — because every spec file declares its own providers and
-   never reads `entries.module.ts`.
-
-Add a row whenever a worker introduces something unfamiliar. Close it only when
-the explanation happens.
+Deployment is Day 31 and not Day 39 because first deployments fail in ways
+nobody predicts, and eight days of room is the difference between a live demo
+and a screenshot of localhost.
 
 ---
 
 ## Rules for the roadmap itself
 
-1. **This roadmap will change.** If a day surfaces a better learning
-   opportunity, take it and push the rest down. That is what the slack days are
-   for. v2.0 exists because v1.0 was followed rather than obeyed.
-2. **Review days are not optional.** Days 14, 27 and 39 are where the audit and
-   refactor loop lives. Skipping them to build more features defeats the point.
-3. **No day begins with implementation.** Problem, then research, then
-   discussion, then decision, then an ADR if it is significant, then design,
-   then implementation, then review.
-4. **Every phase ends with written documentation**, not just working code.
-5. **Every day ends with an audit, and the audit includes a mutation.** Delete
-   the line that makes the day's work load-bearing and run everything. If it
-   all still passes, the day shipped untested wiring. This rule exists because
-   that has now happened three times.
-6. **Learning debt is tracked, not assumed away.** A worker shipping code is
-   not the same as the concept being learned.
-7. **A day ends merged.** A day that stops mid-block costs part of itself again
-   on the next start.
-
----
-
-## Open questions
-
-- ~~Does the monorepo earn its complexity?~~ **Answered on Day 16: yes.** A
-  second application needed the same facts, and one package now holds them.
-  ADR-019.
-- ~~Where does the storage-outcome to HTTP-status mapping belong?~~ **Resolved**
-  — ADR-005. The controller, and only the controller. The rule generalises:
-  each layer reports outcomes in its own vocabulary, and translation happens
-  where the vocabulary changes.
-- ~~Should `POST` reject unknown fields, or ignore them?~~ **Resolved Day 5** —
-  both `POST` and `PATCH` reject with a 400 (ADR-006).
-- ~~What should search do with `%` and `_`?~~ **Resolved Day 5** — treat them as
-  ordinary characters and escape them before they reach `LIKE`.
-- **Does deleting a user delete their journal?** **Direction set 2026-10-04:
-  yes. Deleting an account is a hard delete of the account and all of its
-  data, and of nothing else.** The foreign keys still refuse it, and the day
-  it is built is not yet scheduled. The history of the question follows.
-  Still open, and now sharper:
-  Day 14 established that a user **cannot be deleted at all** — `sessions`,
-  `entries` and `days` all refuse it. Day 10 and Day 11 passed without
-  deciding. The three answers are cascade, orphan, or refuse that accounts can
-  be deleted; the last is a position rather than a default and would need
-  saying out loud. **Phase 3 or Day 27, and it should not slide again.**
-- ~~**When does `user_id` become `NOT NULL`?**~~ **Resolved Day 10.** The same
-  question now applies to `entries.day_id`, added nullable on Day 13. Its
-  contract step is **Day 16**, by her decision on Day 15: the `?date=` filter
-  now relies on the column, so an entry without a day would be silently
-  unreachable by date.
-- ~~**Where does the token live in the browser?**~~ **Resolved Day 15** — an
-  `HttpOnly` cookie for the refresh credential, memory for the access token.
-  ADR-018.
-- ~~Rich text versus plain text for entries?~~ **Resolved by the designs** —
-  the brief cut markdown outright ("journal writing is prose") and no screen
-  renders formatted text. Plain text stands.
-- **Does an entry move if the user changes timezone?** ADR-015 says no, by
-  resolving the day at write time. First support question about an entry on
-  the wrong day is the revisit trigger.
-- ~~**Which day builds a way to change the timezone?**~~ **Day 34, by her
-  decision on Day 17c.** Opened on Day 17b. The
-  timezone is set at registration and nothing can change it. An account the
-  migration set to `UTC` stays there, and so does one made in a browser
-  that hides its timezone. Drawn in `docs/ui-handover.md` §12; scheduled
-  nowhere.
-- **Where does audio live, and when?** Object storage, and it arrives around
-  Day 18 rather than Day 31. ADR-016.
-- Which AI provider, and does that decision need to be reversible? Phase 4.
-- `better-sqlite3@13.0.3` sits outside `typeorm`'s `^12.0.0` peer range. It
-  works and is pinned. It dissolves on Day 31 when Postgres arrives, so it is
-  deliberately not being fixed.
-- TypeScript 7 (the Go-native compiler) is released but blocked by `ts-jest` and
-  `typescript-eslint` peer ranges. Revisit around Phase 4.
+1. **It will change.** A better learning opportunity is taken and the rest
+   moves down. Inserted days are lettered or named.
+2. **Review days are not optional.** Days 14, 27 and 39.
+3. **No day begins with implementation.** Problem, research, discussion,
+   decision, an ADR if significant, design, implementation, review.
+4. **Every phase ends with written documentation**: a handbook entry.
+5. **Every day ends with an audit that includes one mutation.** A sweep of
+   many is for review days only.
+6. **Learning debt is tracked and repaid** before the next day's work. The
+   current list is in `master-state.md`.
+7. **A day ends merged**, through a pull request.
+8. **Slack left:** Days 27 and 38.

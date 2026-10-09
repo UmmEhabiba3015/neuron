@@ -1,181 +1,157 @@
-# Handoff — starting a new Master Thread
+# Neuron — the project, for a reader who has not followed it
 
-> **SUPERSEDED, 2026-10-04.** This file describes the project at Day 11 and is
-> kept for its account of that moment. For the current state read
-> [HANDOFF-PHASE-3.md](HANDOFF-PHASE-3.md), which was written at the end of
-> Day 14 and verified by re-running everything it claims.
+**Written 2026-10-10, at the close of Screens Day.** Every number here was
+re-run on that day. This replaces the two earlier hand-off files, written at
+Day 11 and Day 17, which are in git history.
 
-**Written:** 2026-09-04, after the maintenance pass and before the machine move.
-**Updated:** 2026-09-21, after Days 9 and 10 shipped and were pushed.
-**Read this after** `master-prompt.md`, `constitution.md`, `roadmap.md` and
-`master-state.md`, in that order. This file says what to do first; those four
-say who you are and where the project stands.
+This file is for a person. A new Master Thread (the mentoring AI session)
+starts from `docs/master-state.md` instead.
 
 ---
 
-## The state in four sentences
+## 1. What this is
 
-Days 9 and 10 are complete, merged and pushed; `main` is at `4401cda`. Day 11
-has not started. The working tree is clean. Everything verified on 2026-09-21 by
-re-running rather than by reading a report: lint, typecheck and build clean, 131
-unit tests, 86 end-to-end tests.
+Neuron is a private journal on the web: short typed entries through the day,
+a mood for each day, and a way to look back over past days. Later phases add
+search, a memory the person can ask questions of, and a weekly reflection.
 
-Identity and ownership both exist now. A user registers, logs in, receives a
-one-hour token, and sees only their own entries — enforced in the `WHERE` clause
-rather than after the fetch. ADR-011, ADR-012 and ADR-013 carry the reasoning.
+It is built by Umm E Habiba as a deliberate learning project, in public on
+LinkedIn, over 40 numbered days (Day 0 to Day 39). The main subject is
+backend architecture; the frontend is real but secondary. The aim is that
+she can explain and defend every decision in it.
 
-**Branch note.** Nothing is waiting on a merge. Work goes straight to `main`
-on this project, and merging remains a human action.
+Three roles make it:
 
----
-
-## The first thing you do
-
-**Read `docs/learning/day-09/report.md` and `docs/learning/day-10/report.md`**
-before teaching anything that builds on this code. They record, per block, which
-step she answered at and — more usefully — which details she *derived* versus
-which were given to her. Both are tracked in git by a narrow gitignore
-exception; the Day 4–7 reports are still local-only, pending the Day 14 decision.
-
-**No learning debt is open.** Day 9's walkthrough was repaid across two sittings
-(2026-09-14 and 2026-09-21): nine topics, eight at step 1. Day 11 starts clean.
-
-**Do not re-teach what she already derived.** The reports carry her own wording.
-The short list: credential stuffing and why the blast radius is the user's
-*other* accounts; that password cracking is an offline problem; the rainbow-table
-O(1) argument; the login enumeration oracle; *"the pre-check is not the guard"*;
-and *"the read is for the payload, not for the authorization"*.
-
-**Her database was changed on Day 10** — baselined, migrated, and its five Day 3
-entries deleted because they had no owner. ADR-010's amendment 6 is now closed on
-the real file. The backup was deleted on 2026-09-21; the database is empty and
-fully migrated.
-
-**Also still open, and lighter:** `transform: true` from Day 7 was offered and
-declined. It is worth ten minutes on Day 14, not a day of its own.
+- **She decides.** Every product and architecture choice is put to her as a
+  short choice with its cost, and she or her husband sets the feature
+  boundary.
+- **The Master Thread** teaches, writes the decision records and the plan,
+  writes prompts for workers, and audits their work by re-running every check
+  itself. It does not write production code.
+- **Workers** are fresh AI sessions, each given one written prompt. They
+  write the code and tests, and report back.
 
 ---
 
-## Then Day 9, and it is the heaviest day on the roadmap
+## 2. Where it stands
 
-Day 9 carries its own work — password hashing, registration, login — plus the
-identity work Day 8 did not reach, which is issuing and verifying a token and
-having an endpoint that can name its caller.
+**What a person can do today:** create an account with an email, a password
+and a name; sign in, stay signed in across a reload, and sign out; write an
+entry and delete one; set the mood of today or of a past day; and look back
+through the Timeline, as a list or a month calendar, and open a past day.
 
-**Decide with her at the start of the day whether it splits.** If it does, it
-splits at "a user exists" and "a request is identified", and Day 20 is the slack
-that absorbs it. Make that call in the first hour rather than discovering it at
-hour six.
+**What a person can see today:** every screen of the designer's final
+prototype, including the ones for features that are not built yet: Ask, Talk
+(voice), editing, forgot password, devices, timezone, export, privacy. A
+control whose feature is not built says "This is not built yet." when pressed,
+and sends nothing to the API. Where a screen would show data that does not
+exist yet, the same sentence stands in its place; nothing made up is shown.
+All 19 such controls are listed in `apps/web/lib/unbuilt.ts`, each with the
+day it is wired, and every one must work or be gone before Day 36, when a
+real person first tests the product.
 
----
+**The numbers.** 246 API unit tests, 365 API end-to-end tests, 171 web tests
+and 7 checks on the shared package, all passing. Lint, typecheck and build are
+clean for both apps. 21 architecture decision records. 11 migrations.
 
-## What she is like to work with
-
-She is genuinely good at this, and the way she is good matters for how you teach
-her.
-
-Her predictions are frequently right and right for the correct reason. Asked
-what a misconfigured database path would do, she said the application would not
-crash — it would create a new empty file and return an empty list. That is a
-subtler answer than "it crashes", which is what most people say. Asked to
-compare sessions with stateless tokens, she articulated unprompted that a stolen
-token stays cryptographically valid after a logout from another device, so the
-server cannot revoke it. She then chose the token approach anyway, having named
-the strongest argument against it. That is recorded in ADR-009.
-
-She pushes back, and she has been right when she did. She rejected a schema
-validation library because it was "just additional complexity and we do not need
-it since we have a built-in way" — the project's own principle, applied against
-the person who wrote the principle. She also said, bluntly, *"how would I know, i
-did not learn this, i am doing it for the first time, why you ask me stuff before
-teaching me."* She was correct. **Demonstrate before asking her to produce.**
-Being asked to generate something she has never been taught is not a Socratic
-question, it is a test with no lesson in it.
-
-Where she is weaker: pace, and closing topics. Multi-day gaps have happened, and
-she has felt the public commitment during them. She sometimes chooses to move
-past a topic rather than finish it, which is what the learning-debt tracking
-exists for.
-
-**On pace, the framing that works is behavioural rather than motivational.** The
-target is a day that ends merged, because a day that stops mid-block pays for
-part of itself again on the next start. Do not turn this into pressure about the
-day count. The roadmap's *A Note On Pace* section has the wording.
+**Not built yet:** any AI, voice recording, real search beyond a keyword
+match, editing an entry from the screen, drafts, forgot password, changing the
+timezone or name, the device list, export, and deleting an account.
 
 ---
 
-## Things you will get wrong if nobody tells you
+## 3. How it is built
 
-These are real failures from the first eight days, recorded so they are not
-repeated.
+A pnpm workspace with three parts.
 
-**Do not trust a worker's report.** Re-run every check yourself. An audit once
-accepted a result that contradicted the code, and the cause turned out to be a
-server the previous worker had left running for twelve minutes holding port
-3000. Check what holds the port before concluding anything.
+- **`apps/api`**, NestJS on SQLite through TypeORM. Four tables: `users`
+  (email, name, IANA timezone, argon2id password hash), `sessions` (one per
+  sign-in, with a hashed refresh token), `days` (one per user per date, with
+  the mood), and `entries` (each belongs to a user and to a day, and is
+  soft-deleted). Every query is limited to its owner in the `WHERE` clause.
+  Every route is closed unless marked public. Schema changes only through
+  migrations.
+- **`apps/web`**, Next.js. The refresh credential lives in an `HttpOnly`
+  cookie and the access token only in memory. Logic lives in `lib/`, without
+  React, where tests reach it; components only draw. The stylesheet
+  `lock.css` is the designer's file, byte for byte.
+- **`packages/contracts`**, the facts both apps must agree on: wire shapes,
+  the mood words, page sizes, the password minimum. No functions, no
+  imports, no build step.
 
-**"Successfully started" is printed before the server listens.** Grepping for it
-once reported a dead process as healthy. Check the exit code and the port.
+The rules that most shape the code:
 
-**Every day ends with a mutation check.** Delete the line that makes the day's
-work load-bearing and run everything. If it all still passes, the day shipped
-untested wiring. This has happened three times: `validate,` on Day 6, the
-`APP_PIPE` provider on Day 7, `synchronize: false` on Day 8. Each passed every
-check at the time it was found.
-
-**You will teach something wrongly.** It happened with `ConfigModule.forRoot` —
-the claim was that it only registers and Nest calls `validate` later, and a
-worker that read the library source found it runs synchronously at import. Own
-the correction in front of her and amend the ADR. She learns more from watching
-a wrong claim get corrected by evidence than from a claim that was right.
-
----
-
-## The rules, compressed
-
-The full versions are in `docs/SETUP.md` section 6, and in the memory files.
-
-You are principal engineer, architect and mentor. **You do not write production
-code.** You teach, write ADRs and roadmap updates, author worker prompts in
-`docs/workers/`, and audit by re-running everything yourself.
-
-Teaching is three steps and the trigger for moving on is **rounds, not
-difficulty**: an open question, then one narrowing question, then teach directly
-and verify with a prediction and an experiment she runs herself.
-
-Open each day with a short brief, then take **one block at a time**. Do not
-preview later blocks.
-
-Write in simple, complete, descriptive English. No tables where prose works
-better, no bold used to make phrases feel important, no terse status fragments,
-no stacked em-dashes. This applies to messages to her husband too; he has had to
-make that correction twice.
-
-She is not required to hand-write test suites. Run testing as **read, predict,
-break, observe**.
-
-Comments in code earn their place by preventing a specific mistake. Reasoning
-belongs in an ADR. This was swept on 2026-09-04, from 926 comment lines to 218 —
-do not let it grow back.
+1. **A day ends at midnight in the person's own timezone.** The API decides
+   which day an entry is on, at the moment it is written, and the entry never
+   moves. The browser's clock never makes a date.
+2. **Asking for someone else's data is a `404`, never a `403`.**
+3. **Signing out takes effect on the next request**, not when a token expires.
+4. **Configuration is checked once at start, and a bad value stops the start.**
 
 ---
 
-## The machine move
+## 4. How the work has gone
 
-`docs/SETUP.md` is the full guide. The two things most likely to be missed:
+The project has five phases. Phases 1 and 2 are closed, with a handbook
+entry each in `docs/handbook/`.
 
-**The agent memory directory does not travel with git.** It lives at
-`~/.claude/projects/<project-path>/memory/` and the path encodes both the
-username and the project location. A copy is committed at
-`docs/archive/agent-memory/` — seven files. Create the new path and copy them in.
-Without them a new session loses the teaching rules and the register drifts back
-to terse status reports within a few messages.
+| Phase | Days | Question | State |
+|---|---|---|---|
+| 1 | 2–7 | Can I store and retrieve a thought? | Closed |
+| 2 | 8–14 | Whose thought is it? | Closed |
+| 3 | 15–20 | Can a person actually use this? | **Open.** Days 15 to 17c and Screens Day done; 18, 19 and 20 remain |
+| 4 | 21–27 | Can I find a thought I half-remember? | Not started |
+| 5 | 28–39 | What do my thoughts mean together, and can it run in public? | Not started |
 
-**The journal database is gitignored.** `apps/api/data/neuron.db` must be copied
-by hand, and then `pnpm migration:run` on the new machine. If it was created
-before Day 8 it has no `migrations` table and needs the baselining step in the
-README's *Migrations* section — read it rather than improvising, it documents two
-ways of getting it wrong that were both hit in practice.
+Phase 3 grew. Four days were inserted, by her decisions, because using the
+product showed what was missing: 17a (the designer's new stylesheet), 17b
+(per-user timezone and a name), 17c (past days and signing out) and Screens
+Day (every screen drawn before its feature). Lettered and named days keep the
+later numbers stable, because the LinkedIn posts cannot be renumbered.
 
-**`docs/archive/` is to be gitignored again after the move**, per the owner's
-instruction. The committed copy stays recoverable in history.
+Two lessons have shaped how each day is checked:
+
+- **Tests that check pieces are not tests that check connections.** Several
+  times, deleting one line disconnected a day's work while every test stayed
+  green. So every day ends with one deliberate "mutation": remove the line
+  that makes the day's work matter, and see whether a test fails.
+- **No test reaches a React component.** Everything inside a component is
+  checked only by the workers walking the app in a browser. Whether to add a
+  browser test, which means a new dependency, is her decision on Day 19.
+
+---
+
+## 5. Questions worth discussing
+
+These are open, and each is a decision for her or her husband.
+
+1. **Five features have no day.** Voice memos (recording, storage,
+   transcription), "keep this out of memory" on an entry (which must exist
+   before Day 22's retrieval work), the words of the support page, what the
+   privacy page says about training, and moving the calendar to another
+   month. Their controls are drawn and say "This is not built yet."
+2. **The schedule.** Phase 3 has no slack day left; an overrun goes to
+   Day 27. Days 27 and 38 are the remaining slack. Screens Day and the
+   lettered days added time without moving the end date.
+3. **A browser test (Day 19).** It would close the one structural gap in the
+   test suite, and it is a dependency.
+4. **Should worker prompts and the remaining worker reports be committed?**
+   Some are, some are local only (`docs/SETUP.md`, section 4).
+5. **Small debts carried:** `users.password_hash` is still nullable though it
+   was decided otherwise on 2026-10-04; nothing enforces the rule that the
+   browser's clock never makes a date (a lint rule would); deleting an account
+   is blocked by foreign keys until Day 34.
+
+---
+
+## 6. Where to read more
+
+| To understand | Read |
+|---|---|
+| What the product must do | `docs/requirements.md` |
+| The plan, day by day | `docs/roadmap.md` |
+| Why each decision was made | `docs/decisions/` |
+| The reasoning across a phase | `docs/handbook/` |
+| What the designer was asked for | `docs/ui-handover.md` |
+| How to set it up | `docs/SETUP.md` |
+| How a day went, in detail | `docs/learning/<day>/` |

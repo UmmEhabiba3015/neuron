@@ -1,6 +1,7 @@
 # Neuron — Requirements
 
-Status: written on 2026-10-08, at the opening of Day 18.
+Status: written on 2026-10-08. Brought up to date on 2026-10-10, at the
+close of Screens Day.
 
 This document says what Neuron must do, what it must not do, and what is
 still undecided. It collects decisions that are spread across the roadmap,
@@ -91,8 +92,8 @@ Each requirement below is marked with its state:
 5. A person can sign out of the device they are using. If the API cannot be
    reached, signing out changes nothing rather than pretending to succeed.
    **Built.**
-6. A person can sign out of every device at once. **Built in the API**; not
-   yet on a screen.
+6. A person can sign out of every device at once. **Built in the API**; the
+   control is drawn on Account and is wired on **Day 34**.
 7. A person who forgets their password can reset it through a link sent by
    email. The reset token is stored hashed, works once, and expires. The
    answer is the same whether or not the email has an account, so the
@@ -170,13 +171,16 @@ and charts of mood over time.
    can change the mood and delete entries, but cannot write a new entry.
    **Built.**
 3. A day with no entries has no page. **Built.**
-4. A calendar view, as another way of looking at the same timeline. **In,
-   not scheduled.**
+4. A calendar view, as another way of looking at the same timeline.
+   **Built** for the current month (Screens Day): beside the list on a wide
+   screen, behind a List / Calendar switch on a narrow one. Moving to another
+   month is **in, not scheduled**.
 
 ### 3.6 Voice memos
 
 1. A person can record a voice memo, which is stored and can be played
-   back. **In, not scheduled.** The audio is kept in object storage (a
+   back. **In, not scheduled.** The Talk screen is drawn; its record control
+   is not built. The audio is kept in object storage (a
    service for storing files, separate from the database).
 2. A recording is an entry with a different kind. There is one entries
    table for both.
@@ -261,6 +265,12 @@ These apply to every feature, present and future.
    tracking, and health checks. **Day 33.**
 6. Every change is checked by lint, typecheck, build and the test suites
    before it is merged.
+7. Every screen of the design is drawn before its feature is built (Screens
+   Day). A control whose feature is not built says "This is not built yet."
+   and sends nothing; where data does not exist yet, the same sentence
+   stands in its place, and no sample content is shown. Every such control
+   is listed in `apps/web/lib/unbuilt.ts` with its day, and each must work or
+   be gone before the first real user test (**Day 36**).
 
 ---
 
@@ -320,3 +330,8 @@ than discovered.
    Phase 4.
 6. Is a free trial followed by a subscription ever introduced? Not decided,
    and not part of this project's 40 days.
+7. What does the support page say? Its screen is drawn; the words are the
+   owner's to write.
+8. What does the privacy page say about training on a person's writing?
+   Nothing in these requirements decides it yet.
+9. On which day can the calendar move to another month?

@@ -1,5 +1,12 @@
 # Journal — changes requested to the design
 
+> **Status on 2026-10-10.** Sections 1 to 13 were answered by the designer's
+> v3 delivery. **Section 14 holds Day 17b and 17c's changes and has not been
+> sent to him yet.** On Screens Day the web app drew every screen of his
+> prototype, with a sentence, "This is not built yet.", standing in for each
+> feature that is not built; that sentence is temporary and needs no design.
+> The live statement of scope is [requirements.md](requirements.md).
+
 **For:** the UI designer.
 **From:** the team building the API and the web app.
 **Started:** 2026-10-04. This document grows as decisions are made. Each

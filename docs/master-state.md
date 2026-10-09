@@ -1,2647 +1,358 @@
 # Master State
 
-**Purpose:** This file exists so that losing the Master Thread costs minutes,
-not hours. It happened once — an OS reinstall took the thread with it — and
-the recovery cost most of a working session.
+**Purpose.** This file lets a new Master Thread pick up the project in
+minutes. It says where the project is, what is open, and how to work with
+her. It is rewritten, not appended to.
 
-**To re-establish a Master Thread from scratch, provide, in this order:**
+**To start a Master Thread from nothing, read in this order:**
 
-1. [docs/master-prompt.md](master-prompt.md) — the role definition
-2. [docs/constitution.md](constitution.md) — how decisions get made
-3. [docs/roadmap.md](roadmap.md) — what happens when
-4. **This file** — where we actually are
+1. [master-prompt.md](master-prompt.md): the role.
+2. [constitution.md](constitution.md): how decisions are made.
+3. [roadmap.md](roadmap.md): the plan and where it stands.
+4. **This file.** Read *How to open the next session* first.
 
-**Update cadence:** end of every day, before the LinkedIn post. Treat a stale
-`master-state.md` the same as a failing test.
+**Update it at the close of every day**, before the LinkedIn post. A stale
+master state is treated like a failing test.
+
+**History.** This file was rewritten from scratch on 2026-10-10. The full
+day-by-day record it replaced (Days 2 to Screens Day, about 2,500 lines,
+including every audit and every "where she answered" note) is in git:
+
+```bash
+git show 340077b:docs/master-state.md
+```
+
+Read that only when a question needs the detail of a past day. The worker
+reports in `docs/learning/<day>/` hold the rest.
 
 ---
 
-**Last updated:** 2026-10-09, at the close of Screens Day.
+## Where the project is
 
-**Current day:** Days 0–17c and **Screens Day** are **complete**. Phase 3
-is open. **A fresh thread needs two sections first: *How to open the next
-session with her*, then *Screens Day, compressed*.** Days 17c, 17b, 17a, 17,
-16 and 15 follow them.
+**Last updated:** 2026-10-10, at the close of Screens Day, during the
+hand-off.
 
-**Current branch:** `screens-day`, closed by pull request. **Every day gets its own branch,
-by the owner's instruction on 2026-10-07**, named `day-<number>-<topic>` and
-created before the day's work begins. Days 9 to 17b were committed straight
-to `main` rather than through pull requests. Four older merged branches still exist
-locally and on the remote (`day-02-persistence`, `day-06-configuration`,
-`day-07-validation`, `day-08-identity`); they were deliberately left rather
-than deleted.
+**Done:** Days 0 to 17c and Screens Day, all merged into `main` through pull
+requests and pushed. Phase 3 is open; Days 18, 19 and 20 remain in it.
 
-**Verified on 2026-10-08, by re-running rather than by reading a report.**
-All nine commands pass:
+**Verified on 2026-10-09 by re-running, not by reading a report.** All nine
+checks pass:
 
 ```bash
 pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-**246** API unit tests, **365** API end-to-end tests, **171** web tests, and
-**7** checks on the shared package (re-run on 2026-10-09). 21 ADRs. Eleven migrations.
+**246** API unit tests, **365** API end-to-end tests, **171** web tests, **7**
+checks on the shared package. 21 ADRs. 11 migrations. Use exactly these nine
+commands every day. A plain `npx jest` in `apps/api` skips the migration tests
+and still reports a pass.
 
-**Run all nine every day.** The root `lint`, `typecheck` and `build` cover
-the API only. **Use these commands and no shorter form.** A plain
-`npx jest` in `apps/api` silently skips the migration test files, and
-reports a pass.
+**What a person can do:** create an account (email, password, name; timezone
+from the browser), sign in, stay signed in across a reload, sign out, write
+and delete entries, set the mood of today or a past day, browse the Timeline
+as a list or a month calendar, and open a past day.
 
-**The designs moved.** `designs/AIJournal-handover/` is gone from the working
-tree and `designs/AIJournal-v3/` replaces it. Older documents and ADR-016
-name the old folder; they describe the day they were written and were left
-as they are.
+**What a person can see:** every screen of the designer's prototype. A
+control whose feature is not built says "This is not built yet." and sends
+nothing; where data does not exist yet, the same sentence stands in its
+place. The 19 such controls are listed in `apps/web/lib/unbuilt.ts` with the
+day each is wired. Not drawn, because they need data first: a reflection, an
+answered question, a recording's options, a draft.
+
+**Branch.** Each day has its own branch, `day-<number>-<topic>`, made from
+`main` before work starts, and closes through a pull request she merges.
+Named days use their name (`screens-day`). This hand-off is on
+`handoff-docs`. Four old merged branches (`day-02-persistence`,
+`day-06-configuration`, `day-07-validation`, `day-08-identity`) are kept on
+purpose.
 
 ---
 
-## How to open the next session with her
+## How to open the next session
 
-**Day 18 is next: drafts, Enter saves and Shift with Enter makes a new
-line, and editing a saved entry.** The screens already exist; Day 18 wires
-them. Make the branch `day-18-<topic>` from `main` before anything else.
-Days close by pull request, which she merges.
+**The next session opens with her husband**, who wants to discuss the
+project with the Master Thread. He gives terse, senior-level direction. Treat
+what he decides as binding, and record it here and in the roadmap. Questions
+worth putting to him are in `docs/HANDOFF.md`, section 5.
+
+**After that, Day 18:** drafts, Enter saves with Shift and Enter for a new
+line, and editing a saved entry. The screens exist; Day 18 wires them. Open it
+in this order:
+
+1. **Make the branch** `day-18-<topic>` from `main`.
+2. **The day overview**, with the number of blocks and what each is.
+3. **Repay Screens Day's learning debt**, as predictions she runs (see
+   *Learning debt*). This comes before the day's work by her husband's rule.
+4. **Her decisions for Day 18**, as short choices with each cost stated:
+   - How often a draft is saved, and what a failed save shows. Drafts are
+     stored on the server; that was decided on 2026-10-04.
+   - Editing: where the text is edited, and what a failed edit shows. The
+     entry keeps its original time and is not marked as edited (ADR-006).
+     An entry cannot be saved empty. A past day's entries can be edited.
+   - Enter saves. How a phone makes a new line is Day 19's question.
+5. **Workers**, then the audit with one mutation, then a pull request.
+
+Wiring a feature removes its controls from `lib/unbuilt.ts`. Day 18 removes
+`editEntry`.
 
 | Day | What it is |
 |---|---|
-| **18** | Drafts and autosave; Enter saves; editing a saved entry (`PATCH /entries/:id` exists, nothing calls it). The edit control is `editEntry` in `apps/web/lib/unbuilt.ts`; wiring it removes it from the list |
-| **19** | Screen sizes and keyboards. The phone question for Enter. **Her decision on one test that drives the app in a real browser**: nothing tests that an unbuilt control sends no request, or any link between screens |
-| **20** | Forgot password. `/forgot` and `/reset` are drawn; `sendResetLink` and `saveNewPassword` are in the list |
+| **18** | Drafts and autosave; Enter saves; editing a saved entry (`PATCH /entries/:id` exists, nothing calls it) |
+| **19** | Screen sizes and keyboards; the phone question for Enter; **her decision on one test that drives the app in a real browser** |
+| **20** | Forgot password. `/forgot` and `/reset` are drawn. Phase 3 has no slack left; an overrun goes to Day 27 |
 
-**Open Day 18 in this order.**
+---
 
-1. **The day overview first**, with the block count.
-2. **Repay Screens Day's learning debt**, as predictions she runs: a custom
-   hook (`useNotBuilt` in `apps/web/app/components/NotBuilt.tsx`), and
-   `as const satisfies` with `keyof typeof` in `lib/unbuilt.ts` (misspell a
-   control's name on a screen and watch `typecheck:web` fail).
-3. **Her decisions for Day 18**, as short choices with the cost stated.
+## What is built
 
-**Rules she set on Screens Day, binding from now on.**
+**`apps/api`**, NestJS on SQLite through TypeORM. Tables: `users` (email,
+unique without regard to case; name; IANA timezone; argon2id hash),
+`sessions`, `days` (`UNIQUE(user_id, date)`, the mood), `entries` (`user_id`
+and `day_id` both `NOT NULL`, soft-deleted through `deleted_at`).
 
-- **She or her husband decides the feature boundary.** A recommendation is
-  advice, labelled as such.
-- **Text in the designs is placeholder**, not a requirement.
+**`apps/web`**, Next.js. Routes: `/`, `/in`, `/new`, `/forgot`, `/reset`,
+`/timeline`, `/d/[date]`, `/ask`, `/talk`, `/options`, `/support`, `/you`,
+`/you/account`, `/you/account/timezone`, `/you/yourdata`, `/you/privacy`,
+`/you/visible`. Logic is in `lib/` without React, where tests reach it;
+components draw. `app/styles/lock.css` is the designer's file byte for byte,
+and anything it lacks is in `live.css`.
+
+**`packages/contracts`**: wire shapes, mood words, page sizes, the password
+minimum. No functions, no imports, no build step.
+
+**The rules that shape the code, and where they are decided:**
+
+| Rule | Record |
+|---|---|
+| Every route is closed unless marked `@Public()` | ADR-013 |
+| Ownership in the `WHERE` clause; another person's data is a `404`, never a `403` | ADR-013 |
+| Sessions checked on every request, so signing out is immediate; refresh tokens rotate, and reuse ends every session | ADR-014 |
+| Refresh credential in an `HttpOnly`, `SameSite=Strict` cookie; access token in memory; one CORS origin, no default | ADR-018 |
+| A day ends at midnight in the user's timezone; the API files an entry on a day when it is written, and it never moves | ADR-015, amended Day 17b |
+| The browser's clock never makes a date | Day 17c, her ruling. Not enforced by any check |
+| Deleting an entry is a soft delete, `204`, a `404` afterwards everywhere; a day row stays | ADR-020 |
+| Writing waits for the API; deleting and mood show at once | ADR-021 |
+| Facts shared by both apps live once in `packages/contracts` | ADR-019 |
+| Configuration checked once at start; a bad value stops it | ADR-007 |
+| Schema changes only through migrations; read every generated one | ADR-010 |
+
+---
+
+## Her rulings in force
+
+These were stated by her or her husband, and bind every session.
+
+- **She or her husband sets the feature boundary.** A recommendation from
+  the Master Thread is advice and is labelled as such.
+- **Product behaviour and wording are hers**, not the designer's. Put them to
+  her as short choices with a recommendation, then tell the designer the
+  answer.
+- **Text in the designs is placeholder**, never a requirement.
   `docs/requirements.md` (hers, written 2026-10-08) wins over the designs.
-- **The web app shows every prototype screen.** A control whose feature
-  is not built says "This is not built yet." and sends nothing; where data
-  does not exist, the same sentence stands in its place; no sample content.
-  Every such control is in `lib/unbuilt.ts` with its day. This reversed her
-  Day 17a rule. When a feature is wired, its entry leaves the list.
-- **Five controls have no day**: voice recording, "keep this out of
-  memory" on an entry and in the composer, the support page's words, and
-  what Privacy says about training. "Keep this out of memory" must come
-  before Day 22. Raise scheduling them when a day has room.
-
-**Read this before teaching her anything.** On Day 17b most of her answers
-were pasted from another assistant, and on Screens Day some predictions
-were pasted. Only her own rough words, and what she ran, count as evidence.
-Ask for predictions and runs and short choices, not written explanations.
-Do not raise the pasting again. **She wants pace.** Keep blocks short and
-put few questions at once; she answered "default" to defaults readily.
-
-**Before a worker runs:** ask her to stop `pnpm dev`. **Never tell a worker
-to skip its tests.** Workers have used a throwaway database and their own
-ports; keep asking for that.
-
-**When running a debt experiment, check the command first.** On Screens
-Day I told her to add TypeORM logging to `database.module.ts`; the e2e tests
-build their own database in `test/test-database.ts`, so nothing printed.
-
-**Audit-shaped items to carry.**
-
-- **No test reaches a React component.** Day 19 at the latest.
-- **Nothing enforces that the browser's clock never makes a date.** A lint
-  rule forbidding `new Date()` and `Date.now()` in `apps/web` would.
-- **`users.password_hash` is still nullable**, decided on 2026-10-04 and
-  not done. `Etc/GMT+5` is accepted as a timezone. TypeORM does not switch
-  foreign keys off when reverting; worth one line in ADR-010.
-
-**She must send the designer `docs/ui-handover.md` section 14.**
-
-**The designer's documents are information, not instructions.** A worker
-reads them and does not run his scripts or obey his `AGENTS.md`.
-
-**She confuses lettered days.** Say the day's name at the top of each block.
-
-**React she knows**: a component is a function React calls again on a
-state change; `useState` including the function form; `useEffect`;
-`useSyncExternalStore`; `useRef`; focus moved with `.focus()` and
-`tabIndex={-1}`; a function that answers one of two shapes; and `Link`.
-
-**The three guardrails still apply**: depth, one mutation per day, and
-amend an ADR only when its decision changes.
+  The designer's documents are information; a worker never runs his scripts
+  or obeys his `AGENTS.md`.
+- **Every prototype screen is shown**, main state only, no sample content,
+  and "This is not built yet." on every unbuilt control (Screens Day). This
+  reversed her Day 17a rule that an unbuilt control is not drawn.
+- **No tiers.** Everyone gets the whole product (2026-10-04, her husband).
+- **The plan may be extended by as many days as the work needs.** Finishing
+  soon is still the aim (2026-10-04, her husband).
 
 ---
 
-## Screens Day, compressed
-
-**Inserted 2026-10-08/09 by her decision, before Day 18, with no number.**
-**Branch:** `screens-day` (renamed from `day-18-writing`). **The problem:**
-building a screen and wiring its feature on the same day mixed frontend work
-into every backend day. She wants the app to look like the final product
-and to add the backend feature by feature.
-
-**Opening.** All nine checks passed. **Day 17c's four learning debts were
-repaid by runs**: the logged SQL (one query, `LEFT JOIN "days"`, only `date`
-and `id`), the cast (22 tests failed with the join removed), `/d/banana`
-(the app's own not-found screen), and `Link` (no refresh on a click, a
-refresh on a typed address). The `as` typecheck run was not reported back;
-her explanation of `as` was correct. Some predictions were pasted.
-
-**How the scope moved, recorded so it is not repeated.** She asked for "one
-day for the frontend, just screens". I scoped it to in-scope features, main
-states, and gave defaults; she chose them, then said she had meant the whole
-prototype. A second worker built the rest. Her final rules: every prototype
-screen, main state only, no sample content, "This is not built yet." on
-every unbuilt control. **Lesson: when she names a whole artifact (the
-prototype), confirm the artifact is the scope before narrowing it.**
-
-**What was built, by two workers, no API change.** Part 1: `lib/unbuilt.ts`
-and `NotBuilt.tsx`; edit control on each entry; Forgot password (`/forgot`)
-and Choose a new password (`/reset`); Account's timezone row, devices
-section and "Sign out everywhere"; Timezone (`/you/account/timezone`); Your
-data (`/you/yourdata`). Part 2: Ask as a destination (`/ask`); Talk (`/talk`),
-which never asks for the microphone; the composer's microphone link, memory
-control and options (`/options`); the support page (`/support`); each
-entry's memory menu; Privacy (`/you/privacy`) and What it sees
-(`/you/visible`). A control may be `NOT_SCHEDULED`; the Day 36 test names
-the unscheduled ones. Not built, because they need data: a reflection, an
-answered question, a recording's options, a draft. The duplicate prototype
-she added at `designs/` was identical to the v3 file and was deleted.
-
-**The audit.** All nine re-run by the Master Thread: **246** unit, **365**
-end-to-end, **160** web (171 after part 3), **7** contract checks. My mutation (remove
-`deleteAccount` from the list) was caught by `typecheck:web` and a test.
-The part 2 worker's mutation (give `entryMemory` a day) was caught by two
-tests. No `new Date()`, `Date.now()` or `getUserMedia` in the web app.
-
-**Left with defaults, at her word "default".** Part 1: one "Export
-everything" row, its sentence mentions recordings, "Permanent" beside Delete
-account, the worker's eight sentences. Part 2: Ask on Day 25 with a button,
-an entry's menu says "In memory", Composer options shows Today's real
-entries, words typed before "More options" are lost, Privacy's three
-undecided rows are drawn with the sentence. All are in the two reports in
-`docs/learning/screens-day/`.
-
-**Part 3, the calendar on the Timeline**, after she found it missing; both
-earlier workers and my audit had counted it as a state. Real data: the
-month of `GET /days/today`, marked from `GET /days?from=&to=`. Desktop: the
-grid beside the list, a day scrolls the list to it with no history entry.
-Tablet and phone: a List / Calendar switch, a day goes to `/d/{date}`. No
-unbuilt control, because no comp draws one. Left at defaults: only the
-current month (no comp draws a way to another), the switch is not
-remembered, its screen-reader name is "Zoom". 171 web tests. The worker's
-mutation (Sunday-first weeks) was caught by five tests.
-
-**Corrected.** The roadmap put voice memos on Days 18–19; they are not
-scheduled.
-
-**Found at commit time, and no check could have found it.** The root
-`.gitignore` had `data/`, which matches at any depth, so
-`apps/web/app/you/data/page.tsx` (renamed to `yourdata` the same day, at her request) was invisible to git while every check
-passed on the working tree. It is now `apps/api/data/`; `*.db` still
-catches a database file anywhere. **Before committing a day, run
-`git status --short` and compare it with every new file a report lists.**
-
----
-
-## Day 17c, compressed
-
-**The problem:** a person could see today and nothing else, could not sign
-out, and their name was shown nowhere. **Branch:** `day-17c-past-days`.
-
-**Opening.** The two Day 17b ideas were answered correctly, as pasted text.
-**All four Day 17b learning debts were repaid by predictions she ran
-herself**: the mood order (she predicted the API, the open tab and the
-reload, then ran a script that sent Low before Good), `useRef` (she
-commented out `.focus()` and typed into nothing), the two shapes of
-`readForm` (typecheck failed before the check and passed after), and
-`@Transform` before validation. The runs are hers; two written reasons
-beside them were pasted.
-
-**What was decided, all of it by her, as short choices.**
-
-| Decision | Note |
-|---|---|
-| Timeline as a second destination, the list only | No calendar yet |
-| A Timeline row shows the day's entries under its date | **Her finding**: an entry carried an instant and nothing saying its day. So `WireEntry` gained `date` |
-| A past day: mood and delete work, no composer | |
-| A day that has not happened is the not-found screen | The API answers 404, judged in the asker's timezone |
-| You, then Account: name, email, "Sign out of this device" | |
-| The timezone setting is Day 34 | |
-| On the Timeline, entries inside a day run newest first | Changed after using it. A day's own page stays oldest first |
-| The designer's "Mood can be changed here, and only here." is kept | |
-| A signed-out person at a wrong address signs in first | |
-| The web worker's eight sentences | Approved, all eight. In `docs/ui-handover.md` §14 |
-
-**What was built, by three workers.** API: `date` on every entry answer
-from the stored day row, in one query; `WireMood`; 404 for a future day,
-with no row created; Day 17b's audit finding closed (removing the
-migration's final foreign key check now fails four tests). Web: the
-Timeline (`lib/timeline.ts`), a past day's page from the same store as
-Today (`createPastDay` hands back no `save`), You and Account, and
-`session.signOut()`, where an unreachable sign-out changes nothing and a
-late 401 cannot sign the person back in. Then the order inside a Timeline
-day.
-
-**The audit.** All nine commands pass, re-run by the Master Thread. **246**
-unit, **365** end-to-end, **154** web, **7** contract checks. **Every
-mutation was caught**: mine on the API (`withDeleted: true` on the shared
-read, 5 unit and 23 e2e failures), the web worker's seven, mine on the web
-(remove the guard that stops a refresh after sign-out, 3 failures), and
-mine on the order (reverse a day's own page, many failures). This is the
-first day in four that a Master Thread mutation did not get through.
-
-**Three things worth keeping.**
-
-- **The web worker was told by her not to run the tests.** It wrote 53
-  tests and a table of predicted mutations, said so at the top of its
-  report, and the audit ran them. Do not tell a worker to skip tests; the
-  next prompt says so.
-- **A dev server in watch mode was running on her real database while the
-  API worker ran**, and reloaded every deliberate mutation. No harm was
-  found. Ask her to stop `pnpm dev` before a worker runs.
-- **The browser's clock never makes a date.** Her account `boo` is stored in
-  `UTC`, so from midnight to 05:00 her browser's date is a day the API
-  answers 404 for. No web code calls `new Date()` without an argument; no
-  test enforces it. A lint rule would.
-
-**Still open.** Everything inside a React component is untested; the web
-report lists thirteen behaviours, which is the evidence for her Day 19
-decision. The web worker suggested naming the date in a past day's delete
-confirmation, and opening Account directly from You while You has one
-row; neither was put to her. Create account has not matched its comp
-since Day 17b added the name field.
-
-**Mistakes of mine, recorded.** I wrote the web prompt as "repair what the
-contract change broke" before seeing that nothing would break; the audit
-corrected it before the worker ran. I did not ask how a day's branch
-returns to `main` when the branch was made.
-
----
-
-## Day 17b, compressed
-
-**The problem:** a day ended at 4am in a timezone nobody chose. **ADR-015
-amended**: its points 3 and 5 are replaced.
-
-**What was decided, all of it by her.** Each came as a short choice.
-
-| Decision | Her reason, where she gave one |
-|---|---|
-| **A day ends at midnight, not 4am** | None given. "just keep it midnight". The cost was put to her first: a sitting that crosses midnight is split |
-| A timezone is an IANA place name, from the browser, never typed | See the warning above about whose words the reasons were |
-| No country field | It was her own idea, and she dropped it |
-| A missing or invalid timezone is a 400, with no default | Proposed by the Master Thread; she said OK |
-| Existing accounts get `UTC`; she makes a fresh account | Proposed by the Master Thread; she said OK |
-| The name column is `name`; existing accounts get the part of the email before the `@` | |
-| A name is trimmed, must hold a character, and is at most 60 long | |
-| The name is shown nowhere until Day 17c, beside sign-out | She refused a fourth destination that is not a destination |
-| Sign-out is Day 17c | Chosen as option 2, against the recommendation of today |
-| Mood words are connected; Record, the memory option and three links are removed | Chosen as option 1 |
-| A mood shows at once; a second press on the chosen word clears it | Chosen as option 1, twice |
-| The two sentences for a mood that was not saved | Approved as proposed |
-| **The mood questions were hers to decide, not the designer's** | Her own correction of the Master Thread, and she was right |
-| Enter saves; Shift with Enter makes a new line | Her own request. The phone is "later". Built on Day 18 |
-
-**What was built, by two workers, each audited with one mutation of the
-Master Thread's own.**
-
-- **API.** `AddUserNameAndTimezone` rebuilds `users` with `name` and
-  `timezone`, both `NOT NULL` with no default; `down()` drops the two
-  columns in place. Registration trims the name and stores the timezone in
-  the form `Intl` resolves it to. Node accepts `+05:00` as a timezone, so
-  the check refuses an offset by name. `dayFor(instant, timeZone)` has no
-  arithmetic on hours. The timezone travels with the user's id as a
-  `DayOwner`, from the user the guard already loaded. `timezone` is in no
-  response. **She ran the migration on her own database**, after a backup
-  at `~/neuron-backup-2026-10-07-c.db`. 211 unit tests became 242, and 279
-  end-to-end became 318.
-- **Web.** `readForm` in `lib/account-form.ts` is the one decision about
-  what stops a send, which closes Day 17a's finding: that mutation now
-  fails four tests. Create account has a name field, first. Both request
-  bodies are typed from the contract. The mood row works. With an empty
-  field the composer has no button. 55 web tests became 100.
-
-**She created a second account from the web app.** Its row holds the name
-`umer` and `Asia/Karachi`, and its first entry, written at 23:20 Karachi
-time, is on 2026-10-07.
-
-**Three things worth keeping from the workers' reports.**
-
-- **The contract changed and nothing failed.** The web app built its
-  registration body as a plain object the compiler never compared with
-  `WireRegistration`. All nine checks passed with registration broken. Both
-  bodies are typed now, and the report shows the compile errors.
-- **Mood requests go one at a time.** The prompt asked for two in flight
-  and a guard on the answers. The worker refused, correctly: what the API
-  stores is decided by the order the requests arrive, which the browser
-  cannot see. A stale read can be thrown away; a stale write has already
-  changed what is stored.
-- **For a maximum length, the browser must not be stricter than the API.**
-  `.length` counts an emoji as two and the API counts one, so the browser
-  counts whole characters.
-
-**Where she answered.** Read the warning in the opening section first.
-
-| Topic | Step |
-|---|---|
-| The two Day 17a ideas, from memory | Correct. Pasted, formatted text |
-| Focus moved by the code: second Enter on the delete confirmation | Wrong first, with a clear chain; right after one narrowing step. Pasted text both times |
-| The required name on a populated table; trimming; the contract | Correct. Pasted text. Said PostgreSQL where the project is SQLite |
-| Two people in one country; offset or place name | Correct. Pasted text |
-| The browser console experiment | **Not run.** The pasted answer said it could not run it |
-| What the API does with a missing timezone; existing accounts | Not answered. Given, and she said OK |
-| Midnight or 4am, and why | Decided. No reason |
-| Good then Low, arriving in the wrong order | **Not answered, twice** |
-| Every product choice put as options | Answered at once, in her own short words |
-
-**Mistakes of mine, recorded.**
-
-- **I said the web typecheck would fail when the contract changed.** It did
-  not, and I had not checked how the body was typed. I then "corrected" the
-  day overview on the strength of that wrong claim.
-- **I said the API answers 404 for a mood on a day that does not exist.**
-  It creates the day.
-- **I asked for two mood requests in flight with a guard on the answers.**
-  The design was wrong, and the worker said why.
-- **I told the worker that foreign keys are off during a migration**, from
-  the Day 16 report, which measured only the forward direction.
-- **My first run of my own mutation used `npx jest`**, which skipped the
-  migration's test file and passed. I noticed and repeated it properly.
-  This is the project's most repeated failure: a test result believed
-  before checking that the test ran.
-- **I put two product questions to the designer that were hers.** She
-  corrected it.
-- **I asked nine questions needing written explanations in one day.** The
-  ones she answered herself were the short choices.
-
----
-
-## Day 17a, compressed
-
-**The problem:** the web app was drawn on a stylesheet the designer had
-replaced. **No ADR**: no decision of an earlier ADR changed, and ADR-021
-still describes waiting and failing.
-
-**What was decided, all of it by her.**
-
-| Decision | Her reason |
-|---|---|
-| The second password is compared in the browser only | The API needs only the password it stores; the confirmation adds no information on the other side of the boundary |
-| Forgot password, the edit icon and the memory control are not drawn until their days | "A control that appears to work but does nothing makes the interface feel broken" |
-| The `/review` pages are removed | They existed to compare against designs that are gone |
-| A required display name on the account, built on Day 17b | See the opening section |
-
-**What was built, by one worker, audited with one mutation of the Master
-Thread's own.** `lock.css` is the designer's v3 file, byte for byte. Sign in
-and create account are on the open spread, with the second password field
-and the show-password control, and measure identical to the comps at 390,
-834 and 1440 wide. Today has the designer's delete icon, confirmation and
-failure, and the row "Today felt" in the order Light, Good, Even, Low, Hard,
-which was one line in `packages/contracts` and needed no migration.
-`lib/account-form.ts` holds the form's rules with no React. The review pages
-and what only they used are deleted. 41 web tests became 55.
-
-**Day 17's audit finding is closed.** A new test holds two questions about
-today in flight and fails when the stale-answer guard is deleted; the Master
-Thread repeated the mutation and saw the one failure. The paging loop stops
-at 20 pages.
-
-**Three things worth keeping from the worker's report.**
-
-- The new `lock.css` ties five layout rules to `.device`, the frame a comp
-  sits in. A running app has no frame, so `live.css` restates them. The
-  fifth was found only by measuring.
-- The v3 delete design makes Day 17's one-button answer impossible, so the
-  code moves keyboard focus by hand in four cases.
-- The browser counts an emoji as two characters and the API counts it as
-  one, so the two length checks can disagree. The API's refusal is shown as
-  the same sentence, which is why the API stays the authority.
-
-**Where she answered.**
-
-| Topic | Step |
-|---|---|
-| Why writing waits and deleting does not; the quiet `PATCH` bug | 1, both, from memory |
-| `useSyncExternalStore`: `publish()` removed from `type` | 1 |
-| A function passed to `useState`: `createToday` in the component body | 1, traced in six steps |
-| One button whose text changes: the double Enter, and two buttons | 1, both parts |
-| Where the password match is checked | 1 |
-| Controls for unbuilt features; the review pages | 1, decided with a reason |
-| The four dead controls already on Today, and mood: at once or wait | Not answered. She asked to move on |
-| Her look at the v3 screens, and the keyboard prediction | Not answered when this was written |
-
-**Mistakes of mine, recorded.**
-
-- **My prompt said delete's behaviour was unchanged.** The design draws
-  "Keep entry" beside a failed delete, which needed a new action, `dismiss`.
-- **My prompt treated the comps as one voice.** They disagree in three
-  places and I gave no rule for which file wins. The worker chose the
-  numbered screens over the generated states pack.
-- **My prompt asked for the delete icon's drawn position and left the edit
-  icon out**, without seeing that the stylesheet positions the pair.
-- **I named `lib/sample.ts` as used by the review pages.** Nothing uses it.
-- **Block 3 grew a second round of scope questions**, and she asked to move
-  on. The four dead controls should have been in the first round.
-
----
-
-## Day 17, compressed
-
-**The problem:** the journal screen works and feels broken. **ADR-020 and
-ADR-021.**
-
-**She reshaped the day by using the product.** Asked to use the Today screen
-and say what felt wrong, she reported four things. The reload was slow with
-nothing to say so. "Try again" gave no sign of being pressed. The composer
-could not be typed into. And yesterday's entry could not be reached at all,
-because nothing in the product shows any day but today. The last one was a
-gap in the roadmap itself that the Master Thread had not seen: no day in
-Phase 3 built it. Day 17c exists because of it.
-
-**What was decided, all of it by her.**
-
-| Decision | Her reason |
-|---|---|
-| Today builds writing and deleting; other days get their own day after the timezone | Chosen as option A, without a stated reason |
-| Request shapes go into the shared package as plain interfaces, and the API's DTO classes `implement` them | The interface is only a shape; validation is behaviour and stays in the API |
-| Writing an entry waits for the API | The server decides an entry's time and day; showing it early would make the browser guess both |
-| Deleting an entry shows at once | It feels responsive, and a failure puts the entry back with a sentence. **Kept after the worker and the Master Thread both recommended changing it** |
-| The soft-delete filter must be automatic | So that a new query excludes deleted entries unless it asks otherwise |
-| `DELETE` answers 204 with no body | There is no undo, and the client already has the entry |
-| A date is listed only if it has a live entry | An empty day should behave as if it does not exist |
-| The composer trims the ends of an entry before sending | No reason given; the worker's was that a trailing Enter is not meant to be stored |
-| The web app is aligned with the new designs next, before the timezone | Chosen as option A |
-| The second password field, the new mood order and colours, and the disabled Start control | Approved by her directly with the designer |
-
-**What was built, by two workers, each audited with one mutation of the
-Master Thread's own.**
-
-- **API.** `AddEntryDeletedAt`, an additive migration. `@DeleteDateColumn`
-  on the entity, with the value written by the application and never by
-  TypeORM's `softDelete`, which writes the database's clock in another
-  format. `update` and `markDeleted` carry the condition by hand. The code
-  that deleted an emptied day is gone. `WireNewEntry`, `WireLogin` and
-  `WireRegistration` joined the contract. **She ran the migration on her own
-  database**, after a backup at `~/neuron-backup-2026-10-07-b.db`. My
-  mutation, sending `deleted_at` in responses, was caught by five tests.
-- **Web.** `lib/today.ts` holds the screen's logic with no React in it. The
-  composer is a real text field. Delete asks first, in place. "Try again"
-  says it is asking and counts. **My mutation was not caught**; see the
-  opening order above.
-
-**Three things worth keeping from the workers' reports.**
-
-- With the hand-written condition removed from `update`, `PATCH` on a
-  deleted entry still answered 404 while overwriting the row, because the
-  read that follows the write is filtered. One test in 490 caught it, by
-  reading the row from the database. She explained this correctly.
-- The automatic filter has a third hole the ADR had not named: a hard
-  `delete` by criteria. Account deletion will meet it.
-- The new code does not run on a database without the new column. For the
-  first time the order between "take the code" and "run the migration"
-  mattered.
-
-**Where she answered.**
-
-| Topic | Step |
-|---|---|
-| What `setLoad` causes; why a plain variable fails | 1, from memory |
-| Why typecheck misses an extra field, and what catches it | 1, from memory |
-| The interface, the rename, and where the whitespace rule belongs | 1, all three |
-| Who owns an entry's time and day, and so which strategy for writing | 1 |
-| What a forgotten filter allows, and how to prevent forgetting | 1 |
-| The two problems with a database-clock timestamp | 1 |
-| The quiet `PATCH` bug | 1, all three parts |
-| The mood order: files, API check, migration | Not answered. Given |
-
-**Mistakes of mine, recorded.**
-
-- **I did not see that the roadmap had no day for viewing other days.** She
-  found it in a morning of using the product.
-- **I planned a day about feedback on actions for a screen that had no
-  actions.** Her observations corrected the plan.
-- **A worker ran while the designs folder was replaced under it.** Nothing
-  broke, because it had already read the old files. Do not start a worker
-  when a design delivery is about to land.
-
----
-
-## Day 16, compressed
-
-**The problem:** two apps describe the same data in two places, and they
-will drift. **ADR-019.**
-
-**What was decided, all of it by her.**
-
-| Decision | Her reason |
-|---|---|
-| A shared package, over leaving the copies and over a generated client | The copies fail silently; generation is far more machinery than three shapes and three values need |
-| The rule for the package | "Facts about data crossing the boundary between the two apps, not implementation or behaviour belonging to either app" |
-| `dayFor` stays out of the package | The API decides which day it is; sharing the function would invite the browser to compute it |
-| The web app must not import the API's entity files | It would couple the browser to TypeORM and to database details |
-| The `day_id` migration refuses, and does not repair | Following her Day 10 precedent. She did not give the reason when asked; it was given to her |
-| Timezone is Day 17b | See the table above |
-
-**One correction to her reasoning, recorded because the ADR depends on it.**
-She argued that the copies "are already drifting". They were identical. The
-argument that stands is that five facts were written twice after one screen,
-and the next days make the web app send data for the first time.
-
-**ADR-019 reverses part of ADR-001**, which expected request and response
-shapes to come from a generated client and not to be written by hand. The
-ADR says so openly and makes the generated client its first revisit
-condition. It is the first time this project has reversed an earlier ADR.
-
-**What was built, by two workers, each audited with one mutation of the
-Master Thread's own.**
-
-- **16a.** `RequireEntryDay`: `entries.day_id` is `NOT NULL`, and the worker
-  added the foreign key to `days`, which had never existed. The migration
-  refuses on an entry with no day and on one pointing at a missing day.
-  Foreign keys are switched off while a migration runs, which is why the
-  second check exists. **She ran it on her own database**, after a backup at
-  `~/neuron-backup-2026-10-07.db`.
-- **16b.** `packages/contracts`, one 49-line file: the mood words, two page
-  sizes, the password minimum, and four `Wire` shapes. Ten declarations left
-  the two applications. The API's controllers return the contract's types,
-  so an entity that stops matching fails to compile. No dependency and no
-  configuration in either application.
-
-**Where she answered.**
-
-| Topic | Step |
-|---|---|
-| Three Day 15 ideas, from memory | 1, all three |
-| Why a component runs more than once | 2. Her first answer was the development double-render; the real cause, a state change, was given after one narrowing question went unanswered |
-| What a `fetch` in the component body would do | 1. She traced the loop |
-| Why "Try again" fetches again | 1. Read from the dependency list |
-| Why not repair entries with no day | Not answered. Given |
-| How many tests notice a missing index | Not answered. Given: 1 of 426 |
-| What breaks when a mood or a field drifts | 1, both cases |
-| Which option, and why not import the entity | 1 |
-| What belongs in the package, and the rule | 1, all seven, and the rule in her words |
-| Types or values: which is harder to share | 1 |
-| Does typecheck catch an extra field | 1 |
-
-**Re-test at the start of Day 17, from memory:** what `setLoad` does besides
-storing a value, and why the contract's types cannot catch the API sending
-an extra field.
-
-**Mistakes of mine, recorded.**
-
-- **My 16a prompt assumed a foreign key that did not exist**, and asked for a
-  `migration:generate` result that this project cannot produce. The worker
-  found both.
-- **My 16b prompt said "eight commands" and listed nine.**
-- **The Day 15 state file claimed she had been taught Next.js rendering.**
-  She had not. Corrected on Day 15 and repaid on Day 16.
-
----
-
-## Day 15, compressed
-
-**The problem:** there was no interface, and the credential had to live
-somewhere in a browser. **ADR-018.**
-
-**What was decided, all of it by her.**
-
-| Decision | Her reason |
-|---|---|
-| The refresh credential lives in an `HttpOnly` cookie | An XSS attacker should not be able to take the long-lived credential elsewhere |
-| CORS allows exactly one origin, held in configuration | Only her own frontend should read API responses; the value differs per environment |
-| `WEB_ORIGIN` has no default; the API refuses to start without it | It is a security boundary, and a deployment must declare the frontend it trusts |
-| The password minimum stays 8 | The design said 12; the API is the authority |
-| On load, the app calls `/auth/refresh` before choosing a screen | The cookie is invisible to script, so the answer is the only way to know |
-| Only one refresh runs at a time | Two together carry the same cookie; the second is read as a replay and revokes every session |
-| The API decides which date is today | The 4am rule and the coming timezone both live on the server |
-| `entries.day_id` becomes required on Day 16, not Day 27 | See the opening order above |
-
-**What was built, by three workers, each audited with one mutation of the
-Master Thread's own.**
-
-- **15a, the API.** Login and refresh set an `HttpOnly`, `SameSite=Strict`,
-  `Path=/auth/refresh` cookie; no body carries the refresh token. CORS and
-  the cookie parser are set up in `configureHttp`, which `main.ts` and every
-  end-to-end suite call, and one test starts `main.ts` as a real process.
-  One dependency, `cookie-parser`.
-- **15b, the API.** `GET /entries?date=` and `GET /entries/count?date=`,
-  three lines inside the shared query builder from ADR-017. `GET /days/today`.
-  No dependency.
-- **15c, the web app.** `lib/session.ts` owns the session and imports
-  nothing. Routes `/in`, `/new` and `/`. Today reads `GET /days/today` and
-  then `GET /entries?date=`. The API's address is `NEXT_PUBLIC_API_URL`, and
-  a missing value stops the build. Tests run on Node's own runner. No
-  dependency.
-
-She created an account and saw a real entry from her own database on her own
-Today screen.
-
-**Where she answered.** Step 1 means the open question was enough.
-
-| Topic | Step |
-|---|---|
-| Where the credential lives | 1, as a short choice |
-| CORS: does the request arrive, who withholds the answer | 1, all three parts |
-| The forged form and the cookie (CSRF) | 1 |
-| One origin, and where the value is written | 1 |
-| `WEB_ORIGIN` absent: default or refuse | 1 |
-| Preflight | 1 |
-| Deleting the cookie parser: 401, not a crash | 1 |
-| `@Res({ passthrough: true })` | Taught first, then predicted correctly |
-| Why `configureHttp` is shared, and why that was still not enough | 1 |
-| Server and client components | 3. Taught from the beginning; she ran the experiment. The follow-up question was asked twice and not answered, so the conclusion was given |
-| What the app does first after a reload | 1 |
-| Two refreshes together | 1, and the rule that follows |
-| Which endpoint gives today's entries | 1. None did, and she found that by reading the list |
-| Who decides what today is | 1 |
-| `credentials: 'include'`, build-time values, the shared promise, the join | 1 each, after a short explanation |
-
-**Two things the browser taught that were not planned.** Twice she saw a
-CORS error whose real cause was that no server was running. The status code
-tells the two apart: no status means nothing answered. That distinction is
-now a named state in the web app. And the API refused to boot for her twice,
-once for `JWT_SECRET` and once for `WEB_ORIGIN`, which is her own rule from
-Day 6 working on her.
-
-**Mistakes of mine, recorded.**
-
-- **My worker prompt said two things that disagreed.** "Set `origin` to
-  exactly this string" and "a foreign origin gets no allow header". The
-  library does not do both. The worker found it with `curl`.
-- **I assumed Next.js knowledge she did not have**, because this file said
-  blocks 1 and 2 had covered it. The question had to be withdrawn and taught.
-- **The daily check did not cover the web app**, so an earlier commit went in
-  with `typecheck:web` red.
-
-**Not built, and said plainly.** There is no sign-out control. The composer
-and the mood row are drawn and wired to nothing. The destinations link to
-`/timeline`, `/ask` and `/you`, which do not exist. No test covers a React
-component.
-
-**With the designer.** He delivered sign-in, create-account and a states
-file without having seen `docs/ui-handover.md`, so they carry guest-session
-lines, a line about Free, an email verification step and a 12-character
-password rule. All of that conflicts with settled decisions and was left out
-of the build. Section 13 of the handover lists it, with ten sentences the
-worker had to write. **She still has to send him the handover document, and
-ask for the new `lock.css` and `00-prototype.html`.** The form's layout lives
-in a block marked TEMPORARY in `apps/web/app/styles/live.css` until then. The
-three delivered HTML files are not in the repository yet.
-
----
-
-## What her husband decided on 2026-10-04
-
-Every item below is his ruling. The full record is the table at the head of
-`docs/feature-reconciliation.md`. What the designer has to draw is
-`docs/ui-handover.md`, twelve sections, all ready and **not yet sent to the
-designer**.
-
-**The product.**
-
-| Decision | Detail |
-|---|---|
-| **No tiers** | No Free and no Pro. Every user gets every feature, including the AI features when they are built. A free trial followed by a subscription is possible later and is not decided. ADR-016 is amended |
-| **Mobile app out of scope** | A later project. Any backend change it needs is made then |
-| **Offline out** | The product needs a connection |
-| **Voice memos in**, confirmed | His reason: recording is easier than typing |
-| **Forgot password in** | Day 20, by an emailed link |
-| **Export in** | Markdown, JSON and audio. Day 34 |
-| **Device list in** | See and sign out each signed-in device. Day 34 |
-| **Editing an entry in** | From the interface. Typed entries only. Day 18 |
-| **Deleting one entry in** | With a required confirmation and no undo. Day 17 |
-| **"Keep this out of memory" in** | One column on an entry |
-| **Out** | Import, trackers beyond mood, notifications, the Timeline total line |
-
-**The data model.**
-
-| Decision | Detail |
-|---|---|
-| **One `entries` table** | A recording is an entry with a `kind`. Its transcript is saved into `content` and cannot be edited |
-| **Timezone** | A setting on the user. Days are worked out in it. This answers the question ADR-015 left open. No day is assigned yet, and it should be early |
-| **Soft delete** | Deleting an entry sets `deleted_at`. There is no timed removal; the row stays until the account is deleted. Soft or hard is chosen per feature as each is built |
-| **Account deletion** | A hard delete of the account and only its data. Day 34. This closes the question open since Day 8 |
-| **The day row stays** | When its last entry is deleted. It keeps its mood and is not shown |
-| **`password_hash` becomes required** | It is nullable only by accident of a migration |
-| **Drafts on the server** | A `drafts` table, one row per user as proposed. Day 18 |
-| **AI tables** | Designed when Phase 4 is built |
-
-**Owed, and not done.**
-
-- **An ADR for the data model decisions.** One table, timezone, soft delete
-  and drafts are expensive to reverse and none has an ADR. Write it when she
-  is walked through them, so that she can explain each one.
-- **`docs/HANDOFF-PHASE-3.md` is out of date.** It was written before this
-  session and still describes the mobile app and tiers as live.
-- **The column shapes for everything planned are proposals** from this
-  thread. They are in the artifact and were not reviewed column by column.
-
----
-
-## Days 12, 13 and 14, compressed
-
-**Day 12 — the design review.** 40 screens arrived and are now in the repo at
-`designs/AIJournal-handover/`. The finding: **the API models entries, the
-designs model days**, and a day ends at 4am. ADR-015. Two contradictions
-settled by her: the login identifier becomes an **email**, and **voice memos
-are in scope** — ADR-016. Of the roadmap's ten predicted misalignments, four
-were already designed, four were real, one could not be scored because `/in`,
-`/new` and `/restore` were never drawn, and one came up empty. She also asked
-for both feature lists side by side, which is
-`docs/feature-reconciliation.md`, and settled two more from it: **no guest
-sessions** and **no distress detection**, with the always-present crisis
-resource deliberately kept.
-
-**`apps/web` was created on Day 12**, against her instruction to build the
-screens before the API caught up. Next.js, the Today screen at three
-breakpoints, verified against the comps by DOM diff at 87 nodes each. It makes
-**zero network calls**. `lock.css` is copied in byte-identical and must not be
-edited — the designs are explicit that a screen needing a value it lacks is a
-revision to that file, not a local override.
-
-**Day 13 — the days table.** `days` with `UNIQUE(user_id, date)` as the
-business key and a UUID as the row key; both halves of that distinction were
-hers, as was the find-or-create shape where the constraint is the guard and the
-pre-check is an optimisation. The 4am boundary is written twice, SQL for the
-backfill and TypeScript for new writes, cross-checked over 34,000 instants.
-Mood, `GET /days?from=&to=`, pagination pulled forward from Day 29, and
-`name` → `email` with a case-insensitive index.
-
-**Day 14 — review day.** An audit, a 20-mutation sweep, two fixes, and the
-handbook. Her three audit predictions found two real bugs. The sweep caught 17
-of 20; the three survivors were an expired session, a deleted user, and **a
-test that could not fail**. `docs/handbook/` now exists with an entry per
-completed phase, which closes the Phase 1 documentation debt. ADR-017 — her
-five conditions, including "one query builder, two endpoints", which is the
-condition that prevents recurrence rather than fixing the instance.
-
----
-
-## Mistakes made in Days 12–14, recorded rather than tidied away
-
-**I reported a concurrency bug that did not exist** (Day 14). Claimed concurrent
-`POST /entries` crashed with "cannot start a transaction within a transaction",
-built a serialising `TransactionRunner`, and reverted all of it. Twelve
-concurrent writes against the real server succeed with and without the fix. Two
-mistakes underneath: my repro fired eight transactions inside one `Promise.all`
-in a single tick, which real HTTP requests never do; and the e2e `ECONNRESET`
-was **supertest**, proven by a control test where eight concurrent plain GETs
-touching no transaction failed identically.
-
-**I broke a test so that it could not fail** (Day 13, found Day 14). The
-timing test for the unknown-user login path passed a bare name after the email
-rename, so both branches took the unknown-user path and it compared the thing
-to itself. It passed for three days.
-
-**I introduced a `userId` leak** (Day 10). `create` returned its in-memory
-object, carrying the owner into the 201 body. She had identified that exact
-trap an hour earlier in the abstract.
-
-**The shape all three share:** a test result was believed without checking the
-test was sound. Day 11 produced the same lesson from the other direction.
-**State this when it recurs; it is the project's most repeated failure.**
-
-### What changed in the 2026-09-04 maintenance pass
-
-Four things were done at the request of the project owner's husband. None of
-them changed behaviour, and the full check suite was re-run after each.
-
-**The roadmap was rewritten as v2.0.** It is now 40 days rather than 30, it
-records where the project actually stands, and it adds a whole phase for the
-frontend. The old plan gave the frontend one day, which was never realistic.
-
-**Day 12 is now a design review.** Frontend designs exist and have not been seen
-by anyone building the API. Day 12 is the fixed point where they are shared,
-before the frontend is built and after auth is real — the only window where both
-the API and the designs can still move. The roadmap lists ten frontend changes
-to expect, each derived from something the API already does or already cannot
-do. Read that section before the day rather than during it.
-
-**`entry.interface.ts` was renamed to `entry.entity.ts`.** It stopped being an
-interface on Day 8 and the name had been left behind, which made it inconsistent
-with `user.entity.ts`. This was a pending item from the Day 8 report.
-
-**Comments were swept, from 926 lines down to 218.** The standard going forward:
-a comment earns its place by preventing a specific mistake. Reasoning about why
-a decision was made belongs in an ADR. A comment is for the trap a future reader
-would otherwise walk into — that `created_at` must stay TEXT, that `@ValidateIf`
-is not interchangeable with `@IsOptional()`, that the replacement order in
-`escapeLikePattern` fails silently if reversed. Narrative comments explaining
-what the code does were removed.
-
-**`docs/SETUP.md` was written.** It is everything needed to continue this project
-on a different machine, including the Claude Code memory directory, which lives
-outside the repository and is not carried by git.
-
----
-
-## Next Session Starts Here
-
-> **Current as of 2026-10-07.** Day 17 is complete. **Read *How to open the
-> next session with her* near the top of this file.** Everything under this heading from
-> here down is the historical record of Days 9–11 and is kept for its
-> reasoning, not as a statement of where the project is.
-
-### Days 9 and 10 are done, merged and pushed ✅
-
-Both finished in single sessions on 2026-09-13 and 2026-09-14, pushed
-2026-09-21. `main` is at `4401cda`. 131 unit tests, 86 end-to-end.
-
-**Day 9 — identity exists.** `POST /auth/register`, `POST /auth/login`,
-`GET /auth/me`. Passwords are argon2id hashes in one `password_hash` column.
-`JWT_SECRET` is required with no default and the application refuses to boot
-without it. ADR-011 and ADR-012.
-
-**Day 10 — ownership is enforced.** Every query filters on `user_id` in its
-`WHERE` clause, so other people's rows never enter the process. 404 never 403.
-`user_id` is `NOT NULL`. The guard is `APP_GUARD` with `@Public()` as the
-opt-out, so a new route is closed by default. ADR-013.
-
-The full per-block step-tracking is in `docs/learning/day-09/report.md` and
-`docs/learning/day-10/report.md`, both now tracked in git by a narrow gitignore
-exception. **Read those before teaching anything that builds on this code** —
-they say which details she derived and which were given to her.
-
-### What she should not be re-taught
-
-She reached these unprompted and they are recorded with her own wording in the
-reports: credential stuffing and why the blast radius is set by the user's
-*other* accounts; *"for a password, recoverable is the problem"*; that password
-cracking is an **offline** problem so rate limits are irrelevant; that a rainbow
-table makes scale irrelevant because lookup is O(1); the login enumeration
-oracle and what membership alone reveals for a journal specifically; and
-*"the pre-check is not the guard"*, which she then re-applied on Day 10 without
-being reminded.
-
-Two structural proposals were hers and both shipped: **`@Exclude()` over a
-response DTO**, because it is declared at the source and covers the endpoint
-nobody has written yet; and **`APP_GUARD` + `@Public()`**, because
-`AuthenticatedRequest`'s `user: User` was *"a conditional truth stated
-unconditionally"*.
-
-### Day 9's code walkthrough is repaid ✅
-
-Two sittings, 2026-09-14 and 2026-09-21. Nine topics, **eight at step 1**. The
-record is in `docs/learning/day-09/report.md`.
-
-Two of her answers shipped as code — `@Exclude()` over a response DTO, and
-`APP_GUARD` + `@Public()`. Two things were given to her rather than derived, and
-are worth re-testing rather than re-explaining: that `undefined` as this
-application's "no" is ADR-005's decision from Day 3 rather than `TokenService`'s
-own, and that `LoginDto` omitting `@MinLength(8)` prevents an information leak
-as well as an account lockout.
-
-**No learning debt is currently open.**
-
-### Her database was changed on Day 10
-
-Three things happened to `apps/api/data/neuron.db`: it was **baselined**,
-**migrated** through all four migrations, and its **five Day 3 entries were
-deleted** because they had no owner and every query now filters on one. That
-closed ADR-010 amendment 6 on the real file. The backup taken at the time was
-deleted on 2026-09-21 at her request; the five entries are gone for good, and
-they were Day 3 test data — an empty string, a single space, `"23.0"`.
-
-The database is now empty and fully migrated: three tables, four migrations
-applied, no entries and no users.
-
-### Day 11 is done ✅ — her objection is answered
-
-Sessions, refresh tokens and real revocation, 2026-09-21. **All three decision
-blocks at step 1** — the first day needing no narrowing question on any
-conceptual block. ADR-014. Record in `docs/learning/day-11/report.md`.
-
-The sentence the day turned on is hers: *"The guard can no longer determine
-accept/reject using only information contained in the JWT itself."* And her
-reframing of whether Day 8 was wrong — *"the interesting question is whether its
-requirements were complete"* — is now the ADR's own framing.
-
-**One deliberate departure from the conventional design.** The guard checks the
-session on every request rather than letting the access token die on its own
-within 15 minutes, so revocation is immediate. That costs one indexed lookup per
-request and it is the first thing to reconsider under load — noted as a revisit
-condition in ADR-014.
-
-**Named rather than hidden:** the `sessions` table grows one row per login and
-nothing removes expired rows yet. The rule is decided (*"delete state once the
-credential it is protecting can no longer be valid anyway"* — hers); only the
-mechanism is missing.
-
-### Then Day 12 — the design review
-
-The roadmap's Day 12 is **no implementation at all**: the frontend designs are
-shared, the API is checked against what the screens actually need, and both the
-roadmap and the designs are amended. It is the first day in this phase that is
-not code.
-
-Worth knowing before it starts: the API now has four auth endpoints beyond
-login and register (`refresh`, `logout`, `logout-everywhere`, `sessions`), and
-whether the screens need all four — a device list in particular — is exactly the
-kind of question that day exists to settle.
-
-### ⚠️ Day 7's "document" third was not done — carried to Day 14
-
-The roadmap's Day 7 is *audit, refactor, document — everything above, written down
-as handbook entries.* The first two were done thoroughly. **The third was not
-started**, and it was deferred by decision rather than forgotten.
-
-The gap is specific and worth stating plainly. Every worker report — Days 2, 3, 4,
-5, 6 and 7 — is **gitignored and exists only on this laptop**, along with every
-worker prompt. The eight ADRs are committed and carry the *why* for each decision.
-Everything else that explains how those decisions were reached would vanish with
-the machine.
-
-There is no handbook. The roadmap has been asking for one since Day 2.
-
-**Carried to Day 14**, the next review day. It wants its own session and a real
-decision about what belongs in it — which reports get promoted into version
-control, what a handbook entry is as distinct from an ADR, and whether the
-gitignore rule on `docs/learning/**/report.md` still earns its place now that the
-reports have become the most interesting writing in the project.
-
-### Day 7 learning debt — two of four paid, 2026-09-01
-
-Paid the same day the code landed, deliberately, because the `@nestjs/config`
-equivalent was left for three weeks and had to be rebuilt from scratch.
-
-**1. Decorators register; something else runs them. ✅ Paid by experiment.**
-Asked when the two functions in `contains-non-whitespace.decorator.ts` run, she
-answered *"when dto class is called"* — which is the one moment neither of them
-runs. Logging was added to the real decorator, the code rebuilt, and the result
-watched: the outer function fired **once, at import**, creating an instance fired
-**nothing at all**, and `validate` fired **once per validation**. Restored
-afterwards.
-
-**She then asked the best question of the session unprompted: "does a function run
-on import?"** That is the actual gap, and it was answered by reading the compiled
-output — the same technique she used on Day 4 for type erasure. The decorators
-vanish from the class body and become a top-level `__decorate([...])` statement,
-so importing the file calls them. `__metadata("design:type", String)` sits in the
-same statement, which is the line `ValidationPipe` reads; typed `unknown` it would
-say `Object` and the pipe would skip everything.
-
-**The generalisation, and it is a correction to something I taught wrongly:**
-handing a function to a library is a separate act from that function running, and
-**the library decides when — differently each time.**
-
-```
-useFactory        (DATABASE provider)  -> Nest calls it once, later
-registerDecorator (custom decorator)   -> called on every validation
-forRoot({ validate })                  -> called immediately, during import
-```
-
-I told her this morning that `forRoot` defers, because I assumed the pattern held.
-It does not. You cannot tell from the call site; all three look like passing an
-argument. **Do not teach "registration always defers" as a rule.**
-
-**2. `@IsOptional()` versus `@ValidateIf`. ✅ Paid by putting the bug back.**
-She predicted a 400 with `content must be a string`, which is exactly what the API
-does *today* — she read the fixed behaviour rather than the counterfactual. The
-`@IsOptional()` version was restored, rebuilt, and run against the real
-application: `PATCH {"content": null}` answered **500 Internal server error**, and
-the entry survived unchanged. Restored, 32 e2e green.
-
-The path: `@IsOptional()` skips every other rule on `null` as well as `undefined`,
-so `@IsString()` never runs, the class-level rule is satisfied because a field did
-arrive, `null` reaches a `NOT NULL` column, and Nest turns the unrecognised error
-into a 500. Applying her own Day 3 test — *could the client fix this by sending a
-different request?* — makes it plainly a 400.
-
-**The reason underneath is hers, used for the third time in three places:**
-`@IsOptional()` assumes `null` and `undefined` mean the same thing, and for a
-`NOT NULL` column they do not. That is the absent-versus-wrong distinction she
-invented on Day 6 for configuration, applied to a request body.
-
-**Still owed from Day 7:** `transform: true` — what the controller actually
-receives, a real `CreateEntryDto` or a plain object wearing its name. She was
-offered it and said no; recorded rather than pushed. `APP_PIPE` versus
-`useGlobalPipes` is largely paid — she reasoned through it during the design
-session — but has never been verified by experiment.
-
-### ⚠️ Teaching correction she made herself, and it was right
-
-Day 7's design session opened by asking her which of her five ADR-006 decisions a
-validation library would fail to express. Her reply: *"how would I know, i did not
-learn this, i am doing it for the first time — why you ask me stuff before
-teaching me?"*
-
-**She was right and the question was badly built.** It asked her to work out the
-limits of a tool she had never used. This is the Day 5 failure repeating: that day
-opened by asking her to invent a bug before she had opened a test file, and she
-said *"i do not understand."* The rule that came out of it — **work one example
-yourself before asking her to produce one** — was recorded and then not followed.
-
-What fixed it immediately was running `class-validator` against the real cases,
-showing three decorator combinations and their actual output, and *then* asking
-her about the second behaviour. She answered that one at step 1 and every design
-question afterwards.
-
-**The Socratic opening is not the problem and must not be dropped.** The problem
-is opening Socratic on material where she has no example to pattern-match against.
-Show one, then ask.
-
-### Day 7 — implemented and audited, 2026-09-01
-
-ADR-008 written and **amended four times** after the audit. Validation now runs
-through `class-validator` with a `ValidationPipe` registered as an `APP_PIPE`
-provider in `AppModule`. **No defects, no rework.**
-
-**Every decision was hers**, and made against real output rather than description:
-a custom decorator for the non-whitespace rule, `PATCH {}` stays a 400 (re-examined
-rather than preserved, since `forbidNonWhitelisted` now covers the misspelled-field
-case that originally motivated it), `?werd=x` is a 400, `?word=` returns `[]` while
-an absent `word` returns everything, and the library's message wording is accepted.
-
-**The mechanical fact that shaped the day:** `ValidationPipe` refuses to validate
-anything whose declared type is `Object`, and `unknown` compiles to exactly that.
-Switching the pipe on without replacing `unknown` would have done nothing at all.
-This reverses the Day 4 `@Body() body: unknown` decision, correctly: that decision
-was right while nothing ran before the handler, and the pipe is what makes the
-label true.
-
-**Audit: all five checks green, 80 → 96 unit, 24 → 32 end-to-end.** Exactly two
-direct dependencies; the lockfile gained four, including a 13M phone-number library
-nothing calls. All three boundary greps silent. Real HTTP verified independently,
-including the pair that had to disagree (`?word=` → `[]`, `/entries` → everything),
-that `"  padded  "` survives `transform: true` unedited, and that `?word=100%`
-still finds only the percent entry through the new query DTO.
-
-**Six mutations, all caught** — the worker's two plus four of mine:
-
-| Mutation | Result |
-|---|---|
-| Remove the `APP_PIPE` provider | 14 e2e fail |
-| Revert `@Query()` to `unknown` | 2 e2e fail (lint/typecheck/build all pass) |
-| Drop `@ContainsNonWhitespace` | 3 unit + 3 e2e fail |
-| Revert `@ValidateIf` to `@IsOptional()` | 1 unit + 1 e2e fail |
-| Drop `forbidNonWhitelisted` | 4 e2e fail |
-| Drop `whitelist` | 4 e2e fail |
-
-The unit suite stays green on the pipe mutations, and that is correct rather than a
-miss: DTO specs assert the rules are right and cannot assert that anything calls
-them — the same split as `env.validation.spec.ts` on Day 6.
-
-**⚠️ What the audit found that the report did not.** A 400 no longer has one
-response shape. The pipe answers `{"message": ["..."]}` while Express's JSON parser
-— which rejects `null`, `42` and bare strings before the pipe runs — answers
-`{"message": "Unexpected token ..."}`. Before Day 7 every 400 from this API had a
-string `message`. Recorded as debt in ADR-008 Amendment 3 rather than fixed,
-because no client exists yet.
-
-**The worker was honest against itself for the third time on this project**, and
-most sharply yet: it reported that the refactor made the codebase **+31 lines
-longer**, that the two rules the library does not understand cost 51 lines of
-boilerplate against eight hand-written, and that *"if this were a decision about
-code alone I would say so more loudly."* What it argued was actually bought is the
-inversion of the default — validation now happens unless somebody stops it. All
-three cases came from a prompt that asked a direct question inviting disagreement.
-
-**Learning debt opened by this day:** `class-validator` decorators, custom
-decorators via `registerDecorator`, `APP_PIPE` versus `useGlobalPipes`, and
-`transform: true`. She chose this library to learn how Nest does things and a
-worker wrote it, which is the same situation Day 7 Block 1 existed to repair for
-`@nestjs/config`. **Do not let this sit as long.**
-
-**Still outstanding:** Day 6 is committed and pushed but **not merged** (`main` is
-at `d24606f`, no PR). Day 7's work is sitting on the `day-06-configuration` branch,
-so the two days need separating before either is merged.
-
-### Day 6 follow-up: audited and closed, 2026-08-28
-
-`apps/api/test/config-wiring.e2e-spec.ts` was added by a worker and audited by me
-rather than taken from its report. **No defects, no rework.**
-
-All five checks green: lint, typecheck, build, **80 unit**, **24 end-to-end** (21
-→ 24 exactly as specified). No dependency added. No production code changed —
-verified by diffing `app.module.ts` against a copy taken *before* the worker ran,
-because file timestamps were useless here: my own mutations had rewritten the
-file.
-
-**Both required mutations caught, and they fail differently, which is stronger
-than the prompt asked for:**
-
-```
-delete 'validate,'       -> 2 tests fail   (claims 1 and 2)
-delete 'isGlobal: true'  -> 1 test fails   (claim 3)
-restored                 -> 24 passed
-```
-
-No stray sockets, no leftover temp directories, real application boots and serves.
-
-#### ⚠️ The worker corrected a factual error I had taught her
-
-My prompt stated as an established mechanical fact that `@nestjs/config` "does not
-validate when `forRoot()` is called; it validates when Nest initialises the
-module." **That is false**, and I had taught her the same thing in Day 7 Block 1.
-
-`ConfigModule.forRoot` is an `async` static and it calls `options.validate(config)`
-in the synchronous part of its body, so the check runs while `app.module.ts` is
-being *imported*. Because an `async` function returns a rejected promise rather
-than throwing, the failure sits unhandled in the `imports` array until Nest awaits
-it — which is why the import looks like it succeeded. Confirmed against the
-library's source and by an `unhandledRejection` handler firing before Nest was
-asked to build anything.
-
-Every *observation* previously recorded is unaffected: the import succeeds,
-`compile()` rejects, `main.ts`'s own `catch` never runs. Only the explanation was
-wrong. The `useFactory` analogy still holds for `DATABASE`; it does not hold for
-`validate`.
-
-Corrected in ADR-007 (Amendment 4) and in the worker prompt. **She was told the
-correction directly.** This is the second time a worker here has corrected the
-record it was handed, and both times it happened because the prompt asked a direct
-question inviting it.
-
-**Day 6 is now complete and ready to commit.** Nothing is outstanding except the
-git work, which is hers: branch `day-06-configuration`, one squashed pull request.
-
-### Day 7 — first block, 2026-08-19 (after a 13-day gap)
-
-The project sat untouched from 2026-08-06 to 2026-08-19. Day 6's work was still
-uncommitted on `main` the whole time. Nothing was lost; all 101 tests still pass.
-
-Day 7 opened by repaying the `@nestjs/config` learning debt, since she chose that
-package specifically to learn how NestJS does things and had not read a line of
-what the worker wrote.
-
-**What she now owns:** that `ConfigModule.forRoot({ validate })` does not call
-`validate` — it stores it in a module description that Nest reads later — and
-that because Nest calls it, Nest also catches it, which is why the `catch` in
-`main.ts` never runs. She predicted correctly that merely importing
-`app.module.js` with `PORT=hello` would succeed.
-
-**⚠️ A regression worth acting on.** Asked what deleting `isGlobal: true` would
-do, she predicted **typecheck and build would fail**. They cannot; Nest resolves
-dependencies at runtime. This is the *third* time she has made this exact
-prediction wrong — Day 2 for `providers`, Day 2 for `exports` — and she got it
-**right** on Day 4 evening for `EntriesRepository`. It slipped back over the
-two-week gap. Re-test it again rather than assuming Day 4 closed it.
-
-**The finding of the block, and it is a real one.** Deleting `isGlobal: true`
-gives:
-
-```
-typecheck  PASSES   build  PASSES   80 unit PASS   21 e2e PASS
-the application  ->  exit 1, Nest can't resolve dependencies of the Symbol(DATABASE)
-```
-
-**The e2e suite does not catch this, though it caught the equivalent Day 4
-break.** The reason is `.overrideProvider(DATABASE).useValue(db)` — that replaces
-the whole factory, and the factory is the only thing that asks for
-`ConfigService`, so the broken edge is never travelled. The idea to keep: **the
-more a test replaces, the less of the real wiring it can check.** The override
-that keeps the suite away from her real journal is the same override that blinds
-it here.
-
-She predicted, correctly, that the planned wiring test would **not** catch this
-either. Verified: with `isGlobal` gone and `PORT=hello`, `compile()` still
-rejects with `PORT must be a whole number…`, because `validate` throws before
-Nest reaches dependency resolution. The asserted message arrives and the test goes
-green.
-
-**My own error, and the same shape as the `successfully started` mistake.** The
-original `day-06-wiring-test.md` said in writing *"do not test valid configuration
-here — the existing suites already cover that."* That instruction would have
-removed the only test that catches this, because the existing suites cover valid
-configuration **with `DATABASE` overridden**, which is exactly what hides it. The
-prompt has been corrected: it now requires a third claim — the real `AppModule`
-builds successfully with valid configuration and no overrides — and a second
-mutation, deleting `isGlobal: true`, which claim 3 must fail against. Expected
-e2e count is now 21 → 24.
-
-### Day 6 — exactly what is outstanding
-
-1. **Run `docs/workers/day-06-wiring-test.md`** in a fresh Claude Code session.
-   It adds one end-to-end spec and no production code. End-to-end count should go
-   21 → 23.
-2. **Audit it the same way**: the acceptance criterion is that deleting
-   `validate,` from `ConfigModule.forRoot` in `apps/api/src/app.module.ts` makes
-   the new tests fail. Verify that yourself rather than reading the report.
-3. **Commit and merge Day 6.** Nothing is committed yet. The branch does not
-   exist yet either; git is hers.
-4. **The Day 6 LinkedIn post is drafted but covers only the first session** — the
-   problem, not the solution. See *Day 6 — LinkedIn* below. She confirmed she
-   posted Day 5 on 2026-08-05.
-
-### Day 6 — second session: the decisions, the implementation, the audit
-
-**ADR-007 is written**, at
-`docs/decisions/ADR-007-configuration-and-boot-validation.md`, and was **amended
-the same day** with three corrections the audit forced. Read the amendments; they
-matter more than the original text.
-
-**Every decision in it was hers.** Check at boot rather than at first use. `PORT`
-absent defaults to 3000 while `PORT` present-but-wrong refuses to boot — she
-produced the distinction that drives this, which is that *absent means "choose for
-me" and wrong means "I had an opinion and expressed it badly", so a default is the
-right answer to the first and the wrong answer to the second.* Reject `PORT=0`.
-Do not trim whitespace, on the same reasoning she used for journal content on Day
-4. Warn rather than refuse when `DATABASE_PATH` names a missing file. Use `.env`.
-Use `@nestjs/config`.
-
-**The `@nestjs/config` choice was hers and was made against my advice**, with the
-facts in front of her: that it is a real dependency, that it validates nothing by
-itself, and that its `.env` loading is redundant on Node 24. Her reason was that
-learning how NestJS conventionally does things is one of the goals of this
-project. That is the second time in one day she chose the framework's own way for
-that reason, so it is a position rather than a mood. **Do not relitigate it.** It
-is in tension with ADR-005's argument that framework API names do not transfer,
-and ADR-007 records the tension rather than smoothing it over.
-
-#### The audit — what I checked and what it found
-
-All five checks re-run by me, not taken from the report: lint, typecheck, build,
-**80 unit tests** (up from 55) and **21 end-to-end** (up from 18).
-
-Verified against the real application on a free port: `PORT=hello` exits 1 with
-`received "hello"`; `PORT=" 3000 "` exits 1 with the spaces visible inside the
-quotes; `PORT=4242` serves real HTTP; a missing `DATABASE_PATH` file warns and
-then serves `{"count":0}`. Her real journal still holds its four entries. No
-socket files anywhere.
-
-**Five deliberate mutations. Four caught:**
-
-| Mutation | Result |
-|---|---|
-| Accept `PORT=0` | 1 test fails |
-| Accept `PORT=99999` | 1 test fails |
-| Return `PORT` as a string, not a number | 4 tests fail |
-| Warn on the default path too | 3 tests fail |
-| **Delete `validate,` from `ConfigModule.forRoot`** | **nothing fails** |
-
-**The finding.** With that one word deleted, typecheck passes, build passes, all
-80 unit tests pass, all 21 end-to-end tests pass, and the real application accepts
-`PORT=hello` and creates the socket file again. Every rule still exists and is
-fully tested; nothing calls it. This is Day 4's `EntriesRepository` experiment
-repeating exactly. It is a gap in the suite, not a defect in the code.
-
-**A process error of mine worth not repeating.** My first run of the
-`DATABASE_PATH` warning case reported `{"count":4}`, which would have meant the
-path was ignored. It was not. A `pnpm --filter @neuron/api start` server left
-running by the Day 6 worker held port 3000 for twelve minutes, so my test process
-died with `EADDRINUSE` and my `curl` was answered by that older server. **When an
-audit result contradicts the code, check what is holding the port before
-concluding anything.** Re-running on port 3997 gave the correct `{"count":0}`.
-
-#### The worker was honest about its own work, again
-
-It volunteered that `@nestjs/config` pulled in `dotenv` at two versions plus
-`dotenv-expand`, all unused, directly contradicting ADR-007's own sentence that
-`dotenv` is not added. It also wrote that *"if the explicit learning goal were
-removed from the ledger, I do not think the remaining benefit would justify it
-today, at two variables."* That is the second worker on this project to report a
-weaker version of its own success without being pushed, and it is the behaviour to
-keep asking for. Both prompts asked a direct question inviting it; that appears to
-be what produces it.
-
-It also found a real library quirk by reading source rather than documentation:
-`@nestjs/config` copies whatever `validate` returns back into `process.env`, and
-`process.env.X = undefined` stores the string `"undefined"`, which would have had
-the application open a database file named `undefined`.
-
-#### Where she answered, second session
-
-| Question | Step reached |
-|---|---|
-| When should configuration be checked? | **Step 1.** Correct and complete — at boot, refuse to start, say exactly what is wrong |
-| Are "not set" and "set to hello" the same problem? | **Step 1.** Correct, both parts |
-| What should each variable mean? | **Step 1**, but too vague to act on. Narrowed once, then answered well |
-| What does `PORT=` do? | **Asked to be told.** Genuinely obscure; not a failure |
-| Can a check catch `data/nueron.db`? | **Step 1, and better than the question.** She did not find a check — she changed the design so the mistake becomes visible. The distinction worth reusing: checking *form* versus checking *reality* |
-| `PORT=0` and whitespace | **Step 1.** Both decided with reasons |
-| How does anybody know the variables exist? | **Step 1**, though "a configuration file" needed splitting into three things |
-| Is `.env` justified today? | **Step 1.** Chose it; Node 24 makes it free |
-| Which mechanism? | **Step 1.** Chose `@nestjs/config` with a stated reason |
-
-### Day 6 — first session (2026-08-05 evening into 2026-08-06)
-
-No production code was changed. `git status` shows only `docs/master-state.md`
-modified. The whole session was understanding work, in the order the constitution
-sets out, and it stopped deliberately before the decision.
-
-**Why it stopped there.** The session ran past midnight, and the next block is
-where the options get compared and one gets chosen. The single thing this Master
-Thread was told to fix on Day 6 was a decision she accepted near midnight without
-arguing. Asking her to make a fresh set of decisions at one in the morning would
-have reproduced the same fault, so she was offered the choice and stopped.
-
-**Four things were established, each by an experiment rather than by assertion.**
-
-*One. An unvalidated configuration value does not crash the application; it makes
-it start.* The server was run with `PORT=hello`. She predicted a crash. What
-actually happened is that Nest reported `Nest application successfully started`,
-mapped every route, and stayed healthy, while nothing at all was listening on TCP
-port 3000. Node's `listen` accepts either a port number or a filesystem path, and
-because `"hello"` does not look like a number it was treated as a path. A Unix
-domain socket named `hello` appeared in `apps/api/`. The sentence she was given to
-keep is that **the dangerous configuration bug is not the one that crashes, it is
-the one that starts.**
-
-*Two. She then predicted the `DATABASE_PATH` typo case completely correctly, in
-one step,* including the mechanism: the application starts, a second database file
-is created under the misspelled name, and `GET /entries` returns an empty array.
-Running `DATABASE_PATH=data/nueron.db` produced exactly that, `{"count":0}` beside
-a real database holding four entries. This case is worse than the port case
-because the application is fully reachable and fully functional, so the only
-symptom reaching the user is that their journal is empty.
-
-*Three. A committed secret cannot be un-committed.* She was asked whether deleting
-a password in a later commit solves the problem and answered correctly that it
-survives in the history. A throwaway repository was built to show it: the working
-tree was clean, `grep` found nothing, and one `git grep` across all commits
-returned the password. She was then told directly, as fact rather than as a
-question, that rewriting history does not reliably fix it either, because forks
-and clones are outside your control and public repositories are scanned
-continuously by automated tools. The only real fix is to rotate the credential.
-The sentence to keep is that **a secret that has been committed is a secret that
-has been leaked.**
-
-*Four. Environments.* This is the one that needed teaching. See the step tracking
-below for how it went.
-
-**The `pnpm test:e2e` experiment is the best teaching artifact of the day and is
-worth reusing.** The e2e suite was pointed at a copy of her real development
-database instead of `:memory:`. Result: **2 failed, 16 passed**, with no
-production code changed at all, and the database grew from 4 entries to 10 as the
-suite left six fake ones behind. Three points came out of it. Correctness is a
-property of code plus environment, not of code alone. The tests that failed were
-precisely the two making a claim about the *whole* collection being empty, while
-every test claiming only "what I put in comes back out" passed, because a claim
-about everything is only true if you control everything. And the suite's result
-now depends on what she happens to have written in her journal, which means it has
-stopped measuring the code. The spec file was restored with `git checkout`.
-
-**Where to pick up — Block 5.** The understanding is done and the design work has
-not started. The open questions for the next session are: whether configuration
-should be checked when the application boots or when each value is first used;
-where the list of variables that exist gets written down, since nothing records
-that `PORT` and `DATABASE_PATH` exist at all; what belongs in `.gitignore`; and
-which mechanism to use, with the real candidates being hand-written checks at
-boot, `@nestjs/config`, and plain `dotenv`. An ADR is owed once that is settled,
-and then a worker prompt. **Do not start Block 5 by presenting a conclusion** —
-she has answered at step 1 on most of today's questions and the comparison work is
-hers.
-
-Note that the `@nestjs/config` question rhymes with the morning's validation
-argument, and the same trap is available: `@nestjs/config` is a real Nest package
-but it is still a dependency, and it does not validate anything by itself.
-
-### Day 6 — where she answered, per topic
-
-| Question | Step reached |
-|---|---|
-| What could go wrong in the two `process.env` reads? | **Step 1**, but general — "it can crash at runtime". Right category, wrong outcome |
-| Does `PORT=hello` crash or start? | **Step 2.** Predicted a crash. The experiment corrected it |
-| What does the `DATABASE_PATH` typo do? | **Step 1.** Completely correct, with the mechanism, unprompted |
-| What is wrong with a hardcoded password? | **Step 1.** Named exposure via a public repository, correctly |
-| Is the password safe after you delete it in a later commit? | **Step 1.** Immediate and correct — "it is still available in the commit history" |
-| Why not hardcode a connection string that holds no secret? | **Step 3.** Her reason was future-proofing, which this project's own rules forbid, and her "every point where it is hardcoded" argument does not hold because there is one such point. Narrowed once, answer was still vague, so environments were taught directly |
-| Does the e2e suite pass against the dev database? | **Asked to be told.** A fair response — the prediction was not answerable without having read the eighteen tests, so the question was badly shaped rather than too hard |
-
-**The teaching finding worth carrying:** the future-proofing correction landed
-well and is worth repeating in that form. She reached the right conclusion by an
-argument the constitution forbids, and instead of accepting the conclusion she was
-shown five real commands from this repository's own history that needed
-`DATABASE_PATH`. The problem had already happened five times in five days. Telling
-her *"you do not need an argument about the future, because the evidence is in
-your own repository"* is a better correction than restating Rule Zero at her.
-
-### Day 6 — LinkedIn
-
-**Correction to the note below under *Next Session Starts Here*: the Day 5 post
-was posted.** She confirmed on 2026-08-06 that it went out on 2026-08-05. The
-older claim that it was still outstanding is wrong and should be ignored. A Day 5
-post was redrafted in this session before she said so, which was wasted effort;
-check with her before rebuilding anything that the state file lists as owed.
-
-The **Day 6 post was drafted and covers the first session only**, which is the
-problem rather than the solution. Its three beats are the `PORT=hello` Unix socket
-result, the `DATABASE_PATH` typo producing a silently empty journal, and the e2e
-suite going 16 passed / 2 failed against a real database with no code changed. Its
-single quotable line is *"the dangerous configuration bug is not the one that
-crashes, it is the one that starts."* It ends by naming tomorrow's work, so the
-decision half of Day 6 is still available as its own post and has not been spent.
-
-Two stories remain deliberately unspent: the worker-honesty story from Day 5 (see
-*A second LinkedIn story* below), and the secret-in-git-history material from Day
-6's first session, which was held back because it belongs with the secret-handling
-work rather than with the configuration experiments.
-
----
-
-Day 5 is fully closed. It was audited, committed, merged through pull request #5
-with a squash, and the branch has been deleted. `main` is green: lint, typecheck
-and build all pass, `pnpm test` gives 55 tests and `pnpm test:e2e` gives 18.
-There is no leftover code work.
-
-⚠️ **The paragraph below is out of date and was corrected on 2026-08-06. The Day 5
-post did go out, on 2026-08-05. Nothing about it is outstanding.** It is left here
-only so the correction has something to point at.
-
-One thing is still outstanding, and it is hers. The LinkedIn post for Day 5 has
-not gone out. A finished draft exists in the Master Thread conversation from
-2026-08-05 and covers three things: the `LIKE` wildcard discovery, the idea that
-a missing test is usually a missing decision, and the argument for fixing code
-that is already scheduled for deletion. She asked for that draft and received it,
-so it only needs copying out and posting. If the conversation is gone, it can be
-rebuilt from ADR-006 and the notes below. There is also a second, separate story
-that was deliberately kept out of that post, described further down under
-*A second LinkedIn story*.
-
-Note on the merge, since it departs from the usual pattern. Git actions are
-normally hers alone. Day 5 was committed, pushed, opened as a pull request and
-merged by the Master Thread because her husband asked for it directly on
-2026-08-05. That was a one-off instruction and does not change the standing rule.
-
-The audit found no defects and required no rework. The full detail is in
-`docs/learning/day-05/report.md`, which holds the worker's own report followed by
-the Master Thread's independent verification of it.
-
-**Day 6 is the next working day.** Its brief is written out in full further down,
-under *Day 6 — the brief already prepared*.
-
-### What Day 5 decided
-
-Five decisions were made. All of them are written up with full reasoning in
-[ADR-006](decisions/ADR-006-strict-input-and-mutation-semantics.md). Four of the
-five were hers, and it is worth recording which, because the point of this
-project is that she can defend the decisions later.
-
-She decided that both `POST` and `PATCH` should reject a body containing any
-field the server does not recognise, and answer with a 400. She reached this by
-working through what happens when somebody misspells a field name on an update.
-Under the old behaviour of quietly ignoring unknown fields, `PATCH` with
-`{"contnet": "I fixed my typo"}` would answer `200 OK` and change nothing at
-all. The user would believe their correction had been saved. She said that was
-unacceptable and that the server has to tell the client to send the data
-correctly.
-
-She decided that a repeated query parameter, such as `?word=a&word=b`, should be
-a 400 rather than the `200` with an empty list that it used to produce. She got
-there by applying the test she learned on Day 3, which is to ask whether the
-client could fix the problem by sending a different request.
-
-She decided that the `%` and `_` characters in a search term should be escaped
-and treated as ordinary text. She chose this over two alternatives that were put
-to her, which were rejecting any search containing those characters, and
-declaring wildcard searching to be a deliberate feature. Her reason was that the
-other two options are not friendly to the person using the product.
-
-She decided that `DELETE` should answer with a 200 and the entry that was
-deleted, rather than the more conventional `204 No Content`.
-
-The fifth decision was mine rather than hers, and that is worth flagging. I
-recommended keeping validation hand-written and extracting the shared parts into
-one function, instead of adopting a validation library. She accepted this without
-arguing it, at close to midnight. Since she did not push back on it at all, it is
-worth confirming with her when she is fresh that she actually agrees.
-
-That fifth decision was not optional to consider. ADR-005 had named Day 5 in
-advance as the day to reconsider hand-written validation, on the grounds that a
-partial update duplicates the rules of a create. That condition fired exactly as
-predicted, so it was reconsidered properly rather than skipped. The outcome was
-to defer a library again, and ADR-006 replaces ADR-005's rather vague trigger
-with four specific ones. See the amendment note below, because the reasoning
-behind this deferral turned out to be weaker than first written down.
-
-### The audit — what was checked and what it found
-
-All three of the flagged risks were verified **by breaking the code**, not by
-reading the worker's report:
-
-1. **Escape ordering.** Three mutations introduced by the Master Thread. Removing
-   escaping entirely fails 3 tests; reversing the order fails 3 *different* ones
-   (percent, underscore and `100%`, while backslash still passes); omitting only
-   the backslash pass fails exactly 1. **The suite distinguishes the two ways of
-   getting this wrong**, which is stronger than the prompt asked for.
-2. **The `only` claims fail on too many, not on none.** Confirmed by reading the
-   failure output: the wanted entry is still present and the test goes red
-   purely because three others came with it. The word `only` — the one word she
-   was missing when she wrote the claim — is doing exactly the work it was added
-   for.
-3. **The shared-validation extraction.** Real, but **the worker reported a
-   weaker version of its own success and was right to.** See below.
-
-**No defects. No rework.**
-
-### ⚠️ ADR-006 was amended the same day
-
-The worker found that `parseCreateEntryDto` and `parseUpdateEntryDto` came out
-**structurally identical**, differing only in their error message — because
-there is exactly one updatable field, so *"at least one field present"* and
-*"`content` present"* are the same sentence.
-
-ADR-006 had justified deferring `zod` partly on "extraction removed the
-duplication." The truthful version is that **one optional field is not a
-schema** — the duplication never had room to form. Deferral still stands, but on
-"there is no complexity yet," not on "the hand-written approach absorbed it."
-
-The amendment is recorded in ADR-006 rather than quietly fixed, and the likeliest
-trigger moved **from Day 12 to Day 13**, when mood adds a second updatable field
-and the two validators genuinely diverge.
-
-**This is the behaviour to want from a worker.** It could have reported "duplication
-removed, as designed" and nobody would have checked.
-
-**Day 5 — the roadmap problem is:** *"I changed something and don't know what I
-broke."* Afterwards she should be able to explain unit vs integration vs e2e and
-judge what a test suite fails to cover.
-
-⚠️ **Note:** the roadmap's own Day 5 row says she should have "**written** tests,
-not just read them." **That is superseded** — see the direction from her husband
-below. Do not open Day 5 by asking her to write a suite.
-
-**Shape she chose for Day 5:** judgement work first, then `PATCH`/`DELETE`.
-Reason: it puts the hardest learning in the freshest hours. Both halves are now
-done.
-
-### What Day 5 produced
-
-**Three coverage gaps found by her, all real, all invisible to a fully green
-39-test suite. All three now fixed and tested.**
-
-| # | Gap | Outcome |
-|---|---|---|
-| 1 | `POST /entries` silently ignores unknown fields. `{"content":"x","id":"mine"}` → 201, `"mine"` discarded | **Fixed.** `POST` and `PATCH` both 400 and name the offending field |
-| 2 | `%` and `_` are `LIKE` wildcards. `?word=%` returns **every entry**; `100%` cannot be searched for | **Fixed.** Escaped and treated literally |
-| 3 | `?word=a&word=b` — Express supplies an *array* to a parameter typed `string`, producing `%a,b%` and a misleading `200 []` | **Fixed.** 400, and `@Query('word')` retyped to `unknown` |
-
-**Gap 2's decision (hers, and I agreed):** treat `%` and `_` as ordinary
-characters — escape them before they reach `LIKE`. Options rejected: reject such
-input with a 400 (a user wanting `100%` gets an error they cannot act on), and
-declare wildcards a feature (a search box that returns the whole journal for one
-keystroke).
-
-**The Rule Zero objection was raised and answered on the record**, because it is
-a fair one: this `LIKE` query is condemned on Day 15 (full-text) and again on
-Day 16 (embeddings), so why fix it? The answer that settled it: the durable
-artifact is not the fix, it is the claim — *"searching for a character finds
-entries containing that character."* That sentence never mentions SQL, `LIKE`,
-or `%`, so it survives all three generations of the implementation. Same shape
-as "newest first", which survived the Day 3 repository extraction because it
-never mentioned where the SQL lived.
-
-**The claim she wrote, sharpened by one word:**
-
-```ts
-it('should return only entries containing a literal percent sign', () => {
-```
-
-She produced everything except `only`. The word is load-bearing: without it, a
-completely broken search that returns all four seed entries still satisfies the
-sentence, because one of those four does contain a `%`. This is the same
-failure mode her own suite already documents at
-`entries.controller.spec.ts:82-84` — a claim a broken implementation can satisfy
-is a green checkmark, not a check.
-
-### The idea worth carrying forward from tonight
-
-**A missing test is usually a missing decision.**
-
-She could not write the claim for gap 2 when first asked, and said so. That was
-not a gap in testing skill — the behaviour had never been decided, so there was
-nothing to write down. Once she chose Option A, the claim came immediately. This
-reframing is what unstuck the block and it is worth reusing.
-
-### Day 6 — the brief already prepared
-
-This was written at the end of Day 5 and given to her, so a fresh Master Thread
-should continue from it rather than invent a new one.
-
-The problem for Day 6, taken from the roadmap, is *"my database password is in a
-committed file."* There is no password in the project yet, and that is precisely
-why this is the right moment to look at configuration, before there is a secret
-to leak.
-
-Two places in the code read the environment directly and trust whatever they
-find. `main.ts` line 6 reads `process.env.PORT ?? 3000`, and
-`database.module.ts` line 26 reads `process.env.DATABASE_PATH`. Nothing checks
-either value, nothing writes down anywhere that these two variables exist, and
-nothing stops the application starting up with a value that makes no sense. It
-will start happily and then fail later, in a place that gives no hint about the
-real cause.
-
-By the end of the day she should be able to explain why configuration is treated
-differently from code, what an environment actually is, why a secret needs more
-careful handling than an ordinary setting, and why checking configuration when
-the application starts is different from checking it the first time it gets
-used.
-
-The format should be the same one that worked on Day 5, which is to read, then
-predict, then break, then observe. This topic breaks in ways that are easy to
-watch. Setting `PORT=hello` and starting the server should teach her something
-within about thirty seconds.
-
-Two things from Day 5 connect directly into Day 6, and both are worth using.
-
-The first is the idea she took away from Day 5, that a missing test is usually a
-missing decision. It applies here without any modification. Nobody has decided
-what `DATABASE_PATH` should mean when it is missing, or when it holds nonsense,
-or when it points at a location the process cannot write to.
-
-The second is that an environment variable is a trust boundary, exactly like a
-request body or a query parameter. `process.env.PORT` has the type
-`string | undefined`, and the code treats it as though it were a port number.
-That is the same category of mistake she found twice on Day 5, so she has a
-model for it already and should be asked to spot it rather than told.
-
-### Decision taken on the morning of Day 6: validation moves to Nest's own approach, on Day 7
-
-The Master Thread reopened yesterday's fifth decision, which was the only one of
-the five that was mine rather than hers, and which she had accepted near midnight
-without arguing it. She did not agree with it once she was fresh.
-
-Her position is that the project should adopt Nest's own validation approach,
-meaning `class-validator` together with a global `ValidationPipe`, and that `zod`
-should be rejected. This reverses the ADR-005 and ADR-006 deferrals.
-
-Two things happened during that conversation which are worth keeping, because the
-reasoning she started with was not the reasoning that survived.
-
-Her first argument was that `class-validator` is built into Nest and so costs
-nothing, whereas `zod` is an extra dependency. That premise is false and she saw
-it proved. `ValidationPipe` is exported by `@nestjs/common`, but constructing one
-without `class-validator` installed fails immediately with the message *"The
-class-validator package is missing."* Nest ships the socket and not the plug. The
-true dependency count is zero for hand-written, one for `zod`, and two for the
-Nest approach, which makes her chosen option the most expensive on the exact axis
-she argued from.
-
-Her second argument was that a library increases accuracy. She then predicted,
-correctly, that `@IsNotEmpty()` would accept a string of three spaces and return
-a 201, which breaks her own Day 4 rule that content must hold at least one
-non-whitespace character. This was confirmed by running `isNotEmpty` from the
-real package: `""` is false, but `"   "` and `"\t\n"` are both true. The
-conclusion drawn was that a library increases *consistency* rather than accuracy,
-because accuracy is the question of whether the rule you wrote is the rule you
-meant, and no library can know what you meant. The sentence worth reusing is that
-**a decorator whose name sounds like your rule is not your rule**, which is the
-same shape as her own Day 5 lesson that a missing test is usually a missing
-decision.
-
-The argument that actually justifies her decision was supplied by the Master
-Thread, because it depends on the Known Debt list rather than on anything visible
-in the code. Validation here is enforced by memory and not by mechanism: nothing
-forces a future endpoint to validate its body, and a forgotten check passes lint,
-typecheck, build and every test. A global pipe runs before every controller
-method whether anyone remembered it or not, and `forbidNonWhitelisted: true`
-expresses her Day 5 unknown-fields rule as one setting rather than as code called
-in two places.
-
-She chose to keep Day 6 for the configuration problem the roadmap set, and to
-carry this out on Day 7, which is the review day and exists for exactly this kind
-of refactor.
-
-**Owed on Day 7:** ADR-007 recording this properly, the implementation itself,
-and a deliberate decision about how to express the non-whitespace rule, since
-`@IsNotEmpty()` demonstrably does not.
-
-### A second LinkedIn story, deliberately held back
-
-Day 5 contains a second story that was left out of the post on purpose, because
-putting both in one post would weaken each of them.
-
-When the worker agent finished the implementation, it was asked whether
-extracting the shared validation had genuinely removed the duplication it was
-being credited with removing. It answered no. Its words were that one optional
-field is not a schema, and that the duplication had never had room to form in the
-first place. It reported a weaker version of its own success without being
-pushed, and ADR-006 was amended because of it.
-
-That is a good story for an audience thinking about how to work with AI agents,
-and it stands on its own. It has not been drafted yet.
-
-### Gaps still unspent — material for a later session
-
-Found by the Master Thread on Day 5 and **deliberately never shown to her.** Do
-not hand these over; they are practice for the skill she was building.
-
-- **Empty search value.** `?word=` is falsy, so it falls through to `findAll()`
-  and returns everything rather than searching. **Still true after Day 5** — the
-  worker left it alone on purpose, because nobody has decided what an empty
-  search term means and implementing an unchosen behaviour is the exact failure
-  ADR-006 describes.
-- **No maximum content length.** A multi-megabyte entry is accepted.
-- **Search case sensitivity is untested in either direction**, so nobody knows
-  whether the current behaviour is intended.
-
-`docs/learning/day-02/testing-literacy.md` experiments 3 and 4 remain unrun and
-are still worth doing — they cover brittle assertions and test isolation.
-**Experiments 2 and 5 are now redundant** and should be skipped: 2 is the
-route-rename experiment and 5 is the four-commands question, both of which she
-answered correctly on Day 4 evening.
-
-### A teaching finding from tonight — this one is actionable
-
-**The opening question failed, and the failure mode is worth not repeating.**
-
-Day 5 opened by asking her to *invent* a bug: "imagine a careless engineer makes
-one change that breaks the API while all 39 tests stay green — what change?"
-Her entire reply was *"i do not understand."*
-
-That question asked her to **generate** an example, from nothing, before she had
-opened a single test file. Generation is far harder than recognition, and there
-was no worked example to pattern-match against.
-
-**What fixed it immediately:** doing one worked example first — here is a change
-(`ORDER BY ... DESC` → `ASC`), here is the exact test that catches it, therefore
-this rule is covered — and then handing her a second case and asking only
-*"is there a test for this?"* She answered that correctly straight away, and
-every question after it.
-
-**The rule:** when introducing a new *kind* of thinking, work one example
-yourself before asking her to produce one. This is not the same as skipping
-Socratic questioning — the questions that followed were all open, and she
-answered them. It is about giving the task a recognisable shape first.
-
-### Where she answered, per topic — the tracking the plan asks for
-
-| Question | Step reached |
-|---|---|
-| Invent a bug the suite would miss | **Did not parse.** Replaced with a worked example rather than narrowed |
-| Is there a test for unknown fields? | **Step 1**, immediately after one worked example |
-| Extra `id` — rejected, stored, or ignored? | **Step 1.** Correct, with the right reason |
-| What does `?word=%` return? | **Step 1.** Immediate |
-| Which spec file does the new test belong in? | **Step 1.** Correct — service spec |
-| What should the claim assert? | **Stuck at step 1**, legitimately — the decision did not exist yet. One narrowing question (*"what should it return?"*) resolved it |
-| Which option for wildcard handling? | **Step 1.** Chose A, with a reason |
-| The claim sentence | **Step 1**, missing only the word `only` |
-
-Six of eight at step 1. The two that were not are both explained by something
-other than difficulty: one was a badly-shaped question, the other was blocked on
-an unmade decision.
-
-### ⚠️ Direction set by her husband on Day 4 — do not relitigate this
-
-**She is not required to write test suites by hand.** His position, stated
-directly: AI writes tests in practice now, and what matters is that she
-understands what tests are, how they work, and the difference between unit,
-integration and e2e.
-
-Day 5 should therefore run **read → predict → break → observe**, not "write a
-suite from scratch." The two experiments below are the model for this, and both
-worked well. The remaining gap is judgement: looking at an existing suite and
-naming what it does *not* cover — which is the skill the Day 3 `ORDER BY` bug
-actually needed.
-
-### How Day 4 actually went — the single most useful thing to know
-
-**The format changed the outcome, and this is the main lesson to carry forward.**
-
-The design work was genuinely hers: the layering rule, the `undefined`/`[]`
-asymmetry, the four validation rules, and the decision to hand-write validation
-with a named revisit condition. The code was not hers; a worker wrote it.
-
-**The day had two halves that looked completely different.**
-
-*Afternoon — open-ended Socratic questioning.* Uneven. The empty-collection idea
-took three rounds, she answered "5xx" for an empty search, and the conclusion
-came from the Master Thread rather than from her. She asked to move on three
-times. At the time this looked like fatigue or disengagement.
-
-*Evening — direct questions, each with an experiment attached.* Seven
-predictions, **all seven correct**, including the two hard ones where she
-worked out that 29 unit tests would still pass on a completely broken
-application, and gave the right reason both times. On prepared statements she
-did not answer the question asked — she volunteered the full mechanism
-unprompted. Six debts closed in one session, two of them owed since Day 1.
-
-**The difference was not effort or energy.** It was that the afternoon kept
-asking her to reason toward concepts she had not met yet, for three rounds,
-while the evening taught directly and then verified with an experiment.
-
-**Do not read this as "drop the Socratic method."** That was the Master Thread's
-first conclusion and her husband corrected it the same evening — see *The
-three-step sequence* under *How To Work With The Learner*, which is the
-authoritative version. Socratic still opens every topic. What changed is the
-exit condition: two attempts, then teach it properly, then verify.
-
-**One thing that reversed on the same day:** the empty-collection idea was
-recorded as owed in the afternoon and closed in the evening, when she said in
-her own words that an empty array *satisfies* the question. Worth knowing that
-"she did not get it today" often means "she has not been taught it yet," not
-"she cannot get it."
-
-### The two experiments from Day 4 evening — reuse this format
-
-Both produced results that contradict intuition, and both are re-runnable in
-under a minute. They are the best teaching tools found so far.
-
-**1. Rename the route.** `@Controller('entries')` → `@Controller('journal')`.
-The application is completely broken — every existing client gets a 404 — and
-**all 29 unit tests still pass.** 9 of 10 e2e tests fail with
-`expected 201 "Created", got 404 "Not Found"`.
-
-> Unit tests verify the pieces work. E2E verifies the pieces are *connected*.
-
-**2. Delete a provider.** Remove `EntriesRepository` from `providers` in
-`entries.module.ts`. `typecheck` ✅, `build` ✅, **server crashes at boot** with
-`Nest can't resolve dependencies of the EntriesService (?)`, and **29 unit tests
-still pass** — because every spec file declares its own `providers` list and
-never reads `entries.module.ts`. Only the e2e suite does `imports: [AppModule]`,
-so only e2e can catch broken production wiring.
-
-Restore both afterwards and re-verify. (A backup copy before editing saves
-time; `git checkout <file>` also works.)
-
-### Also outstanding
-
-**Experiments 3 and 4** in `docs/learning/day-02/testing-literacy.md` remain
-unrun and are still worth doing — brittle assertions, and why tests must be
-independent.
-
-**Experiments 2 and 5 are now redundant and should be skipped.** Experiment 2 is
-the route-rename experiment and experiment 5 is the four-commands type-error
-question; she answered both correctly on Day 4 evening. Running them again would
-be revision, not learning.
-
----
-
-## Current State
-
-**What runs today:**
-
-```
-GET    /entries              → 200, all entries, newest first
-GET    /entries?word=<term>  → 200, matching entries newest first; 200 [] when
-                               nothing matches. `%`, `_` and `\` in the term are
-                               ordinary characters, not wildcards
-                               400 when `word` is given more than once
-GET    /entries/count        → 200, { "count": n }
-GET    /entries/:id          → 200, one entry; 404 when not found
-POST   /entries              → 201, { "content": "..." }, returns the created entry
-                               400 when content is absent, not a string, or has no
-                               non-whitespace character; 400 on a null body;
-                               400 naming any field other than `content`
-PATCH  /entries/:id          → 200, the updated entry. `createdAt` is unchanged
-                               404 when the id does not exist
-                               400 on an empty body, an invalid `content`, or any
-                               field other than `content`
-DELETE /entries/:id          → 200, the deleted entry; 404 when the id does not
-                               exist
-```
-
-Entries persist across restarts. **Every endpoint now returns a correct status
-code** — the three known-wrong 500s are gone. No auth, no frontend, no CI, no
-deployment.
-
-**Verified working on Fedora KDE as of 2026-08-04, end of Day 5:**
-`pnpm lint` ✅ · `pnpm typecheck` ✅ · `pnpm build` ✅ · `pnpm test` ✅ (55 tests,
-up from 29) · `pnpm test:e2e` ✅ (18 tests, up from 10)
-
-Day 5's endpoints and search behaviour were exercised over real HTTP by the
-worker against a throwaway database on port 3999. **Not yet re-verified
-independently by the Master Thread** — that audit is still owed.
-
-All re-verified independently by the Master Thread against a fresh database on
-port 3998, not taken from the worker's report. Every status code above was
-confirmed over real HTTP, plus three checks the worker did not claim:
-
-- whitespace survived storage unmodified (`"  padded  "` in, `"  padded  "` out)
-- three rejected writes stored nothing (count unchanged)
-- `content` is a string on every endpoint, so POST and GET cannot disagree
-
-`apps/api/package.json` and `pnpm-lock.yaml` confirmed unmodified — **no
-dependency was added.**
-
-**Boundary check** (re-runnable, must return nothing):
-
-```bash
-grep -n "node:sqlite\|DatabaseSync\|DATABASE\|SELECT\|INSERT\|prepare(" \
-  apps/api/src/entries/entries.service.ts apps/api/src/entries/entries.controller.ts
-```
-
-**HTTP-boundary check, added Day 4** (must return nothing — the service and
-repository may not know status codes exist). The `grep -v` strips comment
-lines: both files legitimately *mention* `NotFoundException` in comments
-explaining why they must never throw one, and a check that reports those is a
-check nobody will trust.
-
-```bash
-grep -nE "HttpException|NotFoundException|BadRequestException" \
-  apps/api/src/entries/entries.service.ts apps/api/src/entries/entries.repository.ts \
-  | grep -v "^\S*:[0-9]*: *[/*]"
-```
-
-`EntryRow` was also confirmed to appear nowhere outside `entries.repository.ts`.
-
-**Workflow decision:** one branch and one PR per day, squash-merged. Branch
-naming `day-NN-topic`.
-
-**Environment:** Node v24.18.0 · pnpm 11.17.0 via Corepack · Docker 29.6.2 ·
-no local Postgres client installed. **VS Code ships its own TypeScript (6.0.3)
-which is not the workspace's (5.9.3)** — this gap caused a real "the editor is
-red but the terminal is green" incident on Day 2. See
-`docs/learning/day-01/report.md` addendum.
-
----
-
-## Current Architecture
-
-```
-neuron/                    pnpm workspace root
-├── apps/
-│   └── api/               NestJS 11 — the only app with code
-│       ├── data/              SQLite file lives here (gitignored)
-│       └── src/
-│           ├── main.ts            bootstrap, listens on PORT ?? 3000
-│           ├── app.module.ts      root module, imports EntriesModule
-│           ├── database/
-│           │   └── database.module.ts  DATABASE symbol token, factory
-│           │                           provider, CREATE TABLE at boot
-│           └── entries/
-│               ├── entries.module.ts      wires controller + service + repository
-│               ├── entries.controller.ts  HTTP only — routes, params, query,
-│               │                          validation, and the ONLY place a
-│               │                          status code appears. Owns
-│               │                          parseEntryBody + parseContent (shared
-│               │                          by POST and PATCH), the two DTO
-│               │                          parsers, and parseSearchTerm
-│               ├── entries.service.ts     application logic; generates id +
-│               │                          createdAt, delegates storage
-│               ├── entries.repository.ts  the ONLY class that knows a database
-│               │                          exists. Owns EntryRow, toJournalEntry
-│               │                          and escapeLikePattern — LIKE's pattern
-│               │                          language is database vocabulary
-│               ├── create-entry.dto.ts    what a client may SEND to POST
-│               ├── update-entry.dto.ts    what a client may SEND to PATCH
-│               └── entry.entity.ts        what an entry IS ({ id, content,
-│                                          createdAt }) — all strings
-└── docs/
-    ├── constitution.md    engineering principles
-    ├── roadmap.md         30-day plan (Day 0–29)
-    ├── master-state.md    this file
-    └── decisions/         ADRs
-```
-
-`apps/web/` does **not** exist yet (Day 12). `packages/` does **not** exist yet
-and that is deliberate — see ADR-001.
-
----
-
-## Decisions Made
-
-| ADR | Decision | Status |
-|---|---|---|
-| [ADR-001](decisions/ADR-001-monorepo.md) | pnpm workspace monorepo; `packages/` deferred until `apps/web` exists | Accepted |
-| [ADR-002](decisions/ADR-002-nestjs.md) | NestJS over raw `http` / Express / Fastify | Accepted |
-| [ADR-003](decisions/ADR-003-sqlite.md) | SQLite via built-in `node:sqlite`, raw SQL, no ORM | Accepted, **expected to be replaced** (Day 16 / Day 24) |
-| [ADR-004](decisions/ADR-004-repository-raw-sql.md) | Data access gets its own layer (`EntriesRepository`); SQL stays hand-written. Query builder and ORM rejected on timing, not merit. `id`/`createdAt` generated in the service | Accepted, **revisit Day 13 / Day 24** |
-| [ADR-005](decisions/ADR-005-validation-and-error-semantics.md) | Status codes live in the controller and nowhere else — the service may not throw HTTP exceptions either. `findById` → `undefined`, `findByContent` → `[]`. Validation hand-written; `class-validator` and `zod` rejected on timing, not merit. `/entries/count` returns `{ count }` | Accepted. **Revisit condition fired on Day 5 as predicted; answered in ADR-006** |
-| [ADR-006](decisions/ADR-006-strict-input-and-mutation-semantics.md) | `POST` and `PATCH` reject unknown fields (400). Repeated query parameter → 400. `%`/`_` escaped and treated literally in search. `PATCH` partial update, `createdAt` unchanged, no `updatedAt`. `DELETE` → 200 with the deleted entry. Validation stays hand-written with a shared check extracted; `zod` deferred again under four sharper triggers | Accepted and **implemented by the Day 5 worker**; Master Thread audit still owed. Revisit Day 12 (frontend) / Day 15–16 (search replaced) |
-
-| [ADR-007](decisions/ADR-007-configuration-and-boot-validation.md) | Configuration is read and checked once, at boot; a bad value refuses the boot. `PORT` defaults to 3000 when absent and must otherwise be a whole number 1–65535, with no trimming. `DATABASE_PATH` empty refuses; set-but-missing warns loudly then creates. `.env` at the repository root, gitignored, loaded by Node's `--env-file-if-exists`; `.env.example` committed. `@nestjs/config` with a hand-written `validate` | Accepted, **amended the same day** (three corrections). Implemented and audited; one follow-up test outstanding. Revisit Day 19 (optional config) / Day 24 (real secrets) |
-
-**Decided outside an ADR:**
-
-- Public day numbering (Day 0–29) is canonical; roadmap renumbered to match.
-- **Branching: one branch + one PR per day**, named `day-NN-topic` (e.g.
-  `day-02-persistence`). Worker agents never touch git; branching, committing,
-  and merging are human actions.
-- **Lint enforcement lands at CI on Day 25, not before.** A root `lint` script
-  makes it *reachable*; nothing yet makes it *mandatory*. Pre-commit hooks
-  (husky/lint-staged) were considered and deliberately declined — the friction
-  of remembering is what earns the Day 25 lesson.
-- **Docker is permitted for local development infrastructure** from Day 2.
-  Docker-for-local-dev and Docker-for-deployment are separate decisions; the
-  latter is still Day 24 and is not pre-empted by the former.
-- **`pnpm typecheck` is a first-class check**, added Day 2. `build` excludes
-  spec files and ts-jest runs transpile-only, so without it nothing in the repo
-  typechecked test code — only the editor did, using a *different compiler
-  version*.
-- **`@types` global inclusion is explicit** (`types: ["jest", "node"]`) rather
-  than implicit. TypeScript 6 stopped auto-including `@types/jest` under this
-  config.
-- Lint warnings are promoted to errors — this project has no warnings, only
-  errors. A warning nobody actions is noise that trains you to ignore output.
-- TypeScript stays on 5.x. TS 7 is released but `ts-jest` (`<7`) and
-  `typescript-eslint` (`<6.1.0`) peer ranges both exclude it, and both are
-  already at their latest versions.
-- `@types/node` tracks the Node **runtime** major (24.x), not npm's latest.
-
----
-
-## Completed
-
-- **Day 0** — repo init, public build announced.
-- **Day 1** — pnpm workspace, NestJS scaffold, `GET /entries`, ADR-001, ADR-002.
-  Shipped **unaudited**; LinkedIn post went out ahead of review.
-- **Day 2** — environment restored after OS migration. Day 1 audited
-  retroactively; ADR-001 merged from two conflicting drafts; roadmap renumbered
-  and ratified as v1.0. Cleanup worker run and re-audited (`typecheck` gap
-  found and closed). `POST /entries` written by hand to make the data-loss
-  problem demonstrable, then SQLite persistence added via a worker and audited.
-  ADR-003 written. Merged as `9c7365e` (PR #2, squash).
-- **Day 3** — three further queries (`findById`, `findByContent`, `countEntries`)
-  hand-written by her to make the duplication real. That produced a genuine bug
-  (a copied `SELECT` that lost its `ORDER BY`, missed by all four checks) and a
-  routing bug (`/entries/count` unreachable under `@Get(':id')`). She derived
-  the repository pattern herself from the duplication, chose raw SQL over a
-  query builder and an ORM with reasons, and argued the `id`/`createdAt`
-  placement hard enough to change the ADR. ADR-004 written. Extraction done by a
-  worker and audited. Merged as `488acc9` (PR #3, squash).
-- **Day 4** — the three known-wrong 500s fixed, and validation added. She
-  derived the layering rule herself: status codes are HTTP vocabulary, so the
-  service may not throw `NotFoundException` either — the same boundary argument
-  as ADR-004, applied one layer up. She got the 4xx/5xx re-test right, learned
-  400 vs 404, and **watched type erasure happen** by reading the compiled
-  JavaScript, which is the fact that makes runtime validation necessary at all.
-  She chose hand-written validation over `class-validator`/`zod` on timing, and
-  decided all four validation rules including rejecting `{"content": 42}`.
-  ADR-005 written. Implementation by a worker and audited. The worker
-  **deviated once and was right to**: it used `@Body() body: unknown` rather
-  than the `CreateEntryDto` the prompt specified, because an unvalidated body is
-  not a `CreateEntryDto` and naming it one repeats the exact falsehood the day
-  removed. It also caught a `null`-body case the design missed
-  (`typeof null === 'object'`). **In an evening session after the code was
-  committed, six learning debts were closed** by direct question and experiment
-  — two of them owed since Day 1, one since Day 2 and previously skipped twice.
-  This cleared Day 5, which had been over capacity.
-- **Day 5** — the day the suite was judged rather than extended. She found
-  **three real defects inside a fully green 39-test suite**: unknown fields
-  silently dropped, `LIKE` wildcards returning the whole journal, and a repeated
-  query parameter producing a misleading `200 []`. Each was confirmed over real
-  HTTP before being accepted. She then made every design decision that followed
-  — reject unknown fields on both `POST` and `PATCH`, 400 on a repeated
-  parameter, escape `%`/`_` rather than reject them, `DELETE` returns the
-  deleted entry. The idea worth keeping: **a missing test is usually a missing
-  decision.** She could not write the wildcard claim until she had chosen what
-  search meant, and that was not a gap in testing skill. ADR-006 written;
-  implementation by a worker, audited by deliberately breaking the code in three
-  places. 29 → 55 unit tests, 10 → 18 e2e, no dependency added, no defects
-  found. **ADR-006 was amended the same day** because the worker honestly
-  reported that the duplication it was credited with removing had never had room
-  to form.
-
----
-
-## Known Debt
-
-### Open as of 2026-10-04
-
-| Item | Where | Note |
-|---|---|---|
-| **A user cannot be deleted** | `sessions`, `entries`, `days` FKs | `ON DELETE NO ACTION`, the generator's default. **Decided 2026-10-04: hard delete, Day 34** |
-| **No test proves an out-of-date answer about today is discarded** | `apps/web/lib/today.ts` | The Master Thread's Day 17 mutation survived. First part of Day 17a |
-| **The loop that reads a day's entries has no cap** | `apps/web/lib/today.ts` | It never stops if an API keeps returning full pages. Day 17a |
-| **The web app is drawn on the old stylesheet** | `apps/web/app/styles/lock.css`, two TEMPORARY blocks in `live.css` | Day 17a |
-| **A failed delete can be missed when scrolled away** | `LiveToday.tsx` | Her decision, kept with the cost known. ADR-021 |
-| **Typed text is lost on a reload and when a session ends** | the composer | Drafts, Day 18 |
-| **The record control and "Keep this out of memory" do nothing** | the composer | Later days |
-| **A mood can be stored where no screen shows it** | `PUT /days/:date/mood` | ADR-020. To be answered when mood is wired |
-| **Deleted entries must be kept out of every later reader** | search, embeddings, export | ADR-020. Phase 4 and Day 34 |
-| **The package loads only while its `package.json` has no `"type"` field** | `packages/contracts/package.json` | Node advises adding one; doing so breaks `ts-node` and the migration commands. `built-output.e2e-spec.ts` guards it |
-| **The built API reads `packages/contracts/src/index.ts` at runtime** | `apps/api/dist` | A deployment that copies only `dist` will not start. Day 31 |
-| **`migration:generate` is never empty** | `sessions`, `days`, `users` | Foreign keys written across two lines, and an index on `lower("email")` that TypeORM cannot describe. Not caused by Day 16 |
-| **No test says a page of 200 is accepted** | `pagination.e2e-spec.ts` | Only that 201 is refused. Whether 200 is a promise is hers to say |
-| **`deleteIfEmpty` throws in one corrupt situation** | `days.repository.ts` | Another user's entry on your day. Unreachable through the API; a 500 if reached |
-| **Entry times use the device's clock; the day uses the API's** | `apps/web/lib/format.ts` | Dissolves with the per-user timezone |
-| **No sign-out control; composer and mood row unwired** | `apps/web` | The You screen and Day 18 |
-| **The auth form's layout is temporary** | `apps/web/app/styles/live.css` | Until the designer's new `lock.css` arrives |
-| **No test covers a React component** | `apps/web` | No framework was added. The session module is tested |
-| **`NEXT_PUBLIC_API_URL` is fixed at build time** | `apps/web/lib/config.ts` | One build cannot move between environments. Day 31 |
-| **The cookie has no `Secure` attribute** | `refresh-cookie.ts` | Day 31, when HTTPS exists. ADR-018 |
-| **No timezone on a user** | `day-boundary.ts` | 4am boundary is UTC. **Decided 2026-10-04: a per-user setting. Not yet scheduled** |
-| **`users.password_hash` is nullable** | `user.entity.ts` | Becomes `NOT NULL`. Decided 2026-10-04 |
-| **No ADR for the data model decisions** | `docs/decisions/` | Owed. See *What her husband decided* |
-| **Migration comments were stripped** | `src/database/migrations/` | A project-wide comment sweep removed the notes explaining why five migrations were hand-written. `docs/handbook/phase-2-identity-and-ownership.md` §6 is now the only record |
-| **`better-sqlite3@13` outside `typeorm`'s peer range** | `package.json` | Works, pinned, dissolves on Day 31 |
-
-**Historical, below.** Everything from here down is the record of debt that was
-resolved, kept for its reasoning.
-
-**Resolved by the Day 2 cleanup worker** (audited and verified):
-
-| Item | Resolution |
-|---|---|
-| `pnpm lint` failed | ✅ Exits 0. Assertions rewritten to shape/invariant checks over every entry |
-| Floating promise | ✅ `no-floating-promises` → `error`; `main.ts` catches, logs, exits 1 |
-| No root `lint` script | ✅ Root now has `lint`, `typecheck`, `test:e2e` |
-| README inaccurate | ✅ Corrected |
-| `report.md` at repo root | ✅ Moved to `docs/learning/day-01/report.md` |
-| `eslint` 9 → 10 | ✅ Bumped; zero new violations, no config changes needed |
-| **Nothing typechecked test files** | ✅ `pnpm typecheck` added — `build` excludes specs, ts-jest is transpile-only via `isolatedModules`, and lint doesn't report compiler errors, so *no* reachable command checked them |
-| TS 6 broke jest globals | ✅ `types: ["jest","node"]` added, deprecated `baseUrl` removed from `tsconfig.json` |
-
-**Open:**
-
-| Item | Detail |
-|---|---|
-| `apps/api` `lint` script has `--fix` | `pnpm lint` silently **rewrites** files rather than reporting. Fine locally, wrong for a CI gate. Split into `lint` / `lint:fix` by Day 25 |
-| `res.body` is untyped (`any`) in e2e | 🟡 **Partly resolved Day 5.** The new e2e tests read the body through one `entryFrom(res)` helper that casts once to `JournalEntry`, so field access is compiler-checked from there on. It is still a cast, and the three older tests still assert on raw `res.body`. Day 7 |
-| Worker prompts + reports are gitignored | `docs/workers/` and `docs/learning/**/report.md` stay local only. They exist on disk but are not in version control |
-| **`?word=` (empty value) returns everything** | `if (word)` treats the empty string as absent and falls through to `findAll()`. **Deliberately left unchanged on Day 5**, and this is the point rather than an oversight: ADR-006's own lesson is that a missing test is usually a missing decision, and nobody has decided whether an empty search term means "list everything" or "reject the request". Still untested. **Not yet shown to her** |
-| **Escaping is enforced by memory, not by mechanism** | New Day 5, and named as an accepted cost in ADR-006. Nothing stops a future query interpolating a raw term into a `LIKE` without calling `escapeLikePattern`. Same class as the `created_at` cast and the forgettable validation checks below |
-| **Nothing forces a third environment variable into the validator** | New Day 6, and the same memory-not-mechanism class as the row below. A variable added straight to `process.env` and read somewhere new would bypass every rule in `env.validation.ts`. Partly mitigated: one test pins the exact set of variables `validate` returns, so a *silent* expansion is caught |
-| **The configuration wiring was untested until the follow-up task** | New Day 6, found by the audit. Deleting `validate,` from `ConfigModule.forRoot` left typecheck, build, 80 unit tests and 21 e2e tests all green on an application where the whole day's work was disconnected. `docs/workers/day-06-wiring-test.md` closes it. **Until that task is run and audited, this is open** |
-| **Three unused `dotenv` packages are installed** | New Day 6. `@nestjs/config` bundles `dotenv` at two versions plus `dotenv-expand`, and `ignoreEnvFile: true` means none of it runs. Cost of choosing the framework's own module; recorded in ADR-007 Amendment 1 |
-| **A `.env` in `apps/api/` is silently ignored** | New Day 6, accepted knowingly. The start scripts load `../../.env` from the repository root. Because `.env` is gitignored, nothing warns. `.env.example` documents the rule instead |
-| **Validation is enforced by memory, not by mechanism** | Nothing makes a future endpoint validate its body. A forgotten check passes lint, typecheck, build and tests. This is ADR-005's accepted cost and its named revisit condition — the same failure class as the Day 3 `ORDER BY` bug. Day 5 shrank it but did not remove it: `POST` and `PATCH` now call the same two checking functions, so the *rules* exist once, but nothing forces a third endpoint to call them. **Scheduled for removal on Day 7** — she decided on the morning of Day 6 to adopt a global `ValidationPipe`, which is a mechanism rather than a memory. See *Decision taken on the morning of Day 6* above |
-
-**Resolved by the Day 5 worker** (implemented and verified over real HTTP;
-Master Thread audit still owed):
-
-| Item | Resolution |
-|---|---|
-| `POST /entries` ignores unknown fields | ✅ **400 naming the field.** `{"content":"x","id":"mine"}` now answers `Unrecognised field(s): id. Only content may be sent.` `PATCH` applies the identical rule |
-| `LIKE` wildcards are not escaped in search | ✅ `%`, `_` and `\` are escaped before the value is bound, and the query names `ESCAPE '\'`. `?word=%` returns only entries containing a percent sign; `?word=100%` finds `100% exhausted today`. The escape character is escaped **first**. Both ways of getting this wrong were introduced deliberately and the tests were watched going red: reversing the order breaks the `%` and `_` claims, and omitting the backslash pass entirely breaks only the backslash claim |
-| Duplicate query parameters are a type lie | ✅ `@Query('word')` is now typed `unknown` and checked. `?word=a&word=b` is a 400, not `200 []`. The first element is deliberately **not** taken — that would guess which of the two terms the user meant |
-| `PATCH` and `DELETE` do not exist | ✅ Both added. `PATCH` leaves `createdAt` unchanged and there is no `updatedAt`. `DELETE` returns the deleted entry with 200, and reads the row before removing it so a second `DELETE` is a 404 rather than a quiet success |
-
-**Resolved during Day 2** (no longer debt):
-
-- `findAll()` returning the private array by reference — dissolved exactly as
-  predicted. The database now owns the data and returns fresh row objects.
-- `toHaveLength(2)` in both unit and e2e tests — replaced by invariant checks
-  and a POST/GET round trip respectively.
-- `entries.service.spec.ts` asserting only `toBeDefined()` — now has real
-  behavioural tests.
-
-**Deferred by design — resolves on a known day:**
-
-| Item | Resolves |
-|---|---|
-| **Casts survive the repository extraction.** Rename `created_at`, miss one `SELECT`, and the API serves `"createdAt": null` with lint, typecheck and build all green. Same class of failure as the Day 3 `ORDER BY` bug — a rule the type system cannot see. Accepted knowingly in ADR-004 | Reopen if it causes a bug, or Day 13 / Day 24 |
-| `id`/`createdAt` format is enforced by convention, not by the database or the type system. Tolerable only while `create()` is the single write path | When a second write path appears (ADR-004) |
-| ~~`entry.interface.ts` names the language construct, not the concept~~ | ✅ **Resolved 2026-09-04** — renamed to `entry.entity.ts`, matching `user.entity.ts` |
-| ~~`POST /entries` with `{}` fails as an uncaught 500~~ | ✅ **Resolved Day 4** — 400 |
-| ~~`GET /entries/:id` returns 500 where 404 belongs~~ | ✅ **Resolved Day 4** — 404, and the pinned test moved to the controller spec where the behaviour now lives |
-| ~~`GET /entries?word=<no matches>` returns 500 where `200 []` belongs~~ | ✅ **Resolved Day 4** — fixed by *deleting* the `throw`; no new code |
-| ~~Storage-outcome → HTTP-status mapping has no home~~ | ✅ **Resolved Day 4** — ADR-005: the controller, and only the controller |
-| ~~`GET /entries/count` returns a bare number~~ | ✅ **Resolved Day 4** — `{ "count": n }` |
-| ~~One type serves as both domain model and HTTP wire shape~~ | ✅ **Resolved Day 4** — `CreateEntryDto` (send) vs `JournalEntry` (is) |
-| `LIKE '%term%'` search is lexical and cannot match meaning | Day 15 / Day 16 (this is the Phase 3 premise) |
-| No exception filter or CORS. **A `ValidationPipe` was deliberately declined**, not deferred by omission — see ADR-005 | Day 12 (CORS); pipe revisits per ADR-005 |
-| ~~`process.env.PORT` and `DATABASE_PATH` read raw and unvalidated~~ | ✅ **Resolved Day 6** — ADR-007. Checked once at boot; `dist/` contains no `process.env` at all |
-| `CREATE TABLE IF NOT EXISTS` at boot is not migration tooling | First non-additive schema change |
-| No index on `created_at`, no pagination | Day 23 (measure first) |
-| Millisecond ties in `created_at` ordering have no tiebreaker | Not worth solving; documented in the service |
-
----
-
-## Learning Debt
-
-Concepts introduced by worker agents that have **not yet been learned**. See
-the roadmap's *Learning Debt* section for why this is tracked.
-
-### Status as of the close of Screens Day: one group open
-
-**All four Day 17c items were repaid at the opening of Screens Day**, by
-runs. The Screens Day workers used two things she has not been taught.
-Repay them at the opening of Day 18, each as a prediction she runs:
-
-- **A custom hook.** `useNotBuilt` in `app/components/NotBuilt.tsx` holds a
-  piece of state for whichever control calls it.
-- **`as const satisfies` with `keyof typeof`.** `lib/unbuilt.ts` checks
-  every entry's shape and makes "one of these names" a type, so a misspelt
-  control name on a screen fails `typecheck:web`.
+## Learning debt
+
+A concept a worker introduced is not done until she can explain it without
+reading the code. **Open debt is repaid before the next day's work; her
+asking to skip it is not enough** (her husband's rule, 2026-09-04).
+
+**Open, to repay at the opening of Day 18, as predictions she runs:**
+
+- **A custom hook.** `useNotBuilt` in `apps/web/app/components/NotBuilt.tsx`
+  holds a piece of state for whichever control calls it.
+- **`as const satisfies` with `keyof typeof`** in `apps/web/lib/unbuilt.ts`.
+  A misspelt control name on a screen fails `pnpm typecheck:web`; that is the
+  experiment.
 
 Named and not taught, under the depth guardrail: `<details>`,
-`role="status"`, `:where()` in CSS, `data-*` attributes, a union of a
-number and one string.
+`role="status"`, `:where()` in CSS, `data-*` attributes, a union of a number
+and one string, `scrollIntoView`, `aria-pressed`, a container query.
 
-### Status as of the close of Day 17c, kept for the record
+**Closed most recently:** Day 17c's four items (a join reading a second
+table, a cast with `as`, a date read from an address, `Link`), repaid on
+Screens Day by runs. Every earlier debt is closed; the record is in the old
+master state.
 
-**All four Day 17b items were repaid at the opening of Day 17c**, each by a
-prediction she made and then ran.
-
-The Day 17c workers used four things she has not been taught. Repay them
-at the opening of Day 18, each as a prediction she runs:
-
-- **A join that reads from a second table.** `filed` in
-  `entries.repository.ts` reads each entry with its day's `date`, in one
-  query, through `relations` and a nested `select`.
-- **A cast with `as`.** `FiledEntry` is promised to the compiler and not
-  proved to it. Remove the join and typecheck still passes.
-- **A date read out of an address.** `app/d/[date]/page.tsx`: the folder
-  name in square brackets matches any text, and the page reads it with
-  `await params`. The text may be nonsense, which is why `isCalendarDate`
-  exists.
-- **`Link`**, which changes the screen without reloading the page, so the
-  access token kept in memory survives.
-
-Named and not taught, under the depth guardrail: `take` against `limit`,
-`jest.spyOn` on the query runner, `PRAGMA foreign_keys` in a test, `key`
-to start a component over, a function as `children`, a custom hook,
-`Omit`, `Extract`, `Map`, a regular expression.
-
-### Status as of the close of Day 17b, kept for the record
-
-Day 17a's item, keyboard focus moved by the code, was **repaid at the
-opening of Day 17b**: the mechanism at the first asking, and which button
-receives focus after one narrowing step. Those answers were pasted text; see
-the opening section.
-
-The Day 17b workers used four things she has not been taught. By the
-owner's rule they are repaid at the opening of Day 17c. Give each one as a
-prediction she runs, not as an explanation she writes.
-
-- **Mood requests go one at a time.** `pressMood` in `lib/today.ts` is a
-  loop with `await` inside it: it sends one request and stops until the
-  answer arrives. The question she was asked twice and did not answer: a
-  person presses Good and then Low, both requests are sent together, and
-  Low reaches the API first. What does the API hold, what does the screen
-  show, and what does a reload show.
-- **`useRef`**: a box that keeps a value for the life of a component, and
-  changing it does not make React call the component again. It holds the
-  composer's field so that the code can give it focus after a save.
-- **A function that answers one of two shapes.** `readForm` answers either
-  `{ send: false, problems }` or `{ send: true, details }`, and TypeScript
-  will not let the caller reach `details` before checking `send`.
-- **`@Transform` runs before validation.** The name is trimmed in the DTO,
-  so the 60 is counted after trimming. This builds on Day 7's
-  `transform: true`.
-
-### Status as of the close of Day 17a, kept for the record
-
-Day 17's three React items were **repaid at the opening of Day 17a**, each
-from an open question at step 1.
-
-The 17a worker used one thing she has not been taught. Repay it at the
-opening of Day 17b, in a few sentences and one prediction:
-
-- **Keyboard focus moved by the code**: `element.focus()` after a press,
-  and `tabindex="-1"`, which lets the code give an element focus without
-  making it a stop for the Tab key. It replaces Day 17's one-button answer.
-  The prediction was put to her on Day 17a and not yet answered: with focus
-  on an entry's delete icon, what does a second press of Enter do.
-
-### Status as of the close of Day 17, kept for the record
-
-The web worker used three things she had not been taught:
-
-- **`useSyncExternalStore`**: how a component is redrawn when a value that
-  lives outside React changes. It is how `LiveToday` follows `lib/today.ts`.
-- **A function passed to `useState`**, as in
-  `useState(() => createToday(...))`: React calls it once, on the first
-  draw.
-- **One button whose text changes**, in place of two buttons shown one at a
-  time, so that keyboard focus is not lost.
-
-The API worker's `EXISTS` subquery and `select: false` on the new column
-were explained in its report and in the audit, and are not counted as debt.
-
-### Status as of the close of Day 16: none open
-
-**React was repaid on Day 16**, to the depth guardrail: three ideas, one
-experiment she ran, and two predictions from the real file. Day 16's own two
-workers opened nothing that was left unexplained; the package's loading
-mechanism was named as existing and not taught.
-
-### Status as of 2026-10-06, kept for the record
-
-**Day 15 used three workers and repaid eight items the same day**: preflight,
-the cookie parser, `@Res({ passthrough: true })`, `configureHttp`,
-`credentials: 'include'`, build-time values, the shared refresh promise, and
-the relation join behind `?date=`.
-
-**Open: React itself.** The web worker wrote a hook, `useSession`, and client
-components that hold state and run effects. She has not been taught hooks,
-state or effects, and said she does not know Next.js. This is the first debt
-in a skill the roadmap calls secondary, so repay it to the depth guardrail:
-enough to read `LiveToday.tsx` and say what runs when.
-
-**Phase 2 carried no learning debt into Day 14 and left none.** Days 12–14
-were worked through directly rather than by a worker agent.
-
-**Two long-standing rows closed on Day 14, both by her own audit:**
-
-- *Where validation belongs — boundary vs service* (owed since Day 4, and owed
-  a re-test on Day 10 that never happened). She closed it by predicting the
-  ownership hole's shape — "a mutation path that loads by id, then acts without
-  scoping" — and supplying the mechanical check that found it.
-- *Reading and judging a whole suite unprompted* (owed since Day 4). Asked for
-  audit predictions before any code was read, she produced ranked hypotheses
-  with confidence levels, a check per hypothesis and a mutation to prove each.
-
-**Her answers that became code:** `@Exclude()` over a response DTO and
-`APP_GUARD` + `@Public()` (Day 9); the surrogate-key/business-key split and the
-find-or-create shape (Day 13); ADR-017's five conditions (Day 14).
-
-**Jest basics** remains the only 🟡 row and is not worth a dedicated day.
-
-**Historical record below.**
-
-**Repaid on Day 2:**
-
-- `Test.createTestingModule` / DI in tests — done by experiment. She deleted a
-  provider, predicted a compile-time failure, and watched it fail at runtime
-  instead. Followed through to the compiled output and `design:paramtypes`.
-- **Nest resolves dependencies at runtime, not compile time** — she got this
-  wrong twice (once for `providers`, once for `exports`), and the second time
-  was proven live: `typecheck` and `build` both passed, the application failed
-  on boot. Worth checking it has stuck.
-- Symbol injection tokens and factory providers — explained in depth after the
-  persistence worker introduced them.
-
-**Repaid on Day 3:**
-
-- **Raw SQL** — she hand-wrote three queries (`findById`, `findByContent`,
-  `countEntries`) including `LIKE`, `COUNT(*)` and `ORDER BY`. SQL itself is now
-  owned rather than inherited from a worker.
-- **Route matching is declaration order, first match wins.** She predicted
-  "static before dynamic" and her own unreachable `/entries/count` disproved it.
-  The distinction that landed: static-before-dynamic is the *discipline forced
-  by* the rule, not the rule.
-- **The repository pattern** — derived by her from the duplication before it was
-  named. She proposed "a function where I dictate what I need," chose the
-  application-language form over the SQL-language form, and located the SQL in a
-  new file (she called it `schema.ts`; the naming correction taught the
-  schema/operations distinction).
-- **UUID vs sequential ids, and where generation belongs.** She argued for
-  database-generated, which is defensible and common. She changed position on
-  evidence, then raised the objection that application-side generation is
-  unenforced — now recorded in ADR-004 as an accepted cost with a revisit
-  condition.
-- **4xx vs 5xx** — given the test *"could the client fix this by sending a
-  different request?"* She applied it correctly once and wrongly once, grouping
-  "record missing" with "database file deleted." **Worth re-testing on Day 4.**
-
-**Repaid on Day 4:**
-
-- **Type erasure.** The best moment of the day. She ran `pnpm build`, read the
-  compiled JavaScript, and saw `{ content: string }` become a bare `body`. She
-  now owns the reason validation must be *runtime code*: TypeScript is not
-  present when the request arrives. Learned by observation, not assertion.
-- **4xx vs 5xx, re-tested.** All three questions right, and question 3 answered
-  with the *rule* ("who can fix it, the client or the engineer?") rather than
-  the two instances. That is the exact distinction that failed on Day 3.
-- **400 vs 404.** Did not know it; was told once; then applied it correctly and
-  unprompted to `POST {}`.
-
-**Repaid on Day 4 (evening session — six items, two owed since Day 1):**
-
-- **Prepared statements.** Owed since Day 2, offered and skipped twice. She
-  explained the parse-then-bind mechanism unprompted: the database parses the
-  instruction text first, so by the time values arrive the sentence structure is
-  already fixed and data cannot become instruction. Not the slogan — the
-  mechanism.
-- **Why three of four commands miss a type error in a spec file.** All four
-  answered correctly with the reason for each, including that `ts-jest`
-  transpiles rather than compiles, so types are stripped without being checked.
-- **Unit vs e2e, and supertest.** Predicted the route-rename result correctly
-  and gave the right reason: unit tests never mention the route, e2e names the
-  path in the request. Then watched 29 unit tests pass on a completely broken
-  application.
-- **`EntriesRepository` wiring.** Four-part prediction, all four correct —
-  including the hard one, that unit tests would still pass because spec files
-  declare their own providers.
-- **Empty collection is an answer, not a failure.** Ran the experiment, then
-  said it in her own words: *"even in that case the correct answer is no row
-  contains the word and empty array can satisfy it."* This is the exact idea she
-  could not reach earlier the same day.
-- **Why `unknown` beats a named DTO at a trust boundary.** Explained that the
-  compiler *believes* the label, so typecheck and build both pass and the
-  failure only appears at runtime.
-
-**Repaid on Day 5 (first session):**
-
-- **Prepared statements have a boundary, and she has now seen it.** She could
-  already explain that bound parameters stop data becoming instruction. Tonight
-  she predicted, correctly and instantly, that `?word=%` returns every entry —
-  then saw why the protection does not apply. `%` and `_` are not SQL grammar;
-  they are the pattern language `LIKE` interprets *after* the value is bound, so
-  binding works perfectly and the bug happens anyway. This also closes the
-  "explained, not verified" flag on prepared statements below: the mechanism was
-  load-bearing in a prediction she got right.
-
-**Opened on Day 6 — introduced by the worker, not yet learned:**
-
-- **`ConfigModule.forRoot` and `ConfigService`.** She chose `@nestjs/config`
-  deliberately, so the wiring is the thing she wanted to learn, and she has not
-  yet seen it. Worth asking her to explain what `isGlobal: true` buys, why
-  `database.module.ts` needed a factory with `inject: [ConfigService]` when it
-  previously computed its path at module load, and where `validate` is actually
-  called from. The audit established that `require()` on `app.module.js` does
-  **not** trigger it — Nest does, when it initialises the module — and that is a
-  good prediction question.
-- **Why configuration must be injected rather than imported.** The compiled `dist/`
-  now contains no `process.env` at all. She has not been shown that, or why it
-  is the same argument as the `DATABASE` token she already understands.
-- **The `undefined` round-trip quirk.** `@nestjs/config` writes `validate`'s
-  return value back into `process.env`, where `undefined` becomes the string
-  `"undefined"`. Small, concrete, and a good example of a library's behaviour
-  differing from its documentation.
-
-**Still owed:**
-
-- **Reading and judging an existing suite.** 🟡 Partial, and moved forward
-  tonight. She found two genuine gaps, correctly placed a new test in the right
-  spec file, and wrote the claim sentence for one of them once the underlying
-  decision existed. What is not yet demonstrated is doing this **unprompted
-  across a whole suite** rather than on cases handed to her one at a time. Four
-  further gaps are listed in *Block 3* for exactly this, deliberately withheld.
-- **Turning a found gap into a claim without help.** New, opened Day 5. The
-  first attempt stalled — legitimately, because the behaviour had never been
-  decided. Worth re-testing on a gap where the correct behaviour is obvious, so
-  the decision step is not confounded with the writing step.
-- **Where validation belongs.** 🟡 Partial — she reasoned it out and chose the
-  *service*, then accepted the counter-argument. The distinction between "is
-  this well-formed?" (boundary) and "is this allowed?" (service) was given to
-  her, not derived. → re-test Day 10 when ownership checks arrive
-- ~~**Prepared statements — 🟡 explained, not verified.**~~ ✅ **Verified Day 5.**
-  The mechanism turned out to be load-bearing in a prediction she got right
-  instantly: that `?word=%` returns every entry, because `%` is interpreted by
-  `LIKE` *after* binding and so binding cannot protect against it. She could not
-  have reached that without the parse-then-bind model. The in-memory injection
-  experiment she declined is no longer needed.
-- **`EntriesRepository` wiring** — the worker did the extraction, so she has not
-  registered a repository provider herself or seen that failure mode. → surfaces
-  naturally on Day 13 when a second entity needs one
-
-`docs/learning/day-02/testing-literacy.md` experiments **3 and 4** remain unrun;
-2 and 5 were overtaken by the Day 4 evening session and should be skipped. Note
-that authorship of tests is **no longer** part of Day 5 —
-see the direction recorded in *Next Session Starts Here*.
+**React she knows:** a component is a function React calls again on a state
+change; `useState` including the function form; `useEffect`;
+`useSyncExternalStore`; `useRef`; moving focus with `.focus()` and
+`tabIndex={-1}`; a function that answers one of two shapes; `Link`.
 
 ---
 
-## Open Questions
+## Known debt
 
-**Live, and in priority order as of the close of Day 17:**
+Each item was checked on 2026-10-10 or is structural and unchanged.
 
-1. **May a mood be set on a date that has no live entry?** The API allows
-   it, and by ADR-020 such a mood is never shown on a calendar. To be
-   answered on the day the mood row is wired.
-2. **Does deleting an entry keep "show at once"?** She kept it on Day 17
-   against two recommendations. ADR-021 names what would reopen it.
-3. **Hand-written wire shapes, or a generated client?** ADR-019 chose
-   hand-written and reversed part of ADR-001. The revisit point is about
-   fifteen endpoints called by the web app, or a native client.
-4. **Should `docs/workers/` and the worker reports be committed?** They are
-   gitignored and exist on one laptop. Open since Day 7.
+| Item | Where | When |
+|---|---|---|
+| **No test reaches a React component.** That an unbuilt control sends nothing, every link between screens, and the calendar's jump are checked only by workers walking the app | `apps/web` | Her decision on Day 19 |
+| **Nothing enforces that the browser's clock never makes a date.** A lint rule forbidding `new Date()` and `Date.now()` in `apps/web` would | `apps/web` | Day 19 is a natural place |
+| **`users.password_hash` is still nullable**, though `NOT NULL` was decided on 2026-10-04 | `user.entity.ts` | Owed. Forgot password (Day 20) touches the column |
+| **A user cannot be deleted.** Foreign keys are `ON DELETE NO ACTION` | `sessions`, `entries`, `days` | Day 34, hard delete |
+| **The API's `pnpm lint` runs `--fix`**, so it rewrites files instead of only reporting | `apps/api/package.json` | Before CI, Day 32 |
+| **The built API reads `packages/contracts/src` at run time**, and the package breaks if its `package.json` gains a `"type"` field | `apps/api/dist`, `packages/contracts` | Day 31 |
+| **`NEXT_PUBLIC_API_URL` is fixed at build time; the cookie has no `Secure` attribute** | web config, `refresh-cookie.ts` | Day 31 |
+| **`migration:generate` never comes back empty**, because TypeORM cannot describe two things the hand-written migrations made | migrations | Accepted |
+| **`better-sqlite3@13` is outside TypeORM's peer range.** It works and is pinned | `apps/api/package.json` | Dissolves on Day 31 with Postgres |
+| **`Etc/GMT+5` is accepted as a timezone** | the registration check | Low; noted |
+| **Deleted entries must be kept out of every later reader** | search, embeddings, export | Phase 4 and Day 34 (ADR-020) |
+| **TypeORM does not switch foreign keys off when reverting a migration** | ADR-010 | One line owed in ADR-010 |
+| **No ADR yet for the 2026-10-04 data-model decisions** (one `entries` table with a `kind` for recordings; drafts on the server) | `docs/decisions/` | Written when each is built |
 
-**Settled since this list was last written:** where the credential lives
-(Day 15, ADR-018); account deletion is a hard delete (2026-10-04, built on
-Day 34); `entries.day_id` is `NOT NULL` (Day 16); a user gets a timezone
-(2026-10-04, built on Day 17b); `packages/` earned its place (Day 16,
-ADR-019).
+---
 
-**Deferred, with a trigger:**
+## Open questions
 
-- ~~Rich text vs plain text for entries~~ — **resolved by the designs.** The
-  brief cut markdown outright and no screen renders formatted text.
-- Which AI provider, and does that decision need to be reversible? (Phase 4)
-- When does TypeScript 7 become viable? (blocked on ecosystem peer ranges)
-- Day 0's LinkedIn post lists PostgreSQL in the stack; Day 2 chose SQLite.
-  ADR-003 explains when Postgres arrives, so this is a documented evolution
-  rather than a contradiction — but it will need saying out loud eventually.
-- ~~Should `feature/project-setup` merge to `main`?~~ **Resolved** — merged as
-  PR #1. `main` is the trunk; each day gets a `day-NN-topic` branch and a
-  squash-merged PR.
+1. **Five features have no day:** voice memos, "keep this out of memory"
+   (must come before Day 22), the support page's words, what Privacy says
+   about training, and moving the calendar to another month.
+2. **May a mood be set on a date with no live entry?** The API allows it;
+   by ADR-020 such a mood shows on no calendar.
+3. **Should `docs/workers/` and the remaining worker reports be committed?**
+   Open since Day 7. `docs/SETUP.md` section 4 says what is and is not.
+4. **Does an entry move if the user changes timezone?** ADR-015 says no.
+   The first support question about an entry on the wrong day reopens it.
+5. **Which AI provider, and must the choice be easy to reverse?** Phase 4.
+6. **Hand-written wire shapes or a generated client?** ADR-019 chose
+   hand-written; the revisit point is about fifteen endpoints in use, or a
+   native client.
+7. **Day 0's LinkedIn post named PostgreSQL; Day 2 chose SQLite.** ADR-003
+   explains when Postgres arrives (Day 31). Worth saying in public then.
+8. **Should she send the designer `docs/ui-handover.md` section 14?** It
+   holds Day 17b and 17c's changes and has not been sent.
 
 ---
 
 ## Workflow
 
-- **Master Thread** (the architecture session) audits, teaches, writes ADRs and
-  roadmap updates, and authors worker prompts. It does **not** write production
-  code.
-- **Worker agents** run in fresh Claude Code sessions, implement one isolated
-  task from a prompt in `docs/workers/`, and produce a report.
-- **Master Thread re-audits** every worker result before the day closes.
+- **The Master Thread** teaches, records decisions (ADRs, roadmap, this
+  file), writes worker prompts into `docs/workers/`, and audits. It does not
+  write production code. It re-runs all nine checks itself and does one
+  mutation per day.
+- **Workers** are fresh Claude Code sessions, each given one prompt. They
+  implement, write and run tests, do one mutation, walk the app in a browser,
+  and write a report in `docs/learning/<day>/`. They never touch git, never
+  use her database (a throwaway database and their own ports), and are
+  never told to skip tests.
+- **Before a worker runs**, ask her to stop `pnpm dev`; a watch-mode server
+  once reloaded on every deliberate mutation a worker made.
+- **Before committing a day**, run `git status --short` and compare it with
+  every new file the reports list. On Screens Day a `.gitignore` rule hid a
+  whole page from git while every check passed.
+- **An ADR is amended only when its decision changes.** A correction to the
+  explanation is fixed in place.
 
 ---
 
 ## How To Work With The Learner
 
-This section exists because a new Master Thread needs it and cannot infer it.
-
 ### Who she is
 
-A 2022 computer engineering graduate returning after a career break. She
-completed boot.dev's TypeScript backend path, so TypeScript fundamentals are
-solid. NestJS, databases, authentication and testing are all new. She has
-roughly 7 focused hours a day.
+Umm E Habiba, a 2022 computer engineering graduate returning after a career
+break. She completed boot.dev's TypeScript backend path. NestJS, databases,
+authentication and testing were new at Day 0, and she has learned them here.
+About 7 focused hours a day. Backend is the main subject; frontend is
+secondary, which is why Screens Day exists.
 
-Her husband is a senior software engineer. He set up the project structure and
-this workflow, and occasionally speaks in the thread to configure something
-before handing back to her. When someone gives terse, senior-level direction,
-that is him.
+Her husband is a senior software engineer. He set up the project and this
+workflow, and speaks in the thread from time to time to set scope or
+guardrails. He is happy with her learning and has said he is not happy with
+the pace.
 
 ### How to teach
 
-1. Open a day with a **short brief** — what she will do and why, in a few
-   lines. Do not preview every block.
-2. Then take **one block at a time**. Do not dump the rest of the day.
-3. Each block opens with **questions**, not answers. Ask her to predict,
-   attempt, or research first, then wait for her reply.
-4. Ask her to explain concepts back before moving on.
-5. Treat a wrong prediction as the valuable outcome. It locates exactly where
-   her mental model and the machine disagree.
-6. Prefer running an experiment over asserting a fact. She learns from watching
-   something break, not from being told it would.
+1. **Open each day with an overview**: how many blocks, what each one is,
+   which are decisions and which are building, and where a split would fall.
+2. **Then one block at a time.** Do not dump later blocks.
+3. **Name the day at the top of every block.** She confuses lettered days.
+4. **Each block opens with a question**, not an answer.
+5. **A wrong prediction is the valuable outcome.** It shows where her model
+   and the machine disagree.
+6. **Prefer running an experiment to stating a fact.**
 
-### ⚠️ The three-step sequence — read this before teaching anything
+### The three-step sequence
 
-Set by her husband on Day 4, correcting an over-broad conclusion the Master
-Thread had drawn from a single day. **Use all three steps in order. Do not skip
-step 1, and do not linger past step 2.**
+Set by her husband on Day 4. Use all three steps, in order.
 
-**Step 1 — Open Socratic.** Give her the situation and ask what she thinks. No
-options, no leading. Real thinking time. This step is not optional, and it is
-not there for the answer — it is there because the habit of thinking through an
-unfamiliar problem is itself being rebuilt after a four-year career break.
+1. **Open question.** The situation, then "what do you think?" No options.
+2. **One narrowing question** if she is stuck. Not a rephrasing.
+3. **Teach it directly, then verify** with a prediction and an experiment she
+   runs. Stuck after two attempts means she does not have the information
+   yet; another question will not give it to her.
 
-**Step 2 — One narrowing question.** If she is stuck, ask *one* question that
-narrows the problem. Not a rephrasing of the first question. One attempt only.
+The shape of the experiment: *here is the situation in three sentences;
+here is what someone changes; predict what happens to typecheck, build, the
+server and the tests; now run this and compare.* **Check the command before
+giving it to her.** On Screens Day the logging line went into the wrong file
+and printed nothing.
 
-**Step 3 — Teach it, then verify with an experiment.** If she is still stuck
-after step 2, **she does not have the concept.** Explain it properly and
-directly. Then use a prediction-plus-experiment to confirm it landed.
+### What counts as evidence
 
-### Why step 3 is teaching and not another kind of question
+Only her own rough words and what she ran count. On Day 17b most answers
+were pasted from another assistant, and on Screens Day some predictions were.
+Ask for predictions, runs and short choices, not written explanations. **Do
+not raise the pasting with her.**
 
-This is the correction, and it matters. Being stuck after two attempts is
-usually an **information** state, not a motivational one — she does not have the
-concept yet. No amount of reframing produces knowledge she was never given.
-Most of this material is genuinely new to her: NestJS, databases, HTTP
-semantics, testing. **It is not realistic to expect any of it in one go.**
+### Pace
 
-What went wrong on Day 4 was not starting Socratic. It was staying there for
-three rounds on the same idea, re-explaining in different words each time. That
-turns thinking time into pressure. The trigger for moving on is **rounds, not
-difficulty**: two attempts, then teach.
+She wants pace. Keep blocks short and put few questions at once. Offer a
+default with every choice; she often answers "default", and that is a real
+answer. When she says "I understand, move on" inside a block, move on and
+record what was skipped. That does not apply to learning debt at a day's
+start.
 
-Note also that the evening's seven correct predictions were not purely the
-format winning. A prediction question is only tractable once some model of the
-system exists, and the afternoon's struggle is part of what built it. Cutting
-straight to prediction questions every time would quietly remove the step where
-that model forms — and it would not show up as a failure, because the
-predictions would keep coming back correct.
+### The depth guardrail
 
-### The concrete shape of step 3's experiment
+Set by her husband on 2026-10-04. Go deep enough that she understands the
+thing completely, then stop. For each topic: the main mechanism, the one or
+two realistic failure cases, and the trade-off behind the decision. Name the
+rest in one line as "this exists, and it is not needed now." His example:
+she does not need every way an attacker could attack the app. This project
+must finish; two or three more projects follow it.
 
-> Here is the situation in three sentences. Here is what someone changes.
-> **Predict** what happens to typecheck, to build, to the server, to the tests.
-> Now run this command and let us compare.
+### Testing
 
-### When she says "I understand, move on"
-
-Do not re-explain and do not push. Move on, and record what was skipped. But
-treat it as a signal worth reading: on Day 4 it consistently meant *"this has
-stopped being productive"*, and an idea she had moved on from in the afternoon
-was fully owned by evening once it was taught directly and then verified with an
-experiment.
-
-### Track where she lands, across days
-
-Worth recording per topic: **which step did she answer at?** If topics that
-needed step 3 in week one are being answered at step 1 by week three, the habit
-is returning and it is measurable. If it never moves, this plan needs revisiting
-rather than repeating. Do not assume either outcome.
-
-Rules 1 to 6 above still hold. This is how to execute rule 3.
-
-If she says she wants to move on, move on. Record what was skipped in the
-Learning Debt section rather than pushing.
-
-### ⚠️ The depth guardrail — set by her husband on 2026-10-04
-
-**Go deep enough that she understands the thing completely. Then stop.** Do
-not go deeper than her level needs, and do not branch into side topics. This
-is not permission to be shallow; he said so directly.
-
-His example: she does not need to work through every possible way an attacker
-could attack her application.
-
-His reasons. This is her first big project, and it has to be finished so that
-she feels the accomplishment. Two or three more projects are planned after it,
-for microservices, events and message brokers, so this one cannot absorb
-unlimited depth. He is happy with her learning and not happy with the pace.
-
-How to apply it. For each topic, cover the main mechanism, the one or two
-realistic failure cases, and the trade-off behind the decision. Then decide and
-move on. Name any remaining edge cases in one line as "this exists, and it is
-not needed now" instead of teaching them. Judging where that line sits is the
-Master Thread's job, not hers.
-
-Two rules that follow from it, approved by him the same day:
-
-- **One mutation per day. The large sweep is for review days only.** Every day
-  still ends with one mutation check, because that has caught real defects. A
-  sweep of many mutations, like Day 14's twenty, happens only on the scheduled
-  review days, 27 and 39.
-- **An ADR is amended only when the decision itself changes.** A correction to
-  the explanation is fixed in place, without a numbered amendment.
+She does not hand-write test suites (her husband, Day 4). The skill is
+judgement: what does this suite fail to cover? Teach testing as **read,
+predict, break, observe.** One mutation per day; a sweep of many mutations is
+for review days only (Days 27 and 39).
 
 ### How to write
 
-Use **simple, complete, descriptive English**. She asked for this directly.
+Simple, complete, descriptive English, to her and to her husband alike.
+Full sentences, one idea each. Explain a technical term the first time it
+appears. No compressed idiom, no stacked dashes, no bold standing in for a
+sentence, no fragments like "Confirmed." Use a table only for a real lookup.
 
-- Full sentences. No fragments used for emphasis.
-- One idea per sentence.
-- Explain a technical term the first time it appears.
-- Avoid compressed idiom and stacked em-dashes.
-- Clear does not mean longer. It means she never re-reads a sentence to parse
-  it.
+### Scope before narrowing
 
-### The Learning Debt rule
+When she names a whole thing as the scope (on Screens Day, "the whole
+frontend, like the prototype"), confirm that the whole thing is the scope
+before offering a narrower version. On Screens Day a narrower first build
+cost a second worker.
 
-Worker agents produce correct code faster than she can learn the concepts
-inside it. Every time that happens the repo gains code its owner cannot
-explain. A concept is not done when it ships. It is done when she can explain
-it without reading the code. Track it in the Learning Debt section above and in
-`docs/roadmap.md`.
+---
+
+## Mistakes of the Master Thread, kept so they are not repeated
+
+- Taught a fact as certain that a worker later showed was wrong (Day 6).
+  Prefer an experiment to an assertion.
+- Wrote worker prompts that predicted breakage before checking whether
+  anything would break (Day 17c).
+- Wrote product questions into the designer's handover instead of asking her
+  (Day 17b). She corrected it: they are hers.
+- Scoped Screens Day narrower than she meant, and missed the Timeline's
+  calendar in two audits, because it was drawn as a "state".
+- Gave a debt experiment with a command that could not work (Screens Day).

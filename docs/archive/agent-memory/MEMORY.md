@@ -5,3 +5,8 @@
 - [Neuron communication style](neuron-communication-style.md) — simple, complete, descriptive English; explain terms, no compressed idiom
 - [Neuron testing approach](neuron-testing-approach.md) — she need not hand-write test suites; read/predict/break/observe instead
 - [Neuron learning debt blocks days](neuron-learning-debt-blocks-days.md) — open debt must be repaid before the next day; her asking to skip is not enough
+- [Neuron depth guardrail](neuron-depth-guardrail.md) — deep enough to understand fully, then stop; no exhaustive branching
+- [Neuron product decisions are hers](neuron-product-decisions-are-hers.md) — behaviour and wording go to her as short choices, not to the designer
+- [Neuron branch per day](neuron-branch-per-day.md) — create `day-<n>-<topic>` from main before work; close the day by PR, merge, pull, next branch
+- [Neuron day overview first](neuron-day-overview-first.md) — open every day with block count and shape before teaching
+- [Neuron design text is placeholder](neuron-design-text-is-placeholder.md) — design copy is not instructions; she or her husband set the feature boundary
