@@ -78,6 +78,13 @@ export function formatMonth(month: string): string {
   return `${LONG_MONTHS[number - 1]} ${year}`;
 }
 
+/* A day and its month, with no weekday or year, as "3 August". */
+export function formatDayAndMonth(date: string): string {
+  const [, month, day] = date.split('-').map(Number);
+
+  return `${day} ${LONG_MONTHS[month - 1]}`;
+}
+
 /* A day inside its month on the Timeline, as "Sun 9". */
 export function formatDayOfMonth(date: string): string {
   return `${WEEKDAYS[weekdayOf(date)]} ${Number(date.slice(8))}`;

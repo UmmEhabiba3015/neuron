@@ -59,6 +59,21 @@ function fakeApi(entries: WireEntry[]) {
       return { kind: 'ok', data: entries.slice(offset, offset + limit) };
     }
 
+    /* The dates in the range that have an entry, newest first, as the API. */
+    if (route === '/days') {
+      const query = new URLSearchParams(path.split('?')[1]);
+      const from = query.get('from')!;
+      const to = query.get('to')!;
+      const dates = [...new Set(entries.map((e) => e.date))]
+        .filter((date) => date >= from && date <= to)
+        .sort((a, b) => b.localeCompare(a));
+
+      return {
+        kind: 'ok',
+        data: dates.map((date) => ({ date, mood: null })),
+      };
+    }
+
     throw new Error(`no answer written for ${path}`);
   }) as Request;
 
@@ -115,9 +130,13 @@ test('entries from two pages, on three dates in two months, are grouped by day a
     { month: '2026-08', days: ['2026-08-31: c b', '2026-08-02: d a'] },
   ]);
 
-  /* Two pages, and one question about today. Nothing is asked per day. */
+  /*
+   * Two pages, one question about today, and one about the dates of
+   * today's month. Nothing is asked per day.
+   */
   assert.deepEqual(api.sent, [
     '/days/today',
+    '/days?from=2026-09-01&to=2026-09-30',
     '/entries?limit=3&offset=0',
     '/entries?limit=3&offset=3',
   ]);
@@ -159,6 +178,22 @@ test('the Timeline carries the API`s date for today, and never one of its own', 
     (timeline.getState().view as { today: string }).today,
     TODAY,
   );
+});
+
+test('the calendar shows the month of the API`s today, and marks the dates the API says have an entry', async () => {
+  /* Today is 2 September. The list holds August too; the calendar does not. */
+  const api = fakeApi(FIVE);
+  const timeline = createTimeline({ request: api.request, pageSize: 200 });
+
+  await timeline.open();
+
+  const view = timeline.getState().view;
+  assert.equal(view.status, 'open');
+  assert.deepEqual((view as { calendar: unknown }).calendar, {
+    month: '2026-09',
+    written: ['2026-09-01'],
+  });
+  assert.equal(api.asked('/days'), 1);
 });
 
 test('an entry is placed by its date, even when its createdAt read on this machine falls on another date', () => {
@@ -295,7 +330,7 @@ for (const [name, reply, status] of [
   ['unreachable: no answer from the server', NO_ANSWER, 'unreachable'],
   ['failed: the server answered with an error', SERVER_ERROR, 'failed'],
 ] as const) {
-  for (const route of ['/days/today', '/entries']) {
+  for (const route of ['/days/today', '/days', '/entries']) {
     test(`${name}, on ${route}, is its own state, counts each question, and can be asked again`, async () => {
       const api = fakeApi(FIVE);
       api.answer(route, () => reply);

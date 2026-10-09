@@ -41,8 +41,9 @@ place. Every such control, 19 of them, is in one list,
 `apps/web/lib/unbuilt.ts`, with its day; five have no day yet (voice
 recording, "keep this out of memory" on an entry and in the composer, the
 support page's words, and what Privacy says about training). Ask is a
-destination. No API change. 246 API unit tests, 365 API end-to-end tests,
-160 web tests and 7 checks on the shared package pass; lint, typecheck and
+destination, and the Timeline has its calendar, from real data. No API
+change. 246 API unit tests, 365 API end-to-end tests,
+171 web tests and 7 checks on the shared package pass; lint, typecheck and
 build are clean for both applications.
 
 **The next day is 18:** drafts, Enter saves, and editing a saved entry, wired

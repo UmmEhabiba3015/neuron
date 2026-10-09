@@ -77,6 +77,28 @@ body {
 }
 
 /*
+ * 2.1 Timeline: one zoom below desktop, both on desktop.
+ *
+ * At 390 and 834 the list and the calendar are alternatives behind the
+ * switch, and the calendar zoom has its month as a heading of its own. At
+ * 1440 the list and the calendar stand side by side, and the calendar is an
+ * index whose days go to the list rather than to a day's page (lock.css
+ * revision 37). That is again a change of markup, so the Timeline renders
+ * every part, marks each with what it is for, and the width and the switch
+ * choose (app/screens/LiveTimeline.tsx).
+ */
+
+@container (max-width: 1199.98px) {
+  .page > [data-shows="index"],
+  .page[data-zoom="list"] > [data-shows="calendar"],
+  .page[data-zoom="calendar"] > [data-shows="list"] { display: none; }
+}
+
+@container (min-width: 1200px) {
+  .page > [data-shows="calendar"] { display: none; }
+}
+
+/*
  * 3. What stays in place while the page scrolls.
  *
  * lock.css has these five rules, with these values, and keys them on
@@ -196,8 +218,9 @@ body {
  * 5.4 The date of a Timeline day is the link to that day's page.
  *
  * 02-timeline.html draws the date as plain text and draws no way from the
- * list to a day: in the comps a day is reached from the calendar, which is
- * not built. The link keeps the column's own colour and size, is underlined
+ * list to a day: in the comps a day is reached from the calendar zoom, and
+ * on desktop the calendar's days lead into the list, not out of it. The
+ * link keeps the column's own colour and size, is underlined
  * so that it is not told apart by colour alone, and is stretched over the
  * column's padding so that it is at least as tall as a control may be.
  */

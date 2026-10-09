@@ -18,6 +18,10 @@ import {
  * `surface` is the designer's .auth-surface, for a page that is one plain
  * sheet: Account, and the two screens that say a day is not there.
  * `split` is Timeline's page, which keeps a second column for the calendar.
+ * `mastAside` is what the masthead holds below desktop, when it is not
+ * `aside`: on Timeline, the switch between list and calendar.
+ * `zoom` is which of the two the switch has chosen. live.css section 2
+ * shows only that one below desktop, and both on desktop.
  */
 export function LiveScreen({
   current,
@@ -25,6 +29,8 @@ export function LiveScreen({
   aside,
   surface,
   split,
+  mastAside,
+  zoom,
   children,
 }: {
   current: Destination | null;
@@ -32,6 +38,8 @@ export function LiveScreen({
   aside: ReactNode;
   surface?: boolean;
   split?: boolean;
+  mastAside?: ReactNode;
+  zoom?: 'list' | 'calendar';
   children: ReactNode;
 }) {
   return (
@@ -44,11 +52,11 @@ export function LiveScreen({
         <Destinations current={current} />
       </div>
 
-      <div className={split ? 'page split' : 'page'}>
+      <div className={split ? 'page split' : 'page'} data-zoom={zoom}>
         <div className="journal-header">
           <header className="mast">
             <Wordmark>{title}</Wordmark>
-            {aside}
+            {mastAside ?? aside}
           </header>
           <Destinations current={current} />
         </div>

@@ -39,7 +39,7 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-**246** API unit tests, **365** API end-to-end tests, **160** web tests, and
+**246** API unit tests, **365** API end-to-end tests, **171** web tests, and
 **7** checks on the shared package (re-run on 2026-10-09). 21 ADRs. Eleven migrations.
 
 **Run all nine every day.** The root `lint`, `typecheck` and `build` cover
@@ -170,7 +170,7 @@ answered question, a recording's options, a draft. The duplicate prototype
 she added at `designs/` was identical to the v3 file and was deleted.
 
 **The audit.** All nine re-run by the Master Thread: **246** unit, **365**
-end-to-end, **160** web, **7** contract checks. My mutation (remove
+end-to-end, **160** web (171 after part 3), **7** contract checks. My mutation (remove
 `deleteAccount` from the list) was caught by `typecheck:web` and a test.
 The part 2 worker's mutation (give `entryMemory` a day) was caught by two
 tests. No `new Date()`, `Date.now()` or `getUserMedia` in the web app.
@@ -182,6 +182,16 @@ an entry's menu says "In memory", Composer options shows Today's real
 entries, words typed before "More options" are lost, Privacy's three
 undecided rows are drawn with the sentence. All are in the two reports in
 `docs/learning/screens-day/`.
+
+**Part 3, the calendar on the Timeline**, after she found it missing; both
+earlier workers and my audit had counted it as a state. Real data: the
+month of `GET /days/today`, marked from `GET /days?from=&to=`. Desktop: the
+grid beside the list, a day scrolls the list to it with no history entry.
+Tablet and phone: a List / Calendar switch, a day goes to `/d/{date}`. No
+unbuilt control, because no comp draws one. Left at defaults: only the
+current month (no comp draws a way to another), the switch is not
+remembered, its screen-reader name is "Zoom". 171 web tests. The worker's
+mutation (Sunday-first weeks) was caught by five tests.
 
 **Corrected.** The roadmap put voice memos on Days 18–19; they are not
 scheduled.

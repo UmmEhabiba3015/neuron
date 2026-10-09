@@ -14,11 +14,16 @@
  *   are not assumed to sit next to each other, and the days are ordered by
  *   their own date.
  *
+ * The calendar shows the month of the API's today, and marks the dates
+ * GET /days says have a live entry. It is asked once, with the list, so the
+ * Timeline opens, fails and is asked again as one thing.
+ *
  * The whole journal is loaded in order to list it. That is known to be the
  * wrong long-term shape, and is Day 29's problem.
  */
 
 import type { WireDay, WireEntry } from '@neuron/contracts';
+import { monthRange } from './calendar.ts';
 import { monthOf } from './format.ts';
 import { MAX_PAGES, type Request } from './today.ts';
 
@@ -30,6 +35,12 @@ export interface TimelineDay {
    * morning to night.
    */
   entries: readonly WireEntry[];
+}
+
+/* The month the calendar shows, as "2026-08", and its dates with entries. */
+export interface TimelineCalendar {
+  month: string;
+  written: readonly string[];
 }
 
 export interface TimelineMonth {
@@ -52,6 +63,7 @@ export type TimelineView =
       today: string;
       months: readonly TimelineMonth[];
       complete: boolean;
+      calendar: TimelineCalendar;
     }
   | { status: 'empty'; today: string }
   | { status: 'unreachable'; asked: number }
@@ -108,7 +120,13 @@ export function groupByDay(entries: readonly WireEntry[]): TimelineMonth[] {
 }
 
 type Fetched =
-  | { status: 'loaded'; today: string; entries: WireEntry[]; complete: boolean }
+  | {
+      status: 'loaded';
+      today: string;
+      calendar: TimelineCalendar;
+      entries: WireEntry[];
+      complete: boolean;
+    }
   | { status: 'unreachable' }
   | { status: 'failed' }
   | { status: 'ended' };
@@ -148,6 +166,16 @@ export function createTimeline(config: {
       return { status: statusOf(today.kind) };
     }
 
+    const month = monthOf(today.data.date);
+    const { from, to } = monthRange(month);
+    const days = await request<WireDay[]>(`/days?from=${from}&to=${to}`);
+
+    if (days.kind !== 'ok') {
+      return { status: statusOf(days.kind) };
+    }
+
+    const calendar = { month, written: days.data.map((day) => day.date) };
+
     const entries: WireEntry[] = [];
     let complete = true;
 
@@ -173,7 +201,13 @@ export function createTimeline(config: {
       }
     }
 
-    return { status: 'loaded', today: today.data.date, entries, complete };
+    return {
+      status: 'loaded',
+      today: today.data.date,
+      calendar,
+      entries,
+      complete,
+    };
   }
 
   /*
@@ -223,6 +257,7 @@ export function createTimeline(config: {
               today: answer.today,
               months: groupByDay(shown),
               complete: answer.complete,
+              calendar: answer.calendar,
             };
     } else if (answer.status !== 'ended') {
       /*
