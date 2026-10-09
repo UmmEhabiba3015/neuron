@@ -1,10 +1,15 @@
 'use client';
 
 import { MAX_PAGE_SIZE } from '@neuron/contracts';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { BlankScreen } from '@/app/components/AuthScreen';
-import { KeyBox, LiveScreen } from '@/app/components/LiveScreen';
+import {
+  JournalBox,
+  KeyBox,
+  LiveScreen,
+} from '@/app/components/LiveScreen';
 import { LiveComposer } from '@/app/components/Journal';
 import { useSession } from '@/app/components/useSession';
 import { session } from '@/lib/api';
@@ -49,7 +54,40 @@ function composerLine(save: TodayState['save']): string | undefined {
   return undefined;
 }
 
-export function LiveToday() {
+/*
+ * The composer's options, from #composer-options in
+ * 18-entry-system-states.html: today's page, with a panel in the composer's
+ * place. lock.css says a panel pushes a history entry and Back closes it,
+ * so the panel has its own address, /options, and Back returns to Today.
+ * As the comp draws it, the page is a plain sheet and its date box is the
+ * journal's.
+ *
+ * Its one row leads to the support resource. Words typed in the composer
+ * and not saved are not carried here: keeping a draft is Day 18's.
+ */
+function ComposerOptions() {
+  return (
+    <section className="panel" aria-label="Composer options">
+      <h2>Composer options</h2>
+      <Link className="srowlink" href="/support">
+        <span className="lab">
+          If you want to talk to someone
+          <span className="why">
+            A support resource is available whenever you need it.
+          </span>
+        </span>
+        <span className="val">Read</span>
+      </Link>
+      <div className="auth-actions">
+        <Link className="btn quiet" href="/">
+          Back to Today
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+export function LiveToday({ options }: { options?: boolean }) {
   const state = useSession();
   const router = useRouter();
 
@@ -125,7 +163,11 @@ export function LiveToday() {
   const date = day.status === 'open' ? formatDay(day.date) : '';
 
   return (
-    <LiveScreen current="Today" aside={<KeyBox label="Day" value={date} />}>
+    <LiveScreen
+      current="Today"
+      surface={options}
+      aside={options ? <JournalBox /> : <KeyBox label="Day" value={date} />}
+    >
       {day.status === 'opening' ? (
         <main className="sheet">
           <div className="state-message">
@@ -183,7 +225,9 @@ export function LiveToday() {
         />
       ) : null}
 
-      {day.status === 'open' ? (
+      {options ? <ComposerOptions /> : null}
+
+      {day.status === 'open' && !options ? (
         <LiveComposer
           text={view.text}
           holdsWords={!isBlank(view.text)}

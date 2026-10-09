@@ -13,9 +13,10 @@ build/
 # Test coverage
 coverage/
 
-# SQLite database — local state, never source. A pattern without a leading
-# slash matches at any depth, so this covers apps/api/data/neuron.db too.
-data/
+# SQLite database — local state, never source. The folder is named exactly:
+# a bare `data/` matched at any depth and ignored the web app's /you/data
+# page. The *.db patterns below still catch a database file anywhere.
+apps/api/data/
 *.db
 *.db-journal
 *.db-wal

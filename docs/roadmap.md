@@ -30,6 +30,25 @@
 
 ---
 
+## Where The Project Stands At The Close Of Screens Day (verified 2026-10-09)
+
+**Every screen of the designer's prototype now exists in the web app**, in
+its main state, apart from four that need data first: a reflection, an
+answered question, a recording's options and a draft. Each control whose
+feature is not built says "This is not built yet." when pressed and sends
+nothing, and where data does not exist yet the same sentence stands in its
+place. Every such control, 19 of them, is in one list,
+`apps/web/lib/unbuilt.ts`, with its day; five have no day yet (voice
+recording, "keep this out of memory" on an entry and in the composer, the
+support page's words, and what Privacy says about training). Ask is a
+destination, and the Timeline has its calendar, from real data. No API
+change. 246 API unit tests, 365 API end-to-end tests,
+171 web tests and 7 checks on the shared package pass; lint, typecheck and
+build are clean for both applications.
+
+**The next day is 18:** drafts, Enter saves, and editing a saved entry, wired
+into screens that already exist.
+
 ## Where The Project Stands At The Close Of Day 17c (verified 2026-10-08)
 
 A person can create an account with a name, sign in, stay signed in across
@@ -43,7 +62,7 @@ tests, 154 web tests and 7
 checks on the shared package pass, and lint, typecheck and build are clean
 for both applications. 21 ADRs, with ADR-015 amended.
 
-**The next day is 18:** drafts, Enter saves, and editing a saved entry. The lettered days were inserted on
+**The next day is Screens Day**, inserted on 2026-10-08 before Day 18: every in-scope screen, built in its main state. **Then Day 18:** drafts, Enter saves, and editing a saved entry. The lettered days were inserted on
 Days 16 and 17 and are in the Phase 3 table below.
 
 Still not built: any AI, voice, search, the calendar view, a way to change
@@ -274,6 +293,7 @@ a product.
 | 17a | The web app is drawn on a stylesheet the designer has replaced. | **Done, 2026-10-07.** `lock.css` is the designer's v3 file byte for byte, and sign in and create account match his screens exactly at three widths. She ruled that the second password is compared in the browser only, because it guards against a typing slip and nothing about it crosses to the API; and that a control for a feature that is not built is not drawn, so forgot password, the edit icon and the memory control wait for their days. The `/review` pages are gone. Day 17's audit finding is closed: a test now fails when the stale-answer guard is removed, and the paging loop is capped at 20 pages. **The Master Thread's mutation was not caught**: the form's call to the password rules is inside a component and no test reaches it. 211 unit, 279 e2e, 55 web. What follows is the plan as it was written. **Inserted on Day 17 by her decision.** The designer answered the handover with `designs/AIJournal-v3/`. Replace `lock.css`, rebuild sign in and create account on the new spread with its second password field, and restyle Today with the real entry controls and the new mood order. Opens by closing Day 17's audit finding: no test proves that an out-of-date answer about today is thrown away. |
 | 17b | A day ends at 4am in a timezone nobody chose. | **Done, 2026-10-07, and the rule itself changed.** She ruled that a day ends at **midnight**, not 4am, and accepted that a sitting which crosses midnight is split. The timezone is an IANA place name on the user, sent by the browser at registration and never typed; a missing or invalid one is a 400 with no default, because a default would start a person on the wrong days without a sign. Node accepts `+05:00` as a timezone, so the check refuses an offset by name. The account has a required name, trimmed, at most 60 characters. `users` was rebuilt with both columns `NOT NULL` and no default, and existing accounts took the part of their email before the `@` and `UTC`. The mood words became the web app's second real action, shown at once, and Record, the memory option and three dead links were removed under her Day 17a rule. **The contract changed and no check failed**: the web app's registration body was never typed against it, so all nine commands passed with registration broken, and both bodies are typed now. The worker refused the prompt's design for mood requests and sent them one at a time, correctly. Day 17a's audit finding is closed. **Both of the Master Thread's mutations went uncaught**: the migration's final foreign key check, and the one line that reads the browser's timezone. There is still no way to change a timezone. ADR-015 amended. 242 unit, 318 e2e, 100 web. What follows is the plan as it was written. **Inserted on Day 16 by her decision.** The per-user timezone decided on 2026-10-04: a setting on the user, taken from the browser at registration, and `dayFor` works a day out in it. It comes before Day 18 because the composer is where real entries begin, and an entry never moves once it is filed (ADR-015). **Added on Day 17a by her decision: a required display name on the account**, asked for at registration and shown in the destinations in place of the word "You". It is the same shape of work in the same files. Opens by closing Day 17a's audit finding. Numbered 17b so that every later day keeps its number. `docs/ui-handover.md` §12. |
 | 17c | A person can see today and nothing else. | **Done, 2026-10-08.** She found by reading two API answers that an entry carried an instant and nothing saying which day it was on, so **`WireEntry` gained `date`**, the stored date of the entry's day and never one worked out from `createdAt`. A day that has not happened is a 404, judged in the asker's timezone. The Timeline is the list only, newest first all the way down; a past day's page has the mood and delete and no composer, and is the same code as Today; a day with no entries has no page. You, then Account, shows the name, the email and "Sign out of this device"; an unreachable sign-out changes nothing. **The browser's clock never makes a date.** The timezone setting is Day 34, by her decision. Day 17b's API audit finding is closed. **Both of the Master Thread's mutations were caught**, the first time in four days. 246 unit, 365 e2e, 154 web. What follows is the plan as it was written. **Added on Day 17b by her decision: sign-out**, which she found missing by asking how to log out, **and the account's name shown beside it.** Opens by repaying four learning debts from Day 17b. **Inserted on Day 17 by her decision**, after her own finding that no day in Phase 3 built a way to look at any day but today. A past day's page and a way to reach it, built after the timezone so that the days it shows are the right ones. The API already has `GET /days/:date`, `GET /days?from=&to=` and `GET /entries?date=`. |
+| Screens Day | Building a screen and wiring its feature on the same day mixes frontend work into every backend day. | **Inserted on 2026-10-08 by her decision, before Day 18, with no number so that later days keep theirs.** **Every screen in the designer's prototype** is built in its main state, the AI screens included, so the app looks like the final product and each later day adds the backend behind a screen. Built in two parts: first the screens for scheduled features, then the rest. Loading, failed and empty states are built on the day each feature is wired. A control that does not work yet says "This is not built yet." when pressed and sends nothing; where data does not exist yet, the same sentence stands in its place, and no sample content is shown. Every such control is in one list, `apps/web/lib/unbuilt.ts`, with its day. **This reverses her Day 17a rule** that a control for an unbuilt feature is not drawn: until its day, a control may be on screen and not yet work, and every one must work or be gone before Day 36. Design text is placeholder, not a requirement. No API change. |
 | 18 | Writing an entry is the product, and the editor is an afterthought. | The core writing experience. Autosave and what it means for the API — does a draft hit the server, and if so how often, and what happens on a failed save. This is likely to produce a real API change. **Added on Day 17b by her decision: Enter saves, and Shift with Enter makes a new line.** **Added 2026-10-04: editing a saved entry from the interface.** `PATCH /entries/:id` has existed since Day 5 and nothing calls it. `docs/ui-handover.md` §11. |
 | 19 | It works on her laptop, at her screen size, signed in as herself. | Responsive layout, keyboard access, and a genuine pass at accessibility rather than a checklist. **Carried here from Day 17b:** a phone's keyboard cannot press Shift with Enter, so under the Day 18 rule a person on a phone could not make a new line; she put the question aside until this day. **Also carried here: no test reaches a React component**, which let a mutation through on Days 17, 17a and 17b. One test that drives the app in a browser is a dependency and so her decision. |
 | 20 | A person who forgets their password is locked out of their own journal for good. | **Forgot password**, added 2026-10-04. A reset link sent by email: what a mail service is and why the application does not send mail itself, why the reset token is stored hashed, used once and expires, why the answer is the same whether or not the account exists, and why a password change revokes every session. The screens are specified in `docs/ui-handover.md` §2. **This day was slack.** Phase 3 now has no overflow day of its own, so an overrun goes to Day 27. |
@@ -459,7 +479,7 @@ because Day 21's `LIKE` visibly fails.
 | Email login | **13** | ADR-016 |
 | Date-range filter, pagination, day-summary for the calendar | **13–14** | **Pulled forward from Day 29.** The frontend cannot paint a calendar without it |
 | Draft / autosave | 18 | Designs answered it: persist on every keystroke |
-| Voice memo capture, storage, playback | **18–19** | ADR-016. Object storage arrives before Day 31 |
+| Voice memo capture, storage, playback | **Not scheduled** | ADR-016. Object storage arrives before Day 31. Was written here as Days 18–19, which no later plan kept; corrected on Screens Day. The Talk screen exists and its record control waits for a day |
 | Search snippets, passage anchors `#p{n}` | 21 | |
 | Transcription | 24 | Async, external, failure-prone. Belongs with the queue work |
 | `/ask/{id}`, citations, reflections | 25–28 | The whole Pro surface |
@@ -527,7 +547,8 @@ an optimisation. Day 14's audit closed the two oldest open rows below.
 | Jest — runners, matchers, mocking | Day 1 | 🟡 **Basics only.** Sufficient for now and not worth a dedicated day. |
 | Mood requests one at a time: a loop with `await` in it, and why a stale write differs from a stale read | Day 17b | ✅ **Closed on Day 17c.** She predicted all three outcomes of Low arriving before Good, then ran a script that made it happen. |
 | `useRef`; a function that answers one of two shapes; `@Transform` before validation | Day 17b | ✅ **Closed on Day 17c**, each by a prediction she ran: focus lost with `.focus()` commented out; typecheck failing before the `send` check and passing after; seventy characters sent and sixty counted. |
-| A join that reads a column from a second table; a cast with `as`; how Next.js reads a date from an address (`[date]`, `await params`); `Link` | Day 17c | 🔴 **Open.** Repay at the opening of Day 18, as predictions she runs. |
+| A join that reads a column from a second table; a cast with `as`; how Next.js reads a date from an address (`[date]`, `await params`); `Link` | Day 17c | ✅ **Closed on Screens Day**, by runs: the logged SQL showed one query with `LEFT JOIN "days"` reading only `date` and `id`; 22 tests failed with the join removed while the cast hid it from the compiler; `/d/banana` gave the app's own not-found screen; a `Link` sent no refresh and a typed address did. |
+| A custom hook (`useNotBuilt`); `as const satisfies` with `keyof typeof`, so a misspelt control name is a type error | Screens Day | 🔴 **Open.** Repay at the opening of Day 18, as predictions she runs. Named and not taught: `<details>`, `role="status"`, `:where()`, `data-*` attributes. |
 
 ### Closed, with how it closed
 

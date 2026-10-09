@@ -9,6 +9,7 @@ import {
   useState,
   type CSSProperties,
   type FormEvent,
+  type ReactNode,
 } from 'react';
 import { AuthScreen, BlankScreen } from '@/app/components/AuthScreen';
 import { useSession } from '@/app/components/useSession';
@@ -334,6 +335,13 @@ export function AuthForm({ mode }: { mode: Mode }) {
               ? `Use at least ${PASSWORD_MIN_LENGTH} characters.`
               : undefined
           }
+          after={
+            mode === 'in' ? (
+              <Link className="btn quiet forgot password-note" href="/forgot">
+                Forgot your password?
+              </Link>
+            ) : undefined
+          }
         />
 
         {mode === 'new' ? (
@@ -381,9 +389,10 @@ export function AuthForm({ mode }: { mode: Mode }) {
  * field's type and nothing else: the value is React's, so it is not cleared.
  *
  * A sentence about a problem takes the hint's place. The two never show
- * together (V3-REVISION.md).
+ * together (V3-REVISION.md). `after` is drawn under both, where 13-login.html
+ * draws "Forgot your password?".
  */
-function PasswordField({
+export function PasswordField({
   id,
   label,
   what,
@@ -392,6 +401,7 @@ function PasswordField({
   onChange,
   problem,
   hint,
+  after,
 }: {
   id: string;
   label: string;
@@ -401,6 +411,7 @@ function PasswordField({
   onChange: (value: string) => void;
   problem?: string;
   hint?: string;
+  after?: ReactNode;
 }) {
   const [shown, setShown] = useState(false);
   const help = problem ?? hint;
@@ -445,6 +456,7 @@ function PasswordField({
             {help}
           </p>
         ) : null}
+        {after}
       </div>
     </div>
   );
