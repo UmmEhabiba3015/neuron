@@ -160,7 +160,7 @@ prototype), confirm the artifact is the scope before narrowing it.**
 and `NotBuilt.tsx`; edit control on each entry; Forgot password (`/forgot`)
 and Choose a new password (`/reset`); Account's timezone row, devices
 section and "Sign out everywhere"; Timezone (`/you/account/timezone`); Your
-data (`/you/data`). Part 2: Ask as a destination (`/ask`); Talk (`/talk`),
+data (`/you/yourdata`). Part 2: Ask as a destination (`/ask`); Talk (`/talk`),
 which never asks for the microphone; the composer's microphone link, memory
 control and options (`/options`); the support page (`/support`); each
 entry's memory menu; Privacy (`/you/privacy`) and What it sees
@@ -188,7 +188,7 @@ scheduled.
 
 **Found at commit time, and no check could have found it.** The root
 `.gitignore` had `data/`, which matches at any depth, so
-`apps/web/app/you/data/page.tsx` was invisible to git while every check
+`apps/web/app/you/data/page.tsx` (renamed to `yourdata` the same day, at her request) was invisible to git while every check
 passed on the working tree. It is now `apps/api/data/`; `*.db` still
 catches a database file anywhere. **Before committing a day, run
 `git status --short` and compare it with every new file a report lists.**

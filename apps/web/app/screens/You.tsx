@@ -79,7 +79,7 @@ function YouRows({ user }: { user: WireUser }) {
           <span className="val">Read it</span>
         </Link>
         <h2 className="shead">What is yours</h2>
-        <Link className="srowlink" href="/you/data">
+        <Link className="srowlink" href="/you/yourdata">
           <span className="lab">
             Your data
             <span className="why">
