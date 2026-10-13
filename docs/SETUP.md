@@ -1,7 +1,8 @@
 # Setting Neuron Up On A New Machine
 
 Everything needed to pick this project up on another computer. Rewritten on
-2026-10-10, at the close of Screens Day.
+2026-10-10, at the close of Screens Day; section 6 updated the same day when
+work moved from days to features.
 
 ---
 
@@ -11,7 +12,7 @@ Everything needed to pick this project up on another computer. Rewritten on
 |---|---|---|
 | Node | 24 or newer | Both apps load TypeScript files from `packages/contracts` directly, which Node does without a flag only from version 24 |
 | pnpm | 11.17.0 | `corepack enable` provides it. npm and yarn will not work: this is a pnpm workspace with a pnpm lockfile |
-| git and `gh` | any recent | `gh` is the GitHub command line tool; each day closes with a pull request |
+| git and `gh` | any recent | `gh` is the GitHub command line tool; each feature closes with a pull request |
 
 `better-sqlite3` is a native module and compiles on install. On Linux that
 needs build tools (`build-essential` on Debian and Ubuntu, `gcc-c++ make` on
@@ -105,15 +106,15 @@ The Master Thread keeps memory outside the repository, at:
 ~/.claude/projects/-home-<user>-Workspace-neuron/memory/
 ```
 
-Twelve files and an index, `MEMORY.md`. They hold the teaching rules, the
-writing style, the learner profile, the day numbering, the branch rule, and
-her rulings on who decides product questions. **A copy as of 2026-10-10 is in
+Thirteen files and an index, `MEMORY.md`. They hold the teaching rules, the
+writing style, the learner profile, the old day numbering, the branch rule,
+the feature-based plan, and her rulings on who decides product questions. **A copy as of 2026-10-10 is in
 `docs/archive/agent-memory/`.** The directory name contains the username and
 the project path, so on a new machine create the new path and copy the files
 into it. Without them a new session loses the teaching rules, and the writing
 drifts back to terse status English.
 
-## 6. How a working day runs
+## 6. How the work runs
 
 The full rules are in `docs/master-state.md`, under *How To Work With The
 Learner*. In short:
@@ -125,8 +126,10 @@ Learner*. In short:
   They never touch git.
 - **She decides**, as short choices with the cost of each stated. She or her
   husband sets the feature boundary.
-- **A day** opens with an overview and its block count, then repays any
-  learning debt, then takes one block at a time. It ends with an audit that
-  includes one mutation, and with a pull request she merges.
-- **Each day has a branch**, `day-<number>-<topic>`, made from `main` before
-  work starts.
+- **Work is planned by feature** (`docs/features.md` for scope,
+  `docs/roadmap.md` for order). A feature opens with an overview and its
+  block count, then repays any learning debt, then takes one block at a time.
+  It ends with an audit that includes one mutation, and with a pull request
+  she merges.
+- **Each feature has a branch**, `feature-<short-name>`, made from `main`
+  before work starts.

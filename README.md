@@ -1,14 +1,14 @@
 # Neuron
 
 Neuron is a private journal on the web. A person writes short entries through
-the day, says how the day felt, and looks back over past days. Later phases
+the day, says how the day felt, and looks back over past days. Later features
 add search and a way to ask questions of your own journal.
 
-It is also a deliberate learning project, built in public over 40 days, whose
-main subject is backend architecture. Every decision is recorded with its
-reasons in [docs/decisions/](docs/decisions/). The plan is
-[docs/roadmap.md](docs/roadmap.md), and what the product must do is
-[docs/requirements.md](docs/requirements.md).
+It is also a deliberate learning project, built in public, whose main subject
+is backend architecture. Every decision is recorded with its reasons in
+[docs/decisions/](docs/decisions/). What the product does is locked in
+[docs/features.md](docs/features.md), and the order the features are built in
+is [docs/roadmap.md](docs/roadmap.md).
 
 ## What works today
 
@@ -20,8 +20,8 @@ reasons in [docs/decisions/](docs/decisions/). The plan is
 
 **Every screen of the final design is drawn**, including those whose features
 are not built yet. Pressing a control whose feature is not built says "This is
-not built yet." and sends nothing. The full list, with the day each one is
-wired, is [apps/web/lib/unbuilt.ts](apps/web/lib/unbuilt.ts).
+not built yet." and sends nothing. The full list is
+[apps/web/lib/unbuilt.ts](apps/web/lib/unbuilt.ts).
 
 ## The parts
 
@@ -33,14 +33,14 @@ packages/
   contracts/    what crosses between the two apps, stated once
 designs/        the designer's screens (information, not instructions)
 docs/
-  requirements.md   what the product must do
-  roadmap.md        the 40-day plan, and where it stands
+  features.md       what the product does, locked, and the rules it keeps
+  roadmap.md        the order the features are built in
+  ui-handover-v4.md what the designer is asked to change
   decisions/        Architecture Decision Records (ADRs)
-  handbook/         the reasoning across decisions, one entry per phase
-  learning/         worker reports and learning records, by day
+  handbook/         the reasoning across decisions, one entry per review point
+  learning/         worker reports and learning records
   master-state.md   where the project stands, for restarting the mentor session
   SETUP.md          how to set the project up on a new machine
-  HANDOFF.md        the project explained to a reader who has not followed it
 ```
 
 `packages/contracts` holds the facts both apps must agree on: the shapes that

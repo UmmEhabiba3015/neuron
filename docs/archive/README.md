@@ -28,11 +28,12 @@ the report, the disagreement is recorded in `docs/master-state.md`.
 
 **`agent-memory/`** — the mentoring session's persistent memory, which normally
 lives outside the repository at
-`~/.claude/projects/<project-path>/memory/`. Twelve files plus an index, as of
-2026-10-10: the learner profile, the worker workflow, the day numbering, the
-teaching mode, the writing style, the testing approach, the depth guardrail,
-learning debt blocking the next day, the day overview, the branch rule, and
-her two rulings on who decides product questions and what design text is.
+`~/.claude/projects/<project-path>/memory/`. Thirteen files plus an index, as of
+2026-10-10: the learner profile, the worker workflow, the feature plan, the
+LinkedIn numbering, the teaching mode, the writing style, the testing
+approach, the depth guardrail, learning debt blocking the next feature, the
+feature overview, the branch rule, and her two rulings on who decides product
+questions and what design text is.
 
 Git does not carry that directory, and the path encodes both the username and
 the project location, so it changes on a different machine. To restore it,
