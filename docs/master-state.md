@@ -72,12 +72,6 @@ The old `day-*` branches and four kept merged branches stay as they are.
 
 ## How to open the next session
 
-**First, push `main`.** The reconciliation was merged locally on
-2026-10-13 because the machine had no internet connection, so `main` is
-ahead of GitHub. Run `git push origin main` once the connection works; the
-branches `final-reconciliation` and `workflow-and-conventions` were merged
-the same way and deleted.
-
 **The next session opens with her**, on this machine. Her husband's
 sessions of 2026-10-10 and 2026-10-13 changed how the project runs, and she
 was not in them. Before anything else, tell her in a few sentences: the
