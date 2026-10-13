@@ -72,6 +72,15 @@ The old `day-*` branches and four kept merged branches stay as they are.
 
 ## How to open the next session
 
+**The next session opens with her**, on this machine. Her husband's
+sessions of 2026-10-10 and 2026-10-13 changed how the project runs, and she
+was not in them. Before anything else, tell her in a few sentences: the
+scope is locked in `features.md`; work is by feature in the `roadmap.md`
+order, not by day; Search, Ask, Reflections, Looking back and Drafts wait
+for the designer; there are no LinkedIn posts while building; and
+`ui-handover-v4.md` is ready for the designer (her husband will discuss it
+with him). Then ask whether she has questions about any ruling.
+
 **Next is feature 1, Finish writing** (Refs 11, 13, 14 and 2 in
 `features.md`): editing a saved entry, Enter saves, Today opening at the
 newest entry, and Show password. Its screens are final. Open it in this
