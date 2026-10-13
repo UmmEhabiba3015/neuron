@@ -468,9 +468,9 @@ It is complete when:
 
 # Public Build
 
-Neuron is built in public.
+Neuron is presented in public, feature by feature, once it is finished.
 
-Every day should leave behind:
+Every feature should leave behind:
 
 - working code
 - better documentation

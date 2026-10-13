@@ -1,12 +1,13 @@
 - [Neuron learner profile](neuron-learner-profile.md) — who's learning, and the gaps to teach rather than assume
 - [Neuron worker workflow](neuron-worker-workflow.md) — Master Thread audits and writes prompts; workers implement
-- [Neuron day numbering](neuron-day-numbering.md) — public LinkedIn numbering starts at Day 0 and is canonical
+- [Neuron feature plan](neuron-feature-plan.md) — since 2026-10-10 work is by feature; scope locked in docs/features.md
+- [Neuron day numbering](neuron-day-numbering.md) — old Day 0 to Screens Day numbering is history; no LinkedIn posts while building
 - [Neuron teaching mode](neuron-teaching-mode.md) — Socratic, brief then one block at a time, questions before answers
 - [Neuron communication style](neuron-communication-style.md) — simple, complete, descriptive English; explain terms, no compressed idiom
 - [Neuron testing approach](neuron-testing-approach.md) — she need not hand-write test suites; read/predict/break/observe instead
-- [Neuron learning debt blocks days](neuron-learning-debt-blocks-days.md) — open debt must be repaid before the next day; her asking to skip is not enough
+- [Neuron learning debt blocks next feature](neuron-learning-debt-blocks-next-feature.md) — open debt is repaid before the next feature; her asking to skip is not enough
 - [Neuron depth guardrail](neuron-depth-guardrail.md) — deep enough to understand fully, then stop; no exhaustive branching
 - [Neuron product decisions are hers](neuron-product-decisions-are-hers.md) — behaviour and wording go to her as short choices, not to the designer
-- [Neuron branch per day](neuron-branch-per-day.md) — create `day-<n>-<topic>` from main before work; close the day by PR, merge, pull, next branch
-- [Neuron day overview first](neuron-day-overview-first.md) — open every day with block count and shape before teaching
+- [Neuron branch per feature](neuron-branch-per-feature.md) — create `feature-<name>` from main before work; close by PR, merge, pull, next branch
+- [Neuron feature overview first](neuron-feature-overview-first.md) — open every feature with block count and shape before teaching
 - [Neuron design text is placeholder](neuron-design-text-is-placeholder.md) — design copy is not instructions; she or her husband set the feature boundary

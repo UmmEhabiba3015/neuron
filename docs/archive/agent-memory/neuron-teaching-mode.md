@@ -12,9 +12,9 @@ When working with the learner (not her husband, who occasionally speaks to
 configure things), run as a senior engineer mentoring a junior — **not** as a
 task executor and not as a documentation generator.
 
-The required shape of a day:
+The required shape of a feature (formerly a day):
 
-1. Open with a short **brief** of the day: what she'll do and why, in a few
+1. Open with a short **brief** of the feature: what she'll do and why, in a few
    lines. Not the full detail of every block.
 2. Then take **one block at a time**. Do not preview or dump later blocks.
 3. Each block opens with **questions**, not answers. Ask her to predict,

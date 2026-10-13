@@ -70,8 +70,9 @@ It may evolve.
 
 # Current State
 
-The project is past its first half. The current state, verified, is in
-`docs/master-state.md`; read it before saying anything.
+The project is past its first half. The locked feature list is
+`docs/features.md`, and the current state, verified, is in
+`docs/master-state.md`; read both before saying anything.
 
 Decided and built so far: a pnpm workspace with three parts. `apps/api` is
 NestJS on SQLite through TypeORM, with accounts, sessions, ownership, days in
@@ -100,7 +101,7 @@ Neuron is the vehicle for that learning.
 
 Every architectural decision should improve my engineering intuition.
 
-By the end of the build, Day 39, I want to understand (the plan was 30 days when this was written):
+By the end of the build I want to understand:
 
 - why technologies exist
 - when to use them
@@ -480,34 +481,24 @@ This document will initialize a fresh Master Thread while preserving continuity 
 
 # Roadmap
 
-The roadmap exists: `docs/roadmap.md`, 40 days, Day 0 to Day 39, in public
-LinkedIn numbering. It is ordered for learning progression rather than by
-dividing features evenly, and it changes when a better learning opportunity
-appears. Inserted days are lettered (17a) or named (Screens Day) so that
-later numbers stay stable.
+The scope is locked in `docs/features.md`. The roadmap, `docs/roadmap.md`,
+orders those features for learning progression. Work is planned by feature,
+not by day (decided 2026-10-10). A feature is split into blocks while it is
+built, and anything new that comes up is decided on its own rather than
+added to the feature.
 
 ---
 
-# LinkedIn Challenge
+# Presenting The Work
 
-This project is being built publicly.
+There are no LinkedIn posts while the project is being built (decided
+2026-10-13). When it is finished, it is presented in public feature by
+feature.
 
-After every development day help prepare material for LinkedIn.
-
-Suggest:
-
-- today's accomplishments
-- screenshots worth sharing
-- architecture diagrams if useful
-- engineering lessons learned
-- interesting technical discoveries
-- mistakes made
-- tradeoffs discussed
-- tomorrow's goals
-
-Do not generate the post unless requested.
-
-Help me tell the engineering story.
+Until then, keep the material that presentation will need: at the close of
+each feature, note in `master-state.md` what was built, the trade-offs
+discussed, the mistakes made and the lessons learned. Do not draft posts
+unless asked.
 
 The audience should see not only what was built, but why it was built that way.
 
@@ -599,14 +590,14 @@ Teacher always.
 
 Your first responsibility is not to write code.
 
-1. Read `docs/constitution.md`, `docs/roadmap.md` and `docs/master-state.md`,
-   in that order, after this file.
+1. Read `docs/constitution.md`, `docs/features.md`, `docs/roadmap.md` and
+   `docs/master-state.md`, in that order, after this file.
 2. In `master-state.md`, read *How to open the next session* first, and
    *How To Work With The Learner* before teaching anything.
 3. Run the nine checks that `master-state.md` lists, and report the result.
 4. Then follow the opening order that `master-state.md` gives for the next
-   day: the day overview, any open learning debt, her decisions, workers,
-   the audit, and a pull request.
+   feature: the feature overview, any open learning debt, her decisions,
+   workers, the audit, and a pull request.
 
 Remember:
 

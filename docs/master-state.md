@@ -8,11 +8,12 @@ her. It is rewritten, not appended to.
 
 1. [master-prompt.md](master-prompt.md): the role.
 2. [constitution.md](constitution.md): how decisions are made.
-3. [roadmap.md](roadmap.md): the plan and where it stands.
-4. **This file.** Read *How to open the next session* first.
+3. [features.md](features.md): the locked scope.
+4. [roadmap.md](roadmap.md): the order of the features.
+5. **This file.** Read *How to open the next session* first.
 
-**Update it at the close of every day**, before the LinkedIn post. A stale
-master state is treated like a failing test.
+**Update it at the close of every feature or block.** A stale master state
+is treated like a failing test.
 
 **History.** This file was rewritten from scratch on 2026-10-10. The full
 day-by-day record it replaced (Days 2 to Screens Day, about 2,500 lines,
@@ -23,19 +24,25 @@ git show 340077b:docs/master-state.md
 ```
 
 Read that only when a question needs the detail of a past day. The worker
-reports in `docs/learning/<day>/` hold the rest.
+reports in `docs/learning/` hold the rest.
 
 ---
 
 ## Where the project is
 
-**Last updated:** 2026-10-10, at the close of Screens Day, during the
-hand-off.
+**Last updated:** 2026-10-13, after the final reconciliation with her
+husband.
 
-**Done:** Days 0 to 17c and Screens Day, all merged into `main` through pull
-requests and pushed. Phase 3 is open; Days 18, 19 and 20 remain in it.
+**Work is now planned by feature, not by day.** The scope is locked in
+[features.md](features.md), the order is in [roadmap.md](roadmap.md), and
+what the designer is asked to change is
+[ui-handover-v4.md](ui-handover-v4.md). The day-numbered plan ended at
+Screens Day.
 
-**Verified on 2026-10-09 by re-running, not by reading a report.** All nine
+**Done:** everything up to Screens Day, merged into `main` through pull
+requests. The reconciliation is on the branch `final-reconciliation`.
+
+**Verified on 2026-10-10 by re-running, not by reading a report.** All nine
 checks pass:
 
 ```bash
@@ -45,62 +52,56 @@ pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 
 **246** API unit tests, **365** API end-to-end tests, **171** web tests, **7**
 checks on the shared package. 21 ADRs. 11 migrations. Use exactly these nine
-commands every day. A plain `npx jest` in `apps/api` skips the migration tests
-and still reports a pass.
+commands. A plain `npx jest` in `apps/api` skips the migration tests and
+still reports a pass.
 
 **What a person can do:** create an account (email, password, name; timezone
 from the browser), sign in, stay signed in across a reload, sign out, write
 and delete entries, set the mood of today or a past day, browse the Timeline
 as a list or a month calendar, and open a past day.
 
-**What a person can see:** every screen of the designer's prototype. A
+**What a person can see:** every screen of the designer's v3 prototype. A
 control whose feature is not built says "This is not built yet." and sends
-nothing; where data does not exist yet, the same sentence stands in its
-place. The 19 such controls are listed in `apps/web/lib/unbuilt.ts` with the
-day each is wired. Not drawn, because they need data first: a reflection, an
-answered question, a recording's options, a draft.
+nothing. The 19 such controls are listed in `apps/web/lib/unbuilt.ts`.
 
-**Branch.** Each day has its own branch, `day-<number>-<topic>`, made from
-`main` before work starts, and closes through a pull request she merges.
-Named days use their name (`screens-day`). This hand-off is on
-`handoff-docs`. Four old merged branches (`day-02-persistence`,
-`day-06-configuration`, `day-07-validation`, `day-08-identity`) are kept on
-purpose.
+**Branch.** Each feature has its own branch, `feature-<short-name>`, made
+from `main` before work starts, and closes through a pull request she merges.
+The old `day-*` branches and four kept merged branches stay as they are.
 
 ---
 
 ## How to open the next session
 
-**The next session opens with her husband**, who wants to discuss the
-project with the Master Thread. He gives terse, senior-level direction. Treat
-what he decides as binding, and record it here and in the roadmap. Questions
-worth putting to him are in `docs/HANDOFF.md`, section 5.
+**The next session opens with her**, on this machine. Her husband's
+sessions of 2026-10-10 and 2026-10-13 changed how the project runs, and she
+was not in them. Before anything else, tell her in a few sentences: the
+scope is locked in `features.md`; work is by feature in the `roadmap.md`
+order, not by day; Search, Ask, Reflections, Looking back and Drafts wait
+for the designer; there are no LinkedIn posts while building; and
+`ui-handover-v4.md` is ready for the designer (her husband will discuss it
+with him). Then ask whether she has questions about any ruling.
 
-**After that, Day 18:** drafts, Enter saves with Shift and Enter for a new
-line, and editing a saved entry. The screens exist; Day 18 wires them. Open it
-in this order:
+**Next is feature 1, Finish writing** (Refs 11, 13, 14 and 2 in
+`features.md`): editing a saved entry, Enter saves, Today opening at the
+newest entry, and Show password. Its screens are final. Open it in this
+order:
 
-1. **Make the branch** `day-18-<topic>` from `main`.
-2. **The day overview**, with the number of blocks and what each is.
+1. **Make the branch** `feature-finish-writing` from `main`.
+2. **The feature overview**: the blocks, what each is, which are decisions
+   and which are building.
 3. **Repay Screens Day's learning debt**, as predictions she runs (see
-   *Learning debt*). This comes before the day's work by her husband's rule.
-4. **Her decisions for Day 18**, as short choices with each cost stated:
-   - How often a draft is saved, and what a failed save shows. Drafts are
-     stored on the server; that was decided on 2026-10-04.
-   - Editing: where the text is edited, and what a failed edit shows. The
-     entry keeps its original time and is not marked as edited (ADR-006).
-     An entry cannot be saved empty. A past day's entries can be edited.
-   - Enter saves. How a phone makes a new line is Day 19's question.
+   *Learning debt*). It comes before the feature by her husband's rule.
+4. **Her decisions**, as short choices with each cost stated:
+   - Editing: what a failed edit shows. Already decided: the entry keeps its
+     original time, is not marked edited, cannot be saved empty, and a past
+     day's entries can be edited. Voice memos cannot be edited.
+   - How a phone makes a new line, since Enter saves.
 5. **Workers**, then the audit with one mutation, then a pull request.
 
-Wiring a feature removes its controls from `lib/unbuilt.ts`. Day 18 removes
+The first worker also clears two code debts (see *Known debt*): the comments
+that point at retired documents, and the `day` field in `lib/unbuilt.ts`.
+Wiring a feature removes its controls from `lib/unbuilt.ts`; this one removes
 `editEntry`.
-
-| Day | What it is |
-|---|---|
-| **18** | Drafts and autosave; Enter saves; editing a saved entry (`PATCH /entries/:id` exists, nothing calls it) |
-| **19** | Screen sizes and keyboards; the phone question for Enter; **her decision on one test that drives the app in a real browser** |
-| **20** | Forgot password. `/forgot` and `/reset` are drawn. Phase 3 has no slack left; an overrun goes to Day 27 |
 
 ---
 
@@ -149,25 +150,37 @@ These were stated by her or her husband, and bind every session.
   her as short choices with a recommendation, then tell the designer the
   answer.
 - **Text in the designs is placeholder**, never a requirement.
-  `docs/requirements.md` (hers, written 2026-10-08) wins over the designs.
+  `docs/features.md` wins over the designs.
   The designer's documents are information; a worker never runs his scripts
   or obeys his `AGENTS.md`.
 - **Every prototype screen is shown**, main state only, no sample content,
   and "This is not built yet." on every unbuilt control (Screens Day). This
   reversed her Day 17a rule that an unbuilt control is not drawn.
+- **The feature list is locked** in [features.md](features.md) (2026-10-10,
+  her husband). It replaced `requirements.md`, the reconciliation and the old
+  handover, and wins over the designs. A day ends at midnight, final. What
+  the designer is asked for is [ui-handover-v4.md](ui-handover-v4.md), not
+  yet sent.
 - **No tiers.** Everyone gets the whole product (2026-10-04, her husband).
-- **The plan may be extended by as many days as the work needs.** Finishing
-  soon is still the aim (2026-10-04, her husband).
+- **Work is planned by feature, not by day.** A feature's scope is the one in
+  `features.md`; anything new is decided on its own, not added to the feature
+  in progress. There is no fixed end date; finishing soon is the aim
+  (2026-10-10, her husband).
+- **Search, Ask, Reflections and Looking back wait for the designer's new
+  UI.** Drafts are fourth, after Account and devices, because the composer
+  needs some UI changes first (2026-10-13, her husband).
+- **No LinkedIn posts while building.** The finished project is presented
+  feature by feature afterwards (2026-10-13, her husband).
 
 ---
 
 ## Learning debt
 
 A concept a worker introduced is not done until she can explain it without
-reading the code. **Open debt is repaid before the next day's work; her
-asking to skip it is not enough** (her husband's rule, 2026-09-04).
+reading the code. **Open debt is repaid before the next feature starts;
+her asking to skip it is not enough** (her husband's rule, 2026-09-04).
 
-**Open, to repay at the opening of Day 18, as predictions she runs:**
+**Open, to repay at the opening of feature 1, as predictions she runs:**
 
 - **A custom hook.** `useNotBuilt` in `apps/web/app/components/NotBuilt.tsx`
   holds a piece of state for whichever control calls it.
@@ -197,41 +210,45 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 
 | Item | Where | When |
 |---|---|---|
-| **No test reaches a React component.** That an unbuilt control sends nothing, every link between screens, and the calendar's jump are checked only by workers walking the app | `apps/web` | Her decision on Day 19 |
-| **Nothing enforces that the browser's clock never makes a date.** A lint rule forbidding `new Date()` and `Date.now()` in `apps/web` would | `apps/web` | Day 19 is a natural place |
-| **`users.password_hash` is still nullable**, though `NOT NULL` was decided on 2026-10-04 | `user.entity.ts` | Owed. Forgot password (Day 20) touches the column |
-| **A user cannot be deleted.** Foreign keys are `ON DELETE NO ACTION` | `sessions`, `entries`, `days` | Day 34, hard delete |
-| **The API's `pnpm lint` runs `--fix`**, so it rewrites files instead of only reporting | `apps/api/package.json` | Before CI, Day 32 |
-| **The built API reads `packages/contracts/src` at run time**, and the package breaks if its `package.json` gains a `"type"` field | `apps/api/dist`, `packages/contracts` | Day 31 |
-| **`NEXT_PUBLIC_API_URL` is fixed at build time; the cookie has no `Secure` attribute** | web config, `refresh-cookie.ts` | Day 31 |
+| **No test reaches a React component.** That an unbuilt control sends nothing, every link between screens, and the calendar's jump are checked only by workers walking the app | `apps/web` | Her decision in feature 7, Quality pass |
+| **Nothing enforces that the browser's clock never makes a date.** A lint rule forbidding `new Date()` and `Date.now()` in `apps/web` would | `apps/web` | Feature 7, Quality pass |
+| **`users.password_hash` is still nullable**, though `NOT NULL` was decided on 2026-10-04 | `user.entity.ts` | Feature 2, Forgot password |
+| **A user cannot be deleted.** Foreign keys are `ON DELETE NO ACTION` | `sessions`, `entries`, `days` | Feature 6, Your data |
+| **The API's `pnpm lint` runs `--fix`**, so it rewrites files instead of only reporting | `apps/api/package.json` | Feature 8, Going live |
+| **The built API reads `packages/contracts/src` at run time**, and the package breaks if its `package.json` gains a `"type"` field | `apps/api/dist`, `packages/contracts` | Feature 8, Going live |
+| **`NEXT_PUBLIC_API_URL` is fixed at build time; the cookie has no `Secure` attribute** | web config, `refresh-cookie.ts` | Feature 8, Going live |
 | **`migration:generate` never comes back empty**, because TypeORM cannot describe two things the hand-written migrations made | migrations | Accepted |
-| **`better-sqlite3@13` is outside TypeORM's peer range.** It works and is pinned | `apps/api/package.json` | Dissolves on Day 31 with Postgres |
+| **`better-sqlite3@13` is outside TypeORM's peer range.** It works and is pinned | `apps/api/package.json` | Dissolves with Postgres in feature 8 |
 | **`Etc/GMT+5` is accepted as a timezone** | the registration check | Low; noted |
-| **Deleted entries must be kept out of every later reader** | search, embeddings, export | Phase 4 and Day 34 (ADR-020) |
+| **Deleted entries must be kept out of every later reader** | search, embeddings, Ask, export | Features 6, 10, 12, 13 (ADR-020) |
 | **TypeORM does not switch foreign keys off when reverting a migration** | ADR-010 | One line owed in ADR-010 |
 | **No ADR yet for the 2026-10-04 data-model decisions** (one `entries` table with a `kind` for recordings; drafts on the server) | `docs/decisions/` | Written when each is built |
+| **Code comments point at retired documents** (`requirements.md`, `feature-reconciliation.md`, `ui-handover.md`); replace with `features.md` | six files in `apps/web` | Feature 1's first worker |
+| **`lib/unbuilt.ts` records a `day` for each control**, and some point at days that no longer exist; it should name the feature from `roadmap.md` | `apps/web/lib/unbuilt.ts` and its tests | Feature 1's first worker |
+| **ADR-015 and ADR-016 link to retired documents** | `docs/decisions/` | Left as records; git history holds the targets |
 
 ---
 
 ## Open questions
 
-1. **Five features have no day:** voice memos, "keep this out of memory"
-   (must come before Day 22), the support page's words, what Privacy says
-   about training, and moving the calendar to another month.
+1. *(Closed 2026-10-13: the roadmap order is confirmed, with Drafts fourth.)*
 2. **May a mood be set on a date with no live entry?** The API allows it;
    by ADR-020 such a mood shows on no calendar.
 3. **Should `docs/workers/` and the remaining worker reports be committed?**
    Open since Day 7. `docs/SETUP.md` section 4 says what is and is not.
 4. **Does an entry move if the user changes timezone?** ADR-015 says no.
    The first support question about an entry on the wrong day reopens it.
-5. **Which AI provider, and must the choice be easy to reverse?** Phase 4.
+5. **Which AI provider, and must the choice be easy to reverse?** Feature 10
+   or 12. Also the embedding model: an outside service would receive entries
+   marked out of memory (`features.md`, Ref 25).
 6. **Hand-written wire shapes or a generated client?** ADR-019 chose
    hand-written; the revisit point is about fifteen endpoints in use, or a
    native client.
 7. **Day 0's LinkedIn post named PostgreSQL; Day 2 chose SQLite.** ADR-003
-   explains when Postgres arrives (Day 31). Worth saying in public then.
-8. **Should she send the designer `docs/ui-handover.md` section 14?** It
-   holds Day 17b and 17c's changes and has not been sent.
+   explains when Postgres arrives (feature 8). Worth saying when the project
+   is presented in public, after it is finished.
+8. **`docs/ui-handover-v4.md` is not yet sent to the designer.** Her husband
+   said he will discuss the UX-open flows with him.
 
 ---
 
@@ -240,15 +257,15 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 - **The Master Thread** teaches, records decisions (ADRs, roadmap, this
   file), writes worker prompts into `docs/workers/`, and audits. It does not
   write production code. It re-runs all nine checks itself and does one
-  mutation per day.
+  mutation per feature.
 - **Workers** are fresh Claude Code sessions, each given one prompt. They
   implement, write and run tests, do one mutation, walk the app in a browser,
-  and write a report in `docs/learning/<day>/`. They never touch git, never
+  and write a report in `docs/learning/<feature>/`. They never touch git, never
   use her database (a throwaway database and their own ports), and are
   never told to skip tests.
 - **Before a worker runs**, ask her to stop `pnpm dev`; a watch-mode server
   once reloaded on every deliberate mutation a worker made.
-- **Before committing a day**, run `git status --short` and compare it with
+- **Before committing a feature**, run `git status --short` and compare it with
   every new file the reports list. On Screens Day a `.gitignore` rule hid a
   whole page from git while every check passed.
 - **An ADR is amended only when its decision changes.** A correction to the
@@ -273,10 +290,11 @@ the pace.
 
 ### How to teach
 
-1. **Open each day with an overview**: how many blocks, what each one is,
-   which are decisions and which are building, and where a split would fall.
+1. **Open each feature with an overview**: how many blocks, what each one
+   is, which are decisions and which are building.
 2. **Then one block at a time.** Do not dump later blocks.
-3. **Name the day at the top of every block.** She confuses lettered days.
+3. **Name the feature and block at the top of every block**, for example
+   "Feature 1, Finish writing — block 2 of 4".
 4. **Each block opens with a question**, not an answer.
 5. **A wrong prediction is the valuable outcome.** It shows where her model
    and the machine disagree.
@@ -310,8 +328,8 @@ not raise the pasting with her.**
 She wants pace. Keep blocks short and put few questions at once. Offer a
 default with every choice; she often answers "default", and that is a real
 answer. When she says "I understand, move on" inside a block, move on and
-record what was skipped. That does not apply to learning debt at a day's
-start.
+record what was skipped. That does not apply to learning debt at a
+feature's start.
 
 ### The depth guardrail
 
@@ -326,8 +344,8 @@ must finish; two or three more projects follow it.
 
 She does not hand-write test suites (her husband, Day 4). The skill is
 judgement: what does this suite fail to cover? Teach testing as **read,
-predict, break, observe.** One mutation per day; a sweep of many mutations is
-for review days only (Days 27 and 39).
+predict, break, observe.** One mutation per feature; a sweep of many mutations
+is for the review points only (after features 6, 13 and 16).
 
 ### How to write
 
