@@ -54,4 +54,36 @@ describe('FindEntriesQueryDto', () => {
     expect(messagesFor({ word: '100%' })).toEqual([]);
     expect(messagesFor({ word: 'snake_case' })).toEqual([]);
   });
+
+  /*
+   * A query string is text. @Type turns "5" into 5 before the number rules
+   * look at it, and the global pipe's transform:true keeps the result.
+   */
+  describe('limit and offset', () => {
+    it('turns them from text into numbers', () => {
+      const query = plainToInstance(FindEntriesQueryDto, {
+        limit: '5',
+        offset: '10',
+      });
+
+      expect(query.limit).toBe(5);
+      expect(query.offset).toBe(10);
+      expect(validateSync(query)).toEqual([]);
+    });
+
+    it('accepts a limit of 1 and of 200, and an offset of 0', () => {
+      expect(messagesFor({ limit: '1', offset: '0' })).toEqual([]);
+      expect(messagesFor({ limit: '200' })).toEqual([]);
+    });
+
+    it.each([
+      ['a limit above the maximum', { limit: '201' }],
+      ['a limit of zero', { limit: '0' }],
+      ['a negative offset', { offset: '-1' }],
+      ['a limit that is not a number', { limit: 'lots' }],
+      ['a limit that is not whole', { limit: '1.5' }],
+    ])('refuses %s', (_label, query) => {
+      expect(messagesFor(query).length).toBeGreaterThan(0);
+    });
+  });
 });

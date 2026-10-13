@@ -50,7 +50,7 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-**246** API unit tests, **365** API end-to-end tests, **171** web tests, **7**
+**421** API unit tests, **42** API end-to-end tests, **170** web tests, **7**
 checks on the shared package. 21 ADRs. 11 migrations. Use exactly these nine
 commands. A plain `npx jest` in `apps/api` skips the migration tests and
 still reports a pass.
@@ -75,32 +75,25 @@ The old `day-*` branches and four kept merged branches stay as they are.
 **First, push `main`.** The reconciliation was merged locally on
 2026-10-13 because the machine had no internet connection, so `main` is
 ahead of GitHub. Run `git push origin main` once the connection works; the
-branch `final-reconciliation` was already deleted.
+branches `final-reconciliation` and `workflow-and-conventions` were merged
+the same way and deleted.
 
 **The next session opens with her**, on this machine. Her husband's
 sessions of 2026-10-10 and 2026-10-13 changed how the project runs, and she
 was not in them. Before anything else, tell her in a few sentences: the
-scope is locked in `features.md`; work is by feature in the `roadmap.md`
+scope is locked in `features.md`; the workflow is streamlined and the code
+was restructured to the conventions in `CLAUDE.md`; work is by feature in the `roadmap.md`
 order, not by day; Search, Ask, Reflections, Looking back and Drafts wait
 for the designer; there are no LinkedIn posts while building; and
 `ui-handover-v4.md` is ready for the designer (her husband will discuss it
 with him). Then ask whether she has questions about any ruling.
 
-**Before feature 1: the restructure**, decided by her husband on
-2026-10-13, on the branch `workflow-and-conventions`. Two workers, run one
-after the other, **only when her husband says to launch them**:
+**The restructure is done** (2026-10-13): code conventions applied across
+both apps, and the API's end-to-end tests reorganised into flows. Reports in
+`docs/learning/restructure/`. She has not seen it; when feature 1 touches the
+code, point out the new layout (`CLAUDE.md`, *Code conventions*).
 
-1. `docs/workers/restructure-1-code.md`: folders, the `Entity` suffix, plain
-   contract names, the `Mood` enum with a build step for the contracts
-   package (ADR-019 amended), response DTOs, `strict: true`, and the web
-   app's Next.js layout. No behaviour change.
-2. `docs/workers/restructure-2-tests.md`: the API's end-to-end tests
-   reorganised into flows by module; detail cases moved to unit tests.
-
-The conventions they follow are in `CLAUDE.md`. Audit each, then merge the
-branch.
-
-**Then feature 1, Finish writing** (Refs 11, 13, 14 and 2 in
+**Next is feature 1, Finish writing** (Refs 11, 13, 14 and 2 in
 `features.md`): editing a saved entry, Enter saves, Today opening at the
 newest entry, and Show password. Its screens are final. Open it in this
 order:

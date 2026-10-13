@@ -98,4 +98,46 @@ describe('UsersService', () => {
       expect((await service.findByEmail('umer'))?.email).toBe('umer');
     });
   });
+
+  /*
+   * An address is one account whatever its capitals, because the unique
+   * index is on lower(email) and the lookup agrees with it. The address is
+   * still stored as it was typed.
+   */
+  describe('the email address', () => {
+    const as = (email: string, name = 'Ummi') => ({
+      email,
+      password: 'a-long-enough-password',
+      name,
+      timezone: 'UTC',
+    });
+
+    it('keeps the address as it was typed', async () => {
+      expect((await service.register(as('Ummi@Example.com')))?.email).toBe(
+        'Ummi@Example.com',
+      );
+    });
+
+    it('refuses a second account for the same address in other capitals', async () => {
+      await service.register(as('Ummi@Example.com'));
+
+      expect(await service.register(as('ummi@example.com'))).toBeUndefined();
+      expect(await users.count()).toBe(1);
+    });
+
+    it('finds the account by the address in any capitals', async () => {
+      await service.register(as('Ummi@Example.com'));
+
+      expect((await service.findByEmail('UMMI@EXAMPLE.COM'))?.email).toBe(
+        'Ummi@Example.com',
+      );
+    });
+
+    it('keeps different addresses apart, and lets two people share a name', async () => {
+      await service.register(as('alice@example.com', 'Sam'));
+      await service.register(as('bob@example.com', 'Sam'));
+
+      expect(await users.count()).toBe(2);
+    });
+  });
 });

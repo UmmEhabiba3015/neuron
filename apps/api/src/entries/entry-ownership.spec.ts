@@ -2,7 +2,7 @@ import type { DataSource } from 'typeorm';
 import {
   closeTestDataSource,
   createTestDataSource,
-} from '../../test/test-database';
+} from '../../test/support/test-database';
 import { UserEntity } from '../users/entities/user.entity';
 import { DayEntity } from '../days/entities/day.entity';
 import { DaysRepository } from '../days/days.repository';

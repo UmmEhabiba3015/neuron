@@ -54,8 +54,8 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-Expected after the restructure (2026-10-13): all clean, 246 API unit tests,
-365 API end-to-end tests, 170 web tests and 7 checks on the shared package.
+Expected after the restructure (2026-10-13): all clean, 421 API unit tests,
+42 API end-to-end tests, 170 web tests and 7 checks on the shared package.
 
 `packages/contracts` is compiled to `packages/contracts/dist/`, which is
 gitignored. Every root script that needs it builds it first. While changing

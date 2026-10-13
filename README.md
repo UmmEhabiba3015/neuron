@@ -191,5 +191,6 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-After the restructure (2026-10-13): 246 API unit tests, 365 API end-to-end
-tests, 170 web tests and 7 checks on the shared package, all passing.
+After the restructure (2026-10-13): 421 API unit tests, 42 API end-to-end
+tests, 170 web tests and 7 checks on the shared package, all passing. Unit
+tests cover every rule; end-to-end tests cover flows (`CLAUDE.md`, *Tests*).

@@ -6,11 +6,11 @@ import {
   createTestDataSource,
   seedUser,
   SEEDED_TIMEZONE,
-} from '../../test/test-database';
+} from '../../test/support/test-database';
 import { EntriesController } from './entries.controller';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import type { AuthenticatedRequest } from '../shared/types/authenticated-request.interface';
-import { entriesProviders } from '../../test/entries-providers';
+import { entriesProviders } from '../../test/support/entries-providers';
 
 const CALLER_ID = 'caller-id';
 

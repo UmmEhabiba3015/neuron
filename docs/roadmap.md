@@ -42,7 +42,7 @@ Built: accounts (sign up, sign in, staying signed in, sign out), writing and
 deleting entries, mood, the Timeline as a list and a month calendar, and a
 past day's page. Every screen of the designer's v3 prototype is drawn, and
 every control whose feature is not built says "This is not built yet."
-246 API unit tests, 365 API end-to-end tests, 171 web tests, 7 contract
+421 API unit tests, 42 API end-to-end tests, 170 web tests, 7 contract
 checks. 21 ADRs.
 
 ## Before feature 1: the restructure
