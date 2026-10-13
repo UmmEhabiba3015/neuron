@@ -4,10 +4,10 @@ import { DataSource } from 'typeorm';
 import { entities } from '../src/database/entities';
 import { migrations } from '../src/database/migrations';
 import { dayFor } from '../src/days/day-boundary';
-import { Day } from '../src/days/day.entity';
+import { DayEntity } from '../src/days/entities/day.entity';
 import { DaysRepository } from '../src/days/days.repository';
-import { JournalEntry } from '../src/entries/entry.entity';
-import { User } from '../src/users/user.entity';
+import { EntryEntity } from '../src/entries/entities/entry.entity';
+import { UserEntity } from '../src/users/entities/user.entity';
 
 /*
  * The zone a test account is in unless the test says otherwise. UTC, so that
@@ -38,11 +38,11 @@ export async function closeTestDataSource(dataSource: DataSource) {
 
 export async function seedEntries(
   dataSource: DataSource,
-  entries: JournalEntry[],
+  entries: EntryEntity[],
   userId?: string,
 ): Promise<void> {
   if (userId === undefined) {
-    await dataSource.getRepository(JournalEntry).insert(entries);
+    await dataSource.getRepository(EntryEntity).insert(entries);
     return;
   }
 
@@ -52,7 +52,7 @@ export async function seedEntries(
    * and it is asked here rather than copied. The zone is the one seedUser
    * gives.
    */
-  const days = new DaysRepository(dataSource.getRepository(Day));
+  const days = new DaysRepository(dataSource.getRepository(DayEntity));
 
   for (const entry of entries) {
     const day = await days.findOrCreate(
@@ -61,7 +61,7 @@ export async function seedEntries(
     );
 
     await dataSource
-      .getRepository(JournalEntry)
+      .getRepository(EntryEntity)
       .insert({ ...entry, userId, dayId: day.id });
   }
 }
@@ -108,7 +108,7 @@ export async function seedUser(
   dataSource: DataSource,
   id = 'test-caller-id',
 ): Promise<string> {
-  await dataSource.getRepository(User).insert({
+  await dataSource.getRepository(UserEntity).insert({
     id,
     email: `${id}@example.com`,
     createdAt: '2026-09-01T00:00:00.000Z',

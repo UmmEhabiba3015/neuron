@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { dayFor, type DayOwner } from './day-boundary';
 import { DaysRepository } from './days.repository';
 import type { Mood } from '@neuron/contracts';
-import type { Day } from './day.entity';
+import type { DayEntity } from './entities/day.entity';
 
 @Injectable()
 export class DaysService {
@@ -17,14 +17,14 @@ export class DaysService {
    * The owner is the user the guard loaded for this request, so the timezone
    * costs no query.
    */
-  async resolveFor(owner: DayOwner, instant: string): Promise<Day> {
+  async resolveFor(owner: DayOwner, instant: string): Promise<DayEntity> {
     return this.daysRepository.findOrCreate(
       owner.id,
       dayFor(instant, owner.timezone),
     );
   }
 
-  findByDate(userId: string, date: string): Promise<Day | undefined> {
+  findByDate(userId: string, date: string): Promise<DayEntity | undefined> {
     return this.daysRepository.findByDate(userId, date);
   }
 
@@ -38,7 +38,7 @@ export class DaysService {
    */
   async findToday(
     owner: DayOwner,
-  ): Promise<{ date: string; day: Day | undefined }> {
+  ): Promise<{ date: string; day: DayEntity | undefined }> {
     const date = this.todayFor(owner);
 
     return { date, day: await this.daysRepository.findByDate(owner.id, date) };
@@ -61,7 +61,7 @@ export class DaysService {
     return dayFor(new Date(), owner.timezone);
   }
 
-  findInRange(userId: string, from: string, to: string): Promise<Day[]> {
+  findInRange(userId: string, from: string, to: string): Promise<DayEntity[]> {
     return this.daysRepository.findInRange(userId, from, to);
   }
 
@@ -69,7 +69,7 @@ export class DaysService {
     userId: string,
     date: string,
     mood: Mood | null,
-  ): Promise<Day | undefined> {
+  ): Promise<DayEntity | undefined> {
     return this.daysRepository.setMood(userId, date, mood);
   }
 }

@@ -5,8 +5,8 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import type { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
-import { configureHttp } from './../src/configure-http';
-import { JournalEntry } from './../src/entries/entry.entity';
+import { configureHttp } from './../src/shared/utils/configure-http';
+import { EntryEntity } from './../src/entries/entities/entry.entity';
 import {
   authenticate,
   closeTestDataSource,
@@ -68,10 +68,10 @@ describe('entry ownership (e2e)', () => {
         .set('Authorization', bob)
         .expect(200);
 
-      expect((forAlice.body as JournalEntry[]).map((e) => e.content)).toEqual([
+      expect((forAlice.body as EntryEntity[]).map((e) => e.content)).toEqual([
         "Alice's private thought",
       ]);
-      expect((forBob.body as JournalEntry[]).map((e) => e.content)).toEqual([
+      expect((forBob.body as EntryEntity[]).map((e) => e.content)).toEqual([
         "Bob's private thought",
       ]);
     });
@@ -89,7 +89,7 @@ describe('entry ownership (e2e)', () => {
         .set('Authorization', alice)
         .expect(200);
 
-      expect((response.body as JournalEntry).content).toBe(
+      expect((response.body as EntryEntity).content).toBe(
         "Alice's private thought",
       );
     });
@@ -126,7 +126,7 @@ describe('entry ownership (e2e)', () => {
         .set('Authorization', alice)
         .expect(200);
 
-      expect((unchanged.body as JournalEntry).content).toBe(
+      expect((unchanged.body as EntryEntity).content).toBe(
         "Alice's private thought",
       );
     });

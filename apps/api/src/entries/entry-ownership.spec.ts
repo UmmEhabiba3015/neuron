@@ -3,13 +3,13 @@ import {
   closeTestDataSource,
   createTestDataSource,
 } from '../../test/test-database';
-import { User } from '../users/user.entity';
-import { Day } from '../days/day.entity';
+import { UserEntity } from '../users/entities/user.entity';
+import { DayEntity } from '../days/entities/day.entity';
 import { DaysRepository } from '../days/days.repository';
 import { DaysService } from '../days/days.service';
 import { EntriesRepository } from './entries.repository';
 import { EntriesService } from './entries.service';
-import { JournalEntry } from './entry.entity';
+import { EntryEntity } from './entities/entry.entity';
 
 describe('entry ownership', () => {
   let dataSource: DataSource;
@@ -29,7 +29,7 @@ describe('entry ownership', () => {
    * the thing it is testing.
    */
   const dayOf = async (userId: string): Promise<string> => {
-    const days = new DaysRepository(dataSource.getRepository(Day));
+    const days = new DaysRepository(dataSource.getRepository(DayEntity));
 
     return (await days.findOrCreate(userId, '2026-09-02')).id;
   };
@@ -68,7 +68,7 @@ describe('entry ownership', () => {
     });
 
     it('should require names to be unique', async () => {
-      const users = dataSource.getRepository(User);
+      const users = dataSource.getRepository(UserEntity);
 
       await users.insert({
         id: 'user-1',
@@ -113,7 +113,7 @@ describe('entry ownership', () => {
     });
 
     it('should actually be enforced, not merely declared', async () => {
-      await dataSource.getRepository(User).insert({
+      await dataSource.getRepository(UserEntity).insert({
         id: 'user-1',
         email: 'habiba@example.com',
         createdAt: '2026-09-02T09:00:00.000Z',
@@ -122,7 +122,7 @@ describe('entry ownership', () => {
       });
 
       await expect(
-        dataSource.getRepository(JournalEntry).insert({
+        dataSource.getRepository(EntryEntity).insert({
           id: 'entry-1',
           content: 'owned by nobody who exists',
           createdAt: '2026-09-02T09:00:00.000Z',
@@ -135,7 +135,7 @@ describe('entry ownership', () => {
 
   describe('writing and reading an owner', () => {
     it('should round-trip an owner through the entity', async () => {
-      await dataSource.getRepository(User).insert({
+      await dataSource.getRepository(UserEntity).insert({
         id: 'user-1',
         email: 'habiba@example.com',
         createdAt: '2026-09-02T09:00:00.000Z',
@@ -143,7 +143,7 @@ describe('entry ownership', () => {
         timezone: 'UTC',
       });
 
-      const entries = dataSource.getRepository(JournalEntry);
+      const entries = dataSource.getRepository(EntryEntity);
 
       await entries.insert({
         id: 'entry-1',
@@ -159,7 +159,7 @@ describe('entry ownership', () => {
     });
 
     it('should refuse an entry with no owner', async () => {
-      const entries = dataSource.getRepository(JournalEntry);
+      const entries = dataSource.getRepository(EntryEntity);
 
       await expect(
         entries.insert({
@@ -173,9 +173,9 @@ describe('entry ownership', () => {
 
   describe('the shape an entry is read back in', () => {
     it('should carry no owner, because nothing has asked for one', async () => {
-      const entries = dataSource.getRepository(JournalEntry);
+      const entries = dataSource.getRepository(EntryEntity);
 
-      await dataSource.getRepository(User).insert({
+      await dataSource.getRepository(UserEntity).insert({
         id: 'owner-of-entry-1',
         email: 'somebody@example.com',
         createdAt: '2026-09-01T00:00:00.000Z',
@@ -202,7 +202,7 @@ describe('entry ownership', () => {
 
   describe('ownership on write', () => {
     it('should record the caller as the owner of a new entry', async () => {
-      await dataSource.getRepository(User).insert({
+      await dataSource.getRepository(UserEntity).insert({
         id: 'owner-1',
         email: 'the-owner@example.com',
         createdAt: '2026-09-01T00:00:00.000Z',
@@ -212,8 +212,10 @@ describe('entry ownership', () => {
       });
 
       const service = new EntriesService(
-        new EntriesRepository(dataSource.getRepository(JournalEntry)),
-        new DaysService(new DaysRepository(dataSource.getRepository(Day))),
+        new EntriesRepository(dataSource.getRepository(EntryEntity)),
+        new DaysService(
+          new DaysRepository(dataSource.getRepository(DayEntity)),
+        ),
         dataSource,
       );
 

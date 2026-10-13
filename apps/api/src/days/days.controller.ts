@@ -8,13 +8,12 @@ import {
   Query,
   Req,
 } from '@nestjs/common';
-import type { WireDay } from '@neuron/contracts';
-import type { AuthenticatedRequest } from '../auth/authenticated-request';
-import type { Day } from './day.entity';
-import { DayDateParamDto } from './day-date.dto';
-import { DaysRangeQueryDto } from './days-range-query.dto';
+import type { AuthenticatedRequest } from '../shared/types/authenticated-request.interface';
+import { DayDateParamDto } from './dto/day-date-param.dto';
+import { DayResponseDto } from './dto/day-response.dto';
+import { DaysRangeQueryDto } from './dto/days-range-query.dto';
 import { DaysService } from './days.service';
-import { SetMoodDto } from './set-mood.dto';
+import { SetMoodDto } from './dto/set-mood.dto';
 
 @Controller('days')
 export class DaysController {
@@ -24,14 +23,14 @@ export class DaysController {
   async findInRange(
     @Query() query: DaysRangeQueryDto,
     @Req() request: AuthenticatedRequest,
-  ): Promise<WireDay[]> {
+  ): Promise<DayResponseDto[]> {
     const days = await this.daysService.findInRange(
       request.user.id,
       query.from,
       query.to,
     );
 
-    return days.map(toResponse);
+    return days.map((day) => new DayResponseDto(day));
   }
 
   /*
@@ -41,10 +40,12 @@ export class DaysController {
    * 400.
    */
   @Get('today')
-  async findToday(@Req() request: AuthenticatedRequest): Promise<WireDay> {
+  async findToday(
+    @Req() request: AuthenticatedRequest,
+  ): Promise<DayResponseDto> {
     const { date, day } = await this.daysService.findToday(request.user);
 
-    return day ? toResponse(day) : { date, mood: null };
+    return new DayResponseDto(day ?? { date, mood: null });
   }
 
   /*
@@ -60,12 +61,12 @@ export class DaysController {
   async findByDate(
     @Param() params: DayDateParamDto,
     @Req() request: AuthenticatedRequest,
-  ): Promise<WireDay> {
+  ): Promise<DayResponseDto> {
     this.refuseADayThatHasNotHappened(params.date, request);
 
     const day = await this.daysService.findByDate(request.user.id, params.date);
 
-    return day ? toResponse(day) : { date: params.date, mood: null };
+    return new DayResponseDto(day ?? { date: params.date, mood: null });
   }
 
   /*
@@ -80,7 +81,7 @@ export class DaysController {
     @Param() params: DayDateParamDto,
     @Body() dto: SetMoodDto,
     @Req() request: AuthenticatedRequest,
-  ): Promise<WireDay> {
+  ): Promise<DayResponseDto> {
     this.refuseADayThatHasNotHappened(params.date, request);
 
     const day = await this.daysService.setMood(
@@ -89,7 +90,7 @@ export class DaysController {
       dto.mood,
     );
 
-    return day ? toResponse(day) : { date: params.date, mood: dto.mood };
+    return new DayResponseDto(day ?? { date: params.date, mood: dto.mood });
   }
 
   /*
@@ -105,13 +106,4 @@ export class DaysController {
       throw new NotFoundException(`Day with date ${date} not found`);
     }
   }
-}
-
-/*
- * A day as it travels is the contract's WireDay. The entity also carries
- * user_id, which is select:false and never leaves the server, so the answer
- * is built field by field rather than being whatever the entity holds.
- */
-function toResponse(day: Day): WireDay {
-  return { date: day.date, mood: day.mood };
 }

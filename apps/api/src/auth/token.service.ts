@@ -1,18 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import type { User } from '../users/user.entity';
-
-export interface AccessTokenPayload {
-  sub: string;
-  email: string;
-  sid: string;
-}
+import type { AccessTokenPayload } from './types/access-token-payload.interface';
+import type { UserEntity } from '../users/entities/user.entity';
 
 @Injectable()
 export class TokenService {
   constructor(private readonly jwtService: JwtService) {}
 
-  sign(user: User, sessionId: string): Promise<string> {
+  sign(user: UserEntity, sessionId: string): Promise<string> {
     const payload: AccessTokenPayload = {
       sub: user.id,
       email: user.email,

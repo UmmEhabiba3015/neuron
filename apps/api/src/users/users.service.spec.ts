@@ -4,7 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 import { entities } from '../database/entities';
 import { migrations } from '../database/migrations';
 import { PasswordService } from '../auth/password.service';
-import { User } from './user.entity';
+import { UserEntity } from './entities/user.entity';
 import { UsersRepository } from './users.repository';
 import { UsersService } from './users.service';
 
@@ -17,7 +17,7 @@ const registration = (password: string) => ({
 
 describe('UsersService', () => {
   let service: UsersService;
-  let users: Repository<User>;
+  let users: Repository<UserEntity>;
 
   beforeEach(async () => {
     const dataSource = new DataSource({
@@ -30,14 +30,14 @@ describe('UsersService', () => {
     await dataSource.initialize();
     await dataSource.runMigrations();
 
-    users = dataSource.getRepository(User);
+    users = dataSource.getRepository(UserEntity);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UsersService,
         UsersRepository,
         PasswordService,
-        { provide: getRepositoryToken(User), useValue: users },
+        { provide: getRepositoryToken(UserEntity), useValue: users },
       ],
     }).compile();
 

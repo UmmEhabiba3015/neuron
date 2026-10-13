@@ -25,7 +25,12 @@ pnpm install
 pnpm migration:run   # creates or updates the database tables
 pnpm dev             # API on http://localhost:3000
 pnpm dev:web         # web app on http://localhost:3001
+pnpm --filter @neuron/contracts dev   # only while editing packages/contracts
 ```
+
+`packages/contracts` is compiled to `dist/`. Every root script builds it
+first, but a running dev server does not see a change to it unless the watch
+command above is running.
 
 **The nine checks.** Run exactly these. A plain `npx jest` in `apps/api`
 skips the migration tests and still reports a pass.
@@ -167,8 +172,9 @@ level that can see it.
 
 ## The report
 
-Write `docs/learning/<feature>/report.md`, about 40 lines, with exactly these
-sections:
+Return the report as your final message, about 40 lines. A worker runs as a
+subagent and may not write report files; the Master Thread saves it to
+`docs/learning/<feature>/`. It has exactly these sections:
 
 1. **What changed**: a few sentences, then the files, one line each.
 2. **Decisions and assumptions**: anything the spec did not settle, and what

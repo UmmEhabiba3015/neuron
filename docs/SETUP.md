@@ -10,7 +10,7 @@ work moved from days to features.
 
 | Thing | Version | Notes |
 |---|---|---|
-| Node | 24 or newer | Both apps load TypeScript files from `packages/contracts` directly, which Node does without a flag only from version 24 |
+| Node | 24 or newer | The web app's tests run TypeScript files with Node alone, which Node does without a flag only from version 24 |
 | pnpm | 11.17.0 | `corepack enable` provides it. npm and yarn will not work: this is a pnpm workspace with a pnpm lockfile |
 | git and `gh` | any recent | `gh` is the GitHub command line tool; each feature closes with a pull request |
 
@@ -54,8 +54,13 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-Expected at the close of Screens Day: all clean, 246 API unit tests, 365 API
-end-to-end tests, 171 web tests and 7 checks on the shared package.
+Expected after the restructure (2026-10-13): all clean, 246 API unit tests,
+365 API end-to-end tests, 170 web tests and 7 checks on the shared package.
+
+`packages/contracts` is compiled to `packages/contracts/dist/`, which is
+gitignored. Every root script that needs it builds it first. While changing
+that package, `pnpm --filter @neuron/contracts dev` rebuilds it on every
+save.
 
 If `typecheck:web` fails inside `apps/web/.next/` after a page folder was
 renamed, delete `apps/web/.next`. It is generated, gitignored, and rebuilt on

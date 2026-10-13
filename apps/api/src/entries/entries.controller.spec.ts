@@ -8,8 +8,8 @@ import {
   SEEDED_TIMEZONE,
 } from '../../test/test-database';
 import { EntriesController } from './entries.controller';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import type { AuthenticatedRequest } from '../auth/authenticated-request';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import type { AuthenticatedRequest } from '../shared/types/authenticated-request.interface';
 import { entriesProviders } from '../../test/entries-providers';
 
 const CALLER_ID = 'caller-id';

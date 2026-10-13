@@ -5,16 +5,16 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import type { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
-import { configureHttp } from './../src/configure-http';
+import { configureHttp } from './../src/shared/utils/configure-http';
 import {
   authenticate,
   closeTestDataSource,
   createTestDataSource,
 } from './test-database';
-import type { JournalEntry } from './../src/entries/entry.entity';
+import type { EntryEntity } from './../src/entries/entities/entry.entity';
 
-const entryFrom = (res: request.Response): JournalEntry =>
-  res.body as JournalEntry;
+const entryFrom = (res: request.Response): EntryEntity =>
+  res.body as EntryEntity;
 
 const messagesFrom = (res: request.Response): string[] =>
   (res.body as { message: string[] }).message;
@@ -272,8 +272,8 @@ describe('EntriesController (e2e)', () => {
         .get('/entries?word=100%25')
         .expect(200)
         .expect((res) => {
-          expect(res.body as JournalEntry[]).toHaveLength(1);
-          expect((res.body as JournalEntry[])[0].content).toBe(
+          expect(res.body as EntryEntity[]).toHaveLength(1);
+          expect((res.body as EntryEntity[])[0].content).toBe(
             '100% exhausted today',
           );
         });

@@ -5,8 +5,8 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import type { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
-import { configureHttp } from './../src/configure-http';
-import { Session } from './../src/auth/session.entity';
+import { configureHttp } from './../src/shared/utils/configure-http';
+import { SessionEntity } from './../src/auth/entities/session.entity';
 import { closeTestDataSource, createTestDataSource } from './test-database';
 
 describe('stale credentials (e2e)', () => {
@@ -52,7 +52,7 @@ describe('stale credentials (e2e)', () => {
     token = body.accessToken;
     userId = body.user.id;
 
-    const sessions = await dataSource.getRepository(Session).find();
+    const sessions = await dataSource.getRepository(SessionEntity).find();
     sessionId = sessions[0].id;
   });
 
@@ -73,7 +73,7 @@ describe('stale credentials (e2e)', () => {
   describe('when the session has expired rather than been revoked', () => {
     beforeEach(async () => {
       await dataSource
-        .getRepository(Session)
+        .getRepository(SessionEntity)
         .update({ id: sessionId }, { expiresAt: '2020-01-01T00:00:00.000Z' });
     });
 
@@ -98,7 +98,7 @@ describe('stale credentials (e2e)', () => {
 
     it('is not treated as revoked, because it was not', async () => {
       const session = await dataSource
-        .getRepository(Session)
+        .getRepository(SessionEntity)
         .findOneByOrFail({ id: sessionId });
 
       expect(session.revokedAt).toBeNull();

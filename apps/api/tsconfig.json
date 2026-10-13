@@ -24,10 +24,11 @@
     "types": ["jest", "node"],
     "incremental": true,
     "skipLibCheck": true,
-    "strictNullChecks": true,
+    // Every strict check. A property a framework fills (an entity column, a
+    // request DTO field) is declared with `!`, which tells the compiler it is
+    // assigned outside the constructor.
+    "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": true,
-    "strictBindCallApply": true,
     "noFallthroughCasesInSwitch": true
   }
 }

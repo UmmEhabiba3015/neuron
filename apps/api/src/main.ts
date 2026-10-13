@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
-import { configureHttp } from './configure-http';
+import { configureHttp } from './shared/utils/configure-http';
 import type { EnvironmentVariables } from './config/env.validation';
 
 async function bootstrap() {

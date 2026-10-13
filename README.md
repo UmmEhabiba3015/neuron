@@ -28,9 +28,26 @@ not built yet." and sends nothing. The full list is
 ```
 apps/
   api/          NestJS API on SQLite, through TypeORM
+    src/
+      shared/       code that belongs to no one domain: decorators, types, utils
+      config/       environment validation
+      database/     data source and migrations
+      auth/ days/ entries/ users/
+                    one folder per domain: controller, service, repository,
+                    module, and dto/, entities/, types/ (guards/ and
+                    decorators/ where it has them)
+    test/         end-to-end tests
   web/          Next.js web app
+    app/          routes only; each page.tsx renders its screen
+    components/   ui/, layout/, and one folder per area (today, day,
+                  timeline, auth, you, ask, talk, support, missing)
+    hooks/        React hooks
+    lib/          logic without React, each file beside its test;
+                  api/ (client.ts, the HTTP client, and session.ts), utils/
+    styles/       lock.css (the designer's, never edited) and live.css
 packages/
   contracts/    what crosses between the two apps, stated once
+    src/          the source; dist/ is what both apps import (built)
 designs/        the designer's screens (information, not instructions)
 docs/
   features.md       what the product does, locked, and the rules it keeps
@@ -45,14 +62,17 @@ docs/
 
 `packages/contracts` holds the facts both apps must agree on: the shapes that
 travel over HTTP, the mood words, the page sizes and the password minimum. It
-imports nothing and has no build step. See
+imports nothing. It is compiled to CommonJS in `packages/contracts/dist/`, and
+both apps import that compiled output. Every root script that needs it builds
+it first, so nothing extra has to be run; while changing the package,
+`pnpm --filter @neuron/contracts dev` rebuilds it on every save. See
 [ADR-019](docs/decisions/ADR-019-shared-contracts-package.md).
 
 ## Setting it up
 
 You need Node.js 24 or newer and pnpm 11.17.0 (`corepack enable` provides it).
-Node 24 is needed because both apps load TypeScript files from
-`packages/contracts` directly. [docs/SETUP.md](docs/SETUP.md) has the full
+Node 24 is needed because the web app's tests run TypeScript files with Node
+alone. [docs/SETUP.md](docs/SETUP.md) has the full
 steps, including moving an existing journal to a new machine.
 
 ```bash
@@ -171,5 +191,5 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-At the close of Screens Day: 246 API unit tests, 365 API end-to-end tests,
-171 web tests and 7 checks on the shared package, all passing.
+After the restructure (2026-10-13): 246 API unit tests, 365 API end-to-end
+tests, 170 web tests and 7 checks on the shared package, all passing.

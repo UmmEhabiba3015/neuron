@@ -6,7 +6,7 @@ import { DaysModule } from '../days/days.module';
 import { EntriesController } from './entries.controller';
 import { EntriesRepository } from './entries.repository';
 import { EntriesService } from './entries.service';
-import { JournalEntry } from './entry.entity';
+import { EntryEntity } from './entities/entry.entity';
 
 @Module({
   imports: [
@@ -16,7 +16,7 @@ import { JournalEntry } from './entry.entity';
 
     DaysModule,
 
-    TypeOrmModule.forFeature([JournalEntry]),
+    TypeOrmModule.forFeature([EntryEntity]),
   ],
   controllers: [EntriesController],
 

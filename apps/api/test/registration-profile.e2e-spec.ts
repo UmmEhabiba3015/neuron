@@ -5,7 +5,7 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import type { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
-import { configureHttp } from './../src/configure-http';
+import { configureHttp } from './../src/shared/utils/configure-http';
 import { refreshCookieFrom } from './refresh-cookie';
 import { closeTestDataSource, createTestDataSource } from './test-database';
 
@@ -199,8 +199,8 @@ describe('the name and the timezone at registration (e2e)', () => {
   });
 
   /*
-   * WireUser has no timezone, and the controllers hand back the entity. The
-   * compiler does not object to an extra field, so this does.
+   * The contract's User has no timezone, and neither does UserResponseDto.
+   * The compiler does not object to an extra field, so this does.
    *
    * The zone is one no other part of these bodies could contain by
    * accident, and each body is searched for the word and for the value.

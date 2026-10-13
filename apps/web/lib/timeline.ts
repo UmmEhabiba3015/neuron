@@ -22,9 +22,9 @@
  * wrong long-term shape, and is Day 29's problem.
  */
 
-import type { WireDay, WireEntry } from '@neuron/contracts';
+import type { Day, Entry } from '@neuron/contracts';
 import { monthRange } from './calendar.ts';
-import { monthOf } from './format.ts';
+import { monthOf } from './utils/format.ts';
 import { MAX_PAGES, type Request } from './today.ts';
 
 export interface TimelineDay {
@@ -34,7 +34,7 @@ export interface TimelineDay {
    * the other way, oldest first, on purpose: there a day is read from
    * morning to night.
    */
-  entries: readonly WireEntry[];
+  entries: readonly Entry[];
 }
 
 /* The month the calendar shows, as "2026-08", and its dates with entries. */
@@ -83,8 +83,8 @@ export interface Timeline {
 }
 
 /* Months, days and the entries of each day: all newest first. */
-export function groupByDay(entries: readonly WireEntry[]): TimelineMonth[] {
-  const byDate = new Map<string, WireEntry[]>();
+export function groupByDay(entries: readonly Entry[]): TimelineMonth[] {
+  const byDate = new Map<string, Entry[]>();
 
   for (const entry of entries) {
     const day = byDate.get(entry.date);
@@ -124,7 +124,7 @@ type Fetched =
       status: 'loaded';
       today: string;
       calendar: TimelineCalendar;
-      entries: WireEntry[];
+      entries: Entry[];
       complete: boolean;
     }
   | { status: 'unreachable' }
@@ -160,7 +160,7 @@ export function createTimeline(config: {
   }
 
   async function fetchAll(): Promise<Fetched> {
-    const today = await request<WireDay>('/days/today');
+    const today = await request<Day>('/days/today');
 
     if (today.kind !== 'ok') {
       return { status: statusOf(today.kind) };
@@ -168,7 +168,7 @@ export function createTimeline(config: {
 
     const month = monthOf(today.data.date);
     const { from, to } = monthRange(month);
-    const days = await request<WireDay[]>(`/days?from=${from}&to=${to}`);
+    const days = await request<Day[]>(`/days?from=${from}&to=${to}`);
 
     if (days.kind !== 'ok') {
       return { status: statusOf(days.kind) };
@@ -176,7 +176,7 @@ export function createTimeline(config: {
 
     const calendar = { month, written: days.data.map((day) => day.date) };
 
-    const entries: WireEntry[] = [];
+    const entries: Entry[] = [];
     let complete = true;
 
     /* A short page is the last one. */
@@ -186,7 +186,7 @@ export function createTimeline(config: {
         break;
       }
 
-      const page = await request<WireEntry[]>(
+      const page = await request<Entry[]>(
         `/entries?limit=${pageSize}&offset=${entries.length}`,
       );
 
@@ -216,7 +216,7 @@ export function createTimeline(config: {
    * entries missing would be a false statement about that day, so that one
    * day is left out, unless it is the only day there is.
    */
-  function shownWhenCut(entries: WireEntry[]): WireEntry[] {
+  function shownWhenCut(entries: Entry[]): Entry[] {
     const cut = entries[entries.length - 1]?.date;
     const rest = entries.filter((entry) => entry.date !== cut);
 

@@ -6,20 +6,24 @@
     "node": ">=24"
   },
   "scripts": {
-    "dev": "pnpm --filter @neuron/api start:dev",
-    "build": "pnpm --filter @neuron/api build",
-    "lint": "pnpm --filter @neuron/api lint",
-    "typecheck": "pnpm --filter @neuron/api typecheck",
+    "build:contracts": "pnpm --filter @neuron/contracts build",
+    "dev": "pnpm build:contracts && pnpm --filter @neuron/api start:dev",
+    "build": "pnpm build:contracts && pnpm --filter @neuron/api build",
+    "lint": "pnpm build:contracts && pnpm --filter @neuron/api lint",
+    "typecheck": "pnpm build:contracts && pnpm --filter @neuron/api typecheck",
     "test": "pnpm test:contracts && pnpm --filter @neuron/api test",
-    "test:e2e": "pnpm --filter @neuron/api test:e2e",
-    "migration:generate": "pnpm --filter @neuron/api migration:generate",
-    "migration:run": "pnpm --filter @neuron/api migration:run",
-    "migration:revert": "pnpm --filter @neuron/api migration:revert",
-    "dev:web": "pnpm --filter @neuron/web dev",
-    "build:web": "pnpm --filter @neuron/web build",
-    "lint:web": "pnpm --filter @neuron/web lint",
-    "typecheck:web": "pnpm --filter @neuron/web typecheck",
+    "test:e2e": "pnpm build:contracts && pnpm --filter @neuron/api test:e2e",
+    "migration:generate": "pnpm build:contracts && pnpm --filter @neuron/api migration:generate",
+    "migration:run": "pnpm build:contracts && pnpm --filter @neuron/api migration:run",
+    "migration:revert": "pnpm build:contracts && pnpm --filter @neuron/api migration:revert",
+    "dev:web": "pnpm build:contracts && pnpm --filter @neuron/web dev",
+    "build:web": "pnpm build:contracts && pnpm --filter @neuron/web build",
+    "lint:web": "pnpm build:contracts && pnpm --filter @neuron/web lint",
+    "typecheck:web": "pnpm build:contracts && pnpm --filter @neuron/web typecheck",
     "test:web": "pnpm test:contracts && pnpm --filter @neuron/web test",
-    "test:contracts": "pnpm --filter @neuron/contracts test"
+    "test:contracts": "pnpm build:contracts && pnpm --filter @neuron/contracts test"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
   }
 }

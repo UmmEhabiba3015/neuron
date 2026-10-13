@@ -1,4 +1,4 @@
-import type { User } from '../users/user.entity';
+import type { UserEntity } from '../users/entities/user.entity';
 
 /*
  * The calendar date an instant falls on for one person. A day ends at
@@ -40,4 +40,4 @@ export function dayFor(instant: string | Date, timeZone: string): string {
  * midnight falls. They travel together so that one person's id can never be
  * paired with another person's zone.
  */
-export type DayOwner = Pick<User, 'id' | 'timezone'>;
+export type DayOwner = Pick<UserEntity, 'id' | 'timezone'>;

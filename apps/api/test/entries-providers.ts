@@ -1,11 +1,11 @@
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { Day } from '../src/days/day.entity';
+import { DayEntity } from '../src/days/entities/day.entity';
 import { DaysRepository } from '../src/days/days.repository';
 import { DaysService } from '../src/days/days.service';
 import { EntriesRepository } from '../src/entries/entries.repository';
 import { EntriesService } from '../src/entries/entries.service';
-import { JournalEntry } from '../src/entries/entry.entity';
+import { EntryEntity } from '../src/entries/entities/entry.entity';
 
 /*
  * Everything EntriesService needs, in one place, so a new dependency is added
@@ -19,12 +19,12 @@ export function entriesProviders(dataSource: DataSource) {
     DaysRepository,
     { provide: DataSource, useValue: dataSource },
     {
-      provide: getRepositoryToken(JournalEntry),
-      useValue: dataSource.getRepository(JournalEntry),
+      provide: getRepositoryToken(EntryEntity),
+      useValue: dataSource.getRepository(EntryEntity),
     },
     {
-      provide: getRepositoryToken(Day),
-      useValue: dataSource.getRepository(Day),
+      provide: getRepositoryToken(DayEntity),
+      useValue: dataSource.getRepository(DayEntity),
     },
   ];
 }

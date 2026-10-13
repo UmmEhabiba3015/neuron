@@ -202,7 +202,7 @@ her asking to skip it is not enough** (her husband's rule, 2026-09-04).
 
 **Open, to repay at the opening of feature 1, as predictions she runs:**
 
-- **A custom hook.** `useNotBuilt` in `apps/web/app/components/NotBuilt.tsx`
+- **A custom hook.** `useNotBuilt` in `apps/web/hooks/useNotBuilt.ts` (moved by the restructure)
   holds a piece of state for whichever control calls it.
 - **`as const satisfies` with `keyof typeof`** in `apps/web/lib/unbuilt.ts`.
   A misspelt control name on a screen fails `pnpm typecheck:web`; that is the
@@ -241,6 +241,7 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 | **`better-sqlite3@13` is outside TypeORM's peer range.** It works and is pinned | `apps/api/package.json` | Dissolves with Postgres in feature 8 |
 | **`Etc/GMT+5` is accepted as a timezone** | the registration check | Low; noted |
 | **Deleted entries must be kept out of every later reader** | search, embeddings, Ask, export | Features 6, 10, 12, 13 (ADR-020) |
+| **The Export row on Your data still says "Markdown and JSON"**; export is PDF, JSON and audio (features.md Ref 36). Screen wording, hers | `components/you/You.tsx` | Feature 6, Your data |
 | **TypeORM does not switch foreign keys off when reverting a migration** | ADR-010 | One line owed in ADR-010 |
 | **No ADR yet for the 2026-10-04 data-model decisions** (one `entries` table with a `kind` for recordings; drafts on the server) | `docs/decisions/` | Written when each is built |
 | **Code comments point at retired documents** (`requirements.md`, `feature-reconciliation.md`, `ui-handover.md`); replace with `features.md` | six files in `apps/web` | The restructure, part 1 |
@@ -289,8 +290,10 @@ reads automatically.
    tool), with her agreement. She does not paste prompts between sessions.
    She can read the spec in `docs/workers/` before it runs.
 4. **The worker** implements, tests, does one mutation, walks the browser only
-   if screens changed, runs the nine checks, and writes a report of about 40
-   lines in the format `CLAUDE.md` gives.
+   if screens changed, runs the nine checks, and returns a report of about
+   40 lines in the format `CLAUDE.md` gives, as its final message. The Master
+   Thread saves it to `docs/learning/<feature>/` (a subagent may not write
+   report files).
 5. **The Master Thread audits the diff** (`git diff`) against the spec,
    `CLAUDE.md` and the ADRs. It does not repeat the worker's mutation or
    walk. It runs the nine checks once, just before the commit, and compares

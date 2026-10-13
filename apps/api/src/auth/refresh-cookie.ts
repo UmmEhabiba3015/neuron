@@ -1,5 +1,6 @@
 import type { CookieOptions } from 'express';
 import { REFRESH_TOKEN_LIFETIME_MS } from './auth.service';
+import type { RefreshCredential } from './types/refresh-credential.interface';
 
 export const REFRESH_COOKIE_NAME = 'neuron_refresh';
 
@@ -23,11 +24,6 @@ export const REFRESH_COOKIE_OPTIONS: CookieOptions = {
 
 export const REFRESH_COOKIE_CLEAR_OPTIONS: CookieOptions =
   REFRESH_COOKIE_ATTRIBUTES;
-
-export interface RefreshCredential {
-  sessionId: string;
-  refreshToken: string;
-}
 
 /*
  * One cookie carries both halves as `<sessionId>.<refreshToken>`. A session

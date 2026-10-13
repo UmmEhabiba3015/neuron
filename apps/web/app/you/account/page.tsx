@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Account } from '@/app/screens/You';
+import { Account } from '@/components/you/You';
 
 export const metadata: Metadata = { title: 'Account · Journal' };
 

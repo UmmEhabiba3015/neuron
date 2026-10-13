@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { LiveToday } from '@/app/screens/LiveToday';
+import { LiveToday } from '@/components/today/LiveToday';
 
 export const metadata: Metadata = { title: 'Composer options · Journal' };
 

@@ -9,9 +9,10 @@ import { join } from 'node:path';
  * `pnpm start:prod` does, so that plain Node has to find @neuron/contracts by
  * itself at runtime.
  *
- * The contract's package.json has no "type" field, and that is deliberate.
- * Adding "type": "module" makes ts-node refuse the package, which breaks the
- * migration commands and the main-wiring suite.
+ * The contract is compiled to CommonJS in its own dist/, and its
+ * package.json points there. ESM output would make ts-node and Jest refuse
+ * the package, which breaks the migration commands and the main-wiring
+ * suite. The root scripts build the contract before this suite runs.
  *
  * It builds for itself rather than trusting a dist folder that happens to be
  * there, which may be old or absent.

@@ -2,14 +2,25 @@
  * Facts about data crossing the boundary between apps/api and apps/web, and
  * nothing else (ADR-019). No behaviour of either application lives here.
  *
- * This file imports nothing and holds no function. Both rules are checked by
- * test/contract.test.mjs.
+ * This file imports nothing and holds no function or class: interfaces,
+ * enums and constants only. Both rules are checked by test/contract.test.mjs.
+ *
+ * It is compiled to dist/ by `pnpm build` in this package, and both
+ * applications import the compiled output, never this file.
  */
 
-/* The five words a day's mood may be. null, not a sixth word, clears it. */
-export const MOODS = ['Light', 'Good', 'Even', 'Low', 'Hard'] as const;
-
-export type Mood = (typeof MOODS)[number];
+/*
+ * The five words a day's mood may be, in the order they are drawn. null, not
+ * a sixth word, clears it. Each value is the word itself, so what travels
+ * over HTTP and what is stored is the word. Object.values(Mood) lists them.
+ */
+export enum Mood {
+  Light = 'Light',
+  Good = 'Good',
+  Even = 'Even',
+  Low = 'Low',
+  Hard = 'Hard',
+}
 
 /* What GET /entries serves when no limit is asked for, and the most it serves. */
 export const DEFAULT_PAGE_SIZE = 50;
@@ -21,12 +32,12 @@ export const PASSWORD_MIN_LENGTH = 8;
 export const NAME_MAX_LENGTH = 60;
 
 /*
- * The shapes below are what travels over HTTP, which is why each name starts
- * with Wire. They are not the API's entities: an entity also holds columns
- * that never leave the server.
+ * The shapes below are what travels over HTTP. They are not the API's
+ * entities: an entity also holds columns that never leave the server. The
+ * API's response DTOs implement them.
  */
 
-export interface WireEntry {
+export interface Entry {
   id: string;
   content: string;
   /* An instant, as an ISO 8601 string. */
@@ -39,13 +50,13 @@ export interface WireEntry {
   date: string;
 }
 
-export interface WireDay {
+export interface Day {
   /* A calendar date, YYYY-MM-DD. Which date is "today" is the API's to say. */
   date: string;
   mood: Mood | null;
 }
 
-export interface WireUser {
+export interface User {
   id: string;
   email: string;
   /* What the person is called on screen. Never used for signing in. */
@@ -54,9 +65,9 @@ export interface WireUser {
 }
 
 /* The answer to POST /auth/login and POST /auth/refresh. */
-export interface WireAuthenticated {
+export interface AuthResponse {
   accessToken: string;
-  user: WireUser;
+  user: User;
 }
 
 /*
@@ -66,23 +77,23 @@ export interface WireAuthenticated {
  */
 
 /* The body of POST /entries. */
-export interface WireNewEntry {
+export interface CreateEntry {
   content: string;
 }
 
 /* The body of PUT /days/:date/mood. null clears the mood. */
-export interface WireMood {
+export interface SetMood {
   mood: Mood | null;
 }
 
 /* The body of POST /auth/login. */
-export interface WireLogin {
+export interface Login {
   email: string;
   password: string;
 }
 
 /* The body of POST /auth/register. */
-export interface WireRegistration {
+export interface Register {
   email: string;
   password: string;
   name: string;

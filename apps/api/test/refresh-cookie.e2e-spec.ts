@@ -7,8 +7,8 @@ import type { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
 import { REFRESH_TOKEN_LIFETIME_DAYS } from './../src/auth/auth.service';
 import { REFRESH_COOKIE_NAME } from './../src/auth/refresh-cookie';
-import { Session } from './../src/auth/session.entity';
-import { configureHttp } from './../src/configure-http';
+import { SessionEntity } from './../src/auth/entities/session.entity';
+import { configureHttp } from './../src/shared/utils/configure-http';
 import { refreshCookieFrom, refreshTokenIn } from './refresh-cookie';
 import { closeTestDataSource, createTestDataSource } from './test-database';
 
@@ -103,7 +103,7 @@ describe('the refresh cookie (e2e)', () => {
 
     it('should carry the session id and a token that matches the stored hash', async () => {
       const cookie = refreshCookieFrom(await respond());
-      const [session] = await dataSource.getRepository(Session).find();
+      const [session] = await dataSource.getRepository(SessionEntity).find();
 
       expect(cookie.value.startsWith(`${session.id}.`)).toBe(true);
       expect(refreshTokenIn(cookie)).toMatch(/^[A-Za-z0-9_-]{43}$/);
@@ -136,7 +136,7 @@ describe('the refresh cookie (e2e)', () => {
 
     it('should ignore a refresh token sent in the body', async () => {
       const cookie = refreshCookieFrom(await login());
-      const [session] = await dataSource.getRepository(Session).find();
+      const [session] = await dataSource.getRepository(SessionEntity).find();
 
       await request(app.getHttpServer())
         .post('/auth/refresh')
@@ -146,7 +146,7 @@ describe('the refresh cookie (e2e)', () => {
 
     it('should answer every bad cookie with the same 401', async () => {
       const cookie = refreshCookieFrom(await login());
-      const [session] = await dataSource.getRepository(Session).find();
+      const [session] = await dataSource.getRepository(SessionEntity).find();
 
       const responses = [
         await refresh(),

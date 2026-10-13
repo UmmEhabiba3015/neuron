@@ -5,7 +5,7 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import type { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
-import { configureHttp } from './../src/configure-http';
+import { configureHttp } from './../src/shared/utils/configure-http';
 import { freezeClockAt, moveClockTo, releaseClock } from './clock';
 import {
   authenticate,
@@ -30,11 +30,11 @@ describe('a deleted entry (e2e)', () => {
   let alice: string;
   let bob: string;
 
-  let earlier: WireEntryBody;
-  let doomed: WireEntryBody;
-  let later: WireEntryBody;
+  let earlier: EntryBody;
+  let doomed: EntryBody;
+  let later: EntryBody;
 
-  interface WireEntryBody {
+  interface EntryBody {
     id: string;
     content: string;
     createdAt: string;
@@ -58,7 +58,7 @@ describe('a deleted entry (e2e)', () => {
 
   const write = async (auth: string, content: string) =>
     (await as(auth).post('/entries').send({ content }).expect(201))
-      .body as WireEntryBody;
+      .body as EntryBody;
 
   const rowOf = async (id: string) =>
     (
@@ -165,7 +165,7 @@ describe('a deleted entry (e2e)', () => {
         ['a limit and an offset', '?limit=200&offset=0'],
       ])('does not list it with %s', async (_label, query) => {
         const listed = (await as(alice).get(`/entries${query}`).expect(200))
-          .body as WireEntryBody[];
+          .body as EntryBody[];
 
         expect(listed.map((entry) => entry.id)).not.toContain(doomed.id);
       });
@@ -182,7 +182,7 @@ describe('a deleted entry (e2e)', () => {
               await as(alice)
                 .get(`/entries?limit=1&offset=${offset}`)
                 .expect(200)
-            ).body as WireEntryBody[]
+            ).body as EntryBody[]
           ).map((entry) => entry.id);
 
         expect(await page(0)).toEqual([later.id]);
@@ -192,7 +192,7 @@ describe('a deleted entry (e2e)', () => {
 
       it('lists exactly the two that are left', async () => {
         const listed = (await as(alice).get('/entries').expect(200))
-          .body as WireEntryBody[];
+          .body as EntryBody[];
 
         expect(listed).toEqual([later, earlier]);
       });
@@ -331,7 +331,7 @@ describe('a deleted entry (e2e)', () => {
   });
 
   /*
-   * The contract's WireEntry has no deleted_at, and the compiler does not
+   * The contract's Entry has no deleted_at, and the compiler does not
    * check for extra fields: an entity with one more property is still
    * assignable to it. So every answer of every entries route is looked at
    * here, before a delete and after one.

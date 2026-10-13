@@ -5,9 +5,9 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import type { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
-import { configureHttp } from './../src/configure-http';
-import { Session } from './../src/auth/session.entity';
-import { User } from './../src/users/user.entity';
+import { configureHttp } from './../src/shared/utils/configure-http';
+import { SessionEntity } from './../src/auth/entities/session.entity';
+import { UserEntity } from './../src/users/entities/user.entity';
 import { closeTestDataSource, createTestDataSource } from './test-database';
 
 const messagesFrom = (res: request.Response): string[] =>
@@ -90,7 +90,7 @@ describe('AuthController (e2e)', () => {
         .expect(201);
 
       const stored = await dataSource
-        .getRepository(User)
+        .getRepository(UserEntity)
         .findOneByOrFail({ email: 'umer@example.com' });
 
       expect(stored.passwordHash).not.toBe(password);
@@ -111,7 +111,7 @@ describe('AuthController (e2e)', () => {
         .send({ email: 'bob@example.com', password, ...profile })
         .expect(201);
 
-      const users = await dataSource.getRepository(User).find();
+      const users = await dataSource.getRepository(UserEntity).find();
 
       expect(users).toHaveLength(2);
       expect(users[0].passwordHash).not.toBe(users[1].passwordHash);
@@ -136,7 +136,7 @@ describe('AuthController (e2e)', () => {
         })
         .expect(409);
 
-      expect(await dataSource.getRepository(User).count()).toBe(1);
+      expect(await dataSource.getRepository(UserEntity).count()).toBe(1);
     });
 
     describe('validation', () => {
@@ -306,7 +306,7 @@ describe('AuthController (e2e)', () => {
     });
 
     it('should reject a login for a user whose password was never set', async () => {
-      await dataSource.getRepository(User).insert({
+      await dataSource.getRepository(UserEntity).insert({
         id: 'legacy-user',
         email: 'legacy@example.com',
         createdAt: '2026-09-01T00:00:00.000Z',
@@ -447,11 +447,11 @@ describe('AuthController (e2e)', () => {
       const authorization = await login();
 
       const user = await dataSource
-        .getRepository(User)
+        .getRepository(UserEntity)
         .findOneByOrFail({ email: 'umer@example.com' });
 
-      await dataSource.getRepository(Session).delete({ userId: user.id });
-      await dataSource.getRepository(User).delete({ id: user.id });
+      await dataSource.getRepository(SessionEntity).delete({ userId: user.id });
+      await dataSource.getRepository(UserEntity).delete({ id: user.id });
 
       await request(app.getHttpServer())
         .get('/auth/me')

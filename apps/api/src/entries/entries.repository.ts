@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Raw, Repository, type FindOptionsWhere } from 'typeorm';
-import { JournalEntry, type FiledEntry } from './entry.entity';
-import type { EntryFilters } from './entry-filters';
-import type { Page } from './page';
+import { EntryEntity } from './entities/entry.entity';
+import type { FiledEntry } from './types/filed-entry.type';
+import type { EntryFilters } from './types/entry-filters.interface';
+import type { Page } from '../shared/types/page.interface';
 
 @Injectable()
 export class EntriesRepository {
   constructor(
-    @InjectRepository(JournalEntry)
-    private readonly entries: Repository<JournalEntry>,
+    @InjectRepository(EntryEntity)
+    private readonly entries: Repository<EntryEntity>,
   ) {}
 
   find(
@@ -44,7 +45,7 @@ export class EntriesRepository {
    * counting entries here, because an entry points at exactly one day, so
    * the join never turns one entry into two rows.
    */
-  private filed(where: FindOptionsWhere<JournalEntry>) {
+  private filed(where: FindOptionsWhere<EntryEntity>) {
     return this.entries.createQueryBuilder('entry').setFindOptions({
       where,
       relations: { day: true },
@@ -58,7 +59,7 @@ export class EntriesRepository {
     });
   }
 
-  async save(entry: JournalEntry): Promise<void> {
+  async save(entry: EntryEntity): Promise<void> {
     await this.entries.insert(entry);
   }
 
@@ -115,8 +116,8 @@ export class EntriesRepository {
 function whereFor(
   userId: string,
   filters: EntryFilters,
-): FindOptionsWhere<JournalEntry> {
-  const where: FindOptionsWhere<JournalEntry> = { userId };
+): FindOptionsWhere<EntryEntity> {
+  const where: FindOptionsWhere<EntryEntity> = { userId };
 
   /*
    * "Written on that day" is the day row the entry points at, not a window

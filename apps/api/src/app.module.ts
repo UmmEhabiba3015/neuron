@@ -6,7 +6,7 @@ import {
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
-import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { validate } from './config/env.validation';
 import { EntriesModule } from './entries/entries.module';
 import { DaysModule } from './days/days.module';

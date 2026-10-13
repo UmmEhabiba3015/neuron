@@ -6,7 +6,7 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import type { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
-import { configureHttp } from './../src/configure-http';
+import { configureHttp } from './../src/shared/utils/configure-http';
 import { closeTestDataSource, createTestDataSource } from './test-database';
 
 const FOREIGN_ORIGIN = 'http://evil.example';

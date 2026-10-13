@@ -1,9 +1,10 @@
+import { Mood } from '@neuron/contracts';
 import { DataSource } from 'typeorm';
 import { entities } from '../database/entities';
 import { migrations } from '../database/migrations';
-import { Day } from './day.entity';
+import { DayEntity } from './entities/day.entity';
 import { DaysRepository } from './days.repository';
-import { User } from '../users/user.entity';
+import { UserEntity } from '../users/entities/user.entity';
 
 describe('DaysRepository', () => {
   let dataSource: DataSource;
@@ -21,7 +22,7 @@ describe('DaysRepository', () => {
     await dataSource.runMigrations();
 
     for (const id of ['alice', 'bob']) {
-      await dataSource.getRepository(User).insert({
+      await dataSource.getRepository(UserEntity).insert({
         id,
         email: `${id}@example.com`,
         createdAt: '2026-01-01T00:00:00.000Z',
@@ -31,7 +32,7 @@ describe('DaysRepository', () => {
       });
     }
 
-    repository = new DaysRepository(dataSource.getRepository(Day));
+    repository = new DaysRepository(dataSource.getRepository(DayEntity));
   });
 
   afterEach(async () => {
@@ -104,7 +105,7 @@ describe('DaysRepository', () => {
     });
 
     it('does not list a day that has only a mood', async () => {
-      await repository.setMood('alice', '2026-08-09', 'Even');
+      await repository.setMood('alice', '2026-08-09', Mood.Even);
 
       expect(await datesListed('alice')).toEqual([]);
     });

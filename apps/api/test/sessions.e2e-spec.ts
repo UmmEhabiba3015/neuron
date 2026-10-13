@@ -5,9 +5,9 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import type { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
-import { configureHttp } from './../src/configure-http';
+import { configureHttp } from './../src/shared/utils/configure-http';
 import { REFRESH_COOKIE_NAME } from './../src/auth/refresh-cookie';
-import { Session } from './../src/auth/session.entity';
+import { SessionEntity } from './../src/auth/entities/session.entity';
 import {
   refreshCookieFrom,
   refreshTokenIn,
@@ -87,13 +87,13 @@ describe('sessions and revocation (e2e)', () => {
       await login();
       await login();
 
-      expect(await dataSource.getRepository(Session).count()).toBe(2);
+      expect(await dataSource.getRepository(SessionEntity).count()).toBe(2);
     });
 
     it('should store a hash of the refresh token, never the token', async () => {
       const body = await login();
 
-      const [session] = await dataSource.getRepository(Session).find();
+      const [session] = await dataSource.getRepository(SessionEntity).find();
 
       const refreshToken = refreshTokenIn(body.cookie);
 
@@ -155,7 +155,7 @@ describe('sessions and revocation (e2e)', () => {
 
       await refreshWith(first.cookie).expect(401);
 
-      const sessions = await dataSource.getRepository(Session).find();
+      const sessions = await dataSource.getRepository(SessionEntity).find();
 
       expect(sessions).toHaveLength(2);
       expect(sessions.every((session) => session.revokedAt !== null)).toBe(

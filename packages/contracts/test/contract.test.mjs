@@ -3,7 +3,11 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { test } from 'node:test';
 
-import * as contract from '../src/index.ts';
+/*
+ * The compiled output, which is what both applications import. Build the
+ * package first (`pnpm build` here, or any root script that needs it).
+ */
+import * as contract from '../dist/index.js';
 
 /*
  * Two rules from ADR-019 that nothing else enforces.
@@ -64,6 +68,12 @@ test('no file of the contract imports anything', () => {
   }
 });
 
+/*
+ * An enum is allowed: it is a fixed set of values, which is a fact. The
+ * checks read the source, where an enum is written without either word; its
+ * compiled form uses a function to build the object, and that is the
+ * compiler's, not ours.
+ */
 test('the contract holds facts, and no function or class', () => {
   for (const { path, code } of contractFiles) {
     assert.doesNotMatch(code, /\bfunction\b|=>|\bclass\b/, path);
@@ -83,7 +93,13 @@ test('the contract holds facts, and no function or class', () => {
  * changed by mistake. Migrations are left out because each one records the
  * schema as it was on the day it was written.
  */
-const applicationSource = ['apps/api/src', 'apps/web/app', 'apps/web/lib']
+const applicationSource = [
+  'apps/api/src',
+  'apps/web/app',
+  'apps/web/components',
+  'apps/web/hooks',
+  'apps/web/lib',
+]
   .flatMap((directory) => filesUnder(join(REPOSITORY, directory)))
   .filter((path) => /\.tsx?$/.test(path))
   .filter((path) => !/\.(spec|test)\.tsx?$/.test(path))
@@ -99,7 +115,7 @@ test('the mood words are not written out again in either application', () => {
    * checks it against the contract's type. Two of them side by side, in a
    * list or in a union, is a second copy of the list.
    */
-  const word = `['"\`](?:${contract.MOODS.join('|')})['"\`]`;
+  const word = `['"\`](?:${Object.values(contract.Mood).join('|')})['"\`]`;
   const twoInARow = new RegExp(`${word}\\s*[,|]\\s*${word}`);
 
   const copies = applicationSource

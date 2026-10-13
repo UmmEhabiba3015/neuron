@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import type { WireRegistration } from '@neuron/contracts';
+import type { Register } from '@neuron/contracts';
 import { QueryFailedError } from 'typeorm';
 import { randomUUID } from 'node:crypto';
 import { PasswordService } from '../auth/password.service';
-import { User } from './user.entity';
+import { UserEntity } from './entities/user.entity';
 import { UsersRepository } from './users.repository';
 
 @Injectable()
@@ -17,12 +17,12 @@ export class UsersService {
    * The name and the timezone are stored as they arrive. RegisterDto has
    * already trimmed the one and resolved the other.
    */
-  async register(registration: WireRegistration): Promise<User | undefined> {
+  async register(registration: Register): Promise<UserEntity | undefined> {
     if (await this.usersRepository.findByEmail(registration.email)) {
       return undefined;
     }
 
-    const user = new User();
+    const user = new UserEntity();
 
     user.id = randomUUID();
     user.email = registration.email;
@@ -44,11 +44,11 @@ export class UsersService {
     return user;
   }
 
-  findByEmail(email: string): Promise<User | undefined> {
+  findByEmail(email: string): Promise<UserEntity | undefined> {
     return this.usersRepository.findByEmail(email);
   }
 
-  findById(id: string): Promise<User | undefined> {
+  findById(id: string): Promise<UserEntity | undefined> {
     return this.usersRepository.findById(id);
   }
 }

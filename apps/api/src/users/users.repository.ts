@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './user.entity';
+import { UserEntity } from './entities/user.entity';
 
 @Injectable()
 export class UsersRepository {
   constructor(
-    @InjectRepository(User)
-    private readonly users: Repository<User>,
+    @InjectRepository(UserEntity)
+    private readonly users: Repository<UserEntity>,
   ) {}
 
-  async save(user: User): Promise<void> {
+  async save(user: UserEntity): Promise<void> {
     await this.users.insert(user);
   }
 
@@ -19,7 +19,7 @@ export class UsersRepository {
    * and a lookup that disagreed with it would let someone register an
    * address that already exists and then fail to sign in with it.
    */
-  async findByEmail(email: string): Promise<User | undefined> {
+  async findByEmail(email: string): Promise<UserEntity | undefined> {
     return (
       (await this.users
         .createQueryBuilder('user')
@@ -29,7 +29,7 @@ export class UsersRepository {
     );
   }
 
-  async findById(id: string): Promise<User | undefined> {
+  async findById(id: string): Promise<UserEntity | undefined> {
     return (await this.users.findOneBy({ id })) ?? undefined;
   }
 }
