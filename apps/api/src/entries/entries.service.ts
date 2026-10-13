@@ -3,9 +3,10 @@ import { DataSource } from 'typeorm';
 import type { DayOwner } from '../days/day-boundary';
 import { DaysService } from '../days/days.service';
 import { EntriesRepository } from './entries.repository';
-import { JournalEntry, type FiledEntry } from './entry.entity';
-import type { EntryFilters } from './entry-filters';
-import { FULL_PAGE, type Page } from './page';
+import { EntryEntity } from './entities/entry.entity';
+import type { FiledEntry } from './types/filed-entry.type';
+import type { EntryFilters } from './types/entry-filters.interface';
+import { FULL_PAGE, type Page } from '../shared/types/page.interface';
 
 @Injectable()
 export class EntriesService {
@@ -40,7 +41,7 @@ export class EntriesService {
     const id = await this.dataSource.transaction(async (manager) => {
       const day = await this.daysService.resolveFor(author, createdAt);
 
-      const entry: JournalEntry = {
+      const entry: EntryEntity = {
         id: crypto.randomUUID(),
         content,
         createdAt,
@@ -48,7 +49,7 @@ export class EntriesService {
         dayId: day.id,
       };
 
-      await manager.insert(JournalEntry, entry);
+      await manager.insert(EntryEntity, entry);
 
       return entry.id;
     });

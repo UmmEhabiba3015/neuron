@@ -2,17 +2,20 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
 import type { Mood } from '@neuron/contracts';
-import { JournalEntry } from '../entries/entry.entity';
-import { Day } from './day.entity';
+import { EntryEntity } from '../entries/entities/entry.entity';
+import { DayEntity } from './entities/day.entity';
 
 @Injectable()
 export class DaysRepository {
   constructor(
-    @InjectRepository(Day)
-    private readonly days: Repository<Day>,
+    @InjectRepository(DayEntity)
+    private readonly days: Repository<DayEntity>,
   ) {}
 
-  async findByDate(userId: string, date: string): Promise<Day | undefined> {
+  async findByDate(
+    userId: string,
+    date: string,
+  ): Promise<DayEntity | undefined> {
     return (await this.days.findOneBy({ userId, date })) ?? undefined;
   }
 
@@ -27,14 +30,14 @@ export class DaysRepository {
    * This is the shape ADR-011 established for registration: application logic
    * decides what to attempt, the constraint decides what can exist.
    */
-  async findOrCreate(userId: string, date: string): Promise<Day> {
+  async findOrCreate(userId: string, date: string): Promise<DayEntity> {
     const existing = await this.findByDate(userId, date);
 
     if (existing) {
       return existing;
     }
 
-    const day: Day = {
+    const day: DayEntity = {
       id: crypto.randomUUID(),
       date,
       mood: null,
@@ -65,7 +68,7 @@ export class DaysRepository {
     userId: string,
     date: string,
     mood: Mood | null,
-  ): Promise<Day | undefined> {
+  ): Promise<DayEntity | undefined> {
     const day = await this.findOrCreate(userId, date);
 
     await this.days.update({ id: day.id, userId }, { mood });
@@ -86,7 +89,11 @@ export class DaysRepository {
    * The entry is matched on its owner as well as its day, because ownership
    * belongs in the WHERE clause (ADR-013).
    */
-  async findInRange(userId: string, from: string, to: string): Promise<Day[]> {
+  async findInRange(
+    userId: string,
+    from: string,
+    to: string,
+  ): Promise<DayEntity[]> {
     return this.days
       .createQueryBuilder('day')
       .where('day.userId = :userId', { userId })
@@ -95,7 +102,7 @@ export class DaysRepository {
         const liveEntry = query
           .subQuery()
           .select('1')
-          .from(JournalEntry, 'entry')
+          .from(EntryEntity, 'entry')
           .where('entry.dayId = day.id')
           .andWhere('entry.userId = :userId')
           .getQuery();

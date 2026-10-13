@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { AuthForm } from '@/app/screens/AuthForm';
+import { AuthForm } from '@/components/auth/AuthForm';
 
 export const metadata: Metadata = { title: 'Create an account · Journal' };
 

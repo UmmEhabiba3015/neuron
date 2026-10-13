@@ -1,9 +1,10 @@
+import { Mood } from '@neuron/contracts';
 import { DataSource } from 'typeorm';
 import { entities } from '../database/entities';
 import { migrations } from '../database/migrations';
-import { Day } from './day.entity';
+import { DayEntity } from './entities/day.entity';
 import { DaysRepository } from './days.repository';
-import { User } from '../users/user.entity';
+import { UserEntity } from '../users/entities/user.entity';
 
 describe('DaysRepository', () => {
   let dataSource: DataSource;
@@ -21,7 +22,7 @@ describe('DaysRepository', () => {
     await dataSource.runMigrations();
 
     for (const id of ['alice', 'bob']) {
-      await dataSource.getRepository(User).insert({
+      await dataSource.getRepository(UserEntity).insert({
         id,
         email: `${id}@example.com`,
         createdAt: '2026-01-01T00:00:00.000Z',
@@ -31,7 +32,7 @@ describe('DaysRepository', () => {
       });
     }
 
-    repository = new DaysRepository(dataSource.getRepository(Day));
+    repository = new DaysRepository(dataSource.getRepository(DayEntity));
   });
 
   afterEach(async () => {
@@ -73,6 +74,49 @@ describe('DaysRepository', () => {
     });
   });
 
+  describe('setMood', () => {
+    const moodOf = async (userId: string) =>
+      (await repository.findByDate(userId, '2026-08-09'))?.mood;
+
+    it('creates the day with its mood, which is how a day exists without an entry', async () => {
+      await repository.setMood('alice', '2026-08-09', Mood.Even);
+
+      expect(await moodOf('alice')).toBe(Mood.Even);
+    });
+
+    it('replaces a mood rather than adding a second day', async () => {
+      await repository.setMood('alice', '2026-08-09', Mood.Hard);
+      await repository.setMood('alice', '2026-08-09', Mood.Good);
+
+      expect(await moodOf('alice')).toBe(Mood.Good);
+      const rows = await dataSource.query<{ c: number }[]>(
+        'SELECT COUNT(*) AS c FROM days',
+      );
+      expect(Number(rows[0].c)).toBe(1);
+    });
+
+    it('clears a mood with null, and keeps the day', async () => {
+      await repository.setMood('alice', '2026-08-09', Mood.Low);
+      await repository.setMood('alice', '2026-08-09', null);
+
+      expect(await repository.findByDate('alice', '2026-08-09')).toMatchObject({
+        date: '2026-08-09',
+        mood: null,
+      });
+    });
+
+    it("never shows or changes another user's mood for the same date", async () => {
+      await repository.setMood('alice', '2026-08-09', Mood.Hard);
+
+      expect(await repository.findByDate('bob', '2026-08-09')).toBeUndefined();
+
+      await repository.setMood('bob', '2026-08-09', Mood.Light);
+
+      expect(await moodOf('alice')).toBe(Mood.Hard);
+      expect(await moodOf('bob')).toBe(Mood.Light);
+    });
+  });
+
   /*
    * The listing is asked through the repository, and the entries are written
    * with raw SQL, so that a deleted entry can be put in place without going
@@ -96,6 +140,54 @@ describe('DaysRepository', () => {
         (day) => day.date,
       );
 
+    it('lists the dates inside the range, both ends included, newest first, with their moods', async () => {
+      for (const [date, mood] of [
+        ['2026-07-31', Mood.Low],
+        ['2026-08-01', Mood.Even],
+        ['2026-08-15', Mood.Good],
+        ['2026-08-31', Mood.Hard],
+        ['2026-09-01', Mood.Light],
+      ] as const) {
+        const day = await repository.findOrCreate('alice', date);
+        await entryOn(`entry-on-${date}`, day.id, 'alice');
+        await repository.setMood('alice', date, mood);
+      }
+
+      expect(
+        (await repository.findInRange('alice', '2026-08-01', '2026-08-31')).map(
+          ({ date, mood }) => ({ date, mood }),
+        ),
+      ).toEqual([
+        { date: '2026-08-31', mood: 'Hard' },
+        { date: '2026-08-15', mood: 'Good' },
+        { date: '2026-08-01', mood: 'Even' },
+      ]);
+      expect(
+        await repository.findInRange('alice', '2026-08-01', '2026-08-01'),
+      ).toHaveLength(1);
+      expect(
+        await repository.findInRange('alice', '2025-01-01', '2025-12-31'),
+      ).toEqual([]);
+      expect(
+        await repository.findInRange('bob', '2026-01-01', '2026-12-31'),
+      ).toEqual([]);
+    });
+
+    it('lists a date again, with the mood it kept, once a live entry is on it again', async () => {
+      const day = await repository.findOrCreate('alice', '2026-08-09');
+      await repository.setMood('alice', '2026-08-09', Mood.Low);
+      await entryOn('gone', day.id, 'alice', '2026-08-09T13:00:00.000Z');
+      expect(await datesListed('alice')).toEqual([]);
+
+      await entryOn('back', day.id, 'alice');
+
+      expect(
+        (await repository.findInRange('alice', '2026-08-01', '2026-08-31')).map(
+          ({ date, mood }) => ({ date, mood }),
+        ),
+      ).toEqual([{ date: '2026-08-09', mood: 'Low' }]);
+    });
+
     it('lists a day that has an entry', async () => {
       const day = await repository.findOrCreate('alice', '2026-08-09');
       await entryOn('e1', day.id, 'alice');
@@ -104,7 +196,7 @@ describe('DaysRepository', () => {
     });
 
     it('does not list a day that has only a mood', async () => {
-      await repository.setMood('alice', '2026-08-09', 'Even');
+      await repository.setMood('alice', '2026-08-09', Mood.Even);
 
       expect(await datesListed('alice')).toEqual([]);
     });

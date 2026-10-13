@@ -10,12 +10,11 @@ import {
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
-import type { WireAuthenticated, WireUser } from '@neuron/contracts';
 import type { Request, Response } from 'express';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
-import { Public } from './public.decorator';
-import { LoginDto } from './login.dto';
+import { Public } from './decorators/public.decorator';
+import { LoginDto } from './dto/login.dto';
 import {
   REFRESH_COOKIE_CLEAR_OPTIONS,
   REFRESH_COOKIE_NAME,
@@ -23,10 +22,12 @@ import {
   packRefreshCookie,
   unpackRefreshCookie,
 } from './refresh-cookie';
-import { RegisterDto } from './register.dto';
-import type { AuthenticatedRequest } from './authenticated-request';
-import type { AuthenticatedSession } from './auth.service';
-import type { Session } from './session.entity';
+import { AuthResponseDto } from './dto/auth-response.dto';
+import { RegisterDto } from './dto/register.dto';
+import { SessionResponseDto } from './dto/session-response.dto';
+import { UserResponseDto } from '../users/dto/user-response.dto';
+import type { AuthenticatedRequest } from '../shared/types/authenticated-request.interface';
+import type { AuthenticatedSession } from './types/authenticated-session.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -37,14 +38,14 @@ export class AuthController {
 
   @Public()
   @Post('register')
-  async register(@Body() dto: RegisterDto): Promise<WireUser> {
+  async register(@Body() dto: RegisterDto): Promise<UserResponseDto> {
     const user = await this.usersService.register(dto);
 
     if (!user) {
       throw new ConflictException('That email address is already registered');
     }
 
-    return user;
+    return new UserResponseDto(user);
   }
 
   @Public()
@@ -53,7 +54,7 @@ export class AuthController {
   async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<WireAuthenticated> {
+  ): Promise<AuthResponseDto> {
     const session = await this.authService.login(dto.email, dto.password);
 
     if (!session) {
@@ -64,8 +65,8 @@ export class AuthController {
   }
 
   @Get('me')
-  me(@Req() request: AuthenticatedRequest): WireUser {
-    return request.user;
+  me(@Req() request: AuthenticatedRequest): UserResponseDto {
+    return new UserResponseDto(request.user);
   }
 
   @Public()
@@ -74,7 +75,7 @@ export class AuthController {
   async refresh(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<WireAuthenticated> {
+  ): Promise<AuthResponseDto> {
     const cookies = request.cookies as Record<string, unknown> | undefined;
     const credential = unpackRefreshCookie(cookies?.[REFRESH_COOKIE_NAME]);
 
@@ -115,25 +116,29 @@ export class AuthController {
   }
 
   @Get('sessions')
-  listSessions(@Req() request: AuthenticatedRequest): Promise<Session[]> {
-    return this.authService.listSessions(request.user.id);
+  async listSessions(
+    @Req() request: AuthenticatedRequest,
+  ): Promise<SessionResponseDto[]> {
+    const sessions = await this.authService.listSessions(request.user.id);
+
+    return sessions.map((session) => new SessionResponseDto(session));
   }
 
   /*
    * The refresh credential leaves in the cookie and only in the cookie. The
-   * body is built field by field so that it cannot follow the service's
-   * result into the response.
+   * body is AuthResponseDto, built field by field, so that it cannot follow
+   * the service's result into the response.
    */
   private respondWith(
     session: AuthenticatedSession,
     response: Response,
-  ): WireAuthenticated {
+  ): AuthResponseDto {
     response.cookie(
       REFRESH_COOKIE_NAME,
       packRefreshCookie(session),
       REFRESH_COOKIE_OPTIONS,
     );
 
-    return { accessToken: session.accessToken, user: session.user };
+    return new AuthResponseDto(session);
   }
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Ask } from '@/app/screens/Ask';
+import { Ask } from '@/components/ask/Ask';
 
 export const metadata: Metadata = { title: 'Ask · Journal' };
 

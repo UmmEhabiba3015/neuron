@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import type { WireEntry } from '@neuron/contracts';
-import type { ApiResult } from './session.ts';
+import type { Entry } from '@neuron/contracts';
+import type { ApiResult } from './api/session.ts';
 import { createTimeline, groupByDay, type TimelineView } from './timeline.ts';
 import { createToday, MAX_PAGES, type Request } from './today.ts';
 
@@ -18,7 +18,7 @@ const ENDED: Reply = { kind: 'ended' };
 
 const TODAY = '2026-09-02';
 
-const entry = (id: string, date: string, createdAt: string): WireEntry => ({
+const entry = (id: string, date: string, createdAt: string): Entry => ({
   id,
   content: `entry ${id}`,
   createdAt,
@@ -34,7 +34,7 @@ function held() {
   return { reply, release };
 }
 
-function fakeApi(entries: WireEntry[]) {
+function fakeApi(entries: Entry[]) {
   const sent: string[] = [];
   const overrides: Record<string, () => Reply | Promise<Reply>> = {};
 

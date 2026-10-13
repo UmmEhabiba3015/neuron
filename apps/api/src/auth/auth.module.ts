@@ -4,22 +4,22 @@ import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import type { EnvironmentVariables } from '../config/env.validation';
 import { DatabaseModule } from '../database/database.module';
-import { User } from '../users/user.entity';
+import { UserEntity } from '../users/entities/user.entity';
 import { UsersRepository } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { PasswordService } from './password.service';
 import { RefreshTokenService } from './refresh-token.service';
-import { Session } from './session.entity';
+import { SessionEntity } from './entities/session.entity';
 import { SessionsRepository } from './sessions.repository';
 import { TokenService } from './token.service';
 
 @Module({
   imports: [
     DatabaseModule,
-    TypeOrmModule.forFeature([User, Session]),
+    TypeOrmModule.forFeature([UserEntity, SessionEntity]),
 
     JwtModule.registerAsync({
       inject: [ConfigService],

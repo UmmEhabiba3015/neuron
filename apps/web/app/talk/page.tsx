@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Talk } from '@/app/screens/Talk';
+import { Talk } from '@/components/talk/Talk';
 
 export const metadata: Metadata = { title: 'Voice memo · Journal' };
 

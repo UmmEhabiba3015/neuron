@@ -6,7 +6,7 @@
  * written. `createToday` and `createPastDay`, at the foot of the file, are
  * the two ways in.
  *
- * Like session.ts, this file is tested with Node alone. The function that
+ * Like api/session.ts, this file is tested with Node alone. The function that
  * sends a request and the size of a page are handed in, and the one thing
  * imported that runs is a function of plain text. The components draw what
  * `getState()` says and decide nothing.
@@ -22,15 +22,19 @@
  *             back to what the API last confirmed if the request fails.
  */
 
+/*
+ * The contract's Day is imported as DayResponse, because Day below is this
+ * file's own: the state of a day's page.
+ */
 import type {
+  CreateEntry,
+  Day as DayResponse,
+  Entry,
   Mood,
-  WireDay,
-  WireEntry,
-  WireMood,
-  WireNewEntry,
+  SetMood,
 } from '@neuron/contracts';
-import { isCalendarDate } from './format.ts';
-import type { ApiResult, RequestOptions } from './session.ts';
+import { isCalendarDate } from './utils/format.ts';
+import type { ApiResult, RequestOptions } from './api/session.ts';
 
 export type Request = <T>(
   path: string,
@@ -47,7 +51,7 @@ export type Day =
       status: 'open';
       date: string;
       mood: Mood | null;
-      entries: readonly WireEntry[];
+      entries: readonly Entry[];
     }
   | { status: 'unreachable'; asked: number }
   | { status: 'failed'; asked: number }
@@ -142,7 +146,7 @@ export function isBlank(text: string): boolean {
 }
 
 type Fetched =
-  | { status: 'loaded'; day: WireDay; entries: WireEntry[] }
+  | { status: 'loaded'; day: DayResponse; entries: Entry[] }
   | { status: 'unreachable' }
   | { status: 'failed' }
   | { status: 'ended' }
@@ -172,7 +176,7 @@ interface DayConfig {
 function createDay(config: DayConfig, date?: string): Today {
   const { request, pageSize, maxPages = MAX_PAGES } = config;
 
-  let fetched: { day: WireDay; entries: WireEntry[] } | undefined;
+  let fetched: { day: DayResponse; entries: Entry[] } | undefined;
   let trouble: 'unreachable' | 'failed' | undefined;
 
   /*
@@ -223,7 +227,7 @@ function createDay(config: DayConfig, date?: string): Today {
   const listeners = new Set<() => void>();
   let state = snapshot();
 
-  function moodShown(day: WireDay): Mood | null {
+  function moodShown(day: DayResponse): Mood | null {
     return wanted && wanted.date === day.date ? wanted.mood : day.mood;
   }
 
@@ -273,7 +277,7 @@ function createDay(config: DayConfig, date?: string): Today {
    * as a date, which `isCalendarDate` should already have stopped.
    */
   async function fetchDay(): Promise<Fetched> {
-    const today = await request<WireDay>('/days/today');
+    const today = await request<DayResponse>('/days/today');
 
     if (today.kind !== 'ok') {
       return { status: statusOf(today.kind) };
@@ -286,7 +290,7 @@ function createDay(config: DayConfig, date?: string): Today {
         return { status: 'isToday' };
       }
 
-      const asked = await request<WireDay>(`/days/${date}`);
+      const asked = await request<DayResponse>(`/days/${date}`);
 
       if (
         asked.kind === 'rejected' &&
@@ -302,7 +306,7 @@ function createDay(config: DayConfig, date?: string): Today {
       day = asked;
     }
 
-    const entries: WireEntry[] = [];
+    const entries: Entry[] = [];
 
     /*
      * A short page is the last one. An API that never sent a short page
@@ -313,7 +317,7 @@ function createDay(config: DayConfig, date?: string): Today {
         return { status: 'failed' };
       }
 
-      const page = await request<WireEntry[]>(
+      const page = await request<Entry[]>(
         `/entries?date=${day.data.date}&limit=${pageSize}&offset=${entries.length}`,
       );
 
@@ -421,12 +425,12 @@ function createDay(config: DayConfig, date?: string): Today {
     }
 
     const typed = text;
-    const body: WireNewEntry = { content: typed.trim() };
+    const body: CreateEntry = { content: typed.trim() };
 
     save = { status: 'saving' };
     publish();
 
-    const result = await request<WireEntry>('/entries', {
+    const result = await request<Entry>('/entries', {
       method: 'POST',
       body,
     });
@@ -530,9 +534,9 @@ function createDay(config: DayConfig, date?: string): Today {
 
     while (wanted) {
       const sent: MoodPress = wanted;
-      const body: WireMood = { mood: sent.mood };
+      const body: SetMood = { mood: sent.mood };
 
-      const result = await request<WireDay>(`/days/${sent.date}/mood`, {
+      const result = await request<DayResponse>(`/days/${sent.date}/mood`, {
         method: 'PUT',
         body,
       });

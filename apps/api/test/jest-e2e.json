@@ -11,6 +11,6 @@
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "setupFiles": [
-    "<rootDir>/setup-environment.ts"
+    "<rootDir>/support/setup-environment.ts"
   ]
 }

@@ -3,8 +3,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DataSource } from 'typeorm';
 import { EntriesRepository } from '../entries/entries.repository';
-import { JournalEntry } from '../entries/entry.entity';
-import { FULL_PAGE } from '../entries/page';
+import { EntryEntity } from '../entries/entities/entry.entity';
+import { FULL_PAGE } from '../shared/types/page.interface';
 import { entities } from './entities';
 import { migrations } from './migrations';
 import { AddUserNameAndTimezone1791383154639 } from './migrations/1791383154639-AddUserNameAndTimezone';
@@ -389,7 +389,7 @@ describe('AddUserNameAndTimezone', () => {
      */
     it('leaves an entry written under the 4am rule on the date it was given', async () => {
       const repository = new EntriesRepository(
-        database.getRepository(JournalEntry),
+        database.getRepository(EntryEntity),
       );
       const idsOn = async (date: string) =>
         (await repository.find('alice', { date }, FULL_PAGE))

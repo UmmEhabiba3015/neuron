@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { LiveDay } from '@/app/screens/LiveDay';
+import { LiveDay } from '@/components/day/LiveDay';
 
 export const metadata: Metadata = { title: 'A day · Journal' };
 

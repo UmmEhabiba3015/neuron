@@ -1,0 +1,255 @@
+/*
+ * What a running app needs on top of lock.css, which is the designer's file
+ * and is never edited here.
+ *
+ * Sections 1 to 4 take a comp's stage away and put a viewport in its place.
+ * No component, colour, type scale, rule weight or spacing token is touched.
+ * Section 5 is marked TEMPORARY: rules for things lock.css does not yet
+ * draw, each one a question for the designer.
+ *
+ * Sections 4 and 5 of lock.css are container queries keyed on .app, so
+ * letting .app be the viewport is the designed behaviour, not an override of
+ * it.
+ */
+
+/*
+ * 1. The stage.
+ *
+ * lock.css 2.1 sets a comp on a grey desk with space around it, and gives
+ * .app the height of a phone. In the product the page is the app and the
+ * viewport is its height, which is what lock.css itself does for the sign-in
+ * spread (.app.auth-paper).
+ *
+ * body is made a container so that section 3 can style .app by width. A
+ * container query cannot style its own container, and .app is one.
+ */
+
+body {
+  background: var(--paper);
+  display: block;
+  padding: 0;
+  container-type: inline-size;
+}
+
+.app {
+  min-height: 100dvh;
+}
+
+/*
+ * 2. One page, two headers.
+ *
+ * The desktop comp puts the wordmark, date box and destinations in .title,
+ * outside .page. The other two widths put them in .journal-header, inside
+ * it. That is a change of markup and not of style, so a single live page
+ * renders both and the width chooses between them.
+ *
+ * .journal-header is only hidden, never given a display value of its own.
+ */
+
+@container (max-width: 1199.98px) {
+  .app > .title { display: none; }
+}
+
+@container (min-width: 1200px) {
+  .app > .title ~ .page > .journal-header { display: none; }
+
+  /*
+   * A pushed page has no .journal-header. Its header below desktop is a
+   * masthead that is the page's own child, holding the way back and the
+   * date box (06-conversation.html), and on desktop the same two things
+   * stand in .title. Sign in has such a masthead too and has no .title, so
+   * this does not reach it.
+   */
+  .app > .title ~ .page > .mast { display: none; }
+
+  /*
+   * On desktop lock.css gives the page's first child a top margin, --lead,
+   * so that the content starts on the date box's line. In a comp the first
+   * child is the content. Here it is .journal-header, which the rule above
+   * has just hidden, so the margin would be spent on something invisible.
+   * This gives the same margin, from the same token, to the first thing that
+   * is shown. The exclusions are lock.css's own.
+   */
+  .app > .title ~ .page:not(.split) > .journal-header + :not(.stack),
+  .app > .title ~ .page:not(.split) > .mast + :not(.stack) {
+    margin-top: var(--lead);
+  }
+}
+
+/*
+ * 2.1 Timeline: one zoom below desktop, both on desktop.
+ *
+ * At 390 and 834 the list and the calendar are alternatives behind the
+ * switch, and the calendar zoom has its month as a heading of its own. At
+ * 1440 the list and the calendar stand side by side, and the calendar is an
+ * index whose days go to the list rather than to a day's page (lock.css
+ * revision 37). That is again a change of markup, so the Timeline renders
+ * every part, marks each with what it is for, and the width and the switch
+ * choose (components/timeline/LiveTimeline.tsx).
+ */
+
+@container (max-width: 1199.98px) {
+  .page > [data-shows="index"],
+  .page[data-zoom="list"] > [data-shows="calendar"],
+  .page[data-zoom="calendar"] > [data-shows="list"] { display: none; }
+}
+
+@container (min-width: 1200px) {
+  .page > [data-shows="calendar"] { display: none; }
+}
+
+/*
+ * 3. What stays in place while the page scrolls.
+ *
+ * lock.css has these five rules, with these values, and keys them on
+ * `.device.d` and `.device:not(.d)`. .device is the comp's stage: a frame of
+ * a fixed width that a running app does not have and cannot know to ask
+ * for. They are restated here on the width instead. QUESTION FOR THE
+ * DESIGNER: can lock.css key them on the 1200 container threshold, as the
+ * rest of its desktop rules are? This section is then deleted.
+ */
+
+/* Below desktop, a masthead that is the page's own child. Sign in is one. */
+@container (max-width: 1199.98px) {
+  .page > .mast {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--paper);
+  }
+}
+
+/* On desktop, the binding column. */
+
+@container (min-width: 1200px) {
+  .app:has(> .title) {
+    display: grid;
+    grid-template-columns: var(--website-sidebar, 360px) minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .app > .title {
+    position: sticky;
+    top: 0;
+    bottom: auto;
+    left: auto;
+    align-self: start;
+    transform: translateX(calc(-1 * var(--rail)));
+    max-height: 100dvh;
+    overflow-y: auto;
+    background: var(--paper);
+    z-index: 3;
+  }
+
+  .app:has(> .title) > .page {
+    min-width: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .app:has(> .page > .composer) > .title {
+      max-height: calc(100dvh - var(--g-hide));
+    }
+  }
+}
+
+/*
+ * 4. The waveform is authored per platform rather than scaled
+ * (direction-lock.md 12.7), so three are rendered and the width picks one,
+ * on the same two thresholds lock.css already uses. Scaling one SVG would
+ * draw the same recording at more than twice the tick weight at 1440.
+ */
+
+.wave[data-w="tablet"],
+.wave[data-w="desktop"] { display: none; }
+
+@container (min-width: 700px) {
+  .wave[data-w="mobile"] { display: none; }
+  .wave[data-w="tablet"] { display: block; }
+}
+
+@container (min-width: 1200px) {
+  .wave[data-w="tablet"] { display: none; }
+  .wave[data-w="desktop"] { display: block; }
+}
+
+/*
+ * 5. TEMPORARY. Four things lock.css has no rule for. Each is the smallest
+ * rule that works, uses only tokens lock.css already has, and is a question
+ * for the designer (docs/learning/day-17a/report.md).
+ */
+
+/*
+ * 5.1 The composer's field is a textarea.
+ *
+ * In every comp it is a div, and lock.css's .field is a flex box that
+ * centres a div's one line. A textarea needs the same line centred by
+ * padding, and grows with what is typed where the browser can do that.
+ * lock.css draws a textarea for the entry editor and for the account forms,
+ * and not for the composer.
+ */
+.composer textarea.field {
+  display: block;
+  min-width: 0;
+  max-height: calc(var(--ctl) * 4);
+  padding-block: calc(
+    (var(--ctl) - 2 * var(--w) - var(--t-field) * var(--lh-note)) / 2
+  );
+  line-height: var(--lh-note);
+  resize: none;
+  field-sizing: content;
+}
+
+/* The comp's prompt is .field.placeholder, and this is its colour. */
+.composer textarea.field::placeholder {
+  color: var(--rule-2);
+  opacity: 1;
+}
+
+/* 5.2 An entry typed on several lines is shown on several lines. */
+.srow .prose {
+  white-space: pre-wrap;
+}
+
+/* 5.3 was deleted on Screens Day, when the edit icon was drawn. */
+
+/*
+ * 5.4 The date of a Timeline day is the link to that day's page.
+ *
+ * 02-timeline.html draws the date as plain text and draws no way from the
+ * list to a day: in the comps a day is reached from the calendar zoom, and
+ * on desktop the calendar's days lead into the list, not out of it. The
+ * link keeps the column's own colour and size, is underlined
+ * so that it is not told apart by colour alone, and is stretched over the
+ * column's padding so that it is at least as tall as a control may be.
+ */
+.dayrow .tcol a {
+  display: block;
+  min-height: var(--tap);
+  margin-block: calc(-1 * var(--s6));
+  padding-block: var(--s6);
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/*
+ * 5.5 A settings row that is a button.
+ *
+ * lock.css draws .srowlink on a link or a div. A row whose feature is not
+ * built yet goes nowhere, so it is a button (components/ui/NotBuilt.tsx),
+ * and a button brings the browser's own border, font, width and centred
+ * text. This takes those away and nothing else. `:where` gives it no
+ * weight, so every rule of lock.css still wins, the line it draws between
+ * the rows of a sheet among them.
+ */
+:where(button.srowlink) {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}

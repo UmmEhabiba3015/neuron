@@ -8,7 +8,7 @@
  *
  * Everything here is checked in the browser, before anything is sent, and
  * the API checks again and is the authority. The second password field never
- * leaves the browser at all (the contract's WireRegistration has no place
+ * leaves the browser at all (the contract's Register has no place
  * for it).
  */
 

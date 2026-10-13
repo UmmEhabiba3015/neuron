@@ -2,6 +2,8 @@
 
 **Status:** Accepted
 **Date:** 2026-10-07 (Day 16)
+**Amended:** 2026-10-13. Enums are allowed, the package gets a build step,
+and its names lose the `Wire` prefix. See the amendment at the end.
 
 **Amends:** ADR-001, which created the workspace on Day 1, deferred
 `packages/` until a type actually needed sharing, and expected request and
@@ -135,3 +137,41 @@ ADR-001's argument is not wrong, and it is the first revisit condition below.
   and the answer should be no until the rule is changed on purpose.
 - **A native client is built.** It cannot import a TypeScript package, and
   that is a second argument for a generated, language-neutral contract.
+
+---
+
+## Amendment — 2026-10-13: enums, a build step, plain names
+
+Decided by her husband, during the code-convention review before feature 1.
+
+**What changed.**
+
+1. **Enums are allowed in the package.** A fixed set of values that both
+   apps use, such as the moods, is a TypeScript `enum` (`Mood.Light`), not
+   a list with `as const`. The rule "no function and no class" stands; an
+   enum is a fact, not behaviour.
+2. **The package has a build step.** TypeScript compiles `src/` into
+   JavaScript, and both apps import the compiled output. Node 24 reads a
+   `.ts` file by deleting its type annotations ("type stripping"), and an
+   enum is not an annotation: it becomes a real object in JavaScript, which
+   type stripping cannot write. This was tested on 2026-10-13: Node 24
+   refuses an `enum` in a file it reads directly.
+3. **The `Wire` prefix is dropped.** It existed because the API's entities
+   already used the plain names (`User`, `Day`). The entities now carry an
+   `Entity` suffix (`UserEntity`, `EntryEntity`, `DayEntity`,
+   `SessionEntity`), so the package uses plain names: `Entry`, `Day`,
+   `User`, `AuthResponse`, and for request bodies `CreateEntry`, `SetMood`,
+   `Login`, `Register`.
+4. **The API's answers are DTO classes** (`EntryResponseDto implements
+   Entry`) instead of plain objects typed by the contract. The compile-time
+   check described in the decision is unchanged: a response class that stops
+   matching its contract does not compile.
+
+**What it costs.** The package must be built before either app builds,
+tests or runs; the root scripts do this, so the nine checks keep their
+commands. During development the package needs a watch mode.
+
+**What it removes.** The known debt that the built API read
+`packages/contracts/src` at run time, and broke if the package's
+`package.json` gained a `"type"` field. The API now reads compiled
+JavaScript like any other dependency.

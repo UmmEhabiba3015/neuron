@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ForgotPassword } from '@/app/screens/Recover';
+import { ForgotPassword } from '@/components/auth/Recover';
 
 export const metadata: Metadata = { title: 'Reset your password · Journal' };
 

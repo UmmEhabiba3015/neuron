@@ -9,6 +9,7 @@ On 2026-10-10 her husband ran a final reconciliation between the roadmap and the
 
 - Scope: `docs/features.md` (Refs 1 to 42, each kept or dropped). It wins over the designs and replaced `requirements.md`, `feature-reconciliation.md`, `ui-handover.md` and `HANDOFF.md`, which were deleted.
 - Order: `docs/roadmap.md` v4.0, 16 features, confirmed by him on 2026-10-13 with Drafts fourth (after Account and devices) because the composer needs small UI changes first. Search, Ask, Reflections and Looking back wait for the designer's new UI; if one comes up before its UI, move to the next ready feature.
+- Before feature 1: a restructure to the code conventions in `CLAUDE.md` (two worker specs in `docs/workers/restructure-*.md`), launched only when her husband says so.
 - Designer: `docs/ui-handover-v4.md`. He said he will discuss the UX-open flows with the designer himself.
 
 **Why:** UI asks had mixed into the plan and scope crept. A feature, broken into blocks at build time, contains decisions that would otherwise spread across days.

@@ -9,10 +9,16 @@ metadata:
 ---
 
 On Neuron, the Master Thread (this session) never implements production code
-directly. The loop is: **audit → write a worker prompt to a file → the user
-runs it in a fresh Claude Code session → re-audit the result.**
-
-Worker prompts go in `docs/workers/` (gitignored). Workers write their report in `docs/learning/<feature>/`. Every prompt says: write and run the tests (never tell a worker to skip them), do one mutation, walk the app in a browser, use a throwaway database and their own ports, never touch git. Ask her to stop `pnpm dev` before a worker runs. Before committing, compare `git status` with every new file the report lists.
+directly. **Streamlined by her husband on 2026-10-13:** the Master Thread writes
+a short spec (30 to 60 lines) into `docs/workers/`, launches the worker itself
+as a subagent with the Agent tool (her husband approved this; she no longer
+pastes prompts), then audits the diff and runs the nine checks once before
+committing. Standing worker rules and the 40-line report format are in the
+repository's `CLAUDE.md`, so specs do not repeat them. One worker per feature
+unless it is genuinely large. The worker does the one mutation and the browser
+walk (only if screens changed); the Master Thread does not repeat them. Ask her
+to stop `pnpm dev` before a worker runs. Full workflow: `docs/master-state.md`,
+*Workflow*.
 
 Documentation that records decisions — ADRs, the roadmap, `master-state.md`,
 learning notes — is Master Thread work and is written directly.

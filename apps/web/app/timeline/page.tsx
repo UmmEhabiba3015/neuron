@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { LiveTimeline } from '@/app/screens/LiveTimeline';
+import { LiveTimeline } from '@/components/timeline/LiveTimeline';
 
 export const metadata: Metadata = { title: 'Timeline · Journal' };
 

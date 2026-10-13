@@ -1,24 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, LessThan, MoreThan, Repository } from 'typeorm';
-import { Session } from './session.entity';
+import { SessionEntity } from './entities/session.entity';
 
 @Injectable()
 export class SessionsRepository {
   constructor(
-    @InjectRepository(Session)
-    private readonly sessions: Repository<Session>,
+    @InjectRepository(SessionEntity)
+    private readonly sessions: Repository<SessionEntity>,
   ) {}
 
-  async save(session: Session): Promise<void> {
+  async save(session: SessionEntity): Promise<void> {
     await this.sessions.insert(session);
   }
 
-  async findById(id: string): Promise<Session | undefined> {
+  async findById(id: string): Promise<SessionEntity | undefined> {
     return (await this.sessions.findOneBy({ id })) ?? undefined;
   }
 
-  async findActiveByUser(userId: string, now: string): Promise<Session[]> {
+  async findActiveByUser(
+    userId: string,
+    now: string,
+  ): Promise<SessionEntity[]> {
     return this.sessions.find({
       where: {
         userId,

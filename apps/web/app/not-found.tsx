@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { AddressNotFound } from '@/app/screens/AddressNotFound';
+import { AddressNotFound } from '@/components/missing/AddressNotFound';
 
 export const metadata: Metadata = { title: 'Page not found · Journal' };
 

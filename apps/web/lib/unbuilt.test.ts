@@ -1,53 +1,33 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import {
-  FIRST_REAL_TEST_DAY,
-  NOT_BUILT_YET,
-  NOT_SCHEDULED,
-  UNBUILT,
-  unscheduled,
-} from './unbuilt.ts';
+import { FIRST_REAL_TEST_FEATURE, NOT_BUILT_YET, UNBUILT } from './unbuilt.ts';
 
 test('the sentence is the one the owner chose', () => {
   assert.equal(NOT_BUILT_YET, 'This is not built yet.');
 });
 
 /*
- * A control with no day yet cannot be checked against Day 36, so it is named
- * in every failure here: a late day is read beside what is still unplaced.
+ * Every control has a feature, so every one is checked: a control wired in
+ * feature 16 or later would still be unbuilt when a real person tests the
+ * product.
  */
-test('every scheduled unbuilt control is wired before a real person tests the product', () => {
+test('every unbuilt control is wired before a real person tests the product', () => {
   const entries = Object.entries(UNBUILT);
-  const waiting = `Not scheduled yet: ${unscheduled().join(', ') || 'none'}.`;
 
   assert.ok(entries.length > 0);
 
   for (const [name, control] of entries) {
-    if (control.day === NOT_SCHEDULED) {
-      continue;
-    }
-
-    assert.ok(Number.isInteger(control.day), `${name}. ${waiting}`);
+    assert.ok(Number.isInteger(control.feature), name);
     assert.ok(
-      control.day >= 18,
-      `${name} is wired on day ${control.day}. ${waiting}`,
+      control.feature >= 1,
+      `${name} is wired in feature ${control.feature}`,
     );
     assert.ok(
-      control.day < FIRST_REAL_TEST_DAY,
-      `${name} is wired on day ${control.day}. ${waiting}`,
+      control.feature < FIRST_REAL_TEST_FEATURE,
+      `${name} is wired in feature ${control.feature}`,
     );
   }
-});
-
-test('the controls with no day are the ones the owner has not placed', () => {
-  assert.deepEqual(unscheduled(), [
-    'training',
-    'startRecording',
-    'entryMemory',
-    'composerMemory',
-    'supportResource',
-  ]);
 });
 
 test('every unbuilt control has a name on screen and a screen it is on', () => {
@@ -68,30 +48,30 @@ test('no two unbuilt controls on one screen share a name', () => {
   }
 });
 
-test('the list is the one the owner decided, each on its day', () => {
-  const days = Object.fromEntries(
-    Object.entries(UNBUILT).map(([name, control]) => [name, control.day]),
+test('the list is the one the owner decided, each in its feature', () => {
+  const features = Object.fromEntries(
+    Object.entries(UNBUILT).map(([name, control]) => [name, control.feature]),
   );
 
-  assert.deepEqual(days, {
-    editEntry: 18,
-    sendResetLink: 20,
-    saveNewPassword: 20,
-    signedInDevices: 34,
-    signOutEverywhere: 34,
-    chooseTimezone: 34,
-    exportEverything: 34,
-    deleteAccount: 34,
-    keepingSince: 34,
-    whatLeaves: 22,
-    whoProcesses: 22,
-    training: NOT_SCHEDULED,
-    modelCanRead: 22,
-    modelCannotRead: 22,
-    ask: 25,
-    startRecording: NOT_SCHEDULED,
-    entryMemory: NOT_SCHEDULED,
-    composerMemory: NOT_SCHEDULED,
-    supportResource: NOT_SCHEDULED,
+  assert.deepEqual(features, {
+    editEntry: 1,
+    sendResetLink: 2,
+    saveNewPassword: 2,
+    signedInDevices: 3,
+    signOutEverywhere: 3,
+    chooseTimezone: 3,
+    exportEverything: 6,
+    deleteAccount: 6,
+    keepingSince: 6,
+    whatLeaves: 15,
+    whoProcesses: 15,
+    training: 15,
+    modelCanRead: 12,
+    modelCannotRead: 12,
+    ask: 12,
+    startRecording: 5,
+    entryMemory: 9,
+    composerMemory: 9,
+    supportResource: 15,
   });
 });

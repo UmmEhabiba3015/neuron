@@ -9,7 +9,7 @@
  * Like timeline.ts, this file is tested with Node alone.
  */
 
-import { formatDayAndMonth } from './format.ts';
+import { formatDayAndMonth } from './utils/format.ts';
 
 export interface CalendarDay {
   date: string;

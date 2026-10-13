@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Timezone } from '@/app/screens/You';
+import { Timezone } from '@/components/you/You';
 
 export const metadata: Metadata = { title: 'Timezone · Journal' };
 

@@ -42,8 +42,15 @@ Built: accounts (sign up, sign in, staying signed in, sign out), writing and
 deleting entries, mood, the Timeline as a list and a month calendar, and a
 past day's page. Every screen of the designer's v3 prototype is drawn, and
 every control whose feature is not built says "This is not built yet."
-246 API unit tests, 365 API end-to-end tests, 171 web tests, 7 contract
+421 API unit tests, 42 API end-to-end tests, 170 web tests, 7 contract
 checks. 21 ADRs.
+
+## Before feature 1: the restructure
+
+Decided 2026-10-13. Existing code is brought into line with the code
+conventions in `CLAUDE.md`, and the API's end-to-end tests are reorganised
+into flows. Two workers; no behaviour change. Specs in `docs/workers/`
+(`restructure-1-code.md`, `restructure-2-tests.md`).
 
 ## The features, in order
 

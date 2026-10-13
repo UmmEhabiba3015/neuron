@@ -1,0 +1,22 @@
+{
+  // Compiles src/ to dist/: JavaScript that both applications load, and the
+  // declarations their compilers read. Neither application reads src/.
+  //
+  // CommonJS, because it is the one format every consumer loads as it is:
+  // the API's compiled output and ts-node (migrations) are CommonJS, Jest
+  // requires modules without a bundler, Next.js bundles either format, and
+  // Node's ESM loader (the web tests, the contract test) imports CommonJS
+  // with its named exports.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true,
+    "declarationMap": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "types": []
+  },
+  "include": ["src"]
+}

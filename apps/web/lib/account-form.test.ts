@@ -8,7 +8,7 @@ import {
   readForm,
   type Typed,
 } from './account-form.ts';
-import { createSession, type Fetch } from './session.ts';
+import { createSession, type Fetch } from './api/session.ts';
 
 const MIN = 8;
 

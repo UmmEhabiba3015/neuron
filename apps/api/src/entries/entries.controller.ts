@@ -12,20 +12,21 @@ import {
   Query,
   Req,
 } from '@nestjs/common';
-import { DEFAULT_PAGE_SIZE, type WireEntry } from '@neuron/contracts';
-import type { AuthenticatedRequest } from '../auth/authenticated-request';
+import { DEFAULT_PAGE_SIZE } from '@neuron/contracts';
+import type { AuthenticatedRequest } from '../shared/types/authenticated-request.interface';
 import { EntriesService } from './entries.service';
-import { CreateEntryDto } from './create-entry.dto';
-import { CountEntriesQueryDto } from './count-entries-query.dto';
-import type { EntryFilters } from './entry-filters';
-import type { FiledEntry } from './entry.entity';
-import { FindEntriesQueryDto } from './find-entries-query.dto';
-import { UpdateEntryDto } from './update-entry.dto';
+import { CreateEntryDto } from './dto/create-entry.dto';
+import { EntryResponseDto } from './dto/entry-response.dto';
+import { CountEntriesQueryDto } from './dto/count-entries-query.dto';
+import { CountResponseDto } from './dto/count-response.dto';
+import type { EntryFilters } from './types/entry-filters.interface';
+import { FindEntriesQueryDto } from './dto/find-entries-query.dto';
+import { UpdateEntryDto } from './dto/update-entry.dto';
 
 /*
- * Every handler here answers with the contract's WireEntry, built field by
- * field in toResponse at the foot of this file. If the contract gains a
- * field that toResponse does not fill, this file stops compiling.
+ * Every entry handler here answers with EntryResponseDto, which implements
+ * the contract's Entry, and the count with CountResponseDto. If the contract
+ * gains a field that EntryResponseDto does not fill, it stops compiling.
  */
 @Controller('entries')
 export class EntriesController {
@@ -35,7 +36,7 @@ export class EntriesController {
   async findAll(
     @Query() query: FindEntriesQueryDto,
     @Req() request: AuthenticatedRequest,
-  ): Promise<WireEntry[]> {
+  ): Promise<EntryResponseDto[]> {
     const entries = await this.entriesService.find(
       request.user.id,
       filtersFrom(query),
@@ -45,15 +46,15 @@ export class EntriesController {
       },
     );
 
-    return entries.map(toResponse);
+    return entries.map((entry) => new EntryResponseDto(entry));
   }
 
   @Post()
   async create(
     @Body() dto: CreateEntryDto,
     @Req() request: AuthenticatedRequest,
-  ): Promise<WireEntry> {
-    return toResponse(
+  ): Promise<EntryResponseDto> {
+    return new EntryResponseDto(
       await this.entriesService.create(dto.content, request.user),
     );
   }
@@ -62,27 +63,24 @@ export class EntriesController {
   async countEntries(
     @Query() query: CountEntriesQueryDto,
     @Req() request: AuthenticatedRequest,
-  ): Promise<{ count: number }> {
-    return {
-      count: await this.entriesService.count(
-        request.user.id,
-        filtersFrom(query),
-      ),
-    };
+  ): Promise<CountResponseDto> {
+    return new CountResponseDto(
+      await this.entriesService.count(request.user.id, filtersFrom(query)),
+    );
   }
 
   @Get(':id')
   async findById(
     @Param('id') id: string,
     @Req() request: AuthenticatedRequest,
-  ): Promise<WireEntry> {
+  ): Promise<EntryResponseDto> {
     const entry = await this.entriesService.findById(id, request.user.id);
 
     if (!entry) {
       throw new NotFoundException(`Entry with ID ${id} not found`);
     }
 
-    return toResponse(entry);
+    return new EntryResponseDto(entry);
   }
 
   @Patch(':id')
@@ -90,7 +88,7 @@ export class EntriesController {
     @Param('id') id: string,
     @Body() dto: UpdateEntryDto,
     @Req() request: AuthenticatedRequest,
-  ): Promise<WireEntry> {
+  ): Promise<EntryResponseDto> {
     const updated = await this.entriesService.update(
       id,
       dto.content!,
@@ -101,7 +99,7 @@ export class EntriesController {
       throw new NotFoundException(`Entry with ID ${id} not found`);
     }
 
-    return toResponse(updated);
+    return new EntryResponseDto(updated);
   }
 
   @Delete(':id')
@@ -124,20 +122,4 @@ export class EntriesController {
  */
 function filtersFrom(query: { word?: string; date?: string }): EntryFilters {
   return { word: query.word, date: query.date };
-}
-
-/*
- * An entry as it travels is the contract's WireEntry. The answer is built
- * field by field, so it holds these four things and nothing else the entity
- * or its day may be carrying. The compiler would not notice an extra field.
- *
- * date is the date of the day row the entry points at.
- */
-function toResponse(entry: FiledEntry): WireEntry {
-  return {
-    id: entry.id,
-    content: entry.content,
-    createdAt: entry.createdAt,
-    date: entry.day.date,
-  };
 }

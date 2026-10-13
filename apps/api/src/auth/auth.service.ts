@@ -1,23 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import type { User } from '../users/user.entity';
+import type { UserEntity } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { PasswordService } from './password.service';
 import { RefreshTokenService } from './refresh-token.service';
-import { Session } from './session.entity';
+import { SessionEntity } from './entities/session.entity';
 import { SessionsRepository } from './sessions.repository';
 import { TokenService } from './token.service';
+import type { AuthenticatedSession } from './types/authenticated-session.interface';
 
 export const REFRESH_TOKEN_LIFETIME_DAYS = 30;
 export const REFRESH_TOKEN_LIFETIME_MS =
   REFRESH_TOKEN_LIFETIME_DAYS * 86_400_000;
-
-export interface AuthenticatedSession {
-  sessionId: string;
-  accessToken: string;
-  refreshToken: string;
-  user: User;
-}
 
 @Injectable()
 export class AuthService {
@@ -99,15 +93,15 @@ export class AuthService {
     return this.sessionsRepository.revokeAllForUser(userId, toIso(new Date()));
   }
 
-  listSessions(userId: string): Promise<Session[]> {
+  listSessions(userId: string): Promise<SessionEntity[]> {
     return this.sessionsRepository.findActiveByUser(userId, toIso(new Date()));
   }
 
-  private async startSession(user: User): Promise<AuthenticatedSession> {
+  private async startSession(user: UserEntity): Promise<AuthenticatedSession> {
     const refreshToken = this.refreshTokenService.generate();
     const now = new Date();
 
-    const session = new Session();
+    const session = new SessionEntity();
     session.id = randomUUID();
     session.userId = user.id;
     session.refreshTokenHash = this.refreshTokenService.hash(refreshToken);

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Support } from '@/app/screens/Support';
+import { Support } from '@/components/support/Support';
 
 export const metadata: Metadata = {
   title: 'If you want to talk to someone · Journal',
