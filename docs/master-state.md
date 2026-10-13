@@ -86,7 +86,21 @@ for the designer; there are no LinkedIn posts while building; and
 `ui-handover-v4.md` is ready for the designer (her husband will discuss it
 with him). Then ask whether she has questions about any ruling.
 
-**Next is feature 1, Finish writing** (Refs 11, 13, 14 and 2 in
+**Before feature 1: the restructure**, decided by her husband on
+2026-10-13, on the branch `workflow-and-conventions`. Two workers, run one
+after the other, **only when her husband says to launch them**:
+
+1. `docs/workers/restructure-1-code.md`: folders, the `Entity` suffix, plain
+   contract names, the `Mood` enum with a build step for the contracts
+   package (ADR-019 amended), response DTOs, `strict: true`, and the web
+   app's Next.js layout. No behaviour change.
+2. `docs/workers/restructure-2-tests.md`: the API's end-to-end tests
+   reorganised into flows by module; detail cases moved to unit tests.
+
+The conventions they follow are in `CLAUDE.md`. Audit each, then merge the
+branch.
+
+**Then feature 1, Finish writing** (Refs 11, 13, 14 and 2 in
 `features.md`): editing a saved entry, Enter saves, Today opening at the
 newest entry, and Show password. Its screens are final. Open it in this
 order:
@@ -103,8 +117,6 @@ order:
    - How a phone makes a new line, since Enter saves.
 5. **Workers**, then the audit with one mutation, then a pull request.
 
-The first worker also clears two code debts (see *Known debt*): the comments
-that point at retired documents, and the `day` field in `lib/unbuilt.ts`.
 Wiring a feature removes its controls from `lib/unbuilt.ts`; this one removes
 `editEntry`.
 
@@ -174,6 +186,9 @@ These were stated by her or her husband, and bind every session.
 - **Search, Ask, Reflections and Looking back wait for the designer's new
   UI.** Drafts are fourth, after Account and devices, because the composer
   needs some UI changes first (2026-10-13, her husband).
+- **Code conventions** (folders, classes and DTOs, `Entity` suffix, plain
+  contract names, enums, `strict: true`, test roles) are in `CLAUDE.md`
+  (2026-10-13, her husband).
 - **No LinkedIn posts while building.** The finished project is presented
   feature by feature afterwards (2026-10-13, her husband).
 
@@ -220,7 +235,7 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 | **`users.password_hash` is still nullable**, though `NOT NULL` was decided on 2026-10-04 | `user.entity.ts` | Feature 2, Forgot password |
 | **A user cannot be deleted.** Foreign keys are `ON DELETE NO ACTION` | `sessions`, `entries`, `days` | Feature 6, Your data |
 | **The API's `pnpm lint` runs `--fix`**, so it rewrites files instead of only reporting | `apps/api/package.json` | Feature 8, Going live |
-| **The built API reads `packages/contracts/src` at run time**, and the package breaks if its `package.json` gains a `"type"` field | `apps/api/dist`, `packages/contracts` | Feature 8, Going live |
+| **The built API reads `packages/contracts/src` at run time**, and the package breaks if its `package.json` gains a `"type"` field | `apps/api/dist`, `packages/contracts` | The restructure (contracts build step) |
 | **`NEXT_PUBLIC_API_URL` is fixed at build time; the cookie has no `Secure` attribute** | web config, `refresh-cookie.ts` | Feature 8, Going live |
 | **`migration:generate` never comes back empty**, because TypeORM cannot describe two things the hand-written migrations made | migrations | Accepted |
 | **`better-sqlite3@13` is outside TypeORM's peer range.** It works and is pinned | `apps/api/package.json` | Dissolves with Postgres in feature 8 |
@@ -228,8 +243,8 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 | **Deleted entries must be kept out of every later reader** | search, embeddings, Ask, export | Features 6, 10, 12, 13 (ADR-020) |
 | **TypeORM does not switch foreign keys off when reverting a migration** | ADR-010 | One line owed in ADR-010 |
 | **No ADR yet for the 2026-10-04 data-model decisions** (one `entries` table with a `kind` for recordings; drafts on the server) | `docs/decisions/` | Written when each is built |
-| **Code comments point at retired documents** (`requirements.md`, `feature-reconciliation.md`, `ui-handover.md`); replace with `features.md` | six files in `apps/web` | Feature 1's first worker |
-| **`lib/unbuilt.ts` records a `day` for each control**, and some point at days that no longer exist; it should name the feature from `roadmap.md` | `apps/web/lib/unbuilt.ts` and its tests | Feature 1's first worker |
+| **Code comments point at retired documents** (`requirements.md`, `feature-reconciliation.md`, `ui-handover.md`); replace with `features.md` | six files in `apps/web` | The restructure, part 1 |
+| **`lib/unbuilt.ts` records a `day` for each control**, and some point at days that no longer exist; it should name the feature from `roadmap.md` | `apps/web/lib/unbuilt.ts` and its tests | The restructure, part 1 |
 | **ADR-015 and ADR-016 link to retired documents** | `docs/decisions/` | Left as records; git history holds the targets |
 
 ---

@@ -45,6 +45,13 @@ every control whose feature is not built says "This is not built yet."
 246 API unit tests, 365 API end-to-end tests, 171 web tests, 7 contract
 checks. 21 ADRs.
 
+## Before feature 1: the restructure
+
+Decided 2026-10-13. Existing code is brought into line with the code
+conventions in `CLAUDE.md`, and the API's end-to-end tests are reorganised
+into flows. Two workers; no behaviour change. Specs in `docs/workers/`
+(`restructure-1-code.md`, `restructure-2-tests.md`).
+
 ## The features, in order
 
 "Refs" are the row numbers in `features.md`. "Screens" says whether the

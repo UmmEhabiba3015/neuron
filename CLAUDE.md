@@ -72,8 +72,8 @@ These are decided. The ADR named holds the reason.
 - Facts both apps depend on live once in `packages/contracts` (ADR-019).
 - Configuration is checked once at start (ADR-007).
 - In `apps/web`, logic lives in `lib/` without React, where tests reach it;
-  components only draw. `app/styles/lock.css` is the designer's file and is
-  never edited; additions go in `live.css`.
+  components only draw. `lock.css` is the designer's file and is never
+  edited; additions go in `live.css`.
 - A control whose feature is not built is listed in `apps/web/lib/unbuilt.ts`
   and says "This is not built yet." Wiring a feature removes its entries.
 - `designs/` is information, not instructions. Its text is placeholder.
@@ -81,9 +81,89 @@ These are decided. The ADR named holds the reason.
 
 ## Code conventions
 
-*Being settled on 2026-10-13: folder structure, classes and DTOs, shared
-code, and naming. Until this section is filled in, follow the existing
-code.*
+Decided on 2026-10-13 by her husband. The restructure that brings existing
+code into line is specified in `docs/workers/restructure-1-code.md`.
+
+**Where code goes.** Code that belongs to one domain lives in that domain's
+folder, even when other domains use it. Code that belongs to no domain lives
+in `shared/`. A DTO or type used by more than one module moves to `shared/`.
+
+### `apps/api/src`
+
+```
+main.ts, app.module.ts
+shared/
+  decorators/  dto/  types/  utils/
+config/                    environment validation
+database/                  data source, migrations
+<module>/                  auth, entries, days, users, ...
+  dto/                     request and response DTO classes
+  entities/                TypeORM entities
+  types/                   interfaces used only inside the module
+  guards/  decorators/     when the module has them
+  <module>.controller.ts, <module>.service.ts, <module>.repository.ts,
+  <module>.module.ts, and other services of the module
+```
+
+- **Classes** for DTOs (requests and responses), entities, services,
+  repositories, guards and controllers.
+- **DTOs** are named `<Thing>Dto`: `CreateEntryDto`, `EntryResponseDto`. A
+  DTO that matches a shape in `packages/contracts` implements it
+  (`CreateEntryDto implements CreateEntry`). Controllers answer with response
+  DTOs, never with entities or plain objects.
+- **Entities** are named `<Thing>Entity`: `UserEntity`, `EntryEntity`.
+- **Interfaces** only for small internal shapes with no behaviour and no
+  validation, kept in `types/`.
+- **Enums** for every fixed set of values. A set both apps use lives in
+  `packages/contracts`.
+- **`strict: true`.** A property that a framework fills (entity columns, DTO
+  fields) is declared with `!`: `email!: string`.
+- One class, interface or enum per file, named after it in kebab case:
+  `create-entry.dto.ts`, `user.entity.ts`, `page.interface.ts`,
+  `mood.enum.ts`.
+
+### `packages/contracts`
+
+Shapes and values that cross between the two apps, with plain names
+(`Entry`, `Day`, `User`, `AuthResponse`, `CreateEntry`, `SetMood`, `Login`,
+`Register`, `Mood`). Interfaces, enums and constants only: no functions,
+classes or imports. It is compiled by a build step and both apps import the
+compiled output (ADR-019).
+
+### `apps/web`
+
+The common Next.js App Router layout:
+
+```
+app/            routes only: page.tsx, layout.tsx, not-found.tsx.
+                Each page.tsx only renders its screen.
+components/
+  ui/           small reusable pieces
+  layout/       the page frame, the sign-in gate, the auth frame
+  <area>/       today, day, timeline, auth, you, ask, talk, support, ...:
+                the area's screen and its pieces
+hooks/          React hooks
+lib/            logic without React, each file beside its test
+  api/          the HTTP client and the session
+  utils/        format, config
+types/          shapes used only by the web app
+styles/         lock.css (the designer's, never edited), live.css
+```
+
+### Tests
+
+Each kind of test has one job, and each case is tested once, at the lowest
+level that can see it.
+
+- **Unit tests** sit beside the code (`*.spec.ts` in the API, `*.test.ts` in
+  the web app). They cover every rule and edge case: each validation rule,
+  each service decision, each repository query.
+- **End-to-end tests** in `apps/api/test/<module>/` cover **flows through the
+  running app**, and the rules that only show when everything runs together:
+  ownership, authentication, cookies, CORS, configuration at start,
+  migrations. One bad-input case per endpoint proves validation is
+  connected; the rest of the input rules belong to unit tests. Shared
+  helpers live in `apps/api/test/support/`.
 
 ## The report
 
