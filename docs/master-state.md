@@ -158,7 +158,8 @@ These were stated by her or her husband, and bind every session.
   in progress. There is no fixed end date; finishing soon is the aim
   (2026-10-10, her husband).
 - **Search, Ask, Reflections and Looking back wait for the designer's new
-  UI.** Drafts are built on the current composer (2026-10-13, her husband).
+  UI.** Drafts are fourth, after Account and devices, because the composer
+  needs some UI changes first (2026-10-13, her husband).
 - **No LinkedIn posts while building.** The finished project is presented
   feature by feature afterwards (2026-10-13, her husband).
 
@@ -202,7 +203,7 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 |---|---|---|
 | **No test reaches a React component.** That an unbuilt control sends nothing, every link between screens, and the calendar's jump are checked only by workers walking the app | `apps/web` | Her decision in feature 7, Quality pass |
 | **Nothing enforces that the browser's clock never makes a date.** A lint rule forbidding `new Date()` and `Date.now()` in `apps/web` would | `apps/web` | Feature 7, Quality pass |
-| **`users.password_hash` is still nullable**, though `NOT NULL` was decided on 2026-10-04 | `user.entity.ts` | Feature 3, Forgot password |
+| **`users.password_hash` is still nullable**, though `NOT NULL` was decided on 2026-10-04 | `user.entity.ts` | Feature 2, Forgot password |
 | **A user cannot be deleted.** Foreign keys are `ON DELETE NO ACTION` | `sessions`, `entries`, `days` | Feature 6, Your data |
 | **The API's `pnpm lint` runs `--fix`**, so it rewrites files instead of only reporting | `apps/api/package.json` | Feature 8, Going live |
 | **The built API reads `packages/contracts/src` at run time**, and the package breaks if its `package.json` gains a `"type"` field | `apps/api/dist`, `packages/contracts` | Feature 8, Going live |
@@ -221,7 +222,7 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 
 ## Open questions
 
-1. *(Closed 2026-10-13: the roadmap order is confirmed, with Drafts second.)*
+1. *(Closed 2026-10-13: the roadmap order is confirmed, with Drafts fourth.)*
 2. **May a mood be set on a date with no live entry?** The API allows it;
    by ADR-020 such a mood shows on no calendar.
 3. **Should `docs/workers/` and the remaining worker reports be committed?**

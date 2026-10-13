@@ -87,8 +87,8 @@ be edited.
 
 **Ref 12. Drafts.** Keep. *Nothing.*
 Unfinished writing is saved on the server, so it survives a failed save, a
-reload and being signed out. **Built on the current composer**, because it
-changes no flow (2026-10-13); the designer may restyle it later.
+reload and being signed out. **UX open:** the flow stays on the composer,
+and the composer needs some changes from the designer first (2026-10-13).
 
 **Ref 13. Enter saves.** Keep. *Nothing.*
 Enter saves the entry; Shift with Enter starts a new line. How a phone makes

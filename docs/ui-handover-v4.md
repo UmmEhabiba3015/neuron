@@ -161,14 +161,15 @@ What the product does: unfinished writing in the composer is saved to the
 server as the person types. It comes back after a reload, after being
 signed out and signing in again, and on another device.
 
-This is being built now on the current composer, because it changes no
-flow. Your design is still welcome, and we will restyle to it when it
-arrives: a draft restored into the composer, and a draft that failed to save
+The flow stays on the composer, and we need your changes to it before we
+build: a draft restored into the composer, and a draft that failed to save
 (the text is still in the composer and can still be saved). If you think a
 quiet "saved" indication helps, show it; it is optional.
 
-**Order of your work.** C1 to C3 (Looking back, Search and Ask,
-Reflections) and C4 are what our build waits for. C5 and C6 are not.
+**Order of your work.** C5 (Drafts) is needed first, because it is the
+next thing we build that waits on you. Then C2 (Search and Ask), C3 and C4
+(Reflections and the overview), and C1 (Looking back). C6 needs nothing
+now.
 
 ### C6. Privacy page wording
 

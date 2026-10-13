@@ -4,7 +4,7 @@
 feature, not by day** (her husband, 2026-10-10). The scope of every feature
 is locked in [features.md](features.md); this file only says the order and
 what each feature teaches. The order was confirmed by her husband on
-2026-10-13, with Drafts moved up to second.
+2026-10-13, with Drafts placed fourth.
 
 The day-numbered plans (v2.0 and v3.0, Days 0 to 39) are in git:
 
@@ -26,7 +26,8 @@ git show 4e49fc1:docs/roadmap.md
    recorded and decided on its own. It does not silently grow the feature.
 4. **Features that wait for the designer.** Search, Ask, Reflections and
    Looking back are a large overhaul of their screens and flow, so they wait
-   for the designer's new UI (her husband, 2026-10-13). If one reaches its
+   for the designer's new UI, and Drafts waits for small changes to the
+   composer (her husband, 2026-10-13). If one reaches its
    turn before its UI has arrived, work moves to the next feature that is
    ready, and returns when the UI arrives. The privacy wording is written
    last, whatever happens.
@@ -52,9 +53,9 @@ feature can be built on today's screens, or waits for the designer.
 | # | Feature | Refs | The problem it starts from, and what it teaches | Screens |
 |---|---|---|---|---|
 | 1 | **Finish writing** | 11, 13, 14, 2 | Writing is the product and a saved entry cannot be changed. `PATCH /entries/:id` exists and nothing calls it. Editing end to end, keyboard handling, scroll position | Ready |
-| 2 | **Drafts** | 12 | Unfinished writing is lost on a failed save, a reload or a sign-out. A `drafts` table, saving while the person types, and what a failed save shows. Built on the current composer; the designer may restyle it later | Ready |
-| 3 | **Forgot password** | 4 | A forgotten password locks a person out for good. A mail service; a reset token stored hashed, single-use and expiring; the same answer whether or not the account exists; every session ended. Also makes `password_hash` required | Ready |
-| 4 | **Account and devices** | 6, 7 | A person cannot see where they are signed in, or move timezone. Listing and ending sessions; changing a setting that dates depend on | Ready |
+| 2 | **Forgot password** | 4 | A forgotten password locks a person out for good. A mail service; a reset token stored hashed, single-use and expiring; the same answer whether or not the account exists; every session ended. Also makes `password_hash` required | Ready |
+| 3 | **Account and devices** | 6, 7 | A person cannot see where they are signed in, or move timezone. Listing and ending sessions; changing a setting that dates depend on | Ready |
+| 4 | **Drafts** | 12 | Unfinished writing is lost on a failed save, a reload or a sign-out. A `drafts` table, saving while the person types, and what a failed save shows. The composer needs some changes from the designer first | Waits for small UI changes |
 | 5 | **Voice memos** | 21, 22, 23 | Recording is easier than typing, and audio does not belong in a database. Object storage, uploads, a second kind of entry, retry after a failed upload | Ready, with the static waveform from the v4 handover |
 | 6 | **Your data** | 36, 8, 37 | A person cannot take their journal away or leave. Export as PDF, JSON and audio; a hard delete that settles every foreign key; counts | Ready, with PDF in place of Markdown |
 | 7 | **Quality pass** | 40 | It works at one screen size and nothing tests a React component. Responsive layout, keyboard access, accessibility, a decision on a real-browser test, a lint rule so the browser's clock never makes a date | Ready |
@@ -74,9 +75,10 @@ entry. Feature 16 is the third.
 
 ## Why this order
 
-- **Features 1 to 7 finish the product a person can use without AI**, on
-  today's screens. They need no design work and can start now. Drafts sit
-  beside editing because both are about the composer.
+- **Features 1 to 7 finish the product a person can use without AI.** All
+  but Drafts run on today's screens and can start now. Drafts is fourth
+  because the composer needs some changes from the designer first, and three
+  features give him time to deliver them.
 - **Going live comes before the AI work**, because first deployments fail in
   ways nobody predicts, and moving to Postgres there settles the database
   before vectors are stored in it.
