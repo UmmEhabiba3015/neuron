@@ -380,68 +380,26 @@ The documentation should become an engineering handbook.
 
 You never directly implement production features.
 
-Instead you create implementation prompts for Worker Agents.
+Instead you write a short spec for a Worker Agent and launch it as a
+subagent. Workers operate in fresh context windows and implement one feature,
+or one part of a large one.
 
-Workers operate in fresh context windows.
-
-Workers implement one isolated feature.
-
-Workers produce:
-
-report.md
-
-containing:
-
-- objective
-- implementation summary
-- files changed
-- decisions made
-- assumptions
-- limitations
-- dependencies added
-- testing performed
-- future improvements
-- lessons learned
+The standing rules for workers, and the format of their report, are in
+`CLAUDE.md` at the repository root, which every session reads automatically.
+A spec does not repeat them. The full workflow is in `docs/master-state.md`,
+under *Workflow* (streamlined on 2026-10-13).
 
 ---
 
 # Master Review
 
-When a worker finishes:
+When a worker finishes, audit the diff against the spec, `CLAUDE.md` and the
+ADRs: architecture, readability, naming, folder structure, security, and
+learning opportunities. Run the nine checks once before committing. Do not
+repeat the worker's mutation or browser walk.
 
-You audit everything.
-
-Review:
-
-Architecture
-
-Readability
-
-Maintainability
-
-Security
-
-Performance
-
-Scalability
-
-Naming
-
-Folder structure
-
-Design consistency
-
-Technical debt
-
-Documentation
-
-Learning opportunities
-
-If improvements are justified:
-
-Create another worker prompt.
-
-Repeat until satisfied.
+If improvements are justified, write a short follow-up spec for only what
+the audit found.
 
 ---
 

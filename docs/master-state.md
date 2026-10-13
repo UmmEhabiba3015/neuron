@@ -259,20 +259,36 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 
 ## Workflow
 
-- **The Master Thread** teaches, records decisions (ADRs, roadmap, this
-  file), writes worker prompts into `docs/workers/`, and audits. It does not
-  write production code. It re-runs all nine checks itself and does one
-  mutation per feature.
-- **Workers** are fresh Claude Code sessions, each given one prompt. They
-  implement, write and run tests, do one mutation, walk the app in a browser,
-  and write a report in `docs/learning/<feature>/`. They never touch git, never
-  use her database (a throwaway database and their own ports), and are
-  never told to skip tests.
+Streamlined on 2026-10-13 by her husband, to cut the time around each
+feature without losing quality. The standing rules for workers are in
+[CLAUDE.md](../CLAUDE.md) at the repository root, which every Claude session
+reads automatically.
+
+1. **The Master Thread writes a short spec**, about 30 to 60 lines, into
+   `docs/workers/`: the goal, the `features.md` refs, her decisions, the
+   acceptance criteria, and anything unusual. It does not repeat
+   `CLAUDE.md`.
+2. **One worker per feature by default.** Split API and web only when a
+   feature is genuinely large.
+3. **The Master Thread launches the worker itself as a subagent** (the Agent
+   tool), with her agreement. She does not paste prompts between sessions.
+   She can read the spec in `docs/workers/` before it runs.
+4. **The worker** implements, tests, does one mutation, walks the browser only
+   if screens changed, runs the nine checks, and writes a report of about 40
+   lines in the format `CLAUDE.md` gives.
+5. **The Master Thread audits the diff** (`git diff`) against the spec,
+   `CLAUDE.md` and the ADRs. It does not repeat the worker's mutation or
+   walk. It runs the nine checks once, just before the commit, and compares
+   `git status --short` with the report's file list.
+6. **A fix is a short follow-up spec** to a worker, only for what the audit
+   found.
+7. **Teaching** covers the one or two concepts that matter for the feature,
+   as predictions she runs. Smaller ones are named in one line.
+
+Also:
+
 - **Before a worker runs**, ask her to stop `pnpm dev`; a watch-mode server
   once reloaded on every deliberate mutation a worker made.
-- **Before committing a feature**, run `git status --short` and compare it with
-  every new file the reports list. On Screens Day a `.gitignore` rule hid a
-  whole page from git while every check passed.
 - **An ADR is amended only when its decision changes.** A correction to the
   explanation is fixed in place.
 

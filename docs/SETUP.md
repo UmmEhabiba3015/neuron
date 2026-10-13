@@ -121,9 +121,10 @@ Learner*. In short:
 
 - **The Master Thread** teaches, records decisions, writes worker prompts and
   audits. It does not write production code.
-- **Workers** are fresh Claude Code sessions given one prompt from
-  `docs/workers/`. They implement, run all nine checks, and write a report.
-  They never touch git.
+- **Workers** are subagents the Master Thread launches with a short spec
+  from `docs/workers/`. Their standing rules are in `CLAUDE.md` at the
+  repository root. They implement, run all nine checks, and write a short
+  report. They never touch git.
 - **She decides**, as short choices with the cost of each stated. She or her
   husband sets the feature boundary.
 - **Work is planned by feature** (`docs/features.md` for scope,
