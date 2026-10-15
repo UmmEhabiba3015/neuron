@@ -29,7 +29,7 @@ export class AuthService {
   ): Promise<AuthenticatedSession | undefined> {
     const user = await this.usersService.findByEmail(email);
 
-    if (!user?.passwordHash) {
+    if (!user) {
       await this.passwordService.verify(UNKNOWN_USER_HASH, password);
 
       return undefined;

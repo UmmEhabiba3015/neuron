@@ -32,4 +32,8 @@ export class UsersRepository {
   async findById(id: string): Promise<UserEntity | undefined> {
     return (await this.users.findOneBy({ id })) ?? undefined;
   }
+
+  async updatePasswordHash(id: string, passwordHash: string): Promise<void> {
+    await this.users.update({ id }, { passwordHash });
+  }
 }

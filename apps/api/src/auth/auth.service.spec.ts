@@ -110,12 +110,12 @@ describe('AuthService', () => {
       expect(await service.login('UMER@EXAMPLE.COM', PASSWORD)).toBeDefined();
     });
 
-    it('refuses a wrong password, an unknown address, and an account with no password', async () => {
+    it('refuses a wrong password, an unknown address, and an account whose stored hash cannot be read', async () => {
       await dataSource.getRepository(UserEntity).insert({
         id: 'legacy-user',
         email: 'legacy@example.com',
         createdAt: '2026-09-01T00:00:00.000Z',
-        passwordHash: null,
+        passwordHash: 'not-an-argon2-hash',
         name: 'Somebody',
         timezone: 'UTC',
       });

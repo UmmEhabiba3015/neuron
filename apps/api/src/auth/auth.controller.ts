@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   ConflictException,
   Controller,
@@ -23,17 +24,28 @@ import {
   unpackRefreshCookie,
 } from './refresh-cookie';
 import { AuthResponseDto } from './dto/auth-response.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { PasswordResetService } from './password-reset.service';
 import { RegisterDto } from './dto/register.dto';
 import { SessionResponseDto } from './dto/session-response.dto';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import type { AuthenticatedRequest } from '../shared/types/authenticated-request.interface';
 import type { AuthenticatedSession } from './types/authenticated-session.interface';
 
+/*
+ * One answer for a reset link that is unknown, expired or already used, so
+ * that none of the three can be told from the others.
+ */
+export const INVALID_RESET_LINK =
+  'This reset link has expired or has already been used';
+
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
+    private readonly passwordResetService: PasswordResetService,
   ) {}
 
   @Public()
@@ -113,6 +125,27 @@ export class AuthController {
     await this.authService.logoutEverywhere(request.user.id);
 
     response.clearCookie(REFRESH_COOKIE_NAME, REFRESH_COOKIE_CLEAR_OPTIONS);
+  }
+
+  /*
+   * 204 whether or not an account uses the address, and before anything is
+   * looked up, stored or sent, so neither the answer nor its timing says
+   * which addresses have accounts (docs/features.md, Ref 4).
+   */
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  forgotPassword(@Body() dto: ForgotPasswordDto): void {
+    this.passwordResetService.requestInBackground(dto.email);
+  }
+
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async resetPassword(@Body() dto: ResetPasswordDto): Promise<void> {
+    if (!(await this.passwordResetService.reset(dto.token, dto.password))) {
+      throw new BadRequestException(INVALID_RESET_LINK);
+    }
   }
 
   @Get('sessions')

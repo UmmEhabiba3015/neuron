@@ -23,16 +23,6 @@ export interface Unbuilt {
 }
 
 export const UNBUILT = {
-  sendResetLink: {
-    label: 'Send reset link',
-    feature: 2,
-    where: 'Forgot password',
-  },
-  saveNewPassword: {
-    label: 'Save new password',
-    feature: 2,
-    where: 'Choose a new password',
-  },
   signedInDevices: {
     label: 'Signed-in devices',
     feature: 3,

@@ -75,8 +75,13 @@ describe('routes closed by default (e2e)', () => {
       .expect(401);
   });
 
-  it('leaves registering, signing in and refreshing open', async () => {
-    for (const url of ['/auth/register', '/auth/login']) {
+  it('leaves registering, signing in, refreshing and resetting a password open', async () => {
+    for (const url of [
+      '/auth/register',
+      '/auth/login',
+      '/auth/forgot-password',
+      '/auth/reset-password',
+    ]) {
       const response = await request(running.server).post(url).send({});
 
       expect([url, response.status]).toEqual([url, 400]);

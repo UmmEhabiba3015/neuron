@@ -10,6 +10,8 @@ import { UserNameBecomesEmail1790668948320 } from './1790668948320-UserNameBecom
 import { RequireEntryDay1791314102576 } from './1791314102576-RequireEntryDay';
 import { AddEntryDeletedAt1791363323870 } from './1791363323870-AddEntryDeletedAt';
 import { AddUserNameAndTimezone1791383154639 } from './1791383154639-AddUserNameAndTimezone';
+import { RequireUserPasswordHash1792063401155 } from './1792063401155-RequireUserPasswordHash';
+import { AddPasswordResets1792063401156 } from './1792063401156-AddPasswordResets';
 
 type Migration = new () => MigrationInterface;
 
@@ -25,4 +27,6 @@ export const migrations: Migration[] = [
   RequireEntryDay1791314102576,
   AddEntryDeletedAt1791363323870,
   AddUserNameAndTimezone1791383154639,
+  RequireUserPasswordHash1792063401155,
+  AddPasswordResets1792063401156,
 ];

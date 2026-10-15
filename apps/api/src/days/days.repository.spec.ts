@@ -5,6 +5,7 @@ import { migrations } from '../database/migrations';
 import { DayEntity } from './entities/day.entity';
 import { DaysRepository } from './days.repository';
 import { UserEntity } from '../users/entities/user.entity';
+import { SEEDED_PASSWORD_HASH } from '../../test/support/test-database';
 
 describe('DaysRepository', () => {
   let dataSource: DataSource;
@@ -26,7 +27,7 @@ describe('DaysRepository', () => {
         id,
         email: `${id}@example.com`,
         createdAt: '2026-01-01T00:00:00.000Z',
-        passwordHash: null,
+        passwordHash: SEEDED_PASSWORD_HASH,
         name: 'Somebody',
         timezone: 'UTC',
       });

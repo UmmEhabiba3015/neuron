@@ -253,3 +253,18 @@ body {
   text-align: start;
   cursor: pointer;
 }
+
+/*
+ * 5.6 A link inside a notice.
+ *
+ * A link that no longer works says "Ask for a new one." inside its notice,
+ * and that sentence is the link to /forgot (components/auth/Recover.tsx).
+ * lock.css draws no link inside a notice, so the browser's blue showed. It
+ * keeps the notice's own colour and is underlined, as in 5.4, so that it is
+ * not told apart by colour alone.
+ */
+.notice a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
