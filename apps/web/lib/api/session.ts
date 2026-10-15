@@ -27,8 +27,10 @@
 
 import type {
   AuthResponse,
+  ForgotPassword,
   Login,
   Register,
+  ResetPassword,
   User,
 } from '@neuron/contracts';
 
@@ -86,6 +88,13 @@ export interface Session {
    * browser for it, and never puts another in its place.
    */
   register(details: Register): Promise<ApiResult<User>>;
+  /* Asks for a reset link by email. Changes nothing about who is signed in. */
+  forgotPassword(email: string): Promise<ApiResult<void>>;
+  /*
+   * Chooses a new password with the token from the link. Signs nobody in,
+   * and changes nothing here: the person was signed out to begin with.
+   */
+  resetPassword(token: string, password: string): Promise<ApiResult<void>>;
   /* Signs out of this device, and of no other. */
   signOut(): Promise<SignOut>;
   request<T>(path: string, options?: RequestOptions): Promise<ApiResult<T>>;
@@ -399,6 +408,29 @@ export function createSession(config: {
   }
 
   /*
+   * Like register, these two are for a person who is signed out. They carry
+   * no token and no cookie, and a refusal is never a reason to refresh.
+   */
+  async function forgotPassword(email: string): Promise<ApiResult<void>> {
+    const body: ForgotPassword = { email };
+
+    return resultOf<void>(
+      await send('/auth/forgot-password', { method: 'POST', body }, {}),
+    );
+  }
+
+  async function resetPassword(
+    token: string,
+    password: string,
+  ): Promise<ApiResult<void>> {
+    const body: ResetPassword = { token, password };
+
+    return resultOf<void>(
+      await send('/auth/reset-password', { method: 'POST', body }, {}),
+    );
+  }
+
+  /*
    * POST /auth/logout ends the session on the server and clears the cookie.
    * It is sent with the access token, which is how the API knows whose
    * session to end, and with the cookie, which is the only way a browser
@@ -487,6 +519,8 @@ export function createSession(config: {
     restore,
     login,
     register,
+    forgotPassword,
+    resetPassword,
     signOut,
     request,
   };

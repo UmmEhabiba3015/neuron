@@ -48,7 +48,8 @@ without clearing it.
 The name is collected at sign-up but is not shown in the menu, and there is
 no way to change it for now. This may be revisited later.
 
-**Ref 4. Forgot and reset password.** Keep. *Drawn.*
+**Ref 4. Forgot and reset password.** Keep. *Built* (feature 2). Until
+feature 8 the email is written to the API's log, not sent (ADR-022).
 A person asks for a reset link by email. The link works once and expires
 after 30 minutes. The answer is the same whether or not the email has an
 account, so nobody can use it to discover who has one. Setting a new password

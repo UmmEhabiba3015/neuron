@@ -30,16 +30,16 @@ reports in `docs/learning/` hold the rest.
 
 ## Where the project is
 
-**Last updated:** 2026-10-15, at the close of feature 1, Finish writing.
+**Last updated:** 2026-10-15, at the close of feature 2, Forgot password.
 
 **Work is planned by feature, not by day.** The scope is locked in
 [features.md](features.md), the order is in [roadmap.md](roadmap.md), and
 what the designer is asked to change is
 [ui-handover-v4.md](ui-handover-v4.md).
 
-**Done:** everything up to Screens Day, the restructure, and feature 1,
-Finish writing. Feature 1 is on the branch `feature-finish-writing`, in a
-pull request for her to merge.
+**Done:** everything up to Screens Day, the restructure, feature 1, Finish
+writing (merged), and feature 2, Forgot password, which is on the branch
+`feature-forgot-password` in a pull request for her to merge.
 
 **Verified on 2026-10-15 by re-running, not by reading a report.** All nine
 checks pass:
@@ -49,21 +49,21 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-**421** API unit tests, **42** API end-to-end tests, **202** web tests, **7**
-checks on the shared package. 21 ADRs. 11 migrations. Use exactly these nine
+**469** API unit tests, **46** API end-to-end tests, **217** web tests, **8**
+checks on the shared package. 22 ADRs. 13 migrations. Use exactly these nine
 commands. A plain `npx jest` in `apps/api` skips the migration tests and
 still reports a pass.
 
 **What a person can do:** create an account (email, password, name; timezone
 from the browser), sign in, stay signed in across a reload, sign out, write,
-edit and delete entries, save with Enter, set the mood of today or a past
+edit and delete entries, save with Enter, reset a forgotten password, set the mood of today or a past
 day, browse the Timeline as a list or a month calendar, and open a past day.
 Today opens at the newest entry, and every password field can show what was
 typed.
 
 **What a person can see:** every screen of the designer's v3 prototype. A
 control whose feature is not built says "This is not built yet." and sends
-nothing. The 18 such controls are listed in `apps/web/lib/unbuilt.ts`.
+nothing. The 16 such controls are listed in `apps/web/lib/unbuilt.ts`.
 
 **Branch.** Each feature has its own branch, `feature-<short-name>`, made
 from `main` before work starts, and closes through a pull request she merges.
@@ -73,37 +73,31 @@ The old `day-*` branches and four kept merged branches stay as they are.
 
 ## How to open the next session
 
-**First, check that she merged the pull request of feature 1** and that
-`main` holds it. Then make `feature-forgot-password` from `main`.
+**First, check that she merged the pull request of feature 2** and that
+`main` holds it. Ask her to run `pnpm migration:run` on her own database: the
+migration `RequireUserPasswordHash` stops, changing nothing, if any account
+has no password hash, and says how many. If it stops, that is her decision
+to make, not a worker's. Then make `feature-account-and-devices` from `main`.
 
-**She has not yet been shown the restructured layout.** Feature 1 touched
-only files whose place did not change for her. When feature 2 reaches the
-API, point out the new layout (`CLAUDE.md`, *Code conventions*): `shared/`,
-`dto/` and `entities/` inside each module, the `Entity` suffix, response
-DTOs.
-
-**Next is feature 2, Forgot password** (Ref 4 in `features.md`). Its screens
-are drawn. It also makes `users.password_hash` `NOT NULL` (known debt). Open
-it in this order:
+**Next is feature 3, Account and devices** (Refs 6 and 7 in `features.md`).
+Its screens are drawn. Listing sessions (`GET /auth/sessions`) and signing
+out everywhere already exist in the API. Open it in this order:
 
 1. **The feature overview**: the blocks, what each is, which are decisions
    and which are building.
 2. **Learning debt:** none is open.
-3. **The problem first.** A reset needs a way to reach the person outside
-   the app. A mail service has not been chosen (`features.md`, *Technology
-   today*), so this is a real research and comparison with an ADR, by the
-   constitution's order. Keep it to the main mechanism and the trade-off
-   (depth guardrail).
-4. **Her decisions**, as short choices with each cost stated. Already
-   decided in `features.md`: the link works once and expires after 30
-   minutes; the answer is the same whether or not the email has an account;
-   a new password signs out every device and returns to sign in. Open: the
-   words of the email and of the screens, and whether `/reset` asks for the
-   new password twice (it asks once today; sign-up asks twice).
+3. **The problem first.** Two problems: a person cannot see where they are
+   signed in, and cannot move timezone. The second touches ADR-015 (a day
+   ends at midnight in the person's timezone; an entry stays on the day it
+   was filed) and open question 4. Start from what happens to today's
+   entries, today's mood and "today" itself when the timezone changes.
+4. **Her decisions**, as short choices with each cost stated: how a device
+   is named in the list (the API stores no device name today), and the
+   words.
 5. **Workers**, then the audit with one mutation, then a pull request.
 
-Wiring feature 2 removes `sendResetLink` and `saveNewPassword` from
-`lib/unbuilt.ts`.
+Wiring feature 3 removes `signedInDevices`, `signOutEverywhere` and
+`chooseTimezone` from `lib/unbuilt.ts`.
 
 ---
 
@@ -134,6 +128,27 @@ Wiring feature 2 removes `sendResetLink` and `saveNewPassword` from
   form and reloads the page. That is true of a one-line `<input>` and never
   of a `<textarea>`.
 
+**Feature 2, Forgot password** (2026-10-15). Ref 4. ADR-022. Report in
+`docs/learning/feature-2-forgot-password/`.
+
+- *Built:* asking for a reset link, the link written to the API's log, a
+  new password set once within 30 minutes, every other link and every
+  session ended; `users.password_hash` made `NOT NULL`.
+- *Her decisions:* mail in development is the API's log, not Mailpit, under
+  Rule Zero (ADR-022; Mailpit was her first answer and is sound); the new
+  password is typed twice; the email's and the screens' words.
+- *Trade-offs worth telling:* the reset token is stored as SHA-256, not
+  argon2id, because 32 random bytes cannot be guessed (her run: 61 digits of
+  years at a billion guesses a second) while a person's password can. The
+  answer to "forgot password" is sent before any work is done, so its
+  timing does not reveal which emails have accounts.
+- *The mutation:* removing the step that marks a link used broke only the
+  test of two requests at once, because ending every other link of the
+  person also ends this one. The step exists for the race.
+- *Mistake:* the Master Thread told her the configuration would refuse the
+  log mailer in production, before checking that Neuron has no idea of
+  production yet. Corrected the same day; owed to feature 8.
+
 ---
 
 ## What is built
@@ -141,7 +156,9 @@ Wiring feature 2 removes `sendResetLink` and `saveNewPassword` from
 **`apps/api`**, NestJS on SQLite through TypeORM. Tables: `users` (email,
 unique without regard to case; name; IANA timezone; argon2id hash),
 `sessions`, `days` (`UNIQUE(user_id, date)`, the mood), `entries` (`user_id`
-and `day_id` both `NOT NULL`, soft-deleted through `deleted_at`).
+and `day_id` both `NOT NULL`, soft-deleted through `deleted_at`),
+`password_resets` (the SHA-256 of the token, expiry, used time). Mail goes
+through `shared/mail/MailService`, which writes it to the log (ADR-022).
 
 **`apps/web`**, Next.js. Routes: `/`, `/in`, `/new`, `/forgot`, `/reset`,
 `/timeline`, `/d/[date]`, `/ask`, `/talk`, `/options`, `/support`, `/you`,
@@ -249,7 +266,6 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 |---|---|---|
 | **No test reaches a React component.** That an unbuilt control sends nothing, every link between screens, and the calendar's jump are checked only by workers walking the app. In feature 1 she removed `event.preventDefault()` from `useEnterToSave.ts` and all 202 web tests passed | `apps/web` | Her decision in feature 7, Quality pass |
 | **Nothing enforces that the browser's clock never makes a date.** A lint rule forbidding `new Date()` and `Date.now()` in `apps/web` would | `apps/web` | Feature 7, Quality pass |
-| **`users.password_hash` is still nullable**, though `NOT NULL` was decided on 2026-10-04 | `user.entity.ts` | Feature 2, Forgot password |
 | **A user cannot be deleted.** Foreign keys are `ON DELETE NO ACTION` | `sessions`, `entries`, `days` | Feature 6, Your data |
 | **The API's `pnpm lint` runs `--fix`**, so it rewrites files instead of only reporting | `apps/api/package.json` | Feature 8, Going live |
 | **The built API reads `packages/contracts/src` at run time**, and the package breaks if its `package.json` gains a `"type"` field | `apps/api/dist`, `packages/contracts` | The restructure (contracts build step) |
@@ -263,6 +279,10 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 | **No ADR yet for the 2026-10-04 data-model decisions** (one `entries` table with a `kind` for recordings; drafts on the server) | `docs/decisions/` | Written when each is built |
 | **`useEnterToSave` is named and placed like a hook but calls no hook**; it is a plain function that returns a key handler | `apps/web/hooks/useEnterToSave.ts` | Feature 7, Quality pass |
 | **On desktop the entry icons show only on hover, and a long entry's words sit over them** (worker's note, feature 1) | `Journal.tsx`, `lock.css` | Feature 7, Quality pass; may be the designer's |
+| **Nothing stops the log mailer in production.** A reset link in a log is a working key to an account; Neuron has no idea of production yet (ADR-022) | `MailService`, `env.validation.ts` | Feature 8, Going live |
+| **`shared/mail/` is a module folder the conventions do not list** (they list `decorators/`, `dto/`, `types/`, `utils/`). Mail belongs to no domain, so the Master Thread kept it | `apps/api/src/shared/mail/` | For her husband to confirm |
+| **Reset requests have no rate limit**, so anyone can fill another person's inbox once real mail is sent | `POST /auth/forgot-password` | Feature 16, Security pass |
+| **Expired and used password resets are never deleted** | `password_resets` | Feature 13, with expired sessions |
 | **ADR-015 and ADR-016 link to retired documents** | `docs/decisions/` | Left as records; git history holds the targets |
 
 ---
@@ -433,3 +453,6 @@ cost a second worker.
 - Wrote the feature 1 spec without checking two facts in the code: Show
   password already existed, and `Recover.tsx` has one password field, not
   two. The worker caught both. Read the screen before describing it.
+- Told her the configuration would refuse the log mailer in production
+  before checking that the configuration has any idea of production. It has
+  none. Corrected within the block (feature 2).

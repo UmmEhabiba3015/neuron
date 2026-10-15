@@ -32,6 +32,12 @@ export const PASSWORD_MIN_LENGTH = 8;
 export const NAME_MAX_LENGTH = 60;
 
 /*
+ * How long the link in a password reset email works, by the API's clock. The
+ * API decides it; the web app says it.
+ */
+export const PASSWORD_RESET_LIFETIME_MINUTES = 30;
+
+/*
  * The shapes below are what travels over HTTP. They are not the API's
  * entities: an entity also holds columns that never leave the server. The
  * API's response DTOs implement them.
@@ -107,4 +113,21 @@ export interface Register {
    * by a person. Not a country, and not an offset such as +05:00.
    */
   timezone: string;
+}
+
+/*
+ * The body of POST /auth/forgot-password. The answer is the same whether or
+ * not an account uses the address.
+ */
+export interface ForgotPassword {
+  email: string;
+}
+
+/*
+ * The body of POST /auth/reset-password. The token is the one in the link of
+ * the email. The password follows the rules of Register's.
+ */
+export interface ResetPassword {
+  token: string;
+  password: string;
 }

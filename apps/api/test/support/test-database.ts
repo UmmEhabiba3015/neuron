@@ -15,6 +15,12 @@ import { UserEntity } from '../../src/users/entities/user.entity';
  */
 export const SEEDED_TIMEZONE = 'UTC';
 
+/*
+ * Every account has a password hash, so a seeded one has this. It is not an
+ * argon2 hash of anything, so no password signs a seeded account in.
+ */
+export const SEEDED_PASSWORD_HASH = 'seeded-account-with-no-usable-password';
+
 export async function createTestDataSource(): Promise<DataSource> {
   const dataSource = new DataSource({
     type: 'better-sqlite3',
@@ -112,7 +118,7 @@ export async function seedUser(
     id,
     email: `${id}@example.com`,
     createdAt: '2026-09-01T00:00:00.000Z',
-    passwordHash: null,
+    passwordHash: SEEDED_PASSWORD_HASH,
     name: id,
     timezone: SEEDED_TIMEZONE,
   });

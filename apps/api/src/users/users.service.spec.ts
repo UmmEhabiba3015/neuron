@@ -140,4 +140,31 @@ describe('UsersService', () => {
       expect(await users.count()).toBe(2);
     });
   });
+
+  describe('setPasswordHash', () => {
+    it("replaces the one person's hash, and no one else's", async () => {
+      const alice = (await service.register({
+        ...registration('alice-password'),
+        email: 'alice@example.com',
+      }))!;
+      const bob = (await service.register({
+        ...registration('bob-password'),
+        email: 'bob@example.com',
+      }))!;
+
+      await service.setPasswordHash(alice.id, '$argon2id$a-new-hash');
+
+      const hashOf = async (id: string) =>
+        (
+          await users
+            .createQueryBuilder('user')
+            .addSelect('user.passwordHash')
+            .where('user.id = :id', { id })
+            .getOneOrFail()
+        ).passwordHash;
+
+      expect(await hashOf(alice.id)).toBe('$argon2id$a-new-hash');
+      expect(await hashOf(bob.id)).toBe(bob.passwordHash);
+    });
+  });
 });

@@ -1,8 +1,20 @@
 import type { Metadata } from 'next';
 import { AuthForm } from '@/components/auth/AuthForm';
+import { isAfterReset } from '@/lib/recover';
 
 export const metadata: Metadata = { title: 'Log in · Journal' };
 
-export default function SignInPage() {
-  return <AuthForm mode="in" />;
+/*
+ * /in?reset=done is where a changed password lands, and sign in then says
+ * so. `searchParams` is a promise in this Next.js, which is why it is
+ * awaited.
+ */
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ reset?: string | string[] }>;
+}) {
+  const { reset } = await searchParams;
+
+  return <AuthForm mode="in" afterReset={isAfterReset(reset)} />;
 }

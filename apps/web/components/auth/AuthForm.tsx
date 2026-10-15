@@ -44,7 +44,7 @@ type Outcome =
   | { kind: 'unreachable' }
   | { kind: 'failed' };
 
-const NO_EMAIL = 'Enter an email address.';
+export const NO_EMAIL = 'Enter an email address.';
 const TOO_SHORT = `Enter a password with at least ${PASSWORD_MIN_LENGTH} characters.`;
 
 const NO_NAME = 'Enter your name.';
@@ -54,7 +54,7 @@ const NAME_TOO_LONG = `Enter a name with at most ${NAME_MAX_LENGTH} characters.`
  * What is wrong is decided in lib/account-form.ts. This puts each problem in
  * words.
  */
-const SENTENCES: Record<NonNullable<FormProblems[FieldName]>, string> = {
+export const SENTENCES: Record<NonNullable<FormProblems[FieldName]>, string> = {
   noName: NO_NAME,
   nameTooLong: NAME_TOO_LONG,
   notAnEmail: NO_EMAIL,
@@ -86,14 +86,23 @@ function browserTimeZone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone;
 }
 
+/* Shared with the screens of a forgotten password, in Recover.tsx. */
+export const COULD_NOT_REACH =
+  'We could not reach the server. Your details are still here. Try again.';
+export const SOMETHING_WENT_WRONG =
+  'Something went wrong on our side. Nothing was changed.';
+
+/* Said once, by sign in, when /reset has sent the person there. */
+const PASSWORD_CHANGED =
+  'Your password has been changed, and every device has been signed out. Sign in with your new password.';
+
 const WORDS = {
   in: {
     heading: 'Log in',
     copy: 'Open your journal on this device.',
     submit: 'Log in',
     sending: 'Signing you in.',
-    unreachable:
-      'We could not reach the server. Your details are still here. Try again.',
+    unreachable: COULD_NOT_REACH,
     passwordAutoComplete: 'current-password',
   },
   new: {
@@ -107,7 +116,13 @@ const WORDS = {
   },
 } as const;
 
-export function AuthForm({ mode }: { mode: Mode }) {
+export function AuthForm({
+  mode,
+  afterReset = false,
+}: {
+  mode: Mode;
+  afterReset?: boolean;
+}) {
   const state = useSession();
   const router = useRouter();
 
@@ -207,7 +222,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
   }
 
   const words = WORDS[mode];
-  const ended = mode === 'in' && state.ended && outcome.kind === 'none';
+  const changed = mode === 'in' && afterReset && outcome.kind === 'none';
+  const ended =
+    !changed && mode === 'in' && state.ended && outcome.kind === 'none';
   const sentences = outcome.kind === 'fields' ? outcome.sentences : {};
 
   const notice =
@@ -218,12 +235,14 @@ export function AuthForm({ mode }: { mode: Mode }) {
         : outcome.kind === 'unreachable'
           ? [words.unreachable]
           : outcome.kind === 'failed'
-            ? ['Something went wrong on our side. Nothing was changed.']
+            ? [SOMETHING_WENT_WRONG]
             : outcome.kind === 'fields'
               ? outcome.other
-              : ended
-                ? ['You were signed out. Sign in again to open your journal.']
-                : [];
+              : changed
+                ? [PASSWORD_CHANGED]
+                : ended
+                  ? ['You were signed out. Sign in again to open your journal.']
+                  : [];
 
   return (
     <AuthScreen>
@@ -243,7 +262,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         notice.map((sentence) => (
           <div
             className="notice"
-            role={ended ? 'status' : 'alert'}
+            role={ended || changed ? 'status' : 'alert'}
             key={sentence}
           >
             {sentence}
@@ -586,7 +605,7 @@ function fromApiMessages(messages: string[]): Outcome {
   };
 }
 
-function inProductWords(message: string): string {
+export function inProductWords(message: string): string {
   if (message === 'email must be an email address') {
     return NO_EMAIL;
   }

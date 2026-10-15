@@ -2,6 +2,7 @@ import type { DataSource } from 'typeorm';
 import {
   closeTestDataSource,
   createTestDataSource,
+  SEEDED_PASSWORD_HASH,
 } from '../../test/support/test-database';
 import { UserEntity } from '../users/entities/user.entity';
 import { DayEntity } from '../days/entities/day.entity';
@@ -59,12 +60,12 @@ describe('entry ownership', () => {
       expect(names).not.toContain('salt');
     });
 
-    it('should allow the credential to be null for rows that predate it', async () => {
+    it('should require the credential, since every account has one', async () => {
       const passwordHash = (await columnsOf('users')).find(
         (column) => column.name === 'password_hash',
       );
 
-      expect(passwordHash?.notnull).toBe(0);
+      expect(passwordHash?.notnull).toBe(1);
     });
 
     it('should require names to be unique', async () => {
@@ -74,6 +75,7 @@ describe('entry ownership', () => {
         id: 'user-1',
         email: 'habiba@example.com',
         createdAt: '2026-09-02T09:00:00.000Z',
+        passwordHash: SEEDED_PASSWORD_HASH,
         name: 'Somebody',
         timezone: 'UTC',
       });
@@ -83,6 +85,7 @@ describe('entry ownership', () => {
           id: 'user-2',
           email: 'habiba@example.com',
           createdAt: '2026-09-02T09:00:01.000Z',
+          passwordHash: SEEDED_PASSWORD_HASH,
           name: 'Somebody',
           timezone: 'UTC',
         }),
@@ -117,6 +120,7 @@ describe('entry ownership', () => {
         id: 'user-1',
         email: 'habiba@example.com',
         createdAt: '2026-09-02T09:00:00.000Z',
+        passwordHash: SEEDED_PASSWORD_HASH,
         name: 'Somebody',
         timezone: 'UTC',
       });
@@ -139,6 +143,7 @@ describe('entry ownership', () => {
         id: 'user-1',
         email: 'habiba@example.com',
         createdAt: '2026-09-02T09:00:00.000Z',
+        passwordHash: SEEDED_PASSWORD_HASH,
         name: 'Somebody',
         timezone: 'UTC',
       });
@@ -179,7 +184,7 @@ describe('entry ownership', () => {
         id: 'owner-of-entry-1',
         email: 'somebody@example.com',
         createdAt: '2026-09-01T00:00:00.000Z',
-        passwordHash: null,
+        passwordHash: SEEDED_PASSWORD_HASH,
         name: 'Somebody',
         timezone: 'UTC',
       });
@@ -206,7 +211,7 @@ describe('entry ownership', () => {
         id: 'owner-1',
         email: 'the-owner@example.com',
         createdAt: '2026-09-01T00:00:00.000Z',
-        passwordHash: null,
+        passwordHash: SEEDED_PASSWORD_HASH,
         name: 'Somebody',
         timezone: 'UTC',
       });

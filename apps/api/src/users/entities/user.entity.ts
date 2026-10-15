@@ -15,8 +15,8 @@ export class UserEntity {
   email!: string;
 
   @Exclude()
-  @Column({ name: 'password_hash', type: 'text', nullable: true })
-  passwordHash!: string | null;
+  @Column({ name: 'password_hash', type: 'text' })
+  passwordHash!: string;
 
   @Column({ name: 'created_at', type: 'text' })
   createdAt!: string;

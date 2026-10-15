@@ -677,3 +677,77 @@ test('after signing out, signing in again works', async () => {
   assert.equal(again.kind, 'ok');
   assert.deepEqual(session.getState(), { status: 'signedIn', user: USER });
 });
+
+test('asking for a reset link sends the address alone, with no token and no cookie', async () => {
+  const api = fakeApi({
+    '/auth/forgot-password': () => ({ status: 204 }),
+  });
+  const session = createSession({ apiUrl: API, fetch: api.fetch });
+
+  const result = await session.forgotPassword(USER.email);
+
+  assert.equal(result.kind, 'ok');
+  assert.deepEqual(api.calls, [
+    {
+      path: '/auth/forgot-password',
+      method: 'POST',
+      token: undefined,
+      cookie: false,
+      body: { email: USER.email },
+    },
+  ]);
+  assert.deepEqual(session.getState(), { status: 'unknown' });
+});
+
+test('choosing a new password sends the token and the password, and signs nobody in', async () => {
+  const api = fakeApi({
+    '/auth/reset-password': () => ({ status: 204 }),
+  });
+  const session = createSession({ apiUrl: API, fetch: api.fetch });
+
+  const result = await session.resetPassword('the-token', 'a new password');
+
+  assert.equal(result.kind, 'ok');
+  assert.deepEqual(api.calls, [
+    {
+      path: '/auth/reset-password',
+      method: 'POST',
+      token: undefined,
+      cookie: false,
+      body: { token: 'the-token', password: 'a new password' },
+    },
+  ]);
+  assert.deepEqual(session.getState(), { status: 'unknown' });
+});
+
+test('a refused reset is a rejection with its message, and triggers no refresh', async () => {
+  const api = fakeApi({
+    '/auth/reset-password': () => ({
+      status: 400,
+      body: { message: 'This reset link has expired or has already been used' },
+    }),
+  });
+  const session = createSession({ apiUrl: API, fetch: api.fetch });
+
+  assert.deepEqual(await session.resetPassword('used', 'a new password'), {
+    kind: 'rejected',
+    status: 400,
+    messages: ['This reset link has expired or has already been used'],
+  });
+  assert.equal(api.calls.length, 1);
+});
+
+test('a reset or a request for a link that gets no answer is unreachable', async () => {
+  const api = fakeApi({
+    '/auth/forgot-password': () => 'no answer',
+    '/auth/reset-password': () => 'no answer',
+  });
+  const session = createSession({ apiUrl: API, fetch: api.fetch });
+
+  assert.deepEqual(await session.forgotPassword(USER.email), {
+    kind: 'unreachable',
+  });
+  assert.deepEqual(await session.resetPassword('t', 'a new password'), {
+    kind: 'unreachable',
+  });
+});

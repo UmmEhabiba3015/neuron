@@ -51,6 +51,15 @@ export class UsersService {
   findById(id: string): Promise<UserEntity | undefined> {
     return this.usersRepository.findById(id);
   }
+
+  /*
+   * Takes a hash and not a password, so that the slow hashing can be done
+   * before a transaction opens rather than while it is open. The caller
+   * hashes with PasswordService, as register() does.
+   */
+  setPasswordHash(id: string, passwordHash: string): Promise<void> {
+    return this.usersRepository.updatePasswordHash(id, passwordHash);
+  }
 }
 
 function isUniqueNameViolation(error: unknown): boolean {

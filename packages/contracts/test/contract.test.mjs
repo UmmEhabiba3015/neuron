@@ -166,3 +166,12 @@ test('the name maximum is not written as a number in either application', () => 
 
   assert.deepEqual(linesThatRestate(contract.NAME_MAX_LENGTH, aboutNames), []);
 });
+
+test('the lifetime of a reset link is not written as a number in either application', () => {
+  const aboutMinutes = /minute/i;
+
+  assert.deepEqual(
+    linesThatRestate(contract.PASSWORD_RESET_LIFETIME_MINUTES, aboutMinutes),
+    [],
+  );
+});
