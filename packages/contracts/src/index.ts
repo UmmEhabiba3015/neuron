@@ -81,6 +81,11 @@ export interface CreateEntry {
   content: string;
 }
 
+/* The body of PATCH /entries/:id. The entry keeps its time and its day. */
+export interface UpdateEntry {
+  content: string;
+}
+
 /* The body of PUT /days/:date/mood. null clears the mood. */
 export interface SetMood {
   mood: Mood | null;

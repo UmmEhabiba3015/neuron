@@ -3,7 +3,13 @@
 import { MAX_PAGE_SIZE } from '@neuron/contracts';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { BlankScreen } from '@/components/layout/AuthScreen';
 import {
   JournalBox,
@@ -14,7 +20,12 @@ import { LiveComposer } from '@/components/day/Journal';
 import { useSession } from '@/hooks/useSession';
 import { session } from '@/lib/api/client';
 import { formatDay } from '@/lib/utils/format';
-import { createToday, isBlank, type TodayState } from '@/lib/today';
+import {
+  createToday,
+  isBlank,
+  scrollsToBottom,
+  type TodayState,
+} from '@/lib/today';
 import { CouldNotConnect } from '@/components/layout/CouldNotConnect';
 import { DaySheet, useFocusAfterDelete } from '@/components/day/DaySheet';
 
@@ -137,6 +148,25 @@ export function LiveToday({ options }: { options?: boolean }) {
       document.removeEventListener('visibilitychange', onVisible);
     };
   }, [signedIn, today]);
+
+  /*
+   * Today reads like a chat, newest at the bottom. When it is kept there is
+   * decided in lib/today.ts. A layout effect, so that the page is never
+   * painted at the top first and then jumps.
+   */
+  const lastView = useRef<TodayState | undefined>(undefined);
+
+  useLayoutEffect(() => {
+    const before = lastView.current;
+    lastView.current = view;
+
+    if (scrollsToBottom(before, view)) {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'instant',
+      });
+    }
+  }, [view]);
 
   /* Where focus goes when an entry is deleted: see DaySheet.tsx. */
   const shownEntries = view.day.status === 'open' ? view.day.entries : [];

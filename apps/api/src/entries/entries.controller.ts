@@ -91,7 +91,7 @@ export class EntriesController {
   ): Promise<EntryResponseDto> {
     const updated = await this.entriesService.update(
       id,
-      dto.content!,
+      dto.content,
       request.user.id,
     );
 

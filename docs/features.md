@@ -40,7 +40,7 @@ twice, and a name, and signs in with email and password. The email is unique
 regardless of upper or lower case. The timezone comes from the browser at
 sign-up.
 
-**Ref 2. Show password.** Keep. *Nothing.*
+**Ref 2. Show password.** Keep. *Built* (feature 1).
 Every password field has a control that shows or hides what was typed,
 without clearing it.
 
@@ -80,7 +80,7 @@ A plain-text entry, filed on today by the server.
 Confirmed in place, removed from the screen at once, kept hidden in the
 database until the account is deleted. No undo.
 
-**Ref 11. Edit an entry.** Keep. *Drawn.*
+**Ref 11. Edit an entry.** Keep. *Built* (feature 1).
 A typed entry is edited in its own row. It keeps its original time and gets
 no "edited" mark. A failed save keeps the changed words. Voice memos cannot
 be edited.
@@ -90,11 +90,12 @@ Unfinished writing is saved on the server, so it survives a failed save, a
 reload and being signed out. **UX open:** the flow stays on the composer,
 and the composer needs some changes from the designer first (2026-10-13).
 
-**Ref 13. Enter saves.** Keep. *Nothing.*
-Enter saves the entry; Shift with Enter starts a new line. How a phone makes
-a new line is decided when this is built.
+**Ref 13. Enter saves.** Keep. *Built* (feature 1).
+Enter saves the entry; Shift with Enter starts a new line. On a phone (a
+touch-only screen), Enter starts a new line and only the button saves (her
+decision, 2026-10-15). The same rule holds in the editor of an entry.
 
-**Ref 14. Today opens at the newest entry.** Keep. *Nothing.*
+**Ref 14. Today opens at the newest entry.** Keep. *Built* (feature 1).
 Like a chat: Today opens scrolled to the bottom, saving scrolls to the
 bottom, and editing does not jump the reader away from where they are.
 
@@ -259,7 +260,6 @@ app.
 ## Not yet decided, and decided when its feature is built
 
 - How often a draft is saved and what a failed save shows (Ref 12).
-- How a phone makes a new line (Ref 13).
 - How the recent overview is produced (Ref 31) and the reflection period
   (Ref 32).
 - What Privacy says about training (Ref 35).

@@ -30,19 +30,18 @@ reports in `docs/learning/` hold the rest.
 
 ## Where the project is
 
-**Last updated:** 2026-10-13, after the final reconciliation with her
-husband.
+**Last updated:** 2026-10-15, at the close of feature 1, Finish writing.
 
-**Work is now planned by feature, not by day.** The scope is locked in
+**Work is planned by feature, not by day.** The scope is locked in
 [features.md](features.md), the order is in [roadmap.md](roadmap.md), and
 what the designer is asked to change is
-[ui-handover-v4.md](ui-handover-v4.md). The day-numbered plan ended at
-Screens Day.
+[ui-handover-v4.md](ui-handover-v4.md).
 
-**Done:** everything up to Screens Day, merged into `main` through pull
-requests. The reconciliation is on the branch `final-reconciliation`.
+**Done:** everything up to Screens Day, the restructure, and feature 1,
+Finish writing. Feature 1 is on the branch `feature-finish-writing`, in a
+pull request for her to merge.
 
-**Verified on 2026-10-10 by re-running, not by reading a report.** All nine
+**Verified on 2026-10-15 by re-running, not by reading a report.** All nine
 checks pass:
 
 ```bash
@@ -50,19 +49,21 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-**421** API unit tests, **42** API end-to-end tests, **170** web tests, **7**
+**421** API unit tests, **42** API end-to-end tests, **202** web tests, **7**
 checks on the shared package. 21 ADRs. 11 migrations. Use exactly these nine
 commands. A plain `npx jest` in `apps/api` skips the migration tests and
 still reports a pass.
 
 **What a person can do:** create an account (email, password, name; timezone
-from the browser), sign in, stay signed in across a reload, sign out, write
-and delete entries, set the mood of today or a past day, browse the Timeline
-as a list or a month calendar, and open a past day.
+from the browser), sign in, stay signed in across a reload, sign out, write,
+edit and delete entries, save with Enter, set the mood of today or a past
+day, browse the Timeline as a list or a month calendar, and open a past day.
+Today opens at the newest entry, and every password field can show what was
+typed.
 
 **What a person can see:** every screen of the designer's v3 prototype. A
 control whose feature is not built says "This is not built yet." and sends
-nothing. The 19 such controls are listed in `apps/web/lib/unbuilt.ts`.
+nothing. The 18 such controls are listed in `apps/web/lib/unbuilt.ts`.
 
 **Branch.** Each feature has its own branch, `feature-<short-name>`, made
 from `main` before work starts, and closes through a pull request she merges.
@@ -72,40 +73,66 @@ The old `day-*` branches and four kept merged branches stay as they are.
 
 ## How to open the next session
 
-**The next session opens with her**, on this machine. Her husband's
-sessions of 2026-10-10 and 2026-10-13 changed how the project runs, and she
-was not in them. Before anything else, tell her in a few sentences: the
-scope is locked in `features.md`; the workflow is streamlined and the code
-was restructured to the conventions in `CLAUDE.md`; work is by feature in the `roadmap.md`
-order, not by day; Search, Ask, Reflections, Looking back and Drafts wait
-for the designer; there are no LinkedIn posts while building; and
-`ui-handover-v4.md` is ready for the designer (her husband will discuss it
-with him). Then ask whether she has questions about any ruling.
+**First, check that she merged the pull request of feature 1** and that
+`main` holds it. Then make `feature-forgot-password` from `main`.
 
-**The restructure is done** (2026-10-13): code conventions applied across
-both apps, and the API's end-to-end tests reorganised into flows. Reports in
-`docs/learning/restructure/`. She has not seen it; when feature 1 touches the
-code, point out the new layout (`CLAUDE.md`, *Code conventions*).
+**She has not yet been shown the restructured layout.** Feature 1 touched
+only files whose place did not change for her. When feature 2 reaches the
+API, point out the new layout (`CLAUDE.md`, *Code conventions*): `shared/`,
+`dto/` and `entities/` inside each module, the `Entity` suffix, response
+DTOs.
 
-**Next is feature 1, Finish writing** (Refs 11, 13, 14 and 2 in
-`features.md`): editing a saved entry, Enter saves, Today opening at the
-newest entry, and Show password. Its screens are final. Open it in this
-order:
+**Next is feature 2, Forgot password** (Ref 4 in `features.md`). Its screens
+are drawn. It also makes `users.password_hash` `NOT NULL` (known debt). Open
+it in this order:
 
-1. **Make the branch** `feature-finish-writing` from `main`.
-2. **The feature overview**: the blocks, what each is, which are decisions
+1. **The feature overview**: the blocks, what each is, which are decisions
    and which are building.
-3. **Repay Screens Day's learning debt**, as predictions she runs (see
-   *Learning debt*). It comes before the feature by her husband's rule.
-4. **Her decisions**, as short choices with each cost stated:
-   - Editing: what a failed edit shows. Already decided: the entry keeps its
-     original time, is not marked edited, cannot be saved empty, and a past
-     day's entries can be edited. Voice memos cannot be edited.
-   - How a phone makes a new line, since Enter saves.
+2. **Learning debt:** none is open.
+3. **The problem first.** A reset needs a way to reach the person outside
+   the app. A mail service has not been chosen (`features.md`, *Technology
+   today*), so this is a real research and comparison with an ADR, by the
+   constitution's order. Keep it to the main mechanism and the trade-off
+   (depth guardrail).
+4. **Her decisions**, as short choices with each cost stated. Already
+   decided in `features.md`: the link works once and expires after 30
+   minutes; the answer is the same whether or not the email has an account;
+   a new password signs out every device and returns to sign in. Open: the
+   words of the email and of the screens, and whether `/reset` asks for the
+   new password twice (it asks once today; sign-up asks twice).
 5. **Workers**, then the audit with one mutation, then a pull request.
 
-Wiring a feature removes its controls from `lib/unbuilt.ts`; this one removes
-`editEntry`.
+Wiring feature 2 removes `sendResetLink` and `saveNewPassword` from
+`lib/unbuilt.ts`.
+
+---
+
+## Features finished, kept for the public presentation
+
+**Feature 1, Finish writing** (2026-10-15). Refs 2, 11, 13, 14. Report in
+`docs/learning/feature-1-finish-writing/`.
+
+- *Built:* editing an entry in its own row on Today and a past day; Enter
+  saves on a computer and starts a new line on a phone; Today opens at the
+  newest entry and a save keeps it there; Show password keeps focus and the
+  cursor in the field.
+- *Her decisions:* an edit waits for the API, as writing does (ADR-021),
+  rather than showing at once; on a touch-only screen Enter makes a new line,
+  at the cost that a tablet with a keyboard behaves like a phone; Cancel and
+  Escape put back the words without asking. She kept the worker's three
+  failure sentences.
+- *Trade-off worth telling:* the rule for Enter lives in `lib/keys.ts`, where
+  tests reach it. The one line that joins a real key press to that rule
+  (`event.preventDefault()` in `hooks/useEnterToSave.ts`) is in React, where
+  no test reaches. She removed it, predicted that nothing visible would go
+  wrong and that no test would fail, and both held: 202 of 202 passed.
+  Evidence for the feature 7 decision on component tests.
+- *Mistake:* Show password was listed as "Nothing" in `features.md`, but it
+  had been built on Screens Day. The spec also counted two password fields on
+  `Recover.tsx`, where there is one.
+- *Lesson:* her first prediction was that Enter in a text box submits the
+  form and reloads the page. That is true of a one-line `<input>` and never
+  of a `<textarea>`.
 
 ---
 
@@ -124,7 +151,8 @@ components draw. `app/styles/lock.css` is the designer's file byte for byte,
 and anything it lacks is in `live.css`.
 
 **`packages/contracts`**: wire shapes, mood words, page sizes, the password
-minimum. No functions, no imports, no build step.
+minimum, the `Mood` enum. Interfaces, enums and constants only; compiled to
+`dist/` by a build step that every root script runs first (ADR-019).
 
 **The rules that shape the code, and where they are decided:**
 
@@ -187,19 +215,21 @@ A concept a worker introduced is not done until she can explain it without
 reading the code. **Open debt is repaid before the next feature starts;
 her asking to skip it is not enough** (her husband's rule, 2026-09-04).
 
-**Open, to repay at the opening of feature 1, as predictions she runs:**
-
-- **A custom hook.** `useNotBuilt` in `apps/web/hooks/useNotBuilt.ts` (moved by the restructure)
-  holds a piece of state for whichever control calls it.
-- **`as const satisfies` with `keyof typeof`** in `apps/web/lib/unbuilt.ts`.
-  A misspelt control name on a screen fails `pnpm typecheck:web`; that is the
-  experiment.
+**Open:** none.
 
 Named and not taught, under the depth guardrail: `<details>`,
 `role="status"`, `:where()` in CSS, `data-*` attributes, a union of a number
 and one string, `scrollIntoView`, `aria-pressed`, a container query.
+From feature 1: `isComposing`, a media query asked through `matchMedia`,
+`useLayoutEffect`, `focus({ preventScroll: true })`, `preventDefault` on
+`mousedown`. `preventDefault` on Enter was taught by a run.
 
-**Closed most recently:** Day 17c's four items (a join reading a second
+**Closed most recently:** Screens Day's two items, repaid on 2026-10-15 at
+the opening of feature 1 by runs. She predicted that each row of Your data
+shows its own sentence, and said why: each call of `useNotBuilt` gets its own
+state. She misspelt a control name, predicted the typecheck failure, ran it,
+and answered that a new control needs no hand-written addition to
+`UnbuiltName`. Before that, Day 17c's four items (a join reading a second
 table, a cast with `as`, a date read from an address, `Link`), repaid on
 Screens Day by runs. Every earlier debt is closed; the record is in the old
 master state.
@@ -217,7 +247,7 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 
 | Item | Where | When |
 |---|---|---|
-| **No test reaches a React component.** That an unbuilt control sends nothing, every link between screens, and the calendar's jump are checked only by workers walking the app | `apps/web` | Her decision in feature 7, Quality pass |
+| **No test reaches a React component.** That an unbuilt control sends nothing, every link between screens, and the calendar's jump are checked only by workers walking the app. In feature 1 she removed `event.preventDefault()` from `useEnterToSave.ts` and all 202 web tests passed | `apps/web` | Her decision in feature 7, Quality pass |
 | **Nothing enforces that the browser's clock never makes a date.** A lint rule forbidding `new Date()` and `Date.now()` in `apps/web` would | `apps/web` | Feature 7, Quality pass |
 | **`users.password_hash` is still nullable**, though `NOT NULL` was decided on 2026-10-04 | `user.entity.ts` | Feature 2, Forgot password |
 | **A user cannot be deleted.** Foreign keys are `ON DELETE NO ACTION` | `sessions`, `entries`, `days` | Feature 6, Your data |
@@ -231,8 +261,8 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 | **The Export row on Your data still says "Markdown and JSON"**; export is PDF, JSON and audio (features.md Ref 36). Screen wording, hers | `components/you/You.tsx` | Feature 6, Your data |
 | **TypeORM does not switch foreign keys off when reverting a migration** | ADR-010 | One line owed in ADR-010 |
 | **No ADR yet for the 2026-10-04 data-model decisions** (one `entries` table with a `kind` for recordings; drafts on the server) | `docs/decisions/` | Written when each is built |
-| **Code comments point at retired documents** (`requirements.md`, `feature-reconciliation.md`, `ui-handover.md`); replace with `features.md` | six files in `apps/web` | The restructure, part 1 |
-| **`lib/unbuilt.ts` records a `day` for each control**, and some point at days that no longer exist; it should name the feature from `roadmap.md` | `apps/web/lib/unbuilt.ts` and its tests | The restructure, part 1 |
+| **`useEnterToSave` is named and placed like a hook but calls no hook**; it is a plain function that returns a key handler | `apps/web/hooks/useEnterToSave.ts` | Feature 7, Quality pass |
+| **On desktop the entry icons show only on hover, and a long entry's words sit over them** (worker's note, feature 1) | `Journal.tsx`, `lock.css` | Feature 7, Quality pass; may be the designer's |
 | **ADR-015 and ADR-016 link to retired documents** | `docs/decisions/` | Left as records; git history holds the targets |
 
 ---
@@ -400,3 +430,6 @@ cost a second worker.
 - Scoped Screens Day narrower than she meant, and missed the Timeline's
   calendar in two audits, because it was drawn as a "state".
 - Gave a debt experiment with a command that could not work (Screens Day).
+- Wrote the feature 1 spec without checking two facts in the code: Show
+  password already existed, and `Recover.tsx` has one password field, not
+  two. The worker caught both. Read the screen before describing it.

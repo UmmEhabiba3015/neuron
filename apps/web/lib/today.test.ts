@@ -8,7 +8,9 @@ import {
   createToday,
   isBlank,
   MAX_PAGES,
+  scrollsToBottom,
   type Request,
+  type TodayState,
 } from './today.ts';
 
 /*
@@ -98,6 +100,21 @@ function fakeApi(ids: string[] = [], mood: string | null = null) {
 
       stored = [...stored, created];
       return { kind: 'ok', data: created };
+    }
+
+    if (method === 'PATCH') {
+      const id = path.split('/')[2];
+      const { content } = options.body as { content: string };
+      const found = stored.find((item) => item.id === id);
+
+      if (!found) {
+        return NOT_FOUND;
+      }
+
+      const changed = { ...found, content };
+
+      stored = stored.map((item) => (item.id === id ? changed : item));
+      return { kind: 'ok', data: changed };
     }
 
     if (method === 'DELETE') {
@@ -1085,6 +1102,368 @@ test('when the delete of the last entry of a past date fails, the entry and the 
   assert.deepEqual(shown(page), ['a']);
   assert.equal(moodOf(page), 'Low');
   assert.deepEqual(page.getState().notDeleted, { a: 'unreachable' });
+});
+
+/* ---- Editing an entry -------------------------------------------------- */
+
+const contentOf = (
+  page: { getState(): { day: unknown } },
+  id: string,
+): string | undefined =>
+  (
+    page.getState().day as { entries?: { id: string; content: string }[] }
+  ).entries?.find((item) => item.id === id)?.content;
+
+test('opening the editor holds the entry`s words, and sends nothing', async () => {
+  const { api, today } = await openToday(['a', 'b']);
+  const before = api.sent.length;
+
+  today.edit('b');
+
+  assert.deepEqual(today.getState().editing, {
+    id: 'b',
+    text: 'entry b',
+    save: { status: 'idle' },
+  });
+  assert.equal(api.sent.length, before);
+});
+
+test('saving sends PATCH for that entry, in the contract`s shape, with the words without the space around them', async () => {
+  const { api, today } = await openToday(['a']);
+
+  today.edit('a');
+  today.typeEdit('  changed words \n');
+  await today.saveEdit();
+
+  const patches = api.sent.filter((s) => s.method === 'PATCH');
+
+  assert.deepEqual(patches, [
+    { method: 'PATCH', path: '/entries/a', body: { content: 'changed words' } },
+  ]);
+});
+
+test('the editor stays open with the new words, saying it is saving, until the API answers; then it closes on the saved words', async () => {
+  const { api, today } = await openToday(['a']);
+  const patch = held();
+  api.answer('PATCH /entries/a', () => patch.reply);
+
+  today.edit('a');
+  today.typeEdit('new words');
+  const saving = today.saveEdit();
+
+  assert.deepEqual(today.getState().editing, {
+    id: 'a',
+    text: 'new words',
+    save: { status: 'saving' },
+  });
+  assert.equal(contentOf(today, 'a'), 'entry a', 'not shown before the answer');
+
+  patch.release({
+    kind: 'ok',
+    data: { ...entry('a', 1), content: 'new words' },
+  });
+  await saving;
+
+  assert.equal(today.getState().editing, null);
+  assert.equal(contentOf(today, 'a'), 'new words');
+});
+
+test('the edited entry keeps its time, its place and its day, and the day is not asked for again', async () => {
+  const { api, today } = await openToday(['a', 'b', 'c']);
+  const before = api.count('GET', '/entries');
+
+  today.edit('b');
+  today.typeEdit('changed');
+  await today.saveEdit();
+
+  assert.deepEqual(shown(today), ['a', 'b', 'c']);
+  const day = today.getState().day as unknown as {
+    entries: { createdAt: string }[];
+  };
+  assert.equal(day.entries[1].createdAt, entry('b', 2).createdAt);
+  assert.equal(api.count('GET', '/entries'), before);
+});
+
+test('two presses while an edit is being saved send one request', async () => {
+  const { api, today } = await openToday(['a']);
+  const patch = held();
+  api.answer('PATCH /entries/a', () => patch.reply);
+
+  today.edit('a');
+  today.typeEdit('once');
+  const first = today.saveEdit();
+  const second = today.saveEdit();
+
+  patch.release({ kind: 'ok', data: { ...entry('a', 1), content: 'once' } });
+  await Promise.all([first, second]);
+
+  assert.equal(api.count('PATCH', '/entries'), 1);
+});
+
+test('blank words are refused before anything is sent, and the editor stays open', async () => {
+  const { api, today } = await openToday(['a']);
+
+  today.edit('a');
+  today.typeEdit('  \n\n ');
+  await today.saveEdit();
+
+  assert.equal(api.count('PATCH', '/entries'), 0);
+  assert.deepEqual(today.getState().editing, {
+    id: 'a',
+    text: '  \n\n ',
+    save: { status: 'notSaved', why: 'blank' },
+  });
+  assert.equal(contentOf(today, 'a'), 'entry a');
+});
+
+for (const [name, reply, why] of [
+  ['no answer', NO_ANSWER, 'unreachable'],
+  ['a server error', SERVER_ERROR, 'refused'],
+] as const) {
+  test(`an edit that fails with ${name} keeps the editor open with the changed words, and says why`, async () => {
+    const { api, today } = await openToday(['a']);
+    api.answer('PATCH /entries/a', () => reply);
+
+    today.edit('a');
+    today.typeEdit('changed words');
+    await today.saveEdit();
+
+    assert.deepEqual(today.getState().editing, {
+      id: 'a',
+      text: 'changed words',
+      save: { status: 'notSaved', why },
+    });
+    assert.equal(contentOf(today, 'a'), 'entry a');
+  });
+}
+
+test('after a failed edit, saving again works, and typing takes the sentence away', async () => {
+  const { api, today } = await openToday(['a']);
+  api.answer('PATCH /entries/a', () => NO_ANSWER);
+
+  today.edit('a');
+  today.typeEdit('changed');
+  await today.saveEdit();
+
+  today.typeEdit('changed again');
+  assert.deepEqual(today.getState().editing?.save, { status: 'idle' });
+
+  api.restore('PATCH /entries/a');
+  await today.saveEdit();
+
+  assert.equal(today.getState().editing, null);
+  assert.equal(contentOf(today, 'a'), 'changed again');
+});
+
+test('an edit whose session has ended keeps the words and says nothing', async () => {
+  const { api, today } = await openToday(['a']);
+  api.answer('PATCH /entries/a', () => ENDED);
+
+  today.edit('a');
+  today.typeEdit('changed');
+  await today.saveEdit();
+
+  assert.deepEqual(today.getState().editing, {
+    id: 'a',
+    text: 'changed',
+    save: { status: 'idle' },
+  });
+});
+
+test('an edit answered 404 removes the entry from the page and says so', async () => {
+  const { api, today } = await openToday(['a', 'b']);
+  api.answer('PATCH /entries/a', () => NOT_FOUND);
+
+  today.edit('a');
+  today.typeEdit('too late');
+  await today.saveEdit();
+
+  assert.deepEqual(shown(today), ['b']);
+  assert.equal(today.getState().editing, null);
+  assert.equal(today.getState().editedGone, true);
+
+  today.edit('b');
+  assert.equal(today.getState().editedGone, false, 'the next edit takes it away');
+});
+
+test('cancelling closes the editor, puts back the words, and sends nothing', async () => {
+  const { api, today } = await openToday(['a']);
+  const before = api.sent.length;
+
+  today.edit('a');
+  today.typeEdit('not wanted');
+  today.cancelEdit();
+
+  assert.equal(today.getState().editing, null);
+  assert.equal(contentOf(today, 'a'), 'entry a');
+  assert.equal(api.sent.length, before);
+
+  today.edit('a');
+  assert.equal(today.getState().editing?.text, 'entry a', 'reopened on the saved words');
+});
+
+test('cancelling while an edit is being saved changes nothing', async () => {
+  const { api, today } = await openToday(['a']);
+  const patch = held();
+  api.answer('PATCH /entries/a', () => patch.reply);
+
+  today.edit('a');
+  today.typeEdit('changed');
+  const saving = today.saveEdit();
+  today.cancelEdit();
+
+  assert.deepEqual(today.getState().editing?.save, { status: 'saving' });
+
+  patch.release({ kind: 'ok', data: { ...entry('a', 1), content: 'changed' } });
+  await saving;
+  assert.equal(contentOf(today, 'a'), 'changed');
+});
+
+test('one entry is edited at a time: opening another puts back the first`s words', async () => {
+  const { today } = await openToday(['a', 'b']);
+
+  today.edit('a');
+  today.typeEdit('half done');
+  today.edit('b');
+
+  assert.equal(today.getState().editing?.id, 'b');
+  assert.equal(contentOf(today, 'a'), 'entry a');
+});
+
+test('no other editor opens while an edit is being saved', async () => {
+  const { api, today } = await openToday(['a', 'b']);
+  const patch = held();
+  api.answer('PATCH /entries/a', () => patch.reply);
+
+  today.edit('a');
+  today.typeEdit('changed');
+  const saving = today.saveEdit();
+  today.edit('b');
+
+  assert.equal(today.getState().editing?.id, 'a');
+
+  patch.release({ kind: 'ok', data: { ...entry('a', 1), content: 'changed' } });
+  await saving;
+});
+
+test('an answer about the day that left the API before the edit was saved does not bring the old words back', async () => {
+  const { api, today } = await openToday(['a']);
+  const page = held();
+  api.answer('GET /entries', () => page.reply);
+
+  const looking = today.look();
+  await settle();
+
+  today.edit('a');
+  today.typeEdit('new words');
+  await today.saveEdit();
+
+  page.release({ kind: 'ok', data: [entry('a', 1)] });
+  await looking;
+
+  assert.equal(contentOf(today, 'a'), 'new words');
+});
+
+test('an answer about the day asked for after the edit was saved is believed', async () => {
+  const { api, today } = await openToday(['a']);
+
+  today.edit('a');
+  today.typeEdit('new words');
+  await today.saveEdit();
+
+  api.answer('GET /entries', () => ({
+    kind: 'ok',
+    data: [{ ...entry('a', 1), content: 'changed in another tab' }],
+  }));
+  await today.look();
+
+  assert.equal(contentOf(today, 'a'), 'changed in another tab');
+});
+
+test('an entry of a past date is edited as on Today', async () => {
+  const { api, page } = await openPast(['a', 'b']);
+
+  page.edit('a');
+  page.typeEdit('a past day, changed');
+  await page.saveEdit();
+
+  assert.deepEqual(
+    api.sent.filter((s) => s.method === 'PATCH').map((s) => [s.path, s.body]),
+    [['/entries/a', { content: 'a past day, changed' }]],
+  );
+  assert.equal(contentOf(page, 'a'), 'a past day, changed');
+  assert.deepEqual(shown(page), ['a', 'b']);
+});
+
+test('an edit on a past date that fails keeps the changed words', async () => {
+  const { api, page } = await openPast(['a']);
+  api.answer('PATCH /entries/a', () => NO_ANSWER);
+
+  page.edit('a');
+  page.typeEdit('kept');
+  await page.saveEdit();
+
+  assert.deepEqual(page.getState().editing, {
+    id: 'a',
+    text: 'kept',
+    save: { status: 'notSaved', why: 'unreachable' },
+  });
+});
+
+/* ---- Where Today is scrolled to ---------------------------------------- */
+
+test('Today is scrolled to the bottom when its day is first shown, and when it comes back after a failure', async () => {
+  const api = fakeApi(['a']);
+  const today = createToday({ request: api.request, pageSize: 200 });
+  const opening = today.getState();
+
+  await today.open();
+
+  assert.equal(scrollsToBottom(undefined, today.getState()), true);
+  assert.equal(scrollsToBottom(opening, today.getState()), true);
+
+  const failed: TodayState = {
+    ...today.getState(),
+    day: { status: 'unreachable', asked: 1 },
+  };
+  assert.equal(scrollsToBottom(today.getState(), failed), false);
+  assert.equal(scrollsToBottom(failed, today.getState()), true);
+});
+
+test('Today is scrolled to the bottom once a saved entry has arrived, and not before', async () => {
+  const { today } = await openToday(['a']);
+  const states: TodayState[] = [today.getState()];
+  today.subscribe(() => states.push(today.getState()));
+
+  today.type('a new entry');
+  await today.save();
+
+  const scrolls = states
+    .slice(1)
+    .map((state, index) => scrollsToBottom(states[index], state));
+
+  assert.equal(scrolls.filter(Boolean).length, 1);
+  assert.equal(scrolls.at(-1), true, 'the last change is the entry arriving');
+});
+
+test('opening, saving or cancelling an edit, a delete, a mood, or looking again never moves Today', async () => {
+  const { today } = await openToday(['a', 'b']);
+  const states: TodayState[] = [today.getState()];
+  today.subscribe(() => states.push(today.getState()));
+
+  today.edit('a');
+  today.typeEdit('changed');
+  await today.saveEdit();
+  today.edit('b');
+  today.cancelEdit();
+  today.askToDelete('b');
+  await today.goAhead();
+  await today.pressMood(Mood.Good);
+  await today.look();
+
+  for (let at = 1; at < states.length; at += 1) {
+    assert.equal(scrollsToBottom(states[at - 1], states[at]), false, `change ${at}`);
+  }
 });
 
 /* ---- The mood body ------------------------------------------------------ */

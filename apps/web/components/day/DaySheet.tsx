@@ -2,11 +2,17 @@
 
 import type { Mood, Entry } from '@neuron/contracts';
 import { useEffect, useRef } from 'react';
-import { LiveEntry, MoodRow } from '@/components/day/Journal';
+import {
+  LiveEntry,
+  MoodRow,
+  type EntryEditor,
+} from '@/components/day/Journal';
 import { formatTime } from '@/lib/utils/format';
 import type {
   DayPage,
   DayState,
+  EditNotSaved,
+  Editing,
   MoodNotSaved,
   NotDeleted,
 } from '@/lib/today';
@@ -21,6 +27,31 @@ const MOOD_NOT_SAVED: Record<MoodNotSaved, string> = {
   unreachable: 'Your mood was not saved. We could not reach the server.',
   refused: 'Your mood was not saved. Something went wrong on our side.',
 };
+
+/* In the composer's style (LiveToday.tsx). Her words, 2026-10-15. */
+const EDIT_NOT_SAVED: Record<EditNotSaved, string> = {
+  unreachable:
+    'We could not reach the server. Your change was not saved. Your words are still here; try saving again.',
+  refused:
+    'Something went wrong on our side. Your change was not saved. Your words are still here; try saving again.',
+  blank: 'An entry needs some words. Your change was not saved.',
+};
+
+const EDITED_GONE =
+  'That entry had been deleted somewhere else, so your change was not saved.';
+
+/* "Saving…" is her word for the edit in flight, as the composer says it. */
+function editorOf(editing: Editing): EntryEditor {
+  const { save } = editing;
+
+  return {
+    text: editing.text,
+    saving: save.status === 'saving',
+    line: save.status === 'saving' ? 'Saving…' : undefined,
+    problem: save.status === 'notSaved' ? EDIT_NOT_SAVED[save.why] : undefined,
+    blank: save.status === 'notSaved' && save.why === 'blank',
+  };
+}
 
 /*
  * A deleted entry leaves the page at once, and its buttons leave with it.
@@ -88,6 +119,18 @@ export function DaySheet({
   moodLabel: string;
   onLeaving: (id: string) => void;
 }) {
+  const gone = useRef<HTMLParagraphElement>(null);
+
+  /*
+   * An edit answered 404 takes its row, and the focus in it, away. Focus
+   * goes to the sentence that says why, if it was left on nothing.
+   */
+  useEffect(() => {
+    if (view.editedGone && document.activeElement === document.body) {
+      gone.current?.focus({ preventScroll: true });
+    }
+  }, [view.editedGone]);
+
   return (
     <main className="sheet">
       {entries.map((entry) => {
@@ -111,11 +154,29 @@ export function DaySheet({
               onLeaving(entry.id);
               void page.goAhead();
             }}
+            editor={
+              view.editing?.id === entry.id ? editorOf(view.editing) : undefined
+            }
+            onEdit={() => page.edit(entry.id)}
+            onEditType={page.typeEdit}
+            onEditSave={() => void page.saveEdit()}
+            onEditCancel={page.cancelEdit}
           >
             {entry.content}
           </LiveEntry>
         );
       })}
+
+      {view.editedGone ? (
+        <p
+          className="auth-help state-message"
+          role="alert"
+          tabIndex={-1}
+          ref={gone}
+        >
+          {EDITED_GONE}
+        </p>
+      ) : null}
 
       <MoodRow
         label={moodLabel}

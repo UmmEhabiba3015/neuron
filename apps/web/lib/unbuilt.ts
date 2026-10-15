@@ -23,11 +23,6 @@ export interface Unbuilt {
 }
 
 export const UNBUILT = {
-  editEntry: {
-    label: 'Edit entry',
-    feature: 1,
-    where: 'Today, and the page of a past day',
-  },
   sendResetLink: {
     label: 'Send reset link',
     feature: 2,
