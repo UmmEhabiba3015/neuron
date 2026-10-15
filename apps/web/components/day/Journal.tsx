@@ -3,16 +3,33 @@
 import { Mood } from '@neuron/contracts';
 import Link from 'next/link';
 import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { escapeCloses } from '@/lib/keys';
 import { WAVEFORMS } from '@/lib/waveform';
 import { NotBuiltYet } from '@/components/ui/NotBuilt';
+import { useEnterToSave } from '@/hooks/useEnterToSave';
 import { useNotBuilt } from '@/hooks/useNotBuilt';
+
+/*
+ * What the editor of an entry draws, worked out from lib/today.ts by the
+ * sheet. `line` is the request in flight; `problem` is a save that failed
+ * or was refused; `blank` says the problem is the text itself.
+ */
+export interface EntryEditor {
+  text: string;
+  saving: boolean;
+  line?: string;
+  problem?: string;
+  blank: boolean;
+}
 
 /*
  * An entry on a day's page, with the controls that edit and delete it.
  *
- * Editing is not built until feature 1. Its icon is drawn where
- * 18-entry-system-states.html draws it in #entry-options, before delete, and
- * a press says so in the row (lib/unbuilt.ts).
+ * The edit icon opens the editor in the entry's own row, in place of its
+ * words and its icons, as #entry-edit in journal-prototype.html draws it.
+ * What it holds and what a press does are decided in lib/today.ts. Opening
+ * it moves focus into its text box; closing it, by Save changes, Cancel or
+ * Escape, returns focus to the edit icon. Neither scrolls the page.
  *
  * "Keep this out of memory" is feature 9's. Its menu is drawn under the
  * icons, as #entry-options draws it, and opens as the comp's does. An entry
@@ -45,6 +62,11 @@ export function LiveEntry({
   onAsk,
   onKeep,
   onGoAhead,
+  editor,
+  onEdit,
+  onEditType,
+  onEditSave,
+  onEditCancel,
 }: {
   id: string;
   time: string;
@@ -55,13 +77,56 @@ export function LiveEntry({
   onAsk: () => void;
   onKeep: () => void;
   onGoAhead: () => void;
+  /* The editor, while this entry is being edited. */
+  editor?: EntryEditor;
+  onEdit: () => void;
+  onEditType: (text: string) => void;
+  onEditSave: () => void;
+  onEditCancel: () => void;
 }) {
   const sentence = useId();
+  const textBox = useId();
+  const editSentence = useId();
   const row = useRef<HTMLDivElement>(null);
   const icon = useRef<HTMLButtonElement>(null);
+  const editIcon = useRef<HTMLButtonElement>(null);
+  const field = useRef<HTMLTextAreaElement>(null);
   const keep = useRef<HTMLButtonElement>(null);
-  const edit = useNotBuilt('editEntry');
   const memory = useNotBuilt('entryMemory');
+  const enterToSave = useEnterToSave(onEditSave);
+
+  const editing = editor !== undefined;
+  const wasEditing = useRef(editing);
+
+  /*
+   * The editor has opened: focus goes into its text box, with the cursor
+   * after the last word. It has closed: focus returns to the edit icon, if
+   * it was in this row or was lost when the editor left the page. Neither
+   * scrolls, so the reader stays where they were (docs/features.md, Ref 14).
+   */
+  useEffect(() => {
+    const opened = !wasEditing.current && editing;
+    const closed = wasEditing.current && !editing;
+    wasEditing.current = editing;
+
+    if (opened && field.current) {
+      const end = field.current.value.length;
+
+      field.current.focus({ preventScroll: true });
+      field.current.setSelectionRange(end, end);
+      return;
+    }
+
+    if (!closed) {
+      return;
+    }
+
+    const focused = document.activeElement;
+
+    if (focused === document.body || row.current?.contains(focused)) {
+      editIcon.current?.focus({ preventScroll: true });
+    }
+  }, [editing]);
 
   const panel = confirming || notDeleted !== undefined;
   const hadPanel = useRef(panel);
@@ -102,8 +167,73 @@ export function LiveEntry({
         <time dateTime={datetime}>{time}</time>
       </div>
       <div className="ccol">
-        <p className="prose">{children}</p>
-        {panel ? (
+        {editor ? (
+          <form
+            className="entry-editor"
+            noValidate
+            onSubmit={(event) => {
+              event.preventDefault();
+              onEditSave();
+            }}
+            onKeyDown={(event) => {
+              const press = {
+                key: event.key,
+                shiftKey: event.shiftKey,
+                isComposing: event.nativeEvent.isComposing,
+              };
+
+              if (escapeCloses(press)) {
+                event.preventDefault();
+                onEditCancel();
+              }
+            }}
+          >
+            <label htmlFor={textBox}>
+              Entry text
+              <textarea
+                className="field"
+                id={textBox}
+                rows={5}
+                ref={field}
+                required
+                readOnly={editor.saving}
+                value={editor.text}
+                aria-invalid={editor.blank ? true : undefined}
+                aria-describedby={editor.problem ? editSentence : undefined}
+                onChange={(event) => onEditType(event.target.value)}
+                onKeyDown={enterToSave}
+              />
+            </label>
+            {editor.problem ? (
+              <p
+                className="auth-help state-message"
+                id={editSentence}
+                role="alert"
+              >
+                {editor.problem}
+              </p>
+            ) : editor.line ? (
+              <p className="auth-help state-message" role="status">
+                {editor.line}
+              </p>
+            ) : null}
+            <div className="auth-actions">
+              <button className="btn solid" type="submit">
+                Save changes
+              </button>
+              <button
+                className="btn quiet"
+                type="button"
+                onClick={onEditCancel}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        ) : (
+          <p className="prose">{children}</p>
+        )}
+        {editor ? null : panel ? (
           <div className="entry-confirm">
             <p id={sentence} role={confirming ? undefined : 'alert'}>
               {confirming
@@ -136,10 +266,10 @@ export function LiveEntry({
               <button
                 className="btn quiet entry-icon"
                 type="button"
+                ref={editIcon}
                 data-entry-action="edit"
-                aria-label={edit.label}
-                onClick={edit.press}
-                {...edit.marker}
+                aria-label="Edit entry"
+                onClick={onEdit}
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -208,7 +338,7 @@ export function LiveEntry({
             </details>
           </div>
         )}
-        {(edit.said || memory.said) && !panel ? (
+        {memory.said && !panel && !editor ? (
           <NotBuiltYet className="auth-help state-message" />
         ) : null}
       </div>
@@ -270,7 +400,8 @@ export function MoodRow({
 }
 
 /*
- * The field, and Save once the field holds words. With no words there is
+ * The field, and Save once the field holds words. On a computer Enter
+ * saves too, and on a phone it starts a new line (lib/keys.ts). With no words there is
  * nothing to save, and the microphone stands in Save's place, as the comp's
  * does: it leads to Talk. Neither the field nor the button is ever
  * disabled; a second press while a save is in flight is stopped in
@@ -303,6 +434,7 @@ export function LiveComposer({
   const field = useRef<HTMLTextAreaElement>(null);
   const hadButton = useRef(holdsWords);
   const memory = useNotBuilt('composerMemory');
+  const enterToSave = useEnterToSave(onSave);
 
   /*
    * A save that succeeds empties the field, and Save leaves the page. If
@@ -337,6 +469,7 @@ export function LiveComposer({
           placeholder="Add to today"
           value={text}
           onChange={(event) => onType(event.target.value)}
+          onKeyDown={enterToSave}
         />
         {holdsWords ? (
           <button className="send" type="submit" aria-label="Save entry">

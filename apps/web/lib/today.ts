@@ -20,6 +20,9 @@
  *   Asking    wait, and say that the question is being asked.
  *   Mood      show at once. The word is marked before any answer, and goes
  *             back to what the API last confirmed if the request fails.
+ *   Editing   wait, then show, as writing does. The editor stays open with
+ *             the changed words until the API has confirmed them, and keeps
+ *             them if it does not.
  */
 
 /*
@@ -32,6 +35,7 @@ import type {
   Entry,
   Mood,
   SetMood,
+  UpdateEntry,
 } from '@neuron/contracts';
 import { isCalendarDate } from './utils/format.ts';
 import type { ApiResult, RequestOptions } from './api/session.ts';
@@ -87,6 +91,21 @@ export type NotDeleted = 'unreachable' | 'refused';
 
 export type MoodNotSaved = 'unreachable' | 'refused';
 
+/*
+ * The entry being edited, and the words in its editor. One entry is edited
+ * at a time. `blank` is decided here, before anything is sent.
+ */
+export type EditNotSaved = 'unreachable' | 'refused' | 'blank';
+
+export interface Editing {
+  id: string;
+  text: string;
+  save:
+    | { status: 'idle' }
+    | { status: 'saving' }
+    | { status: 'notSaved'; why: EditNotSaved };
+}
+
 /* A press on a mood word: the day it was pressed on, and what it asks for. */
 type MoodPress = { date: string; mood: Mood | null };
 
@@ -102,6 +121,12 @@ export interface TodayState {
   notDeleted: Readonly<Record<string, NotDeleted>>;
   /* The last mood press failed, and the mood shown is the one before it. */
   moodNotSaved: MoodNotSaved | null;
+  editing: Editing | null;
+  /*
+   * An edit was answered 404: the entry had been deleted somewhere else, and
+   * has left this page too. It lasts until the next edit or delete is begun.
+   */
+  editedGone: boolean;
 }
 
 /* What the page of a date shows: everything Today shows but the composer. */
@@ -132,6 +157,17 @@ export interface DayPage {
    * marked clears the mood.
    */
   pressMood(mood: Mood): Promise<void>;
+  /*
+   * Opens the editor of one entry, holding its words. Another editor that
+   * is open closes, and its changes are put back. Nothing opens while an
+   * edit is being saved.
+   */
+  edit(id: string): void;
+  typeEdit(text: string): void;
+  /* Closes the editor and puts back the words. Not while it is saving. */
+  cancelEdit(): void;
+  /* Sends the changed words. A press while they are being sent sends nothing. */
+  saveEdit(): Promise<void>;
 }
 
 export interface Today extends DayPage {
@@ -224,6 +260,18 @@ function createDay(config: DayConfig, date?: string): Today {
    */
   let moodAnswers = 0;
 
+  let editing: Editing | null = null;
+  let editedGone = false;
+
+  /*
+   * Words the API has confirmed for an entry, each with the number of the
+   * edit answer that confirmed it. An answer about the day that was asked
+   * for before that edit was answered may still hold the old words, and
+   * these are put over them.
+   */
+  let editAnswers = 0;
+  const confirmedEdits = new Map<string, { content: string; at: number }>();
+
   const listeners = new Set<() => void>();
   let state = snapshot();
 
@@ -259,7 +307,17 @@ function createDay(config: DayConfig, date?: string): Today {
       }
     }
 
-    return { day, asking, text, save, confirming, notDeleted, moodNotSaved };
+    return {
+      day,
+      asking,
+      text,
+      save,
+      confirming,
+      notDeleted,
+      moodNotSaved,
+      editing,
+      editedGone,
+    };
   }
 
   function publish(): void {
@@ -353,6 +411,7 @@ function createDay(config: DayConfig, date?: string): Today {
     publish();
 
     const moodAnswersBefore = moodAnswers;
+    const editAnswersBefore = editAnswers;
     const answer = await fetchDay();
 
     if (mine !== question) {
@@ -375,7 +434,13 @@ function createDay(config: DayConfig, date?: string): Today {
         day: moodIsOlder
           ? { ...answer.day, mood: fetched!.day.mood }
           : answer.day,
-        entries: answer.entries,
+        entries: answer.entries.map((item) => {
+          const confirmed = confirmedEdits.get(item.id);
+
+          return confirmed && confirmed.at > editAnswersBefore
+            ? { ...item, content: confirmed.content }
+            : item;
+        }),
       };
       trouble = undefined;
       outcome = undefined;
@@ -384,6 +449,15 @@ function createDay(config: DayConfig, date?: string): Today {
 
       if (save.status === 'saved') {
         save = { status: 'idle' };
+      }
+
+      /* The entry being edited is gone, deleted somewhere else. */
+      if (
+        editing &&
+        editing.save.status !== 'saving' &&
+        !answer.entries.some((item) => item.id === editing!.id)
+      ) {
+        editing = null;
       }
     } else if (answer.status === 'notFound' || answer.status === 'isToday') {
       outcome = answer.status;
@@ -459,6 +533,7 @@ function createDay(config: DayConfig, date?: string): Today {
 
   function askToDelete(id: string): void {
     confirming = id;
+    editedGone = false;
     notDeleted = without(notDeleted, id);
     publish();
   }
@@ -569,6 +644,110 @@ function createDay(config: DayConfig, date?: string): Today {
     publish();
   }
 
+  function startEdit(id: string): void {
+    if (editing?.save.status === 'saving') {
+      return;
+    }
+
+    const shown = fetched?.entries.find((item) => item.id === id);
+
+    if (!shown || hidden.has(id)) {
+      return;
+    }
+
+    editing = { id, text: shown.content, save: { status: 'idle' } };
+    editedGone = false;
+    publish();
+  }
+
+  function typeEdit(next: string): void {
+    if (!editing || editing.save.status === 'saving') {
+      return;
+    }
+
+    /* Typing takes away the sentence of a save that failed. */
+    editing = { ...editing, text: next, save: { status: 'idle' } };
+    publish();
+  }
+
+  function cancelEdit(): void {
+    if (!editing || editing.save.status === 'saving') {
+      return;
+    }
+
+    editing = null;
+    publish();
+  }
+
+  async function saveEdit(): Promise<void> {
+    /* No control is disabled, so this is what stops a second request. */
+    if (!editing || editing.save.status === 'saving') {
+      return;
+    }
+
+    const { id, text: typed } = editing;
+
+    if (isBlank(typed)) {
+      editing = { ...editing, save: { status: 'notSaved', why: 'blank' } };
+      publish();
+      return;
+    }
+
+    const body: UpdateEntry = { content: typed.trim() };
+
+    editing = { ...editing, save: { status: 'saving' } };
+    publish();
+
+    const result = await request<Entry>(`/entries/${id}`, {
+      method: 'PATCH',
+      body,
+    });
+
+    if (result.kind === 'ok') {
+      editAnswers += 1;
+      confirmedEdits.set(id, { content: result.data.content, at: editAnswers });
+
+      if (fetched) {
+        fetched = {
+          ...fetched,
+          entries: fetched.entries.map((item) =>
+            item.id === id ? { ...item, content: result.data.content } : item,
+          ),
+        };
+      }
+
+      editing = null;
+      publish();
+      return;
+    }
+
+    /* Deleted somewhere else: it leaves this page too, and the page says so. */
+    if (result.kind === 'rejected' && result.status === 404) {
+      hidden.add(id);
+      editing = null;
+      editedGone = true;
+      publish();
+      return;
+    }
+
+    /*
+     * An ended session leaves the words where they were, and says nothing
+     * here: the screen leaves for /in.
+     */
+    editing = {
+      id,
+      text: typed,
+      save:
+        result.kind === 'ended'
+          ? { status: 'idle' }
+          : {
+              status: 'notSaved',
+              why: result.kind === 'unreachable' ? 'unreachable' : 'refused',
+            },
+    };
+    publish();
+  }
+
   return {
     getState: () => state,
     subscribe(listener) {
@@ -589,6 +768,10 @@ function createDay(config: DayConfig, date?: string): Today {
     dismiss,
     goAhead,
     pressMood,
+    edit: startEdit,
+    typeEdit,
+    cancelEdit,
+    saveEdit,
   };
 }
 
@@ -613,6 +796,10 @@ export function createPastDay(config: DayConfig & { date: string }): DayPage {
     dismiss: day.dismiss,
     goAhead: day.goAhead,
     pressMood: day.pressMood,
+    edit: day.edit,
+    typeEdit: day.typeEdit,
+    cancelEdit: day.cancelEdit,
+    saveEdit: day.saveEdit,
   };
 }
 
@@ -630,4 +817,31 @@ function without<T>(record: Record<string, T>, key: string): Record<string, T> {
   const rest = { ...record };
   delete rest[key];
   return rest;
+}
+
+/*
+ * Today reads like a chat: the newest entry is at the bottom, and Today is
+ * kept there at two moments only (docs/features.md, Ref 14).
+ *
+ *   The day is shown, having not been shown just before: Today has opened,
+ *   or has come back after a failure.
+ *   A saved entry has arrived: today has been shown again after a save.
+ *
+ * Nothing else moves the page. An edit opened, saved or cancelled, a
+ * delete, a mood, or a look again when the tab is shown, leaves the reader
+ * where they are. The page of a past date never calls this.
+ */
+export function scrollsToBottom(
+  before: TodayState | undefined,
+  after: TodayState,
+): boolean {
+  if (after.day.status !== 'open') {
+    return false;
+  }
+
+  if (before?.day.status !== 'open') {
+    return true;
+  }
+
+  return before.save.status === 'saved' && after.save.status === 'idle';
 }

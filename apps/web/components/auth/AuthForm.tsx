@@ -387,6 +387,13 @@ export function AuthForm({ mode }: { mode: Mode }) {
 /*
  * A password field and its show-password control. The control changes the
  * field's type and nothing else: the value is React's, so it is not cleared.
+ * Each field has its own control.
+ *
+ * A press with a mouse or a finger leaves focus where it was, so a person
+ * typing can look at what they typed and go on typing. The cursor and any
+ * selection are put back after the type changes, because Chrome moves the
+ * cursor to the start when it does. A press from the keyboard leaves focus
+ * on the control, as any button does.
  *
  * A sentence about a problem takes the hint's place. The two never show
  * together (V3-REVISION.md). `after` is drawn under both, where 13-login.html
@@ -414,7 +421,33 @@ export function PasswordField({
   after?: ReactNode;
 }) {
   const [shown, setShown] = useState(false);
+  const field = useRef<HTMLInputElement>(null);
+  const selection = useRef<[number | null, number | null] | null>(null);
   const help = problem ?? hint;
+
+  /*
+   * Chrome moves the cursor to the start once it has drawn the field with
+   * its new type, after this effect has run, so the cursor is put back on
+   * the next frame.
+   */
+  useEffect(() => {
+    const kept = selection.current;
+    selection.current = null;
+
+    if (!kept) {
+      return;
+    }
+
+    const frame = requestAnimationFrame(() => {
+      const input = field.current;
+
+      if (input && document.activeElement === input) {
+        input.setSelectionRange(kept[0], kept[1]);
+      }
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [shown]);
 
   return (
     <div className="auth-field">
@@ -425,6 +458,7 @@ export function PasswordField({
             className="field"
             id={id}
             name={id}
+            ref={field}
             type={shown ? 'text' : 'password'}
             autoComplete={autoComplete}
             required
@@ -439,7 +473,15 @@ export function PasswordField({
             aria-controls={id}
             aria-label={`${shown ? 'Hide' : 'Show'} ${what}`}
             aria-pressed={shown}
-            onClick={() => setShown(!shown)}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={() => {
+              const input = field.current;
+
+              selection.current = input
+                ? [input.selectionStart, input.selectionEnd]
+                : null;
+              setShown(!shown);
+            }}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M2.5 12c2.4-3.5 5.5-5.25 9.5-5.25s7.1 1.75 9.5 5.25c-2.4 3.5-5.5 5.25-9.5 5.25S4.9 15.5 2.5 12Z" />
