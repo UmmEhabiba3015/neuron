@@ -55,14 +55,17 @@ after 30 minutes. The answer is the same whether or not the email has an
 account, so nobody can use it to discover who has one. Setting a new password
 signs out every device and returns the person to sign in.
 
-**Ref 6. Devices and signing out.** Keep. *Drawn.*
+**Ref 6. Devices and signing out.** Keep. *Built* (feature 3).
 Account lists the devices where the person is signed in. They can sign out
-one device, or every device at once. Signing out everywhere already works in
-the API.
+one device, or every device at once. A device is named from its browser's
+`User-Agent` header by Neuron's own small function, such as "Firefox on
+Linux" (her decision, 2026-10-15).
 
-**Ref 7. Change the timezone.** Keep. *Drawn.*
+**Ref 7. Change the timezone.** Keep. *Built* (feature 3).
 A person picks a new timezone from a list. Entries already written stay on
-the day they were filed.
+the day they were filed. A day with entries always exists, even when a move
+west puts it in the future (her decision; ADR-015, amendment of
+2026-10-15).
 **Final rule: a day ends at midnight in the person's timezone.** The designs
 say 4am; the designs are wrong on this point, whether or not they are
 updated.
@@ -264,8 +267,8 @@ app.
 - How the recent overview is produced (Ref 31) and the reflection period
   (Ref 32).
 - What Privacy says about training (Ref 35).
-- May a mood be set on a day with no entries? Does an entry move when the
-  timezone changes? (Today: yes, and no.)
+- May a mood be set on a day with no entries? (Today: yes.) An entry does
+  not move when the timezone changes (decided 2026-10-15, feature 3).
 - Which AI provider.
 
 ---

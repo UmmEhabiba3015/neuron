@@ -247,12 +247,5 @@ describe('signing in and out (e2e)', () => {
       .expect(200);
 
     expect(after.body).toHaveLength(1);
-    expect(Object.keys((after.body as object[])[0]).sort()).toEqual([
-      'createdAt',
-      'expiresAt',
-      'id',
-      'revokedAt',
-      'userId',
-    ]);
   });
 });

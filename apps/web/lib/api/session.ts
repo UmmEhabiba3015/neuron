@@ -31,6 +31,7 @@ import type {
   Login,
   Register,
   ResetPassword,
+  UpdateTimezone,
   User,
 } from '@neuron/contracts';
 
@@ -95,8 +96,16 @@ export interface Session {
    * and changes nothing here: the person was signed out to begin with.
    */
   resetPassword(token: string, password: string): Promise<ApiResult<void>>;
-  /* Signs out of this device, and of no other. */
-  signOut(): Promise<SignOut>;
+  /*
+   * Signs out of this device and of no other, or, with 'everywhere', of
+   * every device the person is signed in on, this one included.
+   */
+  signOut(scope?: SignOutScope): Promise<SignOut>;
+  /*
+   * Changes the timezone. When the API agrees, the signed-in user is the one
+   * it answered with, so every screen shows the new timezone at once.
+   */
+  setTimezone(timezone: string): Promise<ApiResult<User>>;
   request<T>(path: string, options?: RequestOptions): Promise<ApiResult<T>>;
 }
 
@@ -109,6 +118,14 @@ export interface Session {
  * `failed`       the server answered, and not with a yes. Nothing has changed.
  */
 export type SignOut = 'signedOut' | 'unreachable' | 'failed';
+
+/* "Sign out of this device", or "Sign out everywhere". */
+export type SignOutScope = 'thisDevice' | 'everywhere';
+
+const SIGN_OUT_PATHS: Record<SignOutScope, string> = {
+  thisDevice: '/auth/logout',
+  everywhere: '/auth/logout-everywhere',
+};
 
 type Answer =
   { kind: 'answered'; status: number; body: unknown } | { kind: 'unreachable' };
@@ -431,7 +448,24 @@ export function createSession(config: {
   }
 
   /*
+   * PATCH /auth/me goes through `request`: it is an ordinary signed-in
+   * request, and an old access token is refreshed like any other.
+   */
+  async function setTimezone(timezone: string): Promise<ApiResult<User>> {
+    const body: UpdateTimezone = { timezone };
+    const result = await request<User>('/auth/me', { method: 'PATCH', body });
+
+    if (result.kind === 'ok' && state.status === 'signedIn') {
+      setState({ status: 'signedIn', user: result.data });
+    }
+
+    return result;
+  }
+
+  /*
    * POST /auth/logout ends the session on the server and clears the cookie.
+   * POST /auth/logout-everywhere ends every session of the person, and
+   * clears the cookie in the same way; everything below holds for both.
    * It is sent with the access token, which is how the API knows whose
    * session to end, and with the cookie, which is the only way a browser
    * accepts the instruction to clear it.
@@ -440,8 +474,10 @@ export function createSession(config: {
    * in the browser and the session is still good on the server, so dropping
    * the token would only look like signing out: a reload would sign the
    * person straight back in.
+   *
+   * A press of either while one is out shares the one out, whichever it is.
    */
-  function signOut(): Promise<SignOut> {
+  function signOut(scope: SignOutScope = 'thisDevice'): Promise<SignOut> {
     if (signOutInFlight) {
       return signOutInFlight;
     }
@@ -458,7 +494,7 @@ export function createSession(config: {
 
       const sendIt = () =>
         send(
-          '/auth/logout',
+          SIGN_OUT_PATHS[scope],
           { method: 'POST' },
           { token: accessToken, withCookie: true },
         );
@@ -522,6 +558,7 @@ export function createSession(config: {
     forgotPassword,
     resetPassword,
     signOut,
+    setTimezone,
     request,
   };
 }

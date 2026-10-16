@@ -120,3 +120,24 @@ export function formatTime(instant: string): string {
 
   return `${hours}:${minutes}`;
 }
+
+/*
+ * The date an instant falls on in a timezone, as "30 September 2026". The
+ * timezone is the person's, as the API holds it, and never the browser's, so
+ * a device somewhere else shows the same date.
+ */
+export function formatDateIn(instant: string, timeZone: string): string {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  }).formatToParts(new Date(instant));
+
+  const part = (type: 'year' | 'month' | 'day'): number =>
+    Number(parts.find((each) => each.type === type)!.value);
+
+  return `${part('day')} ${LONG_MONTHS[part('month') - 1]} ${part('year')}`;
+}

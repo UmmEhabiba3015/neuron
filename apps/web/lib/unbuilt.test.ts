@@ -54,9 +54,6 @@ test('the list is the one the owner decided, each in its feature', () => {
   );
 
   assert.deepEqual(features, {
-    signedInDevices: 3,
-    signOutEverywhere: 3,
-    chooseTimezone: 3,
     exportEverything: 6,
     deleteAccount: 6,
     keepingSince: 6,

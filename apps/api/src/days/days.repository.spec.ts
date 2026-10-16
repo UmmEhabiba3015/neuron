@@ -231,4 +231,47 @@ describe('DaysRepository', () => {
       expect(await datesListed('alice')).toEqual([]);
     });
   });
+
+  describe('hasLiveEntry', () => {
+    const entryOn = (
+      id: string,
+      dayId: string,
+      userId: string,
+      deletedAt: string | null = null,
+    ) =>
+      dataSource.query(
+        `INSERT INTO entries (id, content, created_at, user_id, day_id, deleted_at)
+         VALUES (?, 'something', '2026-08-09T12:00:00.000Z', ?, ?, ?)`,
+        [id, userId, dayId, deletedAt],
+      );
+
+    it('is true for a date with an entry that is not deleted', async () => {
+      const day = await repository.findOrCreate('alice', '2026-08-09');
+      await entryOn('e1', day.id, 'alice', '2026-08-09T13:00:00.000Z');
+      await entryOn('e2', day.id, 'alice');
+
+      expect(await repository.hasLiveEntry('alice', '2026-08-09')).toBe(true);
+    });
+
+    it('is false for no day, a day with only a mood, and a day whose entries are all deleted', async () => {
+      expect(await repository.hasLiveEntry('alice', '2026-08-09')).toBe(false);
+
+      await repository.setMood('alice', '2026-08-10', Mood.Even);
+      expect(await repository.hasLiveEntry('alice', '2026-08-10')).toBe(false);
+
+      const day = await repository.findOrCreate('alice', '2026-08-11');
+      await entryOn('gone', day.id, 'alice', '2026-08-11T13:00:00.000Z');
+      expect(await repository.hasLiveEntry('alice', '2026-08-11')).toBe(false);
+    });
+
+    it("is false for another person's date, and for another person's entry on one's own day", async () => {
+      const bobs = await repository.findOrCreate('bob', '2026-08-09');
+      await entryOn('bobs-entry', bobs.id, 'bob');
+      expect(await repository.hasLiveEntry('alice', '2026-08-09')).toBe(false);
+
+      const alices = await repository.findOrCreate('alice', '2026-08-12');
+      await entryOn('misfiled', alices.id, 'bob');
+      expect(await repository.hasLiveEntry('alice', '2026-08-12')).toBe(false);
+    });
+  });
 });

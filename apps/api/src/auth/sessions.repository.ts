@@ -28,13 +28,19 @@ export class SessionsRepository {
         revokedAt: IsNull(),
         expiresAt: MoreThan(now),
       },
-      order: { createdAt: 'DESC' },
+      order: { lastUsedAt: 'DESC', createdAt: 'DESC' },
     });
   }
 
-  async revoke(id: string, now: string): Promise<boolean> {
+  /*
+   * Ends one session of one person. The person is in the WHERE clause
+   * (ADR-013), so another person's session is not found, exactly as a
+   * session that does not exist is not. So is one that has already ended,
+   * by a sign-out or by its expiry: false means nothing was ended.
+   */
+  async revoke(id: string, userId: string, now: string): Promise<boolean> {
     const result = await this.sessions.update(
-      { id, revokedAt: IsNull() },
+      { id, userId, revokedAt: IsNull(), expiresAt: MoreThan(now) },
       { revokedAt: now },
     );
 
@@ -50,8 +56,13 @@ export class SessionsRepository {
     return result.affected ?? 0;
   }
 
-  async rotate(id: string, refreshTokenHash: string): Promise<void> {
-    await this.sessions.update({ id }, { refreshTokenHash });
+  /* A refresh: a new token hash, and the moment the session was last used. */
+  async rotate(
+    id: string,
+    refreshTokenHash: string,
+    lastUsedAt: string,
+  ): Promise<void> {
+    await this.sessions.update({ id }, { refreshTokenHash, lastUsedAt });
   }
 
   async deleteExpiredBefore(now: string): Promise<number> {

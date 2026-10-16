@@ -4,6 +4,9 @@
 **Date:** 2026-09-23 (Day 12)
 **Amended:** 2026-10-07 (Day 17b). Points 3 and 5 of the decision are
 replaced. See *Amendment — 2026-10-07*, at the end.
+**Amended:** 2026-10-15 (feature 3). The timezone can be changed, and a day
+with entries exists even when it is in the future. See *Amendment —
+2026-10-15*, at the end.
 
 **Amends:** the roadmap's Day 13, which planned to model mood as a property of
 an entry. Mood is a property of a *day*.
@@ -191,3 +194,39 @@ day builds it yet.
   crossed midnight, and second whether their stored timezone is right.
 - The settings route for the timezone is scheduled. Until it is, the three
   items above stay true.
+
+---
+
+## Amendment — 2026-10-15: changing the timezone
+
+Feature 3 (`features.md`, Ref 7) builds the repair the previous amendment
+asked for: a person picks a new timezone from a list.
+
+- **The timezone can be changed** after registration, and the API sends it
+  to the web app so Account can show it. *The timezone leaves the API in no
+  response* is no longer true.
+- **Nothing already written moves.** Entries and days keep the dates they
+  were filed on. This is unchanged, and it is `features.md` Ref 7.
+
+### A day with entries always exists
+
+Since Day 17c, a day that has not happened yet in the person's timezone does
+not exist: its page and its mood answer `404`. Changing the timezone breaks
+that rule's assumption that every written day is in the past.
+
+Her example: in Karachi at 01:00 on 16 October she writes an entry, filed on
+16 October. She moves to New York, where it is 16:00 on 15 October. The
+Timeline lists 16 October, and its page answers "not found" for about eight
+hours. Only a move west can do this.
+
+**Her decision, 2026-10-15:** a future day **with no entries** does not
+exist; a day with entries that are not deleted always exists, wherever it
+falls. The alternatives were to accept the hours of "not found" (rare, but a
+list that leads nowhere), or to refuse such a timezone change (a strange
+refusal, and more code).
+
+### Revisit when
+
+- Moving entries to the new timezone's dates is asked for. `features.md`
+  Ref 7 forbids it today.
+

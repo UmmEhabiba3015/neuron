@@ -19,14 +19,23 @@ describe('what every route answers with (e2e)', () => {
 
   const SHAPES = {
     entry: ['id', 'content', 'createdAt', 'date'],
-    user: ['id', 'email', 'createdAt', 'name'],
+    user: ['id', 'email', 'createdAt', 'name', 'timezone'],
     day: ['date', 'mood'],
-    session: ['id', 'userId', 'createdAt', 'expiresAt', 'revokedAt'],
+    session: ['id', 'device', 'createdAt', 'lastUsedAt', 'current'],
   };
 
+  /*
+   * The browser that signs in sends this header. The device's name is made
+   * from it, and the header itself never leaves the API.
+   */
+  const USER_AGENT =
+    'Mozilla/5.0 (X11; Linux x86_64; rv:157.0) Gecko/20100101 Firefox/157.0';
+
+  /*
+   * The timezone is sent with the user since feature 3, so it is not in
+   * this list; the shapes above say exactly where it may appear.
+   */
   const FORBIDDEN = [
-    /time_?zone/i,
-    /Kiritimati/,
     /\$argon2/,
     new RegExp(PASSWORD),
     /refreshToken/,
@@ -34,6 +43,10 @@ describe('what every route answers with (e2e)', () => {
     /"(dayId|day_id|day)"/,
     /deleted/i,
     /user_id/,
+    /"userId"/,
+    /user_?agent/i,
+    /Gecko/,
+    /expiresAt|revokedAt/,
   ];
 
   beforeAll(async () => {
@@ -58,6 +71,7 @@ describe('what every route answers with (e2e)', () => {
       .expect(201);
     const login = await request(server)
       .post('/auth/login')
+      .set('User-Agent', USER_AGENT)
       .send({ email: 'habiba@example.com', password: PASSWORD })
       .expect(200);
     const cookie = refreshCookieFrom(login);
@@ -104,6 +118,10 @@ describe('what every route answers with (e2e)', () => {
         .expect(200),
       today: await habiba.get('/days/today').expect(200),
       me: await habiba.get('/auth/me').expect(200),
+      changedZone: await habiba
+        .patch('/auth/me')
+        .send({ timezone: ZONE })
+        .expect(200),
       sessions: await habiba.get('/auth/sessions').expect(200),
     });
 
@@ -153,6 +171,20 @@ describe('what every route answers with (e2e)', () => {
       expect(answer.text).not.toContain(refreshTokenIn(nextCookie));
     }
 
+    /* The timezone travels with a user, and in nothing else. */
+    const carriesAUser = (name: string) =>
+      ['register', 'login', 'refresh'].includes(name) ||
+      /^(me|changedZone) /.test(name);
+
+    for (const [name, answer] of everyAnswer) {
+      if (!carriesAUser(name)) {
+        expect({ name, text: answer.text }).not.toEqual({
+          name,
+          text: expect.stringContaining(ZONE) as string,
+        });
+      }
+    }
+
     for (const answer of Object.values(after)) {
       expect(answer.text).not.toContain(DELETED_CONTENT);
     }
@@ -175,6 +207,7 @@ describe('what every route answers with (e2e)', () => {
     expect((before.range.body as object[]).map(keysOf)).toEqual([SHAPES.day]);
     expect(keysOf(registered.body)).toEqual(SHAPES.user);
     expect(keysOf(before.me.body)).toEqual(SHAPES.user);
+    expect(keysOf(before.changedZone.body)).toEqual(SHAPES.user);
     for (const answer of [login, refreshed]) {
       expect(keysOf(answer.body)).toEqual(['accessToken', 'user']);
       expect(keysOf((answer.body as { user: object }).user)).toEqual(

@@ -3,9 +3,13 @@ import {
   Body,
   ConflictException,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
+  NotFoundException,
+  Param,
+  Patch,
   Post,
   Req,
   Res,
@@ -29,6 +33,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { PasswordResetService } from './password-reset.service';
 import { RegisterDto } from './dto/register.dto';
 import { SessionResponseDto } from './dto/session-response.dto';
+import { UpdateTimezoneDto } from './dto/update-timezone.dto';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import type { AuthenticatedRequest } from '../shared/types/authenticated-request.interface';
 import type { AuthenticatedSession } from './types/authenticated-session.interface';
@@ -65,9 +70,14 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() dto: LoginDto,
+    @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ): Promise<AuthResponseDto> {
-    const session = await this.authService.login(dto.email, dto.password);
+    const session = await this.authService.login(
+      dto.email,
+      dto.password,
+      request.headers['user-agent'],
+    );
 
     if (!session) {
       throw new UnauthorizedException('Invalid email or password');
@@ -79,6 +89,28 @@ export class AuthController {
   @Get('me')
   me(@Req() request: AuthenticatedRequest): UserResponseDto {
     return new UserResponseDto(request.user);
+  }
+
+  /*
+   * Changes the timezone, and nothing already written (docs/features.md,
+   * Ref 7). The answer is the user as now stored, so the web app shows the
+   * new timezone without asking again.
+   */
+  @Patch('me')
+  async updateMe(
+    @Body() dto: UpdateTimezoneDto,
+    @Req() request: AuthenticatedRequest,
+  ): Promise<UserResponseDto> {
+    const user = await this.usersService.setTimezone(
+      request.user.id,
+      dto.timezone,
+    );
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return new UserResponseDto(user);
   }
 
   @Public()
@@ -111,7 +143,7 @@ export class AuthController {
     @Req() request: AuthenticatedRequest,
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
-    await this.authService.logout(request.session.id);
+    await this.authService.logout(request.user.id, request.session.id);
 
     response.clearCookie(REFRESH_COOKIE_NAME, REFRESH_COOKIE_CLEAR_OPTIONS);
   }
@@ -154,7 +186,33 @@ export class AuthController {
   ): Promise<SessionResponseDto[]> {
     const sessions = await this.authService.listSessions(request.user.id);
 
-    return sessions.map((session) => new SessionResponseDto(session));
+    return sessions.map(
+      (session) => new SessionResponseDto(session, request.session.id),
+    );
+  }
+
+  /*
+   * Signs out one device. Another person's session, one that does not
+   * exist, and one that has already ended are all the same 404 (ADR-013).
+   *
+   * The session making the request may be the one named. Then this is
+   * "Sign out of this device", and the cookie is cleared as logout clears
+   * it.
+   */
+  @Delete('sessions/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async endSession(
+    @Param('id') id: string,
+    @Req() request: AuthenticatedRequest,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    if (!(await this.authService.logout(request.user.id, id))) {
+      throw new NotFoundException(`Session with ID ${id} not found`);
+    }
+
+    if (id === request.session.id) {
+      response.clearCookie(REFRESH_COOKIE_NAME, REFRESH_COOKIE_CLEAR_OPTIONS);
+    }
   }
 
   /*

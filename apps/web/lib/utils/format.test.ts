@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import {
+  formatDateIn,
   formatDay,
   formatDayOfMonth,
   formatLongDay,
@@ -58,4 +59,20 @@ test('the first and the last day of a month stay in their own month, whatever th
   assert.equal(formatDayOfMonth('2026-08-01'), 'Sat 1');
   assert.equal(formatLongDay('2026-08-01'), 'Saturday 1 August 2026');
   assert.equal(formatLongDay('2026-07-31'), 'Friday 31 July 2026');
+});
+
+/*
+ * 20:00Z on 15 October is 01:00 on the 16th in Karachi and 16:00 on the
+ * 15th in New York. The date is the person's, whatever this machine's
+ * timezone is.
+ */
+test('an instant is written as the date it falls on in the timezone given', () => {
+  const instant = '2026-10-15T20:00:00.000Z';
+
+  assert.equal(formatDateIn(instant, 'Asia/Karachi'), '16 October 2026');
+  assert.equal(formatDateIn(instant, 'America/New_York'), '15 October 2026');
+  assert.equal(
+    formatDateIn('2026-09-30T08:00:00.000Z', 'UTC'),
+    '30 September 2026',
+  );
 });

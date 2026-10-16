@@ -71,8 +71,16 @@ describe('AddPasswordResets', () => {
     );
   });
 
+  /*
+   * The migrations that came after this one are undone first, newest first,
+   * so that the last one undone is this one.
+   */
   it('is removed again by down()', async () => {
-    await dataSource.undoLastMigration();
+    const position = migrations.indexOf(AddPasswordResets1792063401156);
+
+    for (let undo = migrations.length; undo > position; undo -= 1) {
+      await dataSource.undoLastMigration();
+    }
 
     expect(
       await dataSource.query(

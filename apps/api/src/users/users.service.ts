@@ -53,6 +53,20 @@ export class UsersService {
   }
 
   /*
+   * The timezone arrives resolved, as UpdateTimezoneDto leaves it. Only the
+   * timezone changes: entries and days keep the dates they were filed on
+   * (docs/features.md, Ref 7). The answer is the user as now stored.
+   */
+  async setTimezone(
+    id: string,
+    timezone: string,
+  ): Promise<UserEntity | undefined> {
+    await this.usersRepository.updateTimezone(id, timezone);
+
+    return this.usersRepository.findById(id);
+  }
+
+  /*
    * Takes a hash and not a password, so that the slow hashing can be done
    * before a transaction opens rather than while it is open. The caller
    * hashes with PasswordService, as register() does.

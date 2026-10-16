@@ -30,10 +30,8 @@ export class UserEntity {
    * falls on for this person (ADR-015), and it is read on every request that
    * needs a date, so it is loaded with the user.
    *
-   * Never sent: no screen reads it, and the contract's User does not have
-   * it, so UserResponseDto does not either.
+   * Sent with the user since feature 3, so that Account can show it.
    */
-  @Exclude()
   @Column({ type: 'text' })
   timezone!: string;
 }

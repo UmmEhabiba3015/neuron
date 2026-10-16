@@ -77,6 +77,31 @@ export class DaysRepository {
   }
 
   /*
+   * Whether the person has an entry that is not deleted on this date. The
+   * subquery is findInRange's, for the same reasons: it selects from the
+   * entry entity, so deleted entries are left out without a word about
+   * deleted_at, and the entry is matched on its owner as well as its day.
+   */
+  async hasLiveEntry(userId: string, date: string): Promise<boolean> {
+    return this.days
+      .createQueryBuilder('day')
+      .where('day.userId = :userId', { userId })
+      .andWhere('day.date = :date', { date })
+      .andWhere((query) => {
+        const liveEntry = query
+          .subQuery()
+          .select('1')
+          .from(EntryEntity, 'entry')
+          .where('entry.dayId = day.id')
+          .andWhere('entry.userId = :userId')
+          .getQuery();
+
+        return `EXISTS ${liveEntry}`;
+      })
+      .getExists();
+  }
+
+  /*
    * A date is listed only if it has at least one entry that is not deleted
    * (ADR-020). A mood alone does not list a date, and neither does a day
    * whose entries were all deleted: the row is still there, and this is

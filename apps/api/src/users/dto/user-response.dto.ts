@@ -3,8 +3,8 @@ import type { UserEntity } from '../entities/user.entity';
 
 /*
  * A person as the API sends them. Built field by field from the entity, so
- * the password hash and the timezone, which the entity also holds, cannot
- * follow it into a response.
+ * the password hash, which the entity also holds, cannot follow it into a
+ * response.
  *
  * The fields are declared in the order the JSON has always had them, and
  * the order of the declarations is the order of the keys.
@@ -14,11 +14,13 @@ export class UserResponseDto implements User {
   email: string;
   createdAt: string;
   name: string;
+  timezone: string;
 
   constructor(user: UserEntity) {
     this.id = user.id;
     this.email = user.email;
     this.createdAt = user.createdAt;
     this.name = user.name;
+    this.timezone = user.timezone;
   }
 }

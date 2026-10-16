@@ -30,16 +30,16 @@ reports in `docs/learning/` hold the rest.
 
 ## Where the project is
 
-**Last updated:** 2026-10-15, at the close of feature 2, Forgot password.
+**Last updated:** 2026-10-16, at the close of feature 3, Account and devices.
 
 **Work is planned by feature, not by day.** The scope is locked in
 [features.md](features.md), the order is in [roadmap.md](roadmap.md), and
 what the designer is asked to change is
 [ui-handover-v4.md](ui-handover-v4.md).
 
-**Done:** everything up to Screens Day, the restructure, feature 1, Finish
-writing (merged), and feature 2, Forgot password, which is on the branch
-`feature-forgot-password` in a pull request for her to merge.
+**Done:** everything up to Screens Day, the restructure, features 1 and 2
+(merged), and feature 3, Account and devices, which is on the branch
+`feature-account-and-devices` in a pull request for her to merge.
 
 **Verified on 2026-10-15 by re-running, not by reading a report.** All nine
 checks pass:
@@ -49,21 +49,22 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-**469** API unit tests, **46** API end-to-end tests, **217** web tests, **8**
-checks on the shared package. 22 ADRs. 13 migrations. Use exactly these nine
+**516** API unit tests, **53** API end-to-end tests, **233** web tests, **8**
+checks on the shared package. 22 ADRs. 14 migrations. Use exactly these nine
 commands. A plain `npx jest` in `apps/api` skips the migration tests and
 still reports a pass.
 
 **What a person can do:** create an account (email, password, name; timezone
 from the browser), sign in, stay signed in across a reload, sign out, write,
-edit and delete entries, save with Enter, reset a forgotten password, set the mood of today or a past
+edit and delete entries, save with Enter, reset a forgotten password, see
+and sign out their devices, change their timezone, set the mood of today or a past
 day, browse the Timeline as a list or a month calendar, and open a past day.
 Today opens at the newest entry, and every password field can show what was
 typed.
 
 **What a person can see:** every screen of the designer's v3 prototype. A
 control whose feature is not built says "This is not built yet." and sends
-nothing. The 16 such controls are listed in `apps/web/lib/unbuilt.ts`.
+nothing. The 13 such controls are listed in `apps/web/lib/unbuilt.ts`.
 
 **Branch.** Each feature has its own branch, `feature-<short-name>`, made
 from `main` before work starts, and closes through a pull request she merges.
@@ -73,31 +74,21 @@ The old `day-*` branches and four kept merged branches stay as they are.
 
 ## How to open the next session
 
-**First, check that she merged the pull request of feature 2** and that
-`main` holds it. Ask her to run `pnpm migration:run` on her own database: the
-migration `RequireUserPasswordHash` stops, changing nothing, if any account
-has no password hash, and says how many. If it stops, that is her decision
-to make, not a worker's. Then make `feature-account-and-devices` from `main`.
+**First, check that she merged the pull request of feature 3** and that
+`main` holds it. Ask her to run `pnpm migration:run`: `AddSessionDevice`
+rebuilds `sessions` on her database. Every device she is signed in on stays
+signed in, named "A browser" until it signs in again.
 
-**Next is feature 3, Account and devices** (Refs 6 and 7 in `features.md`).
-Its screens are drawn. Listing sessions (`GET /auth/sessions`) and signing
-out everywhere already exist in the API. Open it in this order:
+**Next is feature 4, Drafts, only if the designer has delivered the
+composer changes** (roadmap rule 4). Ask her. If he has not, feature 5,
+Voice memos (Refs 21, 22, 23), comes next, and Drafts returns when the
+screens arrive. Voice memos opens a real decision: where audio lives
+(`features.md`, *Technology today*: object storage is not chosen). Start
+from the problem: why audio does not belong in the database.
 
-1. **The feature overview**: the blocks, what each is, which are decisions
-   and which are building.
-2. **Learning debt:** none is open.
-3. **The problem first.** Two problems: a person cannot see where they are
-   signed in, and cannot move timezone. The second touches ADR-015 (a day
-   ends at midnight in the person's timezone; an entry stays on the day it
-   was filed) and open question 4. Start from what happens to today's
-   entries, today's mood and "today" itself when the timezone changes.
-4. **Her decisions**, as short choices with each cost stated: how a device
-   is named in the list (the API stores no device name today), and the
-   words.
-5. **Workers**, then the audit with one mutation, then a pull request.
-
-Wiring feature 3 removes `signedInDevices`, `signOutEverywhere` and
-`chooseTimezone` from `lib/unbuilt.ts`.
+Open the next feature in the usual order: the branch from `main`, the
+overview, learning debt (none is open), the problem first, her decisions as
+short choices, the worker, the audit with one mutation, the pull request.
 
 ---
 
@@ -149,13 +140,35 @@ Wiring feature 3 removes `signedInDevices`, `signOutEverywhere` and
   log mailer in production, before checking that Neuron has no idea of
   production yet. Corrected the same day; owed to feature 8.
 
+**Feature 3, Account and devices** (2026-10-16). Refs 6, 7. ADR-015
+amended. Report in `docs/learning/feature-3-account-and-devices/`.
+
+- *Built:* the list of signed-in devices with names, last use and sign-in
+  date; signing out one device or every device; changing the timezone; a
+  day with entries reachable even when a move west puts it in the future.
+- *Her decisions:* Neuron's own small function names a device, not a
+  library (a dependency for one label, and the AGPL licence of newer
+  `ua-parser-js`); a day with entries always exists, rather than hours of
+  "not found" or refusing the change; signing out at once, without a
+  question.
+- *Trade-offs worth telling:* her `navigator.userAgent` run. She predicted
+  "Safari" in Firefox's header, and it is not there; it is in Chrome's and
+  Edge's, which is why the order of the checks is the whole rule. The raw
+  header is stored and the name made when listed, so a better rule renames
+  every old row without a migration.
+- *The mutation:* removing the user id from the one-device sign-out's
+  `WHERE` failed two tests. Her prediction mixed the broken and the correct
+  query; the lesson she drew was the right one: the attacker sees success
+  and only the victim sees a sign-out that looks like a bug.
+
 ---
 
 ## What is built
 
 **`apps/api`**, NestJS on SQLite through TypeORM. Tables: `users` (email,
 unique without regard to case; name; IANA timezone; argon2id hash),
-`sessions`, `days` (`UNIQUE(user_id, date)`, the mood), `entries` (`user_id`
+`sessions` (the raw `User-Agent` of the sign-in, `last_used_at`), `days`
+(`UNIQUE(user_id, date)`, the mood), `entries` (`user_id`
 and `day_id` both `NOT NULL`, soft-deleted through `deleted_at`),
 `password_resets` (the SHA-256 of the token, expiry, used time). Mail goes
 through `shared/mail/MailService`, which writes it to the log (ADR-022).
@@ -283,6 +296,8 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 | **`shared/mail/` is a module folder the conventions do not list** (they list `decorators/`, `dto/`, `types/`, `utils/`). Mail belongs to no domain, so the Master Thread kept it | `apps/api/src/shared/mail/` | For her husband to confirm |
 | **Reset requests have no rate limit**, so anyone can fill another person's inbox once real mail is sent | `POST /auth/forgot-password` | Feature 16, Security pass |
 | **Expired and used password resets are never deleted** | `password_resets` | Feature 13, with expired sessions |
+| **The `User-Agent` header is stored with no length limit** (Node caps headers at about 16 KB) | `sessions.user_agent` | Feature 16, Security pass |
+| **One timezone can be listed twice under two spellings** (`Asia/Kolkata`, `Asia/Calcutta`) | Timezone screen | Feature 7, Quality pass |
 | **ADR-015 and ADR-016 link to retired documents** | `docs/decisions/` | Left as records; git history holds the targets |
 
 ---
@@ -294,8 +309,9 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
    by ADR-020 such a mood shows on no calendar.
 3. **Should `docs/workers/` and the remaining worker reports be committed?**
    Open since Day 7. `docs/SETUP.md` section 4 says what is and is not.
-4. **Does an entry move if the user changes timezone?** ADR-015 says no.
-   The first support question about an entry on the wrong day reopens it.
+4. *(Closed 2026-10-15, feature 3: an entry does not move when the
+   timezone changes, and a day with entries always exists, even in the
+   future. ADR-015, amendment of 2026-10-15.)*
 5. **Which AI provider, and must the choice be easy to reverse?** Feature 10
    or 12. Also the embedding model: an outside service would receive entries
    marked out of memory (`features.md`, Ref 25).

@@ -23,6 +23,7 @@ describe('AuthResponseDto', () => {
       'email',
       'createdAt',
       'name',
+      'timezone',
     ]);
   });
 

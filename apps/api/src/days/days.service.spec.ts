@@ -145,6 +145,70 @@ describe('DaysService', () => {
     });
   });
 
+  /*
+   * ADR-015, amendment of 2026-10-15. At 20:00Z on the 9th it is 01:00 on
+   * the 10th in Karachi and 16:00 on the 9th in New York, so the 10th is
+   * today for one and tomorrow for the other.
+   */
+  describe('exists', () => {
+    const writeOn = async (owner: { id: string }, date: string) => {
+      const day = await new DaysRepository(
+        dataSource.getRepository(DayEntity),
+      ).findOrCreate(owner.id, date);
+
+      await dataSource.query(
+        `INSERT INTO entries (id, content, created_at, user_id, day_id)
+         VALUES (?, 'written', '2026-08-09T20:00:00.000Z', ?, ?)`,
+        [`${owner.id}-${date}`, owner.id, day.id],
+      );
+    };
+
+    beforeEach(() => {
+      moveClockTo('2026-08-09T20:00:00.000Z');
+    });
+
+    it('is true for a day that has happened, written to or not', async () => {
+      expect(await service.exists(NEW_YORK, '2026-08-09')).toBe(true);
+      expect(await service.exists(NEW_YORK, '2019-01-01')).toBe(true);
+    });
+
+    it('is false for a future day with no entries, even with a mood', async () => {
+      await new DaysRepository(dataSource.getRepository(DayEntity)).setMood(
+        NEW_YORK.id,
+        '2026-08-10',
+        Mood.Good,
+      );
+
+      expect(await service.exists(NEW_YORK, '2026-08-10')).toBe(false);
+    });
+
+    it('is true for a future day with an entry: written in Karachi, read after a move west', async () => {
+      await writeOn(KARACHI, '2026-08-10');
+
+      expect(await service.exists(NEW_YORK, '2026-08-10')).toBe(false);
+      expect(
+        await service.exists(
+          { ...KARACHI, timezone: NEW_YORK.timezone },
+          '2026-08-10',
+        ),
+      ).toBe(true);
+    });
+
+    it('is false again once the entry is deleted', async () => {
+      await writeOn(KARACHI, '2026-08-10');
+      await dataSource.query(
+        `UPDATE entries SET deleted_at = '2026-08-09T20:01:00.000Z'`,
+      );
+
+      expect(
+        await service.exists(
+          { ...KARACHI, timezone: NEW_YORK.timezone },
+          '2026-08-10',
+        ),
+      ).toBe(false);
+    });
+  });
+
   describe('resolveFor', () => {
     it('files an instant under its date in the owner’s timezone, one row per date', async () => {
       const instant = '2026-10-08T05:00:00.000Z';

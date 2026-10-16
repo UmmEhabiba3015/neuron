@@ -3,10 +3,10 @@ import { freezeClockAt, moveClockTo, releaseClock } from '../support/clock';
 import { authenticate, login } from '../support/test-database';
 
 /*
- * A day that has not happened yet does not exist, and "not yet" is judged
- * in the timezone of the person asking. DaysService.hasHappened and the
- * controller's refusal are unit tests; this shows the clock, the stored
- * timezone and the routes together.
+ * A day that has not happened yet, and has no entry, does not exist, and
+ * "not yet" is judged in the timezone of the person asking.
+ * DaysService.exists and the controller's refusal are unit tests; this
+ * shows the clock, the stored timezone and the routes together.
  */
 describe('a day that has not happened yet (e2e)', () => {
   let running: RunningApp;
@@ -116,5 +116,62 @@ describe('a day that has not happened yet (e2e)', () => {
       (await newYork.get('/days?from=2026-10-01&to=2031-12-31').expect(200))
         .body,
     ).toEqual([{ date: '2026-10-08', mood: null }]);
+  });
+
+  /*
+   * Her example (ADR-015, amendment of 2026-10-15). At 20:00Z on 15 October
+   * it is 01:00 on the 16th in Karachi, where she writes an entry. She moves
+   * to New York, where it is 16:00 on the 15th. The entry stays on the 16th
+   * (Ref 7), and the 16th, though it has not happened in New York, is a day
+   * because it has an entry.
+   */
+  it('keeps a day reachable after a move west puts it in the future, while it has an entry', async () => {
+    const instant = '2026-10-15T20:00:00.000Z';
+    await authenticate(running.server, 'karachi', 'Asia/Karachi');
+    const habiba = await at(instant, 'karachi');
+
+    const written = (
+      await habiba
+        .post('/entries')
+        .send({ content: 'one in the morning' })
+        .expect(201)
+    ).body as { id: string; date: string };
+    expect(written.date).toBe('2026-10-16');
+
+    await habiba
+      .patch('/auth/me')
+      .send({ timezone: 'America/New_York' })
+      .expect(200);
+
+    expect((await habiba.get('/days/today').expect(200)).body).toEqual({
+      date: '2026-10-15',
+      mood: null,
+    });
+    expect((await habiba.get('/days/2026-10-16').expect(200)).body).toEqual({
+      date: '2026-10-16',
+      mood: null,
+    });
+    expect(
+      (
+        await habiba
+          .put('/days/2026-10-16/mood')
+          .send({ mood: 'Good' })
+          .expect(200)
+      ).body,
+    ).toEqual({ date: '2026-10-16', mood: 'Good' });
+    expect(
+      (
+        (await habiba.get('/entries?date=2026-10-16').expect(200)).body as {
+          id: string;
+        }[]
+      ).map((entry) => entry.id),
+    ).toEqual([written.id]);
+
+    /* A future day with no entry is still no day. */
+    await habiba.get('/days/2026-10-17').expect(404);
+
+    /* Nor is the 16th, once its only entry is deleted. */
+    await habiba.delete(`/entries/${written.id}`).expect(204);
+    await habiba.get('/days/2026-10-16').expect(404);
   });
 });
