@@ -141,3 +141,34 @@ export function formatDateIn(instant: string, timeZone: string): string {
 
   return `${part('day')} ${LONG_MONTHS[part('month') - 1]} ${part('year')}`;
 }
+
+/*
+ * A length of time as a clock reads it: "0:00", "1:12", "10:00". Seconds
+ * that have not been completed are not counted, so the clock of a recording
+ * changes once a second has passed, and never shows more than was recorded.
+ */
+export function formatDuration(milliseconds: number): string {
+  const seconds = Math.max(0, Math.floor(milliseconds / 1000));
+  const minutes = Math.floor(seconds / 60);
+
+  return `${minutes}:${String(seconds % 60).padStart(2, '0')}`;
+}
+
+/*
+ * The same length in words, for a screen reader: "1 minute 12 seconds",
+ * "45 seconds", "2 minutes". "1:12" read aloud is a time of day.
+ */
+export function speakDuration(milliseconds: number): string {
+  const seconds = Math.max(0, Math.floor(milliseconds / 1000));
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+  const count = (n: number, unit: string) => `${n} ${unit}${n === 1 ? '' : 's'}`;
+
+  if (minutes === 0) {
+    return count(rest, 'second');
+  }
+
+  return rest === 0
+    ? count(minutes, 'minute')
+    : `${count(minutes, 'minute')} ${count(rest, 'second')}`;
+}

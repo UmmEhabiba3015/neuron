@@ -268,8 +268,12 @@ test('a character the API counts as one is counted as one here, so the browser n
 test('a name typed with spaces around it reaches the API without them, beside the timezone that was handed in', async () => {
   let body: unknown;
   const fetch: Fetch = async (_url, init) => {
-    body = JSON.parse(init.body!);
-    return { status: 201, json: async () => ({}) };
+    body = JSON.parse(init.body as string);
+    return {
+      status: 201,
+      json: async () => ({}),
+      blob: async () => new Blob([]),
+    };
   };
   const session = createSession({ apiUrl: 'http://api.test', fetch });
   const reading = readForm('new', { ...GOOD, name: '  Mubeen ' }, LIMITS);

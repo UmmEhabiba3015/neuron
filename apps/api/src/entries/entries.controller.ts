@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -11,7 +12,11 @@ import {
   Param,
   Query,
   Req,
+  StreamableFile,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { DEFAULT_PAGE_SIZE } from '@neuron/contracts';
 import type { AuthenticatedRequest } from '../shared/types/authenticated-request.interface';
 import { EntriesService } from './entries.service';
@@ -22,6 +27,17 @@ import { CountResponseDto } from './dto/count-response.dto';
 import type { EntryFilters } from './types/entry-filters.interface';
 import { FindEntriesQueryDto } from './dto/find-entries-query.dto';
 import { UpdateEntryDto } from './dto/update-entry.dto';
+import { CreateVoiceMemoDto } from './dto/create-voice-memo.dto';
+import { VoiceMemoSizeInterceptor } from './interceptors/voice-memo-size.interceptor';
+import type { UploadedAudio } from './types/uploaded-audio.interface';
+import {
+  AUDIO_FIELD,
+  RECORDING_MISSING,
+  VOICE_MEMO_UPLOAD,
+} from './voice-memo-rules';
+
+/* Said when PATCH /entries/:id is asked to change a voice memo. */
+export const VOICE_MEMO_NOT_EDITABLE = 'A voice memo cannot be edited';
 
 /*
  * Every entry handler here answers with EntryResponseDto, which implements
@@ -59,6 +75,35 @@ export class EntriesController {
     );
   }
 
+  /*
+   * A voice memo: one multipart form, holding the recording as the file
+   * "audio" and its length as durationMs. The rules are in
+   * voice-memo-rules.ts; the size is checked first, then the type, as the
+   * file arrives, then the length, once the form has been read.
+   */
+  @Post('voice')
+  @UseInterceptors(
+    VoiceMemoSizeInterceptor,
+    FileInterceptor(AUDIO_FIELD, VOICE_MEMO_UPLOAD),
+  )
+  async createVoiceMemo(
+    @UploadedFile() audio: UploadedAudio | undefined,
+    @Body() dto: CreateVoiceMemoDto,
+    @Req() request: AuthenticatedRequest,
+  ): Promise<EntryResponseDto> {
+    if (!audio || audio.size === 0) {
+      throw new BadRequestException(RECORDING_MISSING);
+    }
+
+    return new EntryResponseDto(
+      await this.entriesService.createVoiceMemo(
+        { bytes: audio.buffer, type: audio.mimetype },
+        dto.durationMs,
+        request.user,
+      ),
+    );
+  }
+
   @Get('count')
   async countEntries(
     @Query() query: CountEntriesQueryDto,
@@ -83,23 +128,49 @@ export class EntriesController {
     return new EntryResponseDto(entry);
   }
 
+  /*
+   * The bytes of a voice memo, with the type it was recorded in. Another
+   * person's memo, a deleted one and a typed entry are all the same 404.
+   * This is the only way audio leaves the API (ADR-023).
+   */
+  @Get(':id/audio')
+  async findAudio(
+    @Param('id') id: string,
+    @Req() request: AuthenticatedRequest,
+  ): Promise<StreamableFile> {
+    const audio = await this.entriesService.readAudio(id, request.user.id);
+
+    if (!audio) {
+      throw new NotFoundException(`Voice memo with ID ${id} not found`);
+    }
+
+    return new StreamableFile(audio.bytes, {
+      type: audio.type,
+      length: audio.bytes.length,
+    });
+  }
+
   @Patch(':id')
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateEntryDto,
     @Req() request: AuthenticatedRequest,
   ): Promise<EntryResponseDto> {
-    const updated = await this.entriesService.update(
+    const outcome = await this.entriesService.update(
       id,
       dto.content,
       request.user.id,
     );
 
-    if (!updated) {
+    if (outcome.status === 'isVoiceMemo') {
+      throw new BadRequestException(VOICE_MEMO_NOT_EDITABLE);
+    }
+
+    if (outcome.status === 'notFound') {
       throw new NotFoundException(`Entry with ID ${id} not found`);
     }
 
-    return new EntryResponseDto(updated);
+    return new EntryResponseDto(outcome.entry);
   }
 
   @Delete(':id')

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import type { Entry } from '@neuron/contracts';
+import { EntryKind, type Entry } from '@neuron/contracts';
 import type { ApiResult } from './api/session.ts';
 import { createTimeline, groupByDay, type TimelineView } from './timeline.ts';
 import { createToday, MAX_PAGES, type Request } from './today.ts';
@@ -20,7 +20,9 @@ const TODAY = '2026-09-02';
 
 const entry = (id: string, date: string, createdAt: string): Entry => ({
   id,
+  kind: EntryKind.Text,
   content: `entry ${id}`,
+  durationMs: null,
   createdAt,
   date,
 });

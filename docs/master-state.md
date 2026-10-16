@@ -30,16 +30,19 @@ reports in `docs/learning/` hold the rest.
 
 ## Where the project is
 
-**Last updated:** 2026-10-16, at the close of feature 3, Account and devices.
+**Last updated:** 2026-10-16, at the close of feature 5, Voice memos.
 
 **Work is planned by feature, not by day.** The scope is locked in
 [features.md](features.md), the order is in [roadmap.md](roadmap.md), and
 what the designer is asked to change is
 [ui-handover-v4.md](ui-handover-v4.md).
 
-**Done:** everything up to Screens Day, the restructure, features 1 and 2
-(merged), and feature 3, Account and devices, which is on the branch
-`feature-account-and-devices` in a pull request for her to merge.
+**Done:** everything up to Screens Day, the restructure, features 1, 2 and
+3 (merged), and feature 5, Voice memos, which is on the branch
+`feature-voice-memos` in a pull request for her to merge. **Feature 4,
+Drafts, is skipped for now:** the designer has not sent the composer
+changes (she confirmed on 2026-10-16), so by roadmap rule 4 it waits and is
+built as soon as they arrive.
 
 **Verified on 2026-10-15 by re-running, not by reading a report.** All nine
 checks pass:
@@ -49,22 +52,22 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-**516** API unit tests, **53** API end-to-end tests, **233** web tests, **8**
-checks on the shared package. 22 ADRs. 14 migrations. Use exactly these nine
+**601** API unit tests, **59** API end-to-end tests, **270** web tests, **10**
+checks on the shared package. 23 ADRs. 15 migrations. Use exactly these nine
 commands. A plain `npx jest` in `apps/api` skips the migration tests and
 still reports a pass.
 
 **What a person can do:** create an account (email, password, name; timezone
 from the browser), sign in, stay signed in across a reload, sign out, write,
 edit and delete entries, save with Enter, reset a forgotten password, see
-and sign out their devices, change their timezone, set the mood of today or a past
+and sign out their devices, change their timezone, record, play and delete voice memos, set the mood of today or a past
 day, browse the Timeline as a list or a month calendar, and open a past day.
 Today opens at the newest entry, and every password field can show what was
 typed.
 
 **What a person can see:** every screen of the designer's v3 prototype. A
 control whose feature is not built says "This is not built yet." and sends
-nothing. The 13 such controls are listed in `apps/web/lib/unbuilt.ts`.
+nothing. The 12 such controls are listed in `apps/web/lib/unbuilt.ts`.
 
 **Branch.** Each feature has its own branch, `feature-<short-name>`, made
 from `main` before work starts, and closes through a pull request she merges.
@@ -74,21 +77,26 @@ The old `day-*` branches and four kept merged branches stay as they are.
 
 ## How to open the next session
 
-**First, check that she merged the pull request of feature 3** and that
-`main` holds it. Ask her to run `pnpm migration:run`: `AddSessionDevice`
-rebuilds `sessions` on her database. Every device she is signed in on stays
-signed in, named "A browser" until it signs in again.
+**First, check that she merged the pull request of feature 5** and that
+`main` holds it. Ask her to run `pnpm migration:run`; it may also hold
+feature 3's `AddSessionDevice` if she has not run it since. `AddVoiceMemos`
+rebuilds `entries`. Audio files go to `apps/api/data/audio/`, which git
+ignores.
 
-**Next is feature 4, Drafts, only if the designer has delivered the
-composer changes** (roadmap rule 4). Ask her. If he has not, feature 5,
-Voice memos (Refs 21, 22, 23), comes next, and Drafts returns when the
-screens arrive. Voice memos opens a real decision: where audio lives
-(`features.md`, *Technology today*: object storage is not chosen). Start
-from the problem: why audio does not belong in the database.
+**Then ask whether the designer has sent the composer changes for Drafts**
+(`ui-handover-v4.md`, C5). If yes, feature 4, Drafts, is next. If not,
+feature 6, **Your data** (Refs 36, 8, 37): export as PDF, JSON and audio;
+deleting the account with every foreign key settled (known debt: `ON DELETE
+NO ACTION` everywhere, and now audio files on disk too); the counts. Start
+from the problem: a hard delete must remove rows in five tables and files
+in a folder, and a crash halfway must not leave half an account.
 
-Open the next feature in the usual order: the branch from `main`, the
-overview, learning debt (none is open), the problem first, her decisions as
-short choices, the worker, the audit with one mutation, the pull request.
+Feature 6 is followed by the **first review point**: an audit, a sweep of
+several mutations, refactoring where justified, and a handbook entry.
+
+Open the feature in the usual order: the branch from `main`, the overview,
+learning debt (none is open), the problem first, her decisions as short
+choices, the worker, the audit with one mutation, the pull request.
 
 ---
 
@@ -161,6 +169,29 @@ amended. Report in `docs/learning/feature-3-account-and-devices/`.
   query; the lesson she drew was the right one: the attacker sees success
   and only the victim sees a sign-out that looks like a bug.
 
+**Feature 5, Voice memos** (2026-10-16). Refs 21, 22, 23. ADR-023. Report
+in `docs/learning/feature-5-voice-memos/`.
+
+- *Built:* recording on Talk with pause, resume, stop and keep, and cancel;
+  a memo on Today that waits for the upload and offers Try again; playback
+  through a signed-in route; deleting; no editing.
+- *Her decisions:* audio on the API's disk behind `AudioStorage`, not object
+  storage, until feature 8; the file written before the row (her reasoning:
+  an orphan file harms nobody, a row without a file does); a memo's
+  `content` is `NULL` until it has a transcript, not `''`; 10 minutes; cancel
+  asks first; the browser's format kept, no `ffmpeg`.
+- *Trade-offs worth telling:* the folder is never served as plain files,
+  and `<audio src>` cannot carry the token held in memory, so the web app
+  fetches the bytes and plays an object URL. Keyword search needed no
+  change for memos, and excluding them would have hidden transcripts in
+  feature 11.
+- *What she found:* the server checks the size but trusts the browser's
+  claimed duration, so a low-quality recording can exceed 10 minutes within
+  24 MB. Accepted in ADR-023; revisited in feature 16.
+- *A hidden trap the worker caught:* "an empty search matches nothing" was
+  written as `content IS NULL`, true of no row until memos made it true of
+  every memo.
+
 ---
 
 ## What is built
@@ -170,7 +201,10 @@ unique without regard to case; name; IANA timezone; argon2id hash),
 `sessions` (the raw `User-Agent` of the sign-in, `last_used_at`), `days`
 (`UNIQUE(user_id, date)`, the mood), `entries` (`user_id`
 and `day_id` both `NOT NULL`, soft-deleted through `deleted_at`),
-`password_resets` (the SHA-256 of the token, expiry, used time). Mail goes
+`password_resets` (the SHA-256 of the token, expiry, used time). An entry
+has a `kind` (`Text` or `Voice`); a memo's `content` is `NULL` until
+transcribed, its audio a file in `AUDIO_PATH` behind `AudioStorage`
+(ADR-023), and a CHECK constraint holds the rules of each kind. Mail goes
 through `shared/mail/MailService`, which writes it to the log (ADR-022).
 
 **`apps/web`**, Next.js. Routes: `/`, `/in`, `/new`, `/forgot`, `/reset`,
@@ -286,7 +320,7 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 | **`migration:generate` never comes back empty**, because TypeORM cannot describe two things the hand-written migrations made | migrations | Accepted |
 | **`better-sqlite3@13` is outside TypeORM's peer range.** It works and is pinned | `apps/api/package.json` | Dissolves with Postgres in feature 8 |
 | **`Etc/GMT+5` is accepted as a timezone** | the registration check | Low; noted |
-| **Deleted entries must be kept out of every later reader** | search, embeddings, Ask, export | Features 6, 10, 12, 13 (ADR-020) |
+| **Deleted entries must be kept out of every later reader**, and from feature 5 their audio too | search, embeddings, Ask, export | Features 6, 10, 12, 13 (ADR-020) |
 | **The Export row on Your data still says "Markdown and JSON"**; export is PDF, JSON and audio (features.md Ref 36). Screen wording, hers | `components/you/You.tsx` | Feature 6, Your data |
 | **TypeORM does not switch foreign keys off when reverting a migration** | ADR-010 | One line owed in ADR-010 |
 | **No ADR yet for the 2026-10-04 data-model decisions** (one `entries` table with a `kind` for recordings; drafts on the server) | `docs/decisions/` | Written when each is built |
@@ -298,6 +332,10 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 | **Expired and used password resets are never deleted** | `password_resets` | Feature 13, with expired sessions |
 | **The `User-Agent` header is stored with no length limit** (Node caps headers at about 16 KB) | `sessions.user_agent` | Feature 16, Security pass |
 | **One timezone can be listed twice under two spellings** (`Asia/Kolkata`, `Asia/Calcutta`) | Timezone screen | Feature 7, Quality pass |
+| **A memo's length is the browser's claim**; the API checks the size (24 MB) but does not measure the audio (ADR-023) | `POST /entries/voice` | Feature 16, Security pass |
+| **Audio files left by a failed insert are never removed** (ADR-023) | `AUDIO_PATH` | Feature 13, with expired sessions and resets |
+| **A memo recorded in one browser may not play in a much older one** (WebM or MP4, kept as recorded) | playback | Accepted; noted |
+| **On Talk, the left rail is drawn over the content at tablet and desktop widths** (before feature 5 too) | `Talk.tsx`, `live.css` | Feature 7, Quality pass |
 | **ADR-015 and ADR-016 link to retired documents** | `docs/decisions/` | Left as records; git history holds the targets |
 
 ---

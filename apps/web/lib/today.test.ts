@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { Mood, type Entry } from '@neuron/contracts';
+import { EntryKind, Mood, type Entry } from '@neuron/contracts';
 import type { ApiResult } from './api/session.ts';
 import {
   createPastDay,
@@ -31,7 +31,9 @@ const NOT_FOUND: Reply = { kind: 'rejected', status: 404, messages: [] };
 
 const entry = (id: string, minute: number, date = TODAY): Entry => ({
   id,
+  kind: EntryKind.Text,
   content: `entry ${id}`,
+  durationMs: null,
   createdAt: `${date}T09:${String(minute).padStart(2, '0')}:00.000Z`,
   date,
 });
@@ -1126,6 +1128,29 @@ test('opening the editor holds the entry`s words, and sends nothing', async () =
     save: { status: 'idle' },
   });
   assert.equal(api.sent.length, before);
+});
+
+test('a voice memo has no editor: pressing edit on one opens nothing and sends nothing', async () => {
+  const api = fakeApi();
+  const memo: Entry = {
+    id: 'm',
+    kind: EntryKind.Voice,
+    content: null,
+    durationMs: 72_000,
+    createdAt: `${TODAY}T09:05:00.000Z`,
+    date: TODAY,
+  };
+  api.answer('GET /entries', () => ({ kind: 'ok', data: [memo] }));
+  const today = createToday({ request: api.request, pageSize: 200 });
+  await today.open();
+  const before = api.sent.length;
+
+  today.edit('m');
+  await today.saveEdit();
+
+  assert.equal(today.getState().editing, null);
+  assert.equal(api.sent.length, before);
+  assert.deepEqual(shown(today), ['m']);
 });
 
 test('saving sends PATCH for that entry, in the contract`s shape, with the words without the space around them', async () => {

@@ -1,3 +1,4 @@
+import { EntryKind } from '@neuron/contracts';
 import {
   as,
   messagesFrom,
@@ -54,13 +55,17 @@ describe('the journal (e2e)', () => {
 
     expect(created).toEqual({
       id: created.id,
+      kind: EntryKind.Text,
       content: padded,
+      durationMs: null,
       createdAt: '2026-08-09T12:00:00.000Z',
       date: '2026-08-09',
     });
     expect(Object.keys(created)).toEqual([
       'id',
+      'kind',
       'content',
+      'durationMs',
       'createdAt',
       'date',
     ]);

@@ -18,7 +18,7 @@ describe('what every route answers with (e2e)', () => {
   const DELETED_CONTENT = 'the canal again, and this one goes';
 
   const SHAPES = {
-    entry: ['id', 'content', 'createdAt', 'date'],
+    entry: ['id', 'kind', 'content', 'durationMs', 'createdAt', 'date'],
     user: ['id', 'email', 'createdAt', 'name', 'timezone'],
     day: ['date', 'mood'],
     session: ['id', 'device', 'createdAt', 'lastUsedAt', 'current'],

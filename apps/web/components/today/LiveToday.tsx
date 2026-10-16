@@ -16,9 +16,10 @@ import {
   KeyBox,
   LiveScreen,
 } from '@/components/layout/LiveScreen';
-import { LiveComposer } from '@/components/day/Journal';
+import { LiveComposer, PendingMemo } from '@/components/day/Journal';
 import { useSession } from '@/hooks/useSession';
-import { session } from '@/lib/api/client';
+import { session, uploads } from '@/lib/api/client';
+import { followUploads, uploadsShownOn } from '@/lib/uploads';
 import { formatDay } from '@/lib/utils/format';
 import {
   createToday,
@@ -116,6 +117,13 @@ export function LiveToday({ options }: { options?: boolean }) {
     today.getState,
   );
 
+  /* Voice memos kept on Talk, while they are sent (lib/uploads.ts). */
+  const sending = useSyncExternalStore(
+    uploads.subscribe,
+    uploads.getState,
+    uploads.getState,
+  );
+
   const signedIn = state.status === 'signedIn';
   const signedOut = state.status === 'signedOut';
 
@@ -147,6 +155,18 @@ export function LiveToday({ options }: { options?: boolean }) {
     return () => {
       document.removeEventListener('visibilitychange', onVisible);
     };
+  }, [signedIn, today]);
+
+  /*
+   * A memo that is saved makes Today ask for the day again, and leaves the
+   * uploads once the day holds it.
+   */
+  useEffect(() => {
+    if (!signedIn) {
+      return;
+    }
+
+    return followUploads(uploads, today);
   }, [signedIn, today]);
 
   /*
@@ -184,6 +204,7 @@ export function LiveToday({ options }: { options?: boolean }) {
   }
 
   const { day, save } = view;
+  const memos = uploadsShownOn(day, sending.uploads);
 
   /*
    * The date box is always drawn, and is empty until the API has said which
@@ -238,13 +259,15 @@ export function LiveToday({ options }: { options?: boolean }) {
 
       {/* It can take focus, and is not a stop for the Tab key: it is where
           focus goes when the last entry of the day has been deleted. */}
-      {day.status === 'open' && day.entries.length === 0 ? (
+      {day.status === 'open' &&
+      day.entries.length === 0 &&
+      memos.length === 0 ? (
         <p className="empty" tabIndex={-1} ref={whenEmpty}>
           What&apos;s today been like?
         </p>
       ) : null}
 
-      {day.status === 'open' && day.entries.length > 0 ? (
+      {day.status === 'open' && (day.entries.length > 0 || memos.length > 0) ? (
         <DaySheet
           page={today}
           view={view}
@@ -252,6 +275,13 @@ export function LiveToday({ options }: { options?: boolean }) {
           mood={day.mood}
           moodLabel="Today felt"
           onLeaving={leaving}
+          after={memos.map((upload) => (
+            <PendingMemo
+              key={upload.id}
+              upload={upload}
+              onRetry={() => void uploads.retry(upload.id)}
+            />
+          ))}
         />
       ) : null}
 

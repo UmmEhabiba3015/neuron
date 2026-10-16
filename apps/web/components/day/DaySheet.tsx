@@ -1,9 +1,10 @@
 'use client';
 
-import type { Mood, Entry } from '@neuron/contracts';
-import { useEffect, useRef } from 'react';
+import { EntryKind, type Mood, type Entry } from '@neuron/contracts';
+import { useEffect, useRef, type ReactNode } from 'react';
 import {
   LiveEntry,
+  LiveMemo,
   MoodRow,
   type EntryEditor,
 } from '@/components/day/Journal';
@@ -102,7 +103,10 @@ export function useFocusAfterDelete<T extends HTMLElement>(
 
 /*
  * The entries of one day and its mood row. Today and the page of any other
- * date both draw this, and differ only in the words beside the mood.
+ * date both draw this, and differ only in the words beside the mood, and in
+ * `after`: Today's voice memos that are not on the day yet, at the bottom.
+ *
+ * A voice memo is deleted as an entry is, and is never edited.
  */
 export function DaySheet({
   page,
@@ -111,6 +115,7 @@ export function DaySheet({
   mood,
   moodLabel,
   onLeaving,
+  after,
 }: {
   page: DayPage;
   view: DayState;
@@ -118,6 +123,7 @@ export function DaySheet({
   mood: Mood | null;
   moodLabel: string;
   onLeaving: (id: string) => void;
+  after?: ReactNode;
 }) {
   const gone = useRef<HTMLParagraphElement>(null);
 
@@ -135,6 +141,31 @@ export function DaySheet({
     <main className="sheet">
       {entries.map((entry) => {
         const why = view.notDeleted[entry.id];
+
+        if (entry.kind === EntryKind.Voice) {
+          return (
+            <LiveMemo
+              key={entry.id}
+              id={entry.id}
+              time={formatTime(entry.createdAt)}
+              datetime={entry.createdAt}
+              durationMs={entry.durationMs ?? 0}
+              content={entry.content}
+              confirming={view.confirming === entry.id}
+              notDeleted={why ? NOT_DELETED[why] : undefined}
+              onAsk={() => page.askToDelete(entry.id)}
+              onKeep={() =>
+                view.confirming === entry.id
+                  ? page.keep()
+                  : page.dismiss(entry.id)
+              }
+              onGoAhead={() => {
+                onLeaving(entry.id);
+                void page.goAhead();
+              }}
+            />
+          );
+        }
 
         return (
           <LiveEntry
@@ -166,6 +197,8 @@ export function DaySheet({
           </LiveEntry>
         );
       })}
+
+      {after}
 
       {view.editedGone ? (
         <p

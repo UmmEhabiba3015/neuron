@@ -68,11 +68,6 @@ export const UNBUILT = {
     feature: 12,
     where: 'Ask',
   },
-  startRecording: {
-    label: 'Start recording',
-    feature: 5,
-    where: 'Talk',
-  },
   entryMemory: {
     label: 'Use in memory',
     feature: 9,

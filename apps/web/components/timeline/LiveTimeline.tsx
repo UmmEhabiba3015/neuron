@@ -78,8 +78,12 @@ function DayRows({ day, today }: { day: TimelineDay; today: string }) {
           </Link>
         ) : null}
       </div>
+      {/* A voice memo has no words until it has a transcript, and shows
+          none until then. */}
       <div className="ccol">
-        <p className="lede">{entry.content}</p>
+        {entry.content !== null ? (
+          <p className="lede">{entry.content}</p>
+        ) : null}
       </div>
     </div>
   ));

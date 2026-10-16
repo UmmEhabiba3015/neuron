@@ -128,17 +128,17 @@ A month view of the same days.
 
 ## 5. Voice
 
-**Ref 21. Record a voice memo.** Keep. *Drawn.*
+**Ref 21. Record a voice memo.** Keep. *Built* (feature 5).
 From the record screen, a person records a memo, which becomes an item on
 today. A memo is an entry of another kind, stored in the same table.
 
-**Ref 22. The recorder.** Keep, with a limit. *Ready state drawn.*
+**Ref 22. The recorder.** Keep, with a limit. *Built* (feature 5).
 - Kept: start, pause, resume, stop and keep, cancel; asking for the
   microphone, and what the screen says when it is refused or missing.
 - **The waveform is a static picture.** It does not show the actual sound of
   the recording, live or after saving.
 
-**Ref 23. Play back, delete, retry an upload.** Keep. *Nothing.*
+**Ref 23. Play back, delete, retry an upload.** Keep. *Built* (feature 5).
 A saved memo can be played and deleted. If the upload fails, the memo stays
 on the page with a retry, and the screen says plainly that it is lost if the
 page is closed.

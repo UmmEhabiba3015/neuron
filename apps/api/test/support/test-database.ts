@@ -42,9 +42,16 @@ export async function closeTestDataSource(dataSource: DataSource) {
   }
 }
 
+/*
+ * A seeded entry names what its test cares about. Everything else is the
+ * column's default: a typed entry, with no audio.
+ */
+export type SeededEntry = Pick<EntryEntity, 'id' | 'createdAt'> &
+  Partial<EntryEntity>;
+
 export async function seedEntries(
   dataSource: DataSource,
-  entries: EntryEntity[],
+  entries: SeededEntry[],
   userId?: string,
 ): Promise<void> {
   if (userId === undefined) {

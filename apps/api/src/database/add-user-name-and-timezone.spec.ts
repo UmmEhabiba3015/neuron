@@ -386,10 +386,21 @@ describe('AddUserNameAndTimezone', () => {
     /*
      * e-late is the entry that would move if anything worked its day out
      * again: midnight in UTC puts 02:00Z on the 10th, and it is on the 9th.
+     *
+     * It is read the way the application reads it, so through every later
+     * migration too: the repository asks for columns that later migrations
+     * add, such as entries.kind. RequireUserPasswordHash, one of them,
+     * needs every seeded user to have a hash first.
      */
     it('leaves an entry written under the 4am rule on the date it was given', async () => {
+      await database.query(
+        `UPDATE users SET password_hash = 'seeded' WHERE password_hash IS NULL`,
+      );
+      const latest = await open(migrations);
+      await latest.runMigrations();
+
       const repository = new EntriesRepository(
-        database.getRepository(EntryEntity),
+        latest.getRepository(EntryEntity),
       );
       const idsOn = async (date: string) =>
         (await repository.find('alice', { date }, FULL_PAGE))

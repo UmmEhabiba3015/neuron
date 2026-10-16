@@ -1,10 +1,26 @@
 'use client';
 
-import { Mood } from '@neuron/contracts';
+import { Mood, type Entry } from '@neuron/contracts';
 import Link from 'next/link';
-import { useEffect, useId, useRef, type ReactNode } from 'react';
+import {
+  useEffect,
+  useId,
+  useRef,
+  type ReactNode,
+  useState,
+  type RefObject,
+} from 'react';
 import { escapeCloses } from '@/lib/keys';
 import { WAVEFORMS } from '@/lib/waveform';
+import { session } from '@/lib/api/client';
+import {
+  createPlayback,
+  type NotPlayed,
+  type Playback,
+  type PlaybackState,
+} from '@/lib/playback';
+import type { Upload } from '@/lib/uploads';
+import { formatDuration, formatTime, speakDuration } from '@/lib/utils/format';
 import { NotBuiltYet } from '@/components/ui/NotBuilt';
 import { useEnterToSave } from '@/hooks/useEnterToSave';
 import { useNotBuilt } from '@/hooks/useNotBuilt';
@@ -37,20 +53,8 @@ export interface EntryEditor {
  * menu says "In memory" and its one option is pressed. A press of the
  * option says so in the row, as edit does, and changes nothing.
  *
- * At rest the row holds the designer's icon. While the person is being asked,
- * or after a delete has failed, the icon's place is taken by a panel with a
- * sentence and two buttons (18-entry-system-states.html). Which of the three
- * it is, is decided in lib/today.ts.
- *
- * The icon and the panel are different elements, so the keyboard's focus is
- * moved by hand each time one replaces the other:
- *
- *   the icon is pressed     focus goes to "Keep entry", the safe answer, so
- *                           a second press of the same key keeps the entry
- *   "Keep entry" is pressed focus returns to the icon
- *
- * Where focus goes after "Delete entry" is the screen's to decide, because
- * this row is no longer there (LiveToday.tsx).
+ * The icons, the memory menu and the panel that asks before a delete are
+ * EntryTools, below, which a voice memo draws too.
  */
 export function LiveEntry({
   id,
@@ -84,15 +88,11 @@ export function LiveEntry({
   onEditSave: () => void;
   onEditCancel: () => void;
 }) {
-  const sentence = useId();
   const textBox = useId();
   const editSentence = useId();
   const row = useRef<HTMLDivElement>(null);
-  const icon = useRef<HTMLButtonElement>(null);
   const editIcon = useRef<HTMLButtonElement>(null);
   const field = useRef<HTMLTextAreaElement>(null);
-  const keep = useRef<HTMLButtonElement>(null);
-  const memory = useNotBuilt('entryMemory');
   const enterToSave = useEnterToSave(onEditSave);
 
   const editing = editor !== undefined;
@@ -127,39 +127,6 @@ export function LiveEntry({
       editIcon.current?.focus({ preventScroll: true });
     }
   }, [editing]);
-
-  const panel = confirming || notDeleted !== undefined;
-  const hadPanel = useRef(panel);
-
-  /*
-   * The panel has closed and the icon is back. Focus is taken only if it was
-   * in this row, or was lost when the panel's button left the page. If the
-   * person has moved on to something else, it stays with them.
-   */
-  useEffect(() => {
-    const closed = hadPanel.current && !panel;
-    hadPanel.current = panel;
-
-    if (!closed) {
-      return;
-    }
-
-    const focused = document.activeElement;
-
-    if (focused === document.body || row.current?.contains(focused)) {
-      icon.current?.focus();
-    }
-  }, [panel]);
-
-  /*
-   * A failed delete opens the panel too, and takes no focus: the person did
-   * not press anything just then, and may be typing.
-   */
-  useEffect(() => {
-    if (confirming) {
-      keep.current?.focus();
-    }
-  }, [confirming]);
 
   return (
     <div className="srow" ref={row} data-entry-id={id}>
@@ -233,116 +200,217 @@ export function LiveEntry({
         ) : (
           <p className="prose">{children}</p>
         )}
-        {editor ? null : panel ? (
-          <div className="entry-confirm">
-            <p id={sentence} role={confirming ? undefined : 'alert'}>
-              {confirming
-                ? 'Delete this entry? This cannot be undone.'
-                : notDeleted}
-            </p>
-            <div className="auth-actions">
-              <button
-                className="btn quiet"
-                type="button"
-                aria-describedby={sentence}
-                onClick={confirming ? onGoAhead : onAsk}
-              >
-                {confirming ? 'Delete entry' : 'Try again'}
-              </button>
-              <button
-                className="btn solid"
-                type="button"
-                ref={keep}
-                aria-describedby={sentence}
-                onClick={onKeep}
-              >
-                Keep entry
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="entry-actions" aria-label="Entry actions">
-            <div className="entry-tools">
-              <button
-                className="btn quiet entry-icon"
-                type="button"
-                ref={editIcon}
-                data-entry-action="edit"
-                aria-label="Edit entry"
-                onClick={onEdit}
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15z" />
-                </svg>
-              </button>
-              <button
-                className="btn quiet entry-icon"
-                type="button"
-                ref={icon}
-                data-entry-action="delete"
-                aria-label="Delete entry"
-                onClick={onAsk}
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" />
-                </svg>
-              </button>
-            </div>
-            <details className="entry-memory-dropdown" data-excluded="false">
-              <summary
-                className="entry-memory-trigger"
-                aria-label="Entry memory settings: in memory"
-              >
-                <span className="memory-state">In memory</span>
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
-              </summary>
-              <div className="entry-memory-menu">
-                <button
-                  className="opt"
-                  type="button"
-                  data-entry-action="memory"
-                  aria-pressed="true"
-                  onClick={memory.press}
-                  {...memory.marker}
-                >
-                  <span className="tick" aria-hidden="true" />
-                  <span>{memory.label}</span>
-                </button>
-              </div>
-            </details>
-          </div>
+        {editor ? null : (
+          <EntryTools
+            row={row}
+            what="entry"
+            confirming={confirming}
+            notDeleted={notDeleted}
+            onAsk={onAsk}
+            onKeep={onKeep}
+            onGoAhead={onGoAhead}
+            editIcon={editIcon}
+            onEdit={onEdit}
+          />
         )}
-        {memory.said && !panel && !editor ? (
-          <NotBuiltYet className="auth-help state-message" />
-        ) : null}
       </div>
     </div>
+  );
+}
+
+/*
+ * What sits beside an entry's words, or under a voice memo: at rest the
+ * designer's icons and the memory menu, and while the person is being asked,
+ * or after a delete has failed, a panel with a sentence and two buttons in
+ * their place (18-entry-system-states.html). Which of the three it is, is
+ * decided in lib/today.ts.
+ *
+ * A voice memo has no edit icon (features.md, Ref 11), so `onEdit` is left
+ * out for one.
+ *
+ * The icon and the panel are different elements, so the keyboard's focus is
+ * moved by hand each time one replaces the other:
+ *
+ *   the icon is pressed     focus goes to "Keep entry", the safe answer, so
+ *                           a second press of the same key keeps the entry
+ *   "Keep entry" is pressed focus returns to the icon
+ *
+ * Where focus goes after "Delete entry" is the screen's to decide, because
+ * this row is no longer there (LiveToday.tsx).
+ */
+function EntryTools({
+  row,
+  what,
+  confirming,
+  notDeleted,
+  onAsk,
+  onKeep,
+  onGoAhead,
+  editIcon,
+  onEdit,
+}: {
+  row: RefObject<HTMLDivElement | null>;
+  what: 'entry' | 'memo';
+  confirming: boolean;
+  notDeleted?: string;
+  onAsk: () => void;
+  onKeep: () => void;
+  onGoAhead: () => void;
+  editIcon?: RefObject<HTMLButtonElement | null>;
+  onEdit?: () => void;
+}) {
+  const sentence = useId();
+  const icon = useRef<HTMLButtonElement>(null);
+  const keep = useRef<HTMLButtonElement>(null);
+  const memory = useNotBuilt('entryMemory');
+  const name = what === 'memo' ? 'Voice memo' : 'Entry';
+
+  const panel = confirming || notDeleted !== undefined;
+  const hadPanel = useRef(panel);
+
+  /*
+   * The panel has closed and the icon is back. Focus is taken only if it was
+   * in this row, or was lost when the panel's button left the page. If the
+   * person has moved on to something else, it stays with them.
+   */
+  useEffect(() => {
+    const closed = hadPanel.current && !panel;
+    hadPanel.current = panel;
+
+    if (!closed) {
+      return;
+    }
+
+    const focused = document.activeElement;
+
+    if (focused === document.body || row.current?.contains(focused)) {
+      icon.current?.focus();
+    }
+  }, [panel, row]);
+
+  /*
+   * A failed delete opens the panel too, and takes no focus: the person did
+   * not press anything just then, and may be typing.
+   */
+  useEffect(() => {
+    if (confirming) {
+      keep.current?.focus();
+    }
+  }, [confirming]);
+
+  if (panel) {
+    return (
+      <div className="entry-confirm">
+        <p id={sentence} role={confirming ? undefined : 'alert'}>
+          {confirming ? 'Delete this entry? This cannot be undone.' : notDeleted}
+        </p>
+        <div className="auth-actions">
+          <button
+            className="btn quiet"
+            type="button"
+            aria-describedby={sentence}
+            onClick={confirming ? onGoAhead : onAsk}
+          >
+            {confirming ? 'Delete entry' : 'Try again'}
+          </button>
+          <button
+            className="btn solid"
+            type="button"
+            ref={keep}
+            aria-describedby={sentence}
+            onClick={onKeep}
+          >
+            Keep entry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="entry-actions" aria-label={`${name} actions`}>
+        <div className="entry-tools">
+          {onEdit ? (
+            <button
+              className="btn quiet entry-icon"
+              type="button"
+              ref={editIcon}
+              data-entry-action="edit"
+              aria-label="Edit entry"
+              onClick={onEdit}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15z" />
+              </svg>
+            </button>
+          ) : null}
+          <button
+            className="btn quiet entry-icon"
+            type="button"
+            ref={icon}
+            data-entry-action="delete"
+            aria-label={what === 'memo' ? 'Delete voice memo' : 'Delete entry'}
+            onClick={onAsk}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" />
+            </svg>
+          </button>
+        </div>
+        <details className="entry-memory-dropdown" data-excluded="false">
+          <summary
+            className="entry-memory-trigger"
+            aria-label={`${name} memory settings: in memory`}
+          >
+            <span className="memory-state">In memory</span>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </summary>
+          <div className="entry-memory-menu">
+            <button
+              className="opt"
+              type="button"
+              data-entry-action="memory"
+              aria-pressed="true"
+              onClick={memory.press}
+              {...memory.marker}
+            >
+              <span className="tick" aria-hidden="true" />
+              <span>{memory.label}</span>
+            </button>
+          </div>
+        </details>
+      </div>
+      {memory.said ? (
+        <NotBuiltYet className="auth-help state-message" />
+      ) : null}
+    </>
   );
 }
 
@@ -552,43 +620,278 @@ export function LiveWaveform() {
   );
 }
 
-export function LiveRecording({
-  time,
-  datetime,
-  duration,
-  label,
-  children,
+/*
+ * The play button of a saved voice memo, and the player behind it.
+ *
+ * The audio is asked for when play is first pressed, with the access token,
+ * and given to <audio> as a local address (lib/playback.ts, ADR-023). The
+ * address is let go when the row leaves the screen. Pressing the button
+ * while the memo plays pauses it.
+ *
+ * The playback is made at the first press and not when the row is drawn, so
+ * that React drawing the row twice in development cannot release it before
+ * it is used.
+ */
+function useMemoPlayer(entryId: string) {
+  const audio = useRef<HTMLAudioElement>(null);
+  const playback = useRef<Playback | null>(null);
+  const [state, setState] = useState<PlaybackState>({ status: 'idle' });
+  const [playing, setPlaying] = useState(false);
+
+  useEffect(
+    () => () => {
+      playback.current?.release();
+      playback.current = null;
+    },
+    [],
+  );
+
+  async function press() {
+    const element = audio.current;
+
+    if (!element) {
+      return;
+    }
+
+    if (!element.paused) {
+      element.pause();
+      return;
+    }
+
+    if (!playback.current) {
+      const made = createPlayback({
+        request: session.request,
+        entryId,
+        urls: {
+          create: (blob) => URL.createObjectURL(blob),
+          revoke: (url) => URL.revokeObjectURL(url),
+        },
+      });
+
+      made.subscribe(() => setState(made.getState()));
+      playback.current = made;
+    }
+
+    const url = await playback.current.load();
+
+    if (!url) {
+      return;
+    }
+
+    if (element.src !== url) {
+      element.src = url;
+    }
+
+    void element.play().catch(() => setPlaying(false));
+  }
+
+  const element = (
+    <audio
+      ref={audio}
+      hidden
+      preload="none"
+      onPlay={() => setPlaying(true)}
+      onPause={() => setPlaying(false)}
+      onEnded={() => setPlaying(false)}
+    />
+  );
+
+  return { press, playing, element, state };
+}
+
+/* Mine: she has not chosen words for a memo that does not play. */
+const NOT_PLAYED: Record<NotPlayed, string> = {
+  unreachable: 'We could not reach the server. The recording did not play.',
+  refused: 'Something went wrong on our side. The recording did not play.',
+};
+
+function PlayIcon({ playing }: { playing: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      {playing ? (
+        <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" />
+      ) : (
+        <path d="M8 5.5v13l11-6.5z" />
+      )}
+    </svg>
+  );
+}
+
+/*
+ * The head of a memo's row, as #recording-kept draws it: its time, its play
+ * button, the waveform, which is a static picture (features.md, Ref 22), and
+ * its length. A memo that is still being sent has none of the first two or
+ * the last, because they are the API's to give.
+ */
+function MemoHead({
+  saved,
+  player,
 }: {
-  time: string;
-  datetime: string;
-  duration: string;
-  label: string;
-  children?: ReactNode;
+  saved?: { time: string; datetime: string; durationMs: number };
+  player?: ReturnType<typeof useMemoPlayer>;
 }) {
   return (
-    <div className="recrow">
-      <div className="head dated">
-        <div className="tcol">
-          <time dateTime={datetime}>{time}</time>
-        </div>
-        <div className="ccol">
-          <button className="play" type="button" aria-label={label}>
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M8 5.5v13l11-6.5z" />
-            </svg>
+    <div className="head dated">
+      <div className="tcol">
+        {saved ? <time dateTime={saved.datetime}>{saved.time}</time> : null}
+      </div>
+      <div className="ccol">
+        {saved && player ? (
+          <button
+            className="play"
+            type="button"
+            aria-label={
+              player.playing
+                ? 'Pause this recording'
+                : `Play this recording, ${speakDuration(saved.durationMs)}`
+            }
+            onClick={() => void player.press()}
+          >
+            <PlayIcon playing={player.playing} />
           </button>
-          <LiveWaveform />
-          <span className="dur">{duration}</span>
+        ) : null}
+        <LiveWaveform />
+        {saved ? (
+          <span className="dur">{formatDuration(saved.durationMs)}</span>
+        ) : null}
+        {player?.element}
+      </div>
+    </div>
+  );
+}
+
+function NotPlayedLine({ player }: { player: ReturnType<typeof useMemoPlayer> }) {
+  return player.state.status === 'failed' ? (
+    <p className="auth-help state-message" role="alert">
+      {NOT_PLAYED[player.state.why]}
+    </p>
+  ) : null;
+}
+
+/*
+ * A saved voice memo on a day's page. It is deleted as an entry is, and has
+ * no edit icon. A memo has no words until it has a transcript (feature 11),
+ * and none are shown until then.
+ */
+export function LiveMemo({
+  id,
+  time,
+  datetime,
+  durationMs,
+  content,
+  confirming,
+  notDeleted,
+  onAsk,
+  onKeep,
+  onGoAhead,
+}: {
+  id: string;
+  time: string;
+  datetime: string;
+  durationMs: number;
+  content: string | null;
+  confirming: boolean;
+  notDeleted?: string;
+  onAsk: () => void;
+  onKeep: () => void;
+  onGoAhead: () => void;
+}) {
+  const row = useRef<HTMLDivElement>(null);
+  const player = useMemoPlayer(id);
+
+  return (
+    <div className="recrow" ref={row} data-entry-id={id}>
+      <MemoHead saved={{ time, datetime, durationMs }} player={player} />
+      <div className="body">
+        <div className="tcol" />
+        <div className="ccol">
+          {content !== null ? <p className="prose">{content}</p> : null}
+          <EntryTools
+            row={row}
+            what="memo"
+            confirming={confirming}
+            notDeleted={notDeleted}
+            onAsk={onAsk}
+            onKeep={onKeep}
+            onGoAhead={onGoAhead}
+          />
+          <NotPlayedLine player={player} />
         </div>
       </div>
-      {children ? (
-        <div className="body">
-          <div className="tcol" />
-          <div className="ccol">
-            <p className="prose">{children}</p>
+    </div>
+  );
+}
+
+/* Her words, 2026-10-16. */
+const SAVING_RECORDING = 'Saving your recording.';
+const RECORDING_NOT_SAVED =
+  'Your recording was not saved. It is still on this page; try again. If you close this page, it is lost.';
+
+/*
+ * A memo that has been kept and is not yet on the day, at the bottom of
+ * Today (lib/uploads.ts). While it is being sent it has no time; if it was
+ * not saved it says so and offers Try again. Once the API has answered, it
+ * has its time, its length and its play button, and is replaced by the
+ * day's own row as soon as the day has been asked for again.
+ */
+export function PendingMemo({
+  upload,
+  onRetry,
+}: {
+  upload: Upload;
+  onRetry: () => void;
+}) {
+  if (upload.status === 'saved') {
+    return <ArrivedMemo entry={upload.entry} />;
+  }
+
+  return (
+    <div className="recrow" data-upload-id={upload.id}>
+      <MemoHead />
+      <div className="body">
+        <div className="tcol" />
+        <div className="ccol">
+          <div className="state-message">
+            {upload.status === 'saving' ? (
+              <p className="auth-help state-message" role="status">
+                {SAVING_RECORDING}
+              </p>
+            ) : (
+              <>
+                <p className="auth-help state-message" role="alert">
+                  {RECORDING_NOT_SAVED}
+                </p>
+                <button className="btn solid" type="button" onClick={onRetry}>
+                  Try again
+                </button>
+              </>
+            )}
           </div>
         </div>
-      ) : null}
+      </div>
+    </div>
+  );
+}
+
+function ArrivedMemo({ entry }: { entry: Entry }) {
+  const player = useMemoPlayer(entry.id);
+
+  return (
+    <div className="recrow" data-upload-entry-id={entry.id}>
+      <MemoHead
+        saved={{
+          time: formatTime(entry.createdAt),
+          datetime: entry.createdAt,
+          durationMs: entry.durationMs ?? 0,
+        }}
+        player={player}
+      />
+      <div className="body">
+        <div className="tcol" />
+        <div className="ccol">
+          <NotPlayedLine player={player} />
+        </div>
+      </div>
     </div>
   );
 }

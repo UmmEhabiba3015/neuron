@@ -1,5 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  NotFoundException,
+  StreamableFile,
+} from '@nestjs/common';
+import { EntryKind } from '@neuron/contracts';
 import type { DataSource } from 'typeorm';
 import {
   closeTestDataSource,
@@ -7,7 +12,12 @@ import {
   seedUser,
   SEEDED_TIMEZONE,
 } from '../../test/support/test-database';
-import { EntriesController } from './entries.controller';
+import {
+  EntriesController,
+  VOICE_MEMO_NOT_EDITABLE,
+} from './entries.controller';
+import { RECORDING_MISSING } from './voice-memo-rules';
+import type { UploadedAudio } from './types/uploaded-audio.interface';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import type { AuthenticatedRequest } from '../shared/types/authenticated-request.interface';
 import { entriesProviders } from '../../test/support/entries-providers';
@@ -61,7 +71,7 @@ describe('EntriesController', () => {
 
       for (const entry of result) {
         expect(entry.id.length).toBeGreaterThan(0);
-        expect(entry.content.length).toBeGreaterThan(0);
+        expect(entry.content?.length).toBeGreaterThan(0);
 
         expect(Number.isNaN(Date.parse(entry.createdAt))).toBe(false);
       }
@@ -228,6 +238,78 @@ describe('EntriesController', () => {
       await controller.create({ content: 'two' }, caller);
 
       expect(await controller.countEntries({}, caller)).toEqual({ count: 2 });
+    });
+  });
+
+  describe('voice memos', () => {
+    const audio: UploadedAudio = {
+      buffer: Buffer.from('some recorded bytes'),
+      mimetype: 'audio/mp4',
+      size: 19,
+    };
+
+    it('answers the memo it filed', async () => {
+      const memo = await controller.createVoiceMemo(
+        audio,
+        { durationMs: 4_000 },
+        caller,
+      );
+
+      expect(memo).toMatchObject({
+        kind: EntryKind.Voice,
+        content: null,
+        durationMs: 4_000,
+      });
+      expect(await controller.findAll({}, caller)).toEqual([memo]);
+    });
+
+    it.each([
+      ['no file', undefined],
+      ['an empty file', { ...audio, buffer: Buffer.alloc(0), size: 0 }],
+    ])('refuses a form with %s, and files nothing', async (_label, file) => {
+      await expect(
+        controller.createVoiceMemo(file, { durationMs: 4_000 }, caller),
+      ).rejects.toThrow(new BadRequestException(RECORDING_MISSING));
+      expect(await controller.countEntries({}, caller)).toEqual({ count: 0 });
+    });
+
+    it('sends the bytes with the type they were recorded in', async () => {
+      const memo = await controller.createVoiceMemo(
+        audio,
+        { durationMs: 4_000 },
+        caller,
+      );
+
+      const file = await controller.findAudio(memo.id, caller);
+
+      expect(file).toBeInstanceOf(StreamableFile);
+      expect(file.getHeaders()).toMatchObject({
+        type: 'audio/mp4',
+        length: audio.buffer.length,
+      });
+    });
+
+    it('is a 404 for the audio of a typed entry, or of nothing', async () => {
+      const typed = await controller.create({ content: 'words' }, caller);
+
+      await expect(controller.findAudio(typed.id, caller)).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(controller.findAudio('no-such-id', caller)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('refuses to edit a memo with a 400, not a 404', async () => {
+      const memo = await controller.createVoiceMemo(
+        audio,
+        { durationMs: 4_000 },
+        caller,
+      );
+
+      await expect(
+        controller.update(memo.id, { content: 'words' }, caller),
+      ).rejects.toThrow(new BadRequestException(VOICE_MEMO_NOT_EDITABLE));
     });
   });
 });
