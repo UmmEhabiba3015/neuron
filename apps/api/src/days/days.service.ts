@@ -56,6 +56,23 @@ export class DaysService {
     return date <= this.todayFor(owner);
   }
 
+  /*
+   * Whether a day exists for this person (ADR-015, amendment of
+   * 2026-10-15). A day that has happened always exists, written to or not.
+   * A day still in the future exists only if it has an entry that is not
+   * deleted, which happens when the person has moved west since writing
+   * it: written at 01:00 on the 16th in Karachi, it is still the 15th in
+   * New York. A mood alone does not make a future day exist.
+   *
+   * The database is asked only about a date in the future.
+   */
+  async exists(owner: DayOwner, date: string): Promise<boolean> {
+    return (
+      this.hasHappened(owner, date) ||
+      this.daysRepository.hasLiveEntry(owner.id, date)
+    );
+  }
+
   /* The one place that says which date is today for a person. */
   private todayFor(owner: DayOwner): string {
     return dayFor(new Date(), owner.timezone);

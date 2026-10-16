@@ -167,4 +167,25 @@ describe('UsersService', () => {
       expect(await hashOf(bob.id)).toBe(bob.passwordHash);
     });
   });
+
+  describe('setTimezone', () => {
+    it("changes the one person's timezone, no one else's, and answers the user as stored", async () => {
+      const alice = (await service.register({
+        ...registration('alice-password'),
+        email: 'alice@example.com',
+      }))!;
+      const bob = (await service.register({
+        ...registration('bob-password'),
+        email: 'bob@example.com',
+      }))!;
+
+      const changed = await service.setTimezone(alice.id, 'America/New_York');
+
+      expect(changed).toMatchObject({
+        id: alice.id,
+        timezone: 'America/New_York',
+      });
+      expect((await service.findById(bob.id))?.timezone).toBe('Asia/Karachi');
+    });
+  });
 });

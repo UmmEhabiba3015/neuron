@@ -23,9 +23,14 @@ export class AuthService {
     private readonly sessionsRepository: SessionsRepository,
   ) {}
 
+  /*
+   * The user agent is the User-Agent header of the request, kept with the
+   * session so that Account can name the device. A request may send none.
+   */
   async login(
     email: string,
     password: string,
+    userAgent?: string,
   ): Promise<AuthenticatedSession | undefined> {
     const user = await this.usersService.findByEmail(email);
 
@@ -39,7 +44,7 @@ export class AuthService {
       return undefined;
     }
 
-    return this.startSession(user);
+    return this.startSession(user, userAgent ?? null);
   }
 
   async refresh(
@@ -75,6 +80,7 @@ export class AuthService {
     await this.sessionsRepository.rotate(
       session.id,
       this.refreshTokenService.hash(nextRefreshToken),
+      toIso(now),
     );
 
     return {
@@ -85,8 +91,13 @@ export class AuthService {
     };
   }
 
-  async logout(sessionId: string): Promise<boolean> {
-    return this.sessionsRepository.revoke(sessionId, toIso(new Date()));
+  /*
+   * Ends one session of this person: the one in use, for "Sign out of this
+   * device", or another, for a device on Account. False when the person has
+   * no such session still signed in.
+   */
+  async logout(userId: string, sessionId: string): Promise<boolean> {
+    return this.sessionsRepository.revoke(sessionId, userId, toIso(new Date()));
   }
 
   async logoutEverywhere(userId: string): Promise<number> {
@@ -97,7 +108,10 @@ export class AuthService {
     return this.sessionsRepository.findActiveByUser(userId, toIso(new Date()));
   }
 
-  private async startSession(user: UserEntity): Promise<AuthenticatedSession> {
+  private async startSession(
+    user: UserEntity,
+    userAgent: string | null,
+  ): Promise<AuthenticatedSession> {
     const refreshToken = this.refreshTokenService.generate();
     const now = new Date();
 
@@ -110,6 +124,8 @@ export class AuthService {
       new Date(now.getTime() + REFRESH_TOKEN_LIFETIME_MS),
     );
     session.revokedAt = null;
+    session.userAgent = userAgent;
+    session.lastUsedAt = session.createdAt;
 
     await this.sessionsRepository.save(session);
 

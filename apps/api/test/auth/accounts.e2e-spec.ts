@@ -50,6 +50,7 @@ describe('accounts (e2e)', () => {
       'email',
       'id',
       'name',
+      'timezone',
     ]);
 
     /*

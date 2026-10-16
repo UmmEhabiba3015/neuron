@@ -11,19 +11,21 @@ describe('UserResponseDto', () => {
     timezone: 'Pacific/Kiritimati',
   });
 
-  it('carries the id, the address, when it was made and the name, in that order', () => {
+  it('carries the id, the address, when it was made, the name and the timezone, in that order', () => {
     expect(Object.keys(new UserResponseDto(user))).toEqual([
       'id',
       'email',
       'createdAt',
       'name',
+      'timezone',
     ]);
+    expect(new UserResponseDto(user).timezone).toBe('Pacific/Kiritimati');
   });
 
-  it('carries neither the password hash nor the timezone', () => {
+  it('never carries the password hash', () => {
     const json = JSON.stringify(new UserResponseDto(user));
 
     expect(json).not.toContain('$argon2');
-    expect(json).not.toMatch(/time_?zone|Kiritimati/i);
+    expect(json).not.toMatch(/password_?hash/i);
   });
 });

@@ -23,21 +23,6 @@ export interface Unbuilt {
 }
 
 export const UNBUILT = {
-  signedInDevices: {
-    label: 'Signed-in devices',
-    feature: 3,
-    where: 'Account',
-  },
-  signOutEverywhere: {
-    label: 'Sign out everywhere',
-    feature: 3,
-    where: 'Account',
-  },
-  chooseTimezone: {
-    label: 'Timezone',
-    feature: 3,
-    where: 'Timezone',
-  },
   exportEverything: {
     label: 'Export everything',
     feature: 6,

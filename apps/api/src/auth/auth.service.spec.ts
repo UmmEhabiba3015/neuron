@@ -80,6 +80,21 @@ describe('AuthService', () => {
       expect(Date.parse(row.createdAt)).toBeGreaterThanOrEqual(before - 1000);
     });
 
+    it('keeps the user agent of the sign-in, and counts the sign-in as its last use', async () => {
+      await service.login('umer@example.com', PASSWORD, 'Firefox/157.0');
+      await service.login('umer@example.com', PASSWORD);
+
+      const rows = await sessionRows();
+
+      expect(rows.map((row) => row.userAgent).sort()).toEqual([
+        'Firefox/157.0',
+        null,
+      ]);
+      for (const row of rows) {
+        expect(row.lastUsedAt).toBe(row.createdAt);
+      }
+    });
+
     it('starts one session for each sign-in', async () => {
       await signIn();
       await signIn();
@@ -171,6 +186,24 @@ describe('AuthService', () => {
       ).toBeDefined();
     });
 
+    it('sets last_used_at to the moment of the refresh, and changes nothing else about when', async () => {
+      const first = await signIn();
+      await dataSource.getRepository(SessionEntity).update(
+        { id: first.sessionId },
+        {
+          createdAt: '2026-01-01T00:00:00.000Z',
+          lastUsedAt: '2026-01-01T00:00:00.000Z',
+        },
+      );
+      const before = Date.now();
+
+      await service.refresh(first.sessionId, first.refreshToken);
+
+      const [row] = await sessionRows();
+      expect(row.createdAt).toBe('2026-01-01T00:00:00.000Z');
+      expect(Date.parse(row.lastUsedAt)).toBeGreaterThanOrEqual(before - 1000);
+    });
+
     it('ends every session of the person, and no one else, when a replaced token is used again', async () => {
       const laptop = await signIn();
       const phone = await signIn();
@@ -209,7 +242,7 @@ describe('AuthService', () => {
 
     it('refuses a session that was signed out', async () => {
       const session = await signIn();
-      await service.logout(session.sessionId);
+      await service.logout(session.user.id, session.sessionId);
 
       expect(
         await service.refresh(session.sessionId, session.refreshToken),
@@ -237,12 +270,40 @@ describe('AuthService', () => {
       const laptop = await signIn();
       const phone = await signIn();
 
-      expect(await service.logout(laptop.sessionId)).toBe(true);
-      expect(await service.logout(laptop.sessionId)).toBe(false);
+      expect(await service.logout(laptop.user.id, laptop.sessionId)).toBe(true);
+      expect(await service.logout(laptop.user.id, laptop.sessionId)).toBe(
+        false,
+      );
 
       expect(
         (await service.listSessions(laptop.user.id)).map((each) => each.id),
       ).toEqual([phone.sessionId]);
+    });
+
+    it("does not end another person's session, and says nothing was ended", async () => {
+      const mine = await signIn();
+      await register('someone-else@example.com');
+      const theirs = await signIn('someone-else@example.com');
+
+      expect(await service.logout(mine.user.id, theirs.sessionId)).toBe(false);
+
+      expect(
+        (await service.listSessions(theirs.user.id)).map((each) => each.id),
+      ).toEqual([theirs.sessionId]);
+    });
+
+    it('says nothing was ended for a session that has expired', async () => {
+      const session = await signIn();
+      await dataSource
+        .getRepository(SessionEntity)
+        .update(
+          { id: session.sessionId },
+          { expiresAt: '2020-01-01T00:00:00.000Z' },
+        );
+
+      expect(await service.logout(session.user.id, session.sessionId)).toBe(
+        false,
+      );
     });
 
     it('ends every session of the person with logoutEverywhere, and no one else', async () => {
@@ -258,23 +319,48 @@ describe('AuthService', () => {
   });
 
   describe('listSessions', () => {
+    it('lists the session used most recently first, whenever it began', async () => {
+      const older = await signIn();
+      const newer = await signIn();
+      const sessions = dataSource.getRepository(SessionEntity);
+      await sessions.update(
+        { id: older.sessionId },
+        {
+          createdAt: '2026-01-01T00:00:00.000Z',
+          lastUsedAt: '2026-03-01T00:00:00.000Z',
+        },
+      );
+      await sessions.update(
+        { id: newer.sessionId },
+        {
+          createdAt: '2026-02-01T00:00:00.000Z',
+          lastUsedAt: '2026-02-01T00:00:00.000Z',
+        },
+      );
+
+      expect(
+        (await service.listSessions(older.user.id)).map((each) => each.id),
+      ).toEqual([older.sessionId, newer.sessionId]);
+    });
+
     it('lists only the sessions still signed in, newest first', async () => {
       const revoked = await signIn();
       const expired = await signIn();
       const live = await signIn();
-      await service.logout(revoked.sessionId);
+      await service.logout(revoked.user.id, revoked.sessionId);
       await dataSource
         .getRepository(SessionEntity)
         .update(
           { id: expired.sessionId },
           { expiresAt: '2020-01-01T00:00:00.000Z' },
         );
-      await dataSource
-        .getRepository(SessionEntity)
-        .update(
-          { id: live.sessionId },
-          { createdAt: '2026-01-01T00:00:00.000Z' },
-        );
+      await dataSource.getRepository(SessionEntity).update(
+        { id: live.sessionId },
+        {
+          createdAt: '2026-01-01T00:00:00.000Z',
+          lastUsedAt: '2026-01-01T00:00:00.000Z',
+        },
+      );
       const newest = await signIn();
 
       expect(

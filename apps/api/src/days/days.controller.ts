@@ -54,15 +54,16 @@ export class DaysController {
    * render. ADR-005 settled the same question for an empty collection: an
    * empty answer is a complete answer.
    *
-   * A day that has not happened yet is different. It is not an empty day,
-   * it is no day at all, and it is a 404.
+   * A day that has not happened yet, and has no entries, is different. It
+   * is not an empty day, it is no day at all, and it is a 404. A future day
+   * with entries exists (ADR-015, amendment of 2026-10-15).
    */
   @Get(':date')
   async findByDate(
     @Param() params: DayDateParamDto,
     @Req() request: AuthenticatedRequest,
   ): Promise<DayResponseDto> {
-    this.refuseADayThatHasNotHappened(params.date, request);
+    await this.refuseADayThatDoesNotExist(params.date, request);
 
     const day = await this.daysService.findByDate(request.user.id, params.date);
 
@@ -82,7 +83,7 @@ export class DaysController {
     @Body() dto: SetMoodDto,
     @Req() request: AuthenticatedRequest,
   ): Promise<DayResponseDto> {
-    this.refuseADayThatHasNotHappened(params.date, request);
+    await this.refuseADayThatDoesNotExist(params.date, request);
 
     const day = await this.daysService.setMood(
       request.user.id,
@@ -98,11 +99,11 @@ export class DaysController {
    * the request and not only the date. The message has the same form as the
    * one for an entry that is not there.
    */
-  private refuseADayThatHasNotHappened(
+  private async refuseADayThatDoesNotExist(
     date: string,
     request: AuthenticatedRequest,
-  ): void {
-    if (!this.daysService.hasHappened(request.user, date)) {
+  ): Promise<void> {
+    if (!(await this.daysService.exists(request.user, date))) {
       throw new NotFoundException(`Day with date ${date} not found`);
     }
   }

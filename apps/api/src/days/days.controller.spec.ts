@@ -18,8 +18,8 @@ import { DaysRepository } from './days.repository';
 import { DaysService } from './days.service';
 
 /*
- * A day that has not happened yet does not exist: asking for it, or setting
- * its mood, is a 404, and nothing is written. A day that has happened and
+ * A day that has not happened yet, and has no entry, does not exist: asking
+ * for it, or setting its mood, is a 404, and nothing is written. A day that has happened and
  * was never touched is a real day with nothing on it yet.
  *
  * The caller is in Karachi. At 20:00Z on the 9th it is 01:00 on the 10th
@@ -128,6 +128,35 @@ describe('DaysController', () => {
     expect(await controller.findByDate({ date: '2026-08-11' }, caller)).toEqual(
       { date: '2026-08-11', mood: 'Hard' },
     );
+  });
+
+  /*
+   * ADR-015, amendment of 2026-10-15: a future day with an entry exists. An
+   * entry on the 11th is in the future for the caller, which only a change
+   * of timezone can bring about, and its day answers and takes a mood.
+   */
+  it('answers a future day that has an entry, and sets its mood', async () => {
+    await dataSource.query(
+      `INSERT INTO days (id, date, mood, created_at, user_id)
+       VALUES ('ahead', '2026-08-11', NULL, '2026-08-09T20:00:00.000Z', ?)`,
+      [KARACHI],
+    );
+    await dataSource.query(
+      `INSERT INTO entries (id, content, created_at, user_id, day_id)
+       VALUES ('e1', 'written further east', '2026-08-09T20:00:00.000Z', ?, 'ahead')`,
+      [KARACHI],
+    );
+
+    expect(await controller.findByDate({ date: '2026-08-11' }, caller)).toEqual(
+      { date: '2026-08-11', mood: null },
+    );
+    expect(
+      await controller.setMood(
+        { date: '2026-08-11' },
+        { mood: Mood.Light },
+        caller,
+      ),
+    ).toEqual({ date: '2026-08-11', mood: 'Light' });
   });
 
   it('lists a range that ends in the future as it would any other', async () => {

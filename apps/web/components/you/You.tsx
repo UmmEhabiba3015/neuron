@@ -3,20 +3,23 @@
 import type { User } from '@neuron/contracts';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { Gate } from '@/components/layout/Gate';
 import {
   JournalBox,
   LiveScreen,
   PushedScreen,
 } from '@/components/layout/LiveScreen';
-import {
-  NotBuiltInPlace,
-  NotBuiltRow,
-  NotBuiltYet,
-} from '@/components/ui/NotBuilt';
-import { useNotBuilt } from '@/hooks/useNotBuilt';
+import { NotBuiltInPlace, NotBuiltRow } from '@/components/ui/NotBuilt';
+import { Devices } from '@/components/you/Devices';
 import { session } from '@/lib/api/client';
+import type { SignOutScope } from '@/lib/api/session';
+import {
+  notSavedSentence,
+  timezoneChoices,
+  timezoneLabel,
+  timezoneSaveOutcome,
+} from '@/lib/timezone';
 import { NOT_BUILT_YET, UNBUILT } from '@/lib/unbuilt';
 
 /*
@@ -31,11 +34,9 @@ const TIMEZONE_RULE =
  * You, from 07-you.html: what is private, what is yours, and your account.
  * Every row leads to its page.
  *
- * The date box says since when the journal has been kept. The month an
- * account was made depends on its timezone, and the contract's User does
- * not carry the timezone until Day 34, so the sentence stands in the box
- * (lib/unbuilt.ts). The line at the foot says the same thing and is not
- * drawn.
+ * The date box says since when the journal has been kept. It is feature
+ * 6's, so the sentence stands in the box (lib/unbuilt.ts). The line at the
+ * foot says the same thing and is not drawn.
  *
  * Your data has no value. The comp's "148 and 31" is a count of entries and
  * recordings, and nothing counts them yet.
@@ -218,16 +219,11 @@ function WhatItSeesRows() {
 
 /*
  * Account, from #account-devices in 17-account-data.html. The name, the
- * email and "Sign out of this device" work. The timezone row leads to its
- * screen. The devices and "Sign out everywhere" are Day 34's
- * (lib/unbuilt.ts): the devices section has its heading and the sentence in
- * place of rows, and a press of "Sign out everywhere" says so.
- *
- * The timezone row has no value: the contract's User does not carry the
- * timezone.
+ * email, the timezone, the signed-in devices, and signing out of this
+ * device or of every device.
  *
  * Not drawn: the sentence about choosing a new password through the
- * forgot-password link, which is Day 20's.
+ * forgot-password link.
  */
 export function Account() {
   return <Gate>{(user) => <AccountRows user={user} />}</Gate>;
@@ -235,23 +231,45 @@ export function Account() {
 
 type Press =
   | { status: 'idle' }
-  | { status: 'asking' }
-  | { status: 'notSignedOut'; why: 'unreachable' | 'failed' };
+  | { status: 'asking'; scope: SignOutScope }
+  | {
+      status: 'notSignedOut';
+      scope: SignOutScope;
+      why: 'unreachable' | 'failed';
+    };
 
-const NOT_SIGNED_OUT = {
-  unreachable:
-    'We could not reach the server. You are still signed in on this device. Try signing out again.',
-  failed:
-    'Something went wrong on our side. You are still signed in on this device. Try signing out again.',
+const SIGNING_OUT: Record<SignOutScope, string> = {
+  thisDevice: 'Signing out.',
+  everywhere: 'Signing out everywhere.',
+};
+
+const NOT_SIGNED_OUT: Record<
+  SignOutScope,
+  Record<'unreachable' | 'failed', string>
+> = {
+  thisDevice: {
+    unreachable:
+      'We could not reach the server. You are still signed in on this device. Try signing out again.',
+    failed:
+      'Something went wrong on our side. You are still signed in on this device. Try signing out again.',
+  },
+  everywhere: {
+    unreachable:
+      'We could not reach the server. You are still signed in on every device. Try signing out everywhere again.',
+    failed:
+      'Something went wrong on our side. You are still signed in on every device. Try signing out everywhere again.',
+  },
 };
 
 function AccountRows({ user }: { user: User }) {
   const router = useRouter();
   const [press, setPress] = useState<Press>({ status: 'idle' });
-  const everywhere = useNotBuilt('signOutEverywhere');
 
   /*
-   * The button is never disabled. A second press while the first is out
+   * Both buttons work the same way, and at once, with no question first
+   * (her decision for signing out everywhere, as for this device).
+   *
+   * The buttons are never disabled. A second press while the first is out
    * sends nothing: the session shares the one request.
    *
    * On success nothing more is done here. The session says the person is
@@ -259,17 +277,17 @@ function AccountRows({ user }: { user: User }) {
    * and also here, so that whichever runs first, Back does not return to
    * this page.
    */
-  async function signOut() {
-    setPress({ status: 'asking' });
+  async function signOut(scope: SignOutScope) {
+    setPress({ status: 'asking', scope });
 
-    const outcome = await session.signOut();
+    const outcome = await session.signOut(scope);
 
     if (outcome === 'signedOut') {
       router.replace('/in');
       return;
     }
 
-    setPress({ status: 'notSignedOut', why: outcome });
+    setPress({ status: 'notSignedOut', scope, why: outcome });
   }
 
   return (
@@ -296,35 +314,35 @@ function AccountRows({ user }: { user: User }) {
               Timezone
               <span className="why">{TIMEZONE_RULE}</span>
             </span>
+            <span className="val">
+              {timezoneLabel(user.timezone, new Date())}
+            </span>
           </Link>
-          <h3 className="shead">{UNBUILT.signedInDevices.label}</h3>
-          <NotBuiltInPlace name="signedInDevices" className="auth-copy" />
+          <Devices timeZone={user.timezone} />
           {press.status === 'notSignedOut' ? (
             <div className="notice" role="alert">
-              {NOT_SIGNED_OUT[press.why]}
+              {NOT_SIGNED_OUT[press.scope][press.why]}
             </div>
           ) : null}
           {press.status === 'asking' ? (
             <p className="auth-help" role="status">
-              Signing out.
+              {SIGNING_OUT[press.scope]}
             </p>
           ) : null}
-          {everywhere.said ? <NotBuiltYet className="auth-help" /> : null}
           <div className="auth-actions">
             <button
               className="btn quiet"
               type="button"
-              onClick={() => void signOut()}
+              onClick={() => void signOut('thisDevice')}
             >
               Sign out of this device
             </button>
             <button
               className="btn quiet"
               type="button"
-              onClick={everywhere.press}
-              {...everywhere.marker}
+              onClick={() => void signOut('everywhere')}
             >
-              {everywhere.label}
+              Sign out everywhere
             </button>
           </div>
         </div>
@@ -334,23 +352,107 @@ function AccountRows({ user }: { user: User }) {
 }
 
 /*
- * Timezone, from #timezone-choose in 17-account-data.html. Choosing one is
- * Day 34's (lib/unbuilt.ts): the list and "Save timezone" are not drawn, and
- * the sentence stands in their place. The current timezone is not shown,
- * because the contract's User does not carry it.
+ * Timezone, from #timezone-choose in 17-account-data.html. One list of every
+ * zone the browser knows, with the person's own chosen. Saving returns to
+ * Account, which shows the new one. What an answer means is decided in
+ * lib/timezone.ts.
+ *
+ * Nothing already written moves (docs/features.md, Ref 7), which is what
+ * the sentence at the top says.
  */
 export function Timezone() {
-  return <Gate>{() => <TimezoneRows />}</Gate>;
+  return <Gate>{(user) => <TimezoneRows user={user} />}</Gate>;
 }
 
-function TimezoneRows() {
+type TimezoneStep =
+  | { status: 'choosing' }
+  | { status: 'saving' }
+  | { status: 'notSaved'; why: 'refused' | 'unreachable' | 'failed' };
+
+function TimezoneRows({ user }: { user: User }) {
+  const router = useRouter();
+  const [choices] = useState(() =>
+    timezoneChoices(
+      Intl.supportedValuesOf('timeZone'),
+      user.timezone,
+      new Date(),
+    ),
+  );
+  const [chosen, setChosen] = useState(user.timezone);
+  const [step, setStep] = useState<TimezoneStep>({ status: 'choosing' });
+  const inFlight = useRef(false);
+
+  async function save(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (inFlight.current) {
+      return;
+    }
+
+    inFlight.current = true;
+    setStep({ status: 'saving' });
+
+    const outcome = timezoneSaveOutcome(await session.setTimezone(chosen));
+
+    inFlight.current = false;
+
+    if (outcome === 'saved') {
+      router.push('/you/account');
+      return;
+    }
+
+    /* The session is over, and Gate sends the person to sign in. */
+    if (outcome === 'ended') {
+      return;
+    }
+
+    setStep({ status: 'notSaved', why: outcome });
+  }
+
   return (
     <LiveScreen current="You" title="You" surface aside={<JournalBox />}>
       <main className="sheet auth-sheet">
         <div className="auth-content">
           <h2 className="auth-heading">Timezone</h2>
           <p className="auth-copy">{TIMEZONE_RULE}</p>
-          <NotBuiltInPlace name="chooseTimezone" className="auth-copy" />
+          {step.status === 'notSaved' ? (
+            <div className="notice" role="alert">
+              {notSavedSentence(
+                step.why,
+                chosen,
+                timezoneLabel(user.timezone, new Date()),
+              )}
+            </div>
+          ) : null}
+          <form className="auth-form" onSubmit={save}>
+            <div className="auth-field">
+              <label htmlFor="timezone">Timezone</label>
+              <select
+                className="field"
+                id="timezone"
+                name="timezone"
+                value={chosen}
+                onChange={(event) => {
+                  setChosen(event.target.value);
+                  setStep({ status: 'choosing' });
+                }}
+              >
+                {choices.map((choice) => (
+                  <option key={choice.value} value={choice.value}>
+                    {choice.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {step.status === 'saving' ? (
+              <p className="auth-help" role="status">
+                Saving your timezone.
+              </p>
+            ) : null}
+            <button className="btn solid" type="submit">
+              Save timezone
+            </button>
+          </form>
           <div className="auth-actions">
             <Link className="btn quiet" href="/you/account">
               Leave as it is

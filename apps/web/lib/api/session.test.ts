@@ -66,6 +66,7 @@ const USER = {
   email: 'a@b.test',
   name: 'Mubeen',
   createdAt: '2026-10-06T09:00:00Z',
+  timezone: 'Asia/Karachi',
 };
 
 const NEW_ACCOUNT = {
@@ -750,4 +751,67 @@ test('a reset or a request for a link that gets no answer is unreachable', async
   assert.deepEqual(await session.resetPassword('t', 'a new password'), {
     kind: 'unreachable',
   });
+});
+
+test('signing out everywhere sends POST /auth/logout-everywhere with the token and the cookie, and signs out here', async () => {
+  const { api, session } = await sessionHoldingToken('held', {
+    '/auth/logout-everywhere': () => SIGNED_OUT,
+  });
+
+  assert.equal(await session.signOut('everywhere'), 'signedOut');
+
+  assert.deepEqual(api.sentTo('/auth/logout-everywhere'), [
+    {
+      path: '/auth/logout-everywhere',
+      method: 'POST',
+      token: 'held',
+      cookie: true,
+    },
+  ]);
+  assert.equal(api.sentTo('/auth/logout').length, 0);
+  assert.deepEqual(session.getState(), { status: 'signedOut', ended: false });
+});
+
+test('signing out everywhere with no answer changes nothing here', async () => {
+  const { session } = await sessionHoldingToken('held', {
+    '/auth/logout-everywhere': () => 'no answer',
+  });
+
+  assert.equal(await session.signOut('everywhere'), 'unreachable');
+  assert.deepEqual(session.getState(), { status: 'signedIn', user: USER });
+});
+
+test('changing the timezone sends PATCH /auth/me with the timezone alone, and the signed-in user becomes the one the API answered with', async () => {
+  const moved = { ...USER, timezone: 'America/New_York' };
+  const { api, session } = await sessionHoldingToken('held', {
+    '/auth/me': () => ({ status: 200, body: moved }),
+  });
+
+  assert.deepEqual(await session.setTimezone('America/New_York'), {
+    kind: 'ok',
+    data: moved,
+  });
+  assert.deepEqual(api.sentTo('/auth/me'), [
+    {
+      path: '/auth/me',
+      method: 'PATCH',
+      token: 'held',
+      cookie: false,
+      body: { timezone: 'America/New_York' },
+    },
+  ]);
+  assert.deepEqual(session.getState(), { status: 'signedIn', user: moved });
+});
+
+test('a timezone the API refuses, or no answer, leaves the signed-in user as it was', async () => {
+  const { session } = await sessionHoldingToken('held', {
+    '/auth/me': (sent) =>
+      (sent.body as { timezone: string }).timezone === '+05:00'
+        ? { status: 400, body: { message: ['timezone must be an IANA time zone name such as Asia/Karachi'] } }
+        : 'no answer',
+  });
+
+  assert.equal((await session.setTimezone('+05:00')).kind, 'rejected');
+  assert.equal((await session.setTimezone('Asia/Tokyo')).kind, 'unreachable');
+  assert.deepEqual(session.getState(), { status: 'signedIn', user: USER });
 });

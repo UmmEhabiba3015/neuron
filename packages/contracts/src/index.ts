@@ -68,6 +68,31 @@ export interface User {
   /* What the person is called on screen. Never used for signing in. */
   name: string;
   createdAt: string;
+  /*
+   * An IANA name such as Asia/Karachi. It decides which date an entry is
+   * filed on. Changed with PATCH /auth/me; nothing already written moves.
+   */
+  timezone: string;
+}
+
+/*
+ * One device where the person is signed in, as GET /auth/sessions answers
+ * it, newest use first.
+ */
+export interface Session {
+  id: string;
+  /*
+   * The browser and the system, such as "Chrome on Windows", named by the
+   * API from the User-Agent header when the list is asked for. "A browser
+   * on Linux", or "A browser", when a part is not known.
+   */
+  device: string;
+  /* When the person signed in there. An instant, as an ISO 8601 string. */
+  createdAt: string;
+  /* The sign-in, or the latest refresh of it. An instant. */
+  lastUsedAt: string;
+  /* True for the session that asked. */
+  current: boolean;
 }
 
 /* The answer to POST /auth/login and POST /auth/refresh. */
@@ -112,6 +137,13 @@ export interface Register {
    * An IANA name such as Asia/Karachi, read from the browser and never typed
    * by a person. Not a country, and not an offset such as +05:00.
    */
+  timezone: string;
+}
+
+/*
+ * The body of PATCH /auth/me. The timezone follows the rules of Register's.
+ */
+export interface UpdateTimezone {
   timezone: string;
 }
 

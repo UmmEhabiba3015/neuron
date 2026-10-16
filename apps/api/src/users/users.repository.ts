@@ -33,6 +33,10 @@ export class UsersRepository {
     return (await this.users.findOneBy({ id })) ?? undefined;
   }
 
+  async updateTimezone(id: string, timezone: string): Promise<void> {
+    await this.users.update({ id }, { timezone });
+  }
+
   async updatePasswordHash(id: string, passwordHash: string): Promise<void> {
     await this.users.update({ id }, { passwordHash });
   }

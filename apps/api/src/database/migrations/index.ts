@@ -12,6 +12,7 @@ import { AddEntryDeletedAt1791363323870 } from './1791363323870-AddEntryDeletedA
 import { AddUserNameAndTimezone1791383154639 } from './1791383154639-AddUserNameAndTimezone';
 import { RequireUserPasswordHash1792063401155 } from './1792063401155-RequireUserPasswordHash';
 import { AddPasswordResets1792063401156 } from './1792063401156-AddPasswordResets';
+import { AddSessionDevice1792068353868 } from './1792068353868-AddSessionDevice';
 
 type Migration = new () => MigrationInterface;
 
@@ -29,4 +30,5 @@ export const migrations: Migration[] = [
   AddUserNameAndTimezone1791383154639,
   RequireUserPasswordHash1792063401155,
   AddPasswordResets1792063401156,
+  AddSessionDevice1792068353868,
 ];
