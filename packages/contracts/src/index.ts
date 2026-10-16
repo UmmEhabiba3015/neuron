@@ -22,6 +22,28 @@ export enum Mood {
   Hard = 'Hard',
 }
 
+/*
+ * What an entry is: words typed, or a voice memo recorded. Each value is the
+ * word itself, as it is stored and as it travels.
+ */
+export enum EntryKind {
+  Text = 'Text',
+  Voice = 'Voice',
+}
+
+/*
+ * The longest a voice memo may be. The web app stops a recording here and
+ * keeps it; the API refuses anything longer.
+ */
+export const VOICE_MEMO_MAX_MINUTES = 10;
+
+/*
+ * The audio types a voice memo may be recorded in, without the codec that
+ * may follow them after a semicolon, as in "audio/webm;codecs=opus".
+ * Browsers that record WebM send the first, Safari the second.
+ */
+export const VOICE_MEMO_TYPES = ['audio/webm', 'audio/mp4'] as const;
+
 /* What GET /entries serves when no limit is asked for, and the most it serves. */
 export const DEFAULT_PAGE_SIZE = 50;
 export const MAX_PAGE_SIZE = 200;
@@ -45,7 +67,14 @@ export const PASSWORD_RESET_LIFETIME_MINUTES = 30;
 
 export interface Entry {
   id: string;
-  content: string;
+  kind: EntryKind;
+  /*
+   * The words of a typed entry. A voice memo has none, and is null, until it
+   * has a transcript (feature 11).
+   */
+  content: string | null;
+  /* How long a voice memo is, in milliseconds. null for a typed entry. */
+  durationMs: number | null;
   /* An instant, as an ISO 8601 string. */
   createdAt: string;
   /*
@@ -112,7 +141,19 @@ export interface CreateEntry {
   content: string;
 }
 
-/* The body of PATCH /entries/:id. The entry keeps its time and its day. */
+/*
+ * The fields of POST /entries/voice, besides the recording itself, which is
+ * the one file of the multipart form, under the name "audio". A form sends
+ * every field as text, and the API reads this one as a whole number.
+ */
+export interface CreateVoiceMemo {
+  durationMs: number;
+}
+
+/*
+ * The body of PATCH /entries/:id. The entry keeps its time and its day. A
+ * voice memo cannot be edited, and is refused.
+ */
 export interface UpdateEntry {
   content: string;
 }

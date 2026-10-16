@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { EntryKind } from '@neuron/contracts';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Raw, Repository, type FindOptionsWhere } from 'typeorm';
 import { EntryEntity } from './entities/entry.entity';
 import type { FiledEntry } from './types/filed-entry.type';
 import type { EntryFilters } from './types/entry-filters.interface';
+import type { StoredAudio } from './types/stored-audio.interface';
 import type { Page } from '../shared/types/page.interface';
 
 @Injectable()
@@ -38,8 +40,8 @@ export class EntriesRepository {
    * Every read of an entry, with the date of its day joined on, in one
    * query however many entries come back.
    *
-   * The columns are named, so user_id, day_id and deleted_at are not read,
-   * and of the day only its date is.
+   * The columns are named, so user_id, day_id, deleted_at and a memo's
+   * audio_key and audio_type are not read, and of the day only its date is.
    *
    * limit and offset count rows of the joined result. That is the same as
    * counting entries here, because an entry points at exactly one day, so
@@ -51,7 +53,9 @@ export class EntriesRepository {
       relations: { day: true },
       select: {
         id: true,
+        kind: true,
         content: true,
+        durationMs: true,
         createdAt: true,
         day: { date: true },
       },
@@ -71,9 +75,12 @@ export class EntriesRepository {
     /*
      * @DeleteDateColumn filters reads and does not filter an update. Without
      * the condition on deletedAt this would change a deleted entry.
+     *
+     * Only a typed entry is changed. A voice memo's words will be its
+     * transcript, which nobody edits (features.md, Refs 11 and 24).
      */
     const result = await this.entries.update(
-      { id, userId, deletedAt: IsNull() },
+      { id, userId, kind: EntryKind.Text, deletedAt: IsNull() },
       { content },
     );
 
@@ -82,6 +89,28 @@ export class EntriesRepository {
     }
 
     return this.findById(id, userId);
+  }
+
+  /*
+   * Where a voice memo's audio is. The owner is in the WHERE clause (ADR-013),
+   * so another person's memo is not found, and so is the kind, so a typed
+   * entry has no audio to find. A deleted memo is left out by
+   * @DeleteDateColumn, as from every read.
+   */
+  async findAudio(
+    id: string,
+    userId: string,
+  ): Promise<StoredAudio | undefined> {
+    const entry = await this.entries.findOne({
+      where: { id, userId, kind: EntryKind.Voice },
+      select: { id: true, audioKey: true, audioType: true },
+    });
+
+    if (!entry?.audioKey || !entry.audioType) {
+      return undefined;
+    }
+
+    return { audioKey: entry.audioKey, audioType: entry.audioType };
   }
 
   /*
@@ -139,9 +168,12 @@ function whereFor(
    * whole journal. IS NULL on a NOT NULL column is how that is said in a
    * where clause, so the listing and the count agree on it without either
    * having to special-case it first.
+   *
+   * It is asked of id and not of content, because content is NULL for a
+   * voice memo without a transcript, and IS NULL would find every one.
    */
   if (filters.word === '') {
-    where.content = IsNull();
+    where.id = IsNull();
 
     return where;
   }

@@ -8,10 +8,19 @@ import {
   SEEDED_TIMEZONE,
 } from '../../test/support/test-database';
 import { EntriesService } from './entries.service';
+import type { UpdateOutcome } from './types/update-outcome.type';
 import { entriesProviders } from '../../test/support/entries-providers';
 import { freezeClockAt, releaseClock } from '../../test/support/clock';
 
 const CALLER_ID = 'caller-id';
+
+const updatedEntry = (outcome: UpdateOutcome) => {
+  if (outcome.status !== 'updated') {
+    throw new Error(`expected the entry to be updated, got ${outcome.status}`);
+  }
+
+  return outcome.entry;
+};
 
 /* create() takes the author with their timezone. seedUser stores the same zone. */
 const CALLER = { id: CALLER_ID, timezone: SEEDED_TIMEZONE };
@@ -266,7 +275,7 @@ describe('EntriesService', () => {
         CALLER_ID,
       );
 
-      expect(updated?.content).toBe('the second draft');
+      expect(updatedEntry(updated).content).toBe('the second draft');
       expect((await service.findById(created.id, CALLER_ID))?.content).toBe(
         'the second draft',
       );
@@ -281,8 +290,8 @@ describe('EntriesService', () => {
         CALLER_ID,
       );
 
-      expect(updated?.id).toBe(created.id);
-      expect(updated?.createdAt).toBe(created.createdAt);
+      expect(updatedEntry(updated).id).toBe(created.id);
+      expect(updatedEntry(updated).createdAt).toBe(created.createdAt);
     });
 
     it('should store the new content verbatim, without trimming', async () => {
@@ -290,17 +299,18 @@ describe('EntriesService', () => {
       const padded = '  the spacing the user chose  ';
 
       expect(
-        (await service.update(created.id, padded, CALLER_ID))?.content,
+        updatedEntry(await service.update(created.id, padded, CALLER_ID))
+          .content,
       ).toBe(padded);
       expect((await service.findById(created.id, CALLER_ID))?.content).toBe(
         padded,
       );
     });
 
-    it('should return undefined when the id does not exist', async () => {
-      expect(
-        await service.update('no-such-id', 'anything', CALLER_ID),
-      ).toBeUndefined();
+    it('should say not found when the id does not exist', async () => {
+      expect(await service.update('no-such-id', 'anything', CALLER_ID)).toEqual(
+        { status: 'notFound' },
+      );
     });
 
     it('should not create an entry for an id that does not exist', async () => {

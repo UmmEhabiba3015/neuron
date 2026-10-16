@@ -64,9 +64,17 @@ export type ApiResult<T> =
   | { kind: 'ended' }
   | { kind: 'unreachable' };
 
+/*
+ * `body` is sent as JSON. `form` is sent as a multipart form instead, and the
+ * browser writes its Content-Type, boundary included; a voice memo is sent
+ * this way. `receive: 'blob'` reads a successful answer as bytes and not as
+ * JSON; a memo's audio is read this way. A refusal is still read as JSON.
+ */
 export interface RequestOptions {
   method?: string;
   body?: unknown;
+  form?: FormData;
+  receive?: 'json' | 'blob';
 }
 
 export type Fetch = (
@@ -74,10 +82,14 @@ export type Fetch = (
   init: {
     method: string;
     headers: Record<string, string>;
-    body?: string;
+    body?: string | FormData;
     credentials?: 'include';
   },
-) => Promise<{ status: number; json(): Promise<unknown> }>;
+) => Promise<{
+  status: number;
+  json(): Promise<unknown>;
+  blob(): Promise<Blob>;
+}>;
 
 export interface Session {
   getState(): SessionState;
@@ -183,6 +195,7 @@ export function createSession(config: {
         ...(options.body !== undefined
           ? { body: JSON.stringify(options.body) }
           : {}),
+        ...(options.form !== undefined ? { body: options.form } : {}),
         /*
          * The web app and the API are two origins. Without this the browser
          * neither stores the cookie that login sets nor attaches it to the
@@ -191,8 +204,13 @@ export function createSession(config: {
         ...(extras.withCookie ? { credentials: 'include' as const } : {}),
       });
 
+      const succeeded = response.status >= 200 && response.status < 300;
+
       /* A 204 has no body, and reading one that is not JSON must not throw. */
-      const body: unknown = await response.json().catch(() => undefined);
+      const body: unknown =
+        succeeded && options.receive === 'blob'
+          ? await response.blob()
+          : await response.json().catch(() => undefined);
 
       return { kind: 'answered', status: response.status, body };
     } catch {

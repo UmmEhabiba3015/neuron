@@ -17,6 +17,7 @@ type Sent = {
   token?: string;
   cookie: boolean;
   body?: unknown;
+  form?: FormData;
 };
 type Reply = { status: number; body?: unknown } | 'no answer';
 type Handler = (sent: Sent) => Reply | Promise<Reply>;
@@ -30,7 +31,8 @@ function fakeApi(handlers: Record<string, Handler>) {
       method: init.method,
       token: init.headers['Authorization']?.replace('Bearer ', ''),
       cookie: init.credentials === 'include',
-      ...(init.body !== undefined ? { body: JSON.parse(init.body) } : {}),
+      ...(typeof init.body === 'string' ? { body: JSON.parse(init.body) } : {}),
+      ...(init.body instanceof FormData ? { form: init.body } : {}),
     };
 
     calls.push(sent);
@@ -51,7 +53,12 @@ function fakeApi(handlers: Record<string, Handler>) {
       throw new TypeError('Failed to fetch');
     }
 
-    return { status: reply.status, json: async () => reply.body };
+    return {
+      status: reply.status,
+      json: async () => reply.body,
+      blob: async () =>
+        reply.body instanceof Blob ? reply.body : new Blob([JSON.stringify(reply.body)]),
+    };
   };
 
   return {
@@ -814,4 +821,57 @@ test('a timezone the API refuses, or no answer, leaves the signed-in user as it 
   assert.equal((await session.setTimezone('+05:00')).kind, 'rejected');
   assert.equal((await session.setTimezone('Asia/Tokyo')).kind, 'unreachable');
   assert.deepEqual(session.getState(), { status: 'signedIn', user: USER });
+});
+
+test('a form is sent as it is, with no JSON Content-Type, so the browser writes the multipart one', async () => {
+  const headersSent: Record<string, string>[] = [];
+  const api = fakeApi({
+    '/auth/login': () => signedInAs('held'),
+    '/entries/voice': () => ({ status: 201, body: { id: 'memo' } }),
+  });
+  const session = createSession({
+    apiUrl: API,
+    fetch: (url, init) => {
+      headersSent.push(init.headers);
+      return api.fetch(url, init);
+    },
+  });
+  await session.login(USER.email, 'a password');
+
+  const form = new FormData();
+  form.append('durationMs', '1000');
+
+  assert.deepEqual(
+    await session.request('/entries/voice', { method: 'POST', form }),
+    { kind: 'ok', data: { id: 'memo' } },
+  );
+
+  const [sent] = api.sentTo('/entries/voice');
+  assert.equal(sent.form, form);
+  assert.equal(sent.token, 'held');
+  assert.equal(headersSent.at(-1)?.['Content-Type'], undefined);
+});
+
+test('an answer asked for as a blob is read as bytes, and a refusal of it as JSON', async () => {
+  const audio = new Blob([new Uint8Array([1, 2, 3])], { type: 'audio/webm' });
+  const { session } = await sessionHoldingToken('held', {
+    '/entries/memo/audio': () => ({ status: 200, body: audio }),
+    '/entries/gone/audio': () => ({
+      status: 404,
+      body: { message: 'Voice memo with ID gone not found' },
+    }),
+  });
+
+  assert.deepEqual(
+    await session.request('/entries/memo/audio', { receive: 'blob' }),
+    { kind: 'ok', data: audio },
+  );
+  assert.deepEqual(
+    await session.request('/entries/gone/audio', { receive: 'blob' }),
+    {
+      kind: 'rejected',
+      status: 404,
+      messages: ['Voice memo with ID gone not found'],
+    },
+  );
 });

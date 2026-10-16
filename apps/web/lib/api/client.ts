@@ -1,4 +1,5 @@
 import { API_URL } from '../utils/config';
+import { createUploads } from '../uploads';
 import { createSession } from './session';
 
 /*
@@ -8,4 +9,17 @@ import { createSession } from './session';
 export const session = createSession({
   apiUrl: API_URL,
   fetch: (url, init) => fetch(url, init),
+});
+
+/*
+ * The voice memos being sent, for the whole page: one is kept on Talk and
+ * shown on Today. Signing out clears them, so that what one person recorded
+ * is not on the page for the next.
+ */
+export const uploads = createUploads({ request: session.request });
+
+session.subscribe(() => {
+  if (session.getState().status === 'signedOut') {
+    uploads.clear();
+  }
 });

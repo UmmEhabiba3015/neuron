@@ -29,13 +29,14 @@
  * The contract's Day is imported as DayResponse, because Day below is this
  * file's own: the state of a day's page.
  */
-import type {
-  CreateEntry,
-  Day as DayResponse,
-  Entry,
-  Mood,
-  SetMood,
-  UpdateEntry,
+import {
+  EntryKind,
+  type CreateEntry,
+  type Day as DayResponse,
+  type Entry,
+  type Mood,
+  type SetMood,
+  type UpdateEntry,
 } from '@neuron/contracts';
 import { isCalendarDate } from './utils/format.ts';
 import type { ApiResult, RequestOptions } from './api/session.ts';
@@ -160,7 +161,7 @@ export interface DayPage {
   /*
    * Opens the editor of one entry, holding its words. Another editor that
    * is open closes, and its changes are put back. Nothing opens while an
-   * edit is being saved.
+   * edit is being saved, and nothing for a voice memo.
    */
   edit(id: string): void;
   typeEdit(text: string): void;
@@ -270,7 +271,10 @@ function createDay(config: DayConfig, date?: string): Today {
    * these are put over them.
    */
   let editAnswers = 0;
-  const confirmedEdits = new Map<string, { content: string; at: number }>();
+  const confirmedEdits = new Map<
+    string,
+    { content: string | null; at: number }
+  >();
 
   const listeners = new Set<() => void>();
   let state = snapshot();
@@ -651,7 +655,13 @@ function createDay(config: DayConfig, date?: string): Today {
 
     const shown = fetched?.entries.find((item) => item.id === id);
 
-    if (!shown || hidden.has(id)) {
+    /* A voice memo cannot be edited (features.md, Ref 11). */
+    if (
+      !shown ||
+      hidden.has(id) ||
+      shown.kind !== EntryKind.Text ||
+      shown.content === null
+    ) {
       return;
     }
 

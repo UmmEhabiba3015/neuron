@@ -11,6 +11,7 @@ import { DaysService } from '../days/days.service';
 import { EntriesRepository } from './entries.repository';
 import { EntriesService } from './entries.service';
 import { EntryEntity } from './entities/entry.entity';
+import { temporaryAudioStorage } from '../../test/support/entries-providers';
 
 describe('entry ownership', () => {
   let dataSource: DataSource;
@@ -201,7 +202,14 @@ describe('entry ownership', () => {
 
       const serialized = JSON.parse(JSON.stringify(found)) as object;
 
-      expect(Object.keys(serialized)).toEqual(['id', 'content', 'createdAt']);
+      /* Nor a voice memo's audio key or type, which are not read either. */
+      expect(Object.keys(serialized)).toEqual([
+        'id',
+        'kind',
+        'content',
+        'durationMs',
+        'createdAt',
+      ]);
     });
   });
 
@@ -222,6 +230,7 @@ describe('entry ownership', () => {
           new DaysRepository(dataSource.getRepository(DayEntity)),
         ),
         dataSource,
+        temporaryAudioStorage(),
       );
 
       const created = await service.create('an owned entry', {

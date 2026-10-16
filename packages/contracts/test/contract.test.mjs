@@ -175,3 +175,36 @@ test('the lifetime of a reset link is not written as a number in either applicat
     [],
   );
 });
+
+/*
+ * Ten is part of many dates, such as 2026-10-16, which a comment about a
+ * memo may well carry, so a number joined to a dash does not count here.
+ */
+test('the longest a voice memo may be is not written as a number in either application', () => {
+  const aboutRecordings = /minute|record|memo|voice|duration/i;
+  const number = new RegExp(
+    `(?<![\\w.-])${contract.VOICE_MEMO_MAX_MINUTES}(?![\\w.-])`,
+  );
+
+  const copies = applicationSource.flatMap(({ path, source }) =>
+    source
+      .split('\n')
+      .map((line, index) => ({ line, where: `${path}:${index + 1}` }))
+      .filter(({ line }) => number.test(line) && aboutRecordings.test(line))
+      .map(({ line, where }) => `${where}  ${line.trim()}`),
+  );
+
+  assert.deepEqual(copies, []);
+});
+
+test('the audio types of a voice memo are not written out again in either application', () => {
+  const copies = applicationSource
+    .filter(({ source }) =>
+      contract.VOICE_MEMO_TYPES.some((type) =>
+        new RegExp(`['"\`]${type.replace('/', '\\/')}`).test(source),
+      ),
+    )
+    .map(({ path }) => path);
+
+  assert.deepEqual(copies, []);
+});

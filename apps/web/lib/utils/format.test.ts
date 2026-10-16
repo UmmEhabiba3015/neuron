@@ -5,10 +5,12 @@ import {
   formatDateIn,
   formatDay,
   formatDayOfMonth,
+  formatDuration,
   formatLongDay,
   formatMonth,
   isCalendarDate,
   monthOf,
+  speakDuration,
 } from './format.ts';
 
 test('a date is written the way the date box shows it', () => {
@@ -75,4 +77,23 @@ test('an instant is written as the date it falls on in the timezone given', () =
     formatDateIn('2026-09-30T08:00:00.000Z', 'UTC'),
     '30 September 2026',
   );
+});
+
+test('a length is shown as a clock shows it, counting whole seconds only', () => {
+  assert.equal(formatDuration(0), '0:00');
+  assert.equal(formatDuration(999), '0:00');
+  assert.equal(formatDuration(1_000), '0:01');
+  assert.equal(formatDuration(72_000), '1:12');
+  assert.equal(formatDuration(599_999), '9:59');
+  assert.equal(formatDuration(600_000), '10:00');
+  assert.equal(formatDuration(-5), '0:00');
+});
+
+test('a length is said in words for a screen reader', () => {
+  assert.equal(speakDuration(1_000), '1 second');
+  assert.equal(speakDuration(45_000), '45 seconds');
+  assert.equal(speakDuration(60_000), '1 minute');
+  assert.equal(speakDuration(72_000), '1 minute 12 seconds');
+  assert.equal(speakDuration(121_000), '2 minutes 1 second');
+  assert.equal(speakDuration(600_000), '10 minutes');
 });

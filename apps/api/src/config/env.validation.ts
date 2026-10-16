@@ -1,6 +1,7 @@
 export interface EnvironmentVariables {
   PORT: number;
   DATABASE_PATH?: string;
+  AUDIO_PATH?: string;
   JWT_SECRET: string;
   WEB_ORIGIN: string;
 }
@@ -37,6 +38,24 @@ const parseDatabasePath = (raw: unknown): string | undefined => {
   if (typeof raw !== 'string' || raw === '') {
     throw new Error(
       `DATABASE_PATH must be a non-empty path, received ${quote(raw)}`,
+    );
+  }
+
+  return raw;
+};
+
+/*
+ * The folder voice memos are kept in (ADR-023). Like DATABASE_PATH it may be
+ * left out, and the default is then beside the database.
+ */
+const parseAudioPath = (raw: unknown): string | undefined => {
+  if (raw === undefined) {
+    return undefined;
+  }
+
+  if (typeof raw !== 'string' || raw === '') {
+    throw new Error(
+      `AUDIO_PATH must be a non-empty path, received ${quote(raw)}`,
     );
   }
 
@@ -129,6 +148,12 @@ export function validate(
 
   if (databasePath !== undefined) {
     validated.DATABASE_PATH = databasePath;
+  }
+
+  const audioPath = parseAudioPath(config.AUDIO_PATH);
+
+  if (audioPath !== undefined) {
+    validated.AUDIO_PATH = audioPath;
   }
 
   return validated;

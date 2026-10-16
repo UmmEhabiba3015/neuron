@@ -85,6 +85,24 @@ describe('validate', () => {
     });
   });
 
+  describe('AUDIO_PATH', () => {
+    it('should refuse to boot for the empty string, naming the variable', () => {
+      expect(() => validate(withRequired({ AUDIO_PATH: '' }))).toThrow(
+        'AUDIO_PATH must be a non-empty path, received ""',
+      );
+    });
+
+    it('should pass an explicit path through unchanged', () => {
+      expect(
+        validate(withRequired({ AUDIO_PATH: 'data/audio' })).AUDIO_PATH,
+      ).toBe('data/audio');
+    });
+
+    it('should leave the key out entirely when AUDIO_PATH is not set', () => {
+      expect('AUDIO_PATH' in validate(withRequired())).toBe(false);
+    });
+  });
+
   describe('JWT_SECRET', () => {
     it('should refuse to boot when JWT_SECRET is not set', () => {
       expect(() => validate({ PORT: '3000' })).toThrow(/^JWT_SECRET must be/);
