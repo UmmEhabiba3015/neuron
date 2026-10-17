@@ -21,7 +21,7 @@ import { DEFAULT_PAGE_SIZE } from '@neuron/contracts';
 import type { AuthenticatedRequest } from '../shared/types/authenticated-request.interface';
 import { EntriesService } from './entries.service';
 import { CreateEntryDto } from './dto/create-entry.dto';
-import { EntryResponseDto } from './dto/entry-response.dto';
+import { EntryResponseDto } from '../shared/dto/entry-response.dto';
 import { CountEntriesQueryDto } from './dto/count-entries-query.dto';
 import { CountResponseDto } from './dto/count-response.dto';
 import type { EntryFilters } from './types/entry-filters.interface';
@@ -191,6 +191,6 @@ export class EntriesController {
  * The listing and the count build their filters the same way, so a filter
  * cannot reach one and miss the other.
  */
-function filtersFrom(query: { word?: string; date?: string }): EntryFilters {
-  return { word: query.word, date: query.date };
+function filtersFrom(query: EntryFilters): EntryFilters {
+  return { word: query.word, date: query.date, kind: query.kind };
 }

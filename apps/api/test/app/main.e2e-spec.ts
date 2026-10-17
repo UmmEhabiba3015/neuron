@@ -1,8 +1,15 @@
 import { spawn, type ChildProcess } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { migrateDatabaseFile } from '../support/test-database';
 
 /*
  * Every other suite builds the application itself and calls configureHttp on
@@ -13,6 +20,9 @@ import { join } from 'node:path';
  * executes main.ts at all.
  */
 const WEB_ORIGIN = 'http://localhost:3001';
+
+/* A file no entry points at, which the sweep at start must remove (ADR-024). */
+const ORPHAN = '44444444-4444-4444-8444-444444444444';
 
 const findAFreePort = (): Promise<number> =>
   new Promise((resolve, reject) => {
@@ -35,6 +45,8 @@ describe('main.ts wiring (e2e)', () => {
   let server: ChildProcess;
   let output = '';
   let baseUrl: string;
+  let audioFolder: string;
+  let orphanGoneAtFirstAnswer: boolean | undefined;
 
   const preflight = () =>
     fetch(`${baseUrl}/entries`, {
@@ -51,6 +63,16 @@ describe('main.ts wiring (e2e)', () => {
     const databaseFile = join(directory, 'neuron.db');
     writeFileSync(databaseFile, '');
 
+    /*
+     * The API reads the entries table before it listens, for the sweep, so
+     * the database has its tables, as `pnpm migration:run` makes them.
+     */
+    await migrateDatabaseFile(databaseFile);
+
+    audioFolder = join(directory, 'audio');
+    mkdirSync(audioFolder);
+    writeFileSync(join(audioFolder, ORPHAN), 'left by a crash');
+
     const port = await findAFreePort();
     baseUrl = `http://127.0.0.1:${port}`;
 
@@ -63,6 +85,7 @@ describe('main.ts wiring (e2e)', () => {
           PATH: process.env.PATH,
           PORT: String(port),
           DATABASE_PATH: databaseFile,
+          AUDIO_PATH: audioFolder,
           JWT_SECRET: 'test-only-signing-secret-never-use-this-anywhere-real',
           WEB_ORIGIN,
         },
@@ -76,6 +99,7 @@ describe('main.ts wiring (e2e)', () => {
     for (;;) {
       try {
         await preflight();
+        orphanGoneAtFirstAnswer = !existsSync(join(audioFolder, ORPHAN));
         return;
       } catch {
         if (server.exitCode !== null || Date.now() > deadline) {
@@ -108,5 +132,9 @@ describe('main.ts wiring (e2e)', () => {
     expect(response.headers.get('access-control-allow-credentials')).toBe(
       'true',
     );
+  });
+
+  it('has swept the audio folder before it answers anything', () => {
+    expect(orphanGoneAtFirstAnswer).toBe(true);
   });
 });

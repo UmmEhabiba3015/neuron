@@ -204,3 +204,34 @@ export interface ResetPassword {
   token: string;
   password: string;
 }
+
+/*
+ * The body of DELETE /auth/me. The person's password, so that someone at an
+ * unlocked device cannot delete another person's journal (ADR-024). A wrong
+ * one is a 400, not a 401: a 401 means the session has ended.
+ */
+export interface DeleteAccount {
+  password: string;
+}
+
+/*
+ * The shapes below are journal.json, inside the ZIP that GET /export answers
+ * with (ADR-025). They are the shapes above, put together. A voice memo's
+ * recording is the file audio/<entry id>.webm or .mp4 beside it.
+ */
+
+/* One day of the export: its date and mood, and its entries, oldest first. */
+export interface ExportedDay extends Day {
+  entries: Entry[];
+}
+
+export interface JournalExport {
+  /* When the export was made. An instant, as an ISO 8601 string. */
+  exportedAt: string;
+  user: User;
+  /*
+   * Every day with at least one entry that is not deleted, oldest first.
+   * Deleted entries are never exported (ADR-020).
+   */
+  days: ExportedDay[];
+}

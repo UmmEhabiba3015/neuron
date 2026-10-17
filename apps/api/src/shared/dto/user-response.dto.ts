@@ -1,5 +1,5 @@
 import type { User } from '@neuron/contracts';
-import type { UserEntity } from '../entities/user.entity';
+import type { UserEntity } from '../../users/entities/user.entity';
 
 /*
  * A person as the API sends them. Built field by field from the entity, so

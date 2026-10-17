@@ -1,5 +1,6 @@
 import {
   existsSync,
+  mkdirSync,
   mkdtempSync,
   readdirSync,
   realpathSync,
@@ -60,6 +61,27 @@ describe('AudioStorage', () => {
     await expect(new AudioStorage(directory).read(KEY)).rejects.toThrow();
   });
 
+  it('removes a file, and is content when the file is already gone', async () => {
+    const storage = new AudioStorage(directory);
+    await storage.write(KEY, Buffer.from('x'));
+
+    await storage.remove(KEY);
+    await storage.remove(KEY);
+
+    expect(readdirSync(directory)).toEqual([]);
+  });
+
+  it('names the files it holds, and nothing in its folder that it did not put there', async () => {
+    const storage = new AudioStorage(directory);
+    const other = '1c2d3e4f-0000-4000-8000-0b7f2a5241f6';
+    await storage.write(KEY, Buffer.from('x'));
+    await storage.write(other, Buffer.from('y'));
+    writeFileSync(join(directory, 'notes.txt'), '');
+    mkdirSync(join(directory, '0b7f2a52-41f6-4d38-9a5e-000000000000'));
+
+    expect((await storage.keys()).sort()).toEqual([KEY, other].sort());
+  });
+
   it.each(['../neuron.db', 'recording.webm', '', `${KEY}/../x`])(
     'refuses a key that is not one of its own ids: %p',
     async (key) => {
@@ -69,6 +91,7 @@ describe('AudioStorage', () => {
         /Not an audio key/,
       );
       await expect(storage.read(key)).rejects.toThrow(/Not an audio key/);
+      await expect(storage.remove(key)).rejects.toThrow(/Not an audio key/);
     },
   );
 });

@@ -268,3 +268,39 @@ body {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/*
+ * 5.7 The dialog is the browser's <dialog>.
+ *
+ * lock.css draws .dialog as a div laid over the comp's .app. Here it is the
+ * browser's own modal dialog (components/you/YourData.tsx), which already
+ * keeps the page behind it out of reach and closes on Escape. This takes
+ * away the browser's border, margin and size limits and its own backdrop,
+ * so lock.css's scrim, padding and centring are what show, over the whole
+ * viewport. QUESTION FOR THE DESIGNER: the comp's three buttons do not fit
+ * one line at 390, so the foot of this card wraps.
+ */
+dialog.dialog {
+  position: fixed;
+  inset: 0;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  color: inherit;
+  overflow-y: auto;
+}
+
+dialog.dialog::backdrop {
+  background: transparent;
+}
+
+.dialog .card-foot {
+  flex-wrap: wrap;
+}
+
+.dialog .delete-form {
+  margin-top: var(--s5);
+}

@@ -1,3 +1,4 @@
+import { EntryKind } from '@neuron/contracts';
 import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 import { CountEntriesQueryDto } from './count-entries-query.dto';
@@ -35,6 +36,25 @@ describe('CountEntriesQueryDto', () => {
   ])('refuses %s', (_label, date) => {
     expect(messagesFor({ date })).toEqual([
       'date must be a real calendar date in YYYY-MM-DD form',
+    ]);
+  });
+});
+
+describe('the kind filter', () => {
+  it('accepts each kind the contract names', () => {
+    for (const kind of Object.values(EntryKind)) {
+      expect(messagesFor({ kind })).toEqual([]);
+    }
+  });
+
+  it.each([
+    ['a kind that does not exist', 'Song'],
+    ['a kind in other capitals', 'voice'],
+    ['an empty kind', ''],
+    ['a kind given twice', ['Text', 'Voice']],
+  ])('refuses %s', (_label, kind) => {
+    expect(messagesFor({ kind })).toEqual([
+      'kind must be one of the following values: Text, Voice',
     ]);
   });
 });

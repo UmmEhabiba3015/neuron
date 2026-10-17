@@ -1,13 +1,14 @@
 import { mkdirSync } from 'node:fs';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { DEFAULT_DATABASE_PATH } from '../database/database.module';
 
 /*
  * Where the audio of voice memos is kept (ADR-023). The rest of the API asks
  * this to write a file or to read one back, and does not know where or how
- * it is kept: the same pattern as MailService (ADR-022). There is nothing
- * else it can do. In particular it cannot list or serve its folder.
+ * it is kept: the same pattern as MailService (ADR-022). It can also remove
+ * a file, when an account is deleted, and name the files it holds, for the
+ * sweep at start (ADR-024). It never serves its folder.
  *
  * Until feature 8 the files are in one folder on the API's own disk. The
  * folder is made when the API starts, so a path that cannot be a folder
@@ -32,6 +33,27 @@ export class AudioStorage {
 
   async read(key: string): Promise<Buffer> {
     return readFile(this.pathOf(key));
+  }
+
+  /*
+   * A file that is already gone is not an error: what was asked for is
+   * true. Any other failure is the caller's to hear about.
+   */
+  async remove(key: string): Promise<void> {
+    await rm(this.pathOf(key), { force: true });
+  }
+
+  /*
+   * The keys of the files in the folder. Only names that are one of the
+   * API's own keys are listed: anything else in the folder was not put there
+   * by the API, and the sweep leaves it alone.
+   */
+  async keys(): Promise<string[]> {
+    const found = await readdir(this.folder, { withFileTypes: true });
+
+    return found
+      .filter((each) => each.isFile() && AUDIO_KEY.test(each.name))
+      .map((each) => each.name);
   }
 
   private pathOf(key: string): string {

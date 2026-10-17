@@ -25,6 +25,7 @@ import {
 import { session } from '@/lib/api/client';
 import type { ApiResult } from '@/lib/api/session';
 import { CouldNotConnect } from '@/components/layout/CouldNotConnect';
+import { ACCOUNT_DELETED } from '@/lib/your-data';
 
 /*
  * `name` and `confirmation` exist on create account only, and the
@@ -119,9 +120,11 @@ const WORDS = {
 export function AuthForm({
   mode,
   afterReset = false,
+  afterDelete = false,
 }: {
   mode: Mode;
   afterReset?: boolean;
+  afterDelete?: boolean;
 }) {
   const state = useSession();
   const router = useRouter();
@@ -223,8 +226,14 @@ export function AuthForm({
 
   const words = WORDS[mode];
   const changed = mode === 'in' && afterReset && outcome.kind === 'none';
+  const gone =
+    !changed && mode === 'in' && afterDelete && outcome.kind === 'none';
   const ended =
-    !changed && mode === 'in' && state.ended && outcome.kind === 'none';
+    !changed &&
+    !gone &&
+    mode === 'in' &&
+    state.ended &&
+    outcome.kind === 'none';
   const sentences = outcome.kind === 'fields' ? outcome.sentences : {};
 
   const notice =
@@ -240,6 +249,8 @@ export function AuthForm({
               ? outcome.other
               : changed
                 ? [PASSWORD_CHANGED]
+                : gone
+                  ? [ACCOUNT_DELETED]
                 : ended
                   ? ['You were signed out. Sign in again to open your journal.']
                   : [];
@@ -262,7 +273,7 @@ export function AuthForm({
         notice.map((sentence) => (
           <div
             className="notice"
-            role={ended || changed ? 'status' : 'alert'}
+            role={ended || changed || gone ? 'status' : 'alert'}
             key={sentence}
           >
             {sentence}

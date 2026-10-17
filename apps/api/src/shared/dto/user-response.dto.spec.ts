@@ -1,4 +1,4 @@
-import { UserEntity } from '../entities/user.entity';
+import { UserEntity } from '../../users/entities/user.entity';
 import { UserResponseDto } from './user-response.dto';
 
 describe('UserResponseDto', () => {

@@ -4,10 +4,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import type { EnvironmentVariables } from '../config/env.validation';
 import { DatabaseModule } from '../database/database.module';
+import { AudioModule } from '../entries/audio.module';
 import { MailModule } from '../shared/mail/mail.module';
 import { UserEntity } from '../users/entities/user.entity';
 import { UsersRepository } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
+import { AccountDeletionService } from './account-deletion.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -24,6 +26,7 @@ import { TokenService } from './token.service';
   imports: [
     DatabaseModule,
     MailModule,
+    AudioModule,
     TypeOrmModule.forFeature([UserEntity, SessionEntity, PasswordResetEntity]),
 
     JwtModule.registerAsync({
@@ -48,6 +51,7 @@ import { TokenService } from './token.service';
     PasswordResetsRepository,
     PasswordResetService,
     AuthService,
+    AccountDeletionService,
     JwtAuthGuard,
   ],
 

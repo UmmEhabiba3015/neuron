@@ -36,6 +36,25 @@ export async function createTestDataSource(): Promise<DataSource> {
   return dataSource;
 }
 
+/*
+ * A database file with every migration applied, as `pnpm migration:run`
+ * leaves it. A suite that starts the API as a real process needs one: the
+ * sweep at start reads the entries table before the API listens (ADR-024).
+ */
+export async function migrateDatabaseFile(path: string): Promise<void> {
+  const dataSource = new DataSource({
+    type: 'better-sqlite3',
+    database: path,
+    entities,
+    migrations,
+    synchronize: false,
+  });
+
+  await dataSource.initialize();
+  await dataSource.runMigrations();
+  await dataSource.destroy();
+}
+
 export async function closeTestDataSource(dataSource: DataSource) {
   if (dataSource.isInitialized) {
     await dataSource.destroy();

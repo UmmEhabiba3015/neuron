@@ -62,20 +62,19 @@ Her choices, 2026-10-16. The order of the two writes is her reasoning.
 ## Accepted costs
 
 - **A file can be left with no row**, after a crash or a failed insert.
-  Nothing removes such files yet.
+  Since feature 6 the sweep at start removes them (ADR-024).
 - **The browser cannot play the route directly.** The access token lives in
   memory (ADR-018), and an `<audio src>` request cannot carry the
   `Authorization` header. The web app fetches the audio with the header and
   gives the bytes to the player as a local object URL.
-
----
-
 - **The 10-minute limit is enforced by size, not by measured length.** The
   API caps the file at 24 MB and checks the `durationMs` the browser sends,
   but it does not measure the audio; that needs a container parser or
   `ffmpeg`. Someone who bypasses the web app can store a longer recording
   within 24 MB. Only their own journal is affected, and the size cap still
   bounds the disk. She found this gap herself.
+
+---
 
 ## Revisit when
 

@@ -1,5 +1,5 @@
 import type { AuthResponse } from '@neuron/contracts';
-import { UserResponseDto } from '../../users/dto/user-response.dto';
+import { UserResponseDto } from '../../shared/dto/user-response.dto';
 import type { AuthenticatedSession } from '../types/authenticated-session.interface';
 
 /*
