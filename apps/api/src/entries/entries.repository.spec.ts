@@ -1,3 +1,4 @@
+import { EntryKind } from '@neuron/contracts';
 import type { DataSource } from 'typeorm';
 import {
   closeTestDataSource,
@@ -236,6 +237,82 @@ describe('EntriesRepository', () => {
       expect(
         await ids('alice', { date: '2026-08-08' }, { limit: 1, offset: 1 }),
       ).toEqual(['e8-1']);
+    });
+  });
+
+  describe('the kind filter', () => {
+    /* Two memos of Alice's on the 9th, one of them deleted. */
+    beforeEach(async () => {
+      for (const [id, minute] of [
+        ['memo-1', '03'],
+        ['memo-gone', '04'],
+      ]) {
+        const day = await new DaysRepository(
+          dataSource.getRepository(DayEntity),
+        ).findOrCreate('alice', '2026-08-09');
+
+        await dataSource.getRepository(EntryEntity).insert({
+          id,
+          kind: EntryKind.Voice,
+          content: null,
+          audioKey: crypto.randomUUID(),
+          audioType: 'audio/x-test',
+          durationMs: 1000,
+          createdAt: `2026-08-09T12:${minute}:00.000Z`,
+          userId: 'alice',
+          dayId: day.id,
+        });
+      }
+
+      await repository.markDeleted(
+        'memo-gone',
+        'alice',
+        '2026-08-09T13:00:00.000Z',
+      );
+    });
+
+    it('lists only voice memos, or only typed entries, and both when absent', async () => {
+      expect(await ids('alice', { kind: EntryKind.Voice })).toEqual(['memo-1']);
+      expect(await ids('alice', { kind: EntryKind.Text })).toEqual([
+        'late',
+        'e9-3',
+        'e9-2',
+        'e9-1',
+        'e8-2',
+        'e8-1',
+      ]);
+      expect(await ids('alice')).toHaveLength(7);
+      expect(await ids('bob', { kind: EntryKind.Voice })).toEqual([]);
+    });
+
+    it('narrows a date and a word, as every filter does', async () => {
+      expect(
+        await ids('alice', { kind: EntryKind.Voice, date: '2026-08-08' }),
+      ).toEqual([]);
+      expect(
+        await ids('alice', { kind: EntryKind.Text, word: 'sister' }),
+      ).toEqual(['e9-2', 'e9-1']);
+      expect(
+        await ids('alice', { kind: EntryKind.Voice, word: 'sister' }),
+      ).toEqual([]);
+    });
+
+    it.each([
+      ['voice memos', { kind: EntryKind.Voice }],
+      ['typed entries', { kind: EntryKind.Text }],
+      ['voice memos on a date', { kind: EntryKind.Voice, date: '2026-08-09' }],
+      ['typed entries with a word', { kind: EntryKind.Text, word: 'flat' }],
+    ])('counts exactly what find returns, for %s', async (_label, filters) => {
+      expect(await repository.count('alice', filters)).toBe(
+        (await ids('alice', filters)).length,
+      );
+    });
+
+    it('counts 1 recording and 6 entries, the deleted memo in neither', async () => {
+      expect(await repository.count('alice', { kind: EntryKind.Voice })).toBe(
+        1,
+      );
+      expect(await repository.count('alice', { kind: EntryKind.Text })).toBe(6);
     });
   });
 

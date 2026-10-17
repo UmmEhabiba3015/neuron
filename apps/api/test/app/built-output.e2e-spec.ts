@@ -3,6 +3,7 @@ import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { migrateDatabaseFile } from '../support/test-database';
 
 /*
  * Builds the API the way `pnpm build` does and starts the result the way
@@ -63,6 +64,8 @@ describe('the built API (e2e)', () => {
     directory = mkdtempSync(join(tmpdir(), 'neuron-built-output-'));
     const databaseFile = join(directory, 'neuron.db');
     writeFileSync(databaseFile, '');
+    /* The sweep at start reads the entries table (ADR-024). */
+    await migrateDatabaseFile(databaseFile);
 
     const port = await findAFreePort();
     baseUrl = `http://127.0.0.1:${port}`;

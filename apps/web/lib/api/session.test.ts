@@ -19,7 +19,9 @@ type Sent = {
   body?: unknown;
   form?: FormData;
 };
-type Reply = { status: number; body?: unknown } | 'no answer';
+type Reply =
+  | { status: number; body?: unknown; headers?: Record<string, string> }
+  | 'no answer';
 type Handler = (sent: Sent) => Reply | Promise<Reply>;
 
 function fakeApi(handlers: Record<string, Handler>) {
@@ -58,6 +60,12 @@ function fakeApi(handlers: Record<string, Handler>) {
       json: async () => reply.body,
       blob: async () =>
         reply.body instanceof Blob ? reply.body : new Blob([JSON.stringify(reply.body)]),
+      headers: {
+        get: (name: string) =>
+          Object.entries(reply.headers ?? {}).find(
+            ([key]) => key.toLowerCase() === name.toLowerCase(),
+          )?.[1] ?? null,
+      },
     };
   };
 
@@ -874,4 +882,94 @@ test('an answer asked for as a blob is read as bytes, and a refusal of it as JSO
       messages: ['Voice memo with ID gone not found'],
     },
   );
+});
+
+test('an answer asked for as a file is its bytes and the name the API gave it', async () => {
+  const zip = new Blob([new Uint8Array([80, 75])], { type: 'application/zip' });
+  const disposition = 'attachment; filename="neuron-export-2026-10-17.zip"';
+  const { session } = await sessionHoldingToken('held', {
+    '/export': () => ({
+      status: 200,
+      body: zip,
+      headers: { 'Content-Disposition': disposition },
+    }),
+  });
+
+  assert.deepEqual(await session.request('/export', { receive: 'file' }), {
+    kind: 'ok',
+    data: { blob: zip, disposition },
+  });
+});
+
+test('deleting the account sends DELETE /auth/me with the password, the token and the cookie, and signs out as deleted', async () => {
+  const { api, session } = await sessionHoldingToken('held', {
+    '/auth/me': () => ({ status: 204 }),
+  });
+
+  assert.equal(await session.deleteAccount('the password'), 'deleted');
+
+  assert.deepEqual(api.sentTo('/auth/me'), [
+    {
+      path: '/auth/me',
+      method: 'DELETE',
+      token: 'held',
+      cookie: true,
+      body: { password: 'the password' },
+    },
+  ]);
+  assert.deepEqual(session.getState(), {
+    status: 'signedOut',
+    ended: false,
+    deleted: true,
+  });
+});
+
+test('a wrong password is a 400, which is not the end of the session, and nothing changes here', async () => {
+  const { api, session } = await sessionHoldingToken('held', {
+    '/auth/me': () => ({
+      status: 400,
+      body: { message: 'That password is not right' },
+    }),
+  });
+
+  assert.equal(await session.deleteAccount('wrong'), 'wrongPassword');
+  assert.equal(api.sentTo('/auth/refresh').length, 0);
+  assert.deepEqual(session.getState(), { status: 'signedIn', user: USER });
+});
+
+test('deleting with no answer, or with an answer of 500, changes nothing here', async () => {
+  for (const [reply, outcome] of [
+    ['no answer', 'unreachable'],
+    [{ status: 500 }, 'failed'],
+  ] as const) {
+    const { session } = await sessionHoldingToken('held', {
+      '/auth/me': () => reply,
+    });
+
+    assert.equal(await session.deleteAccount('the password'), outcome);
+    assert.deepEqual(session.getState(), { status: 'signedIn', user: USER });
+  }
+});
+
+test('an old access token is refreshed once and the delete sent again with the new one', async () => {
+  const { api, session } = await sessionHoldingToken('old', {
+    '/auth/refresh': () => signedInAs('new'),
+    '/auth/me': (sent) => (sent.token === 'new' ? { status: 204 } : UNAUTHORIZED),
+  });
+
+  assert.equal(await session.deleteAccount('the password'), 'deleted');
+  assert.deepEqual(
+    api.sentTo('/auth/me').map((call) => call.token),
+    ['old', 'new'],
+  );
+});
+
+test('a delete refused because the session has ended signs the person out, as ended', async () => {
+  const { session } = await sessionHoldingToken('old', {
+    '/auth/refresh': () => UNAUTHORIZED,
+    '/auth/me': () => UNAUTHORIZED,
+  });
+
+  assert.equal(await session.deleteAccount('the password'), 'ended');
+  assert.deepEqual(session.getState(), { status: 'signedOut', ended: true });
 });

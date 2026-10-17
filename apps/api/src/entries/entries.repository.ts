@@ -3,7 +3,7 @@ import { EntryKind } from '@neuron/contracts';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Raw, Repository, type FindOptionsWhere } from 'typeorm';
 import { EntryEntity } from './entities/entry.entity';
-import type { FiledEntry } from './types/filed-entry.type';
+import type { FiledEntry } from '../shared/types/filed-entry.type';
 import type { EntryFilters } from './types/entry-filters.interface';
 import type { StoredAudio } from './types/stored-audio.interface';
 import type { Page } from '../shared/types/page.interface';
@@ -159,6 +159,10 @@ function whereFor(
    */
   if (filters.date !== undefined) {
     where.day = { date: filters.date };
+  }
+
+  if (filters.kind !== undefined) {
+    where.kind = filters.kind;
   }
 
   /*

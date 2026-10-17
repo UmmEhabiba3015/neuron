@@ -70,7 +70,7 @@ west puts it in the future (her decision; ADR-015, amendment of
 say 4am; the designs are wrong on this point, whether or not they are
 updated.
 
-**Ref 8. Delete the account.** Keep. *Drawn.*
+**Ref 8. Delete the account.** Keep. *Built* (feature 6).
 A hard delete of the account and all of its data, and nothing else. It is
 the only blocking dialog in the product. Its safe choice is "Export
 instead". Afterwards every device is signed out.
@@ -197,12 +197,12 @@ which provider they use.
 
 ## 7. Your data and support
 
-**Ref 36. Export.** Keep, changed. *Drawn.*
+**Ref 36. Export.** Keep, changed. *Built* (feature 6).
 **PDF, JSON and audio files. Markdown is removed.** A quiet "Ready" state
 offers the file again if the download did not start. An empty account is
 told there is nothing to export.
 
-**Ref 37. Counts and "Keeping since".** Keep. *Drawn.*
+**Ref 37. Counts and "Keeping since".** Keep. *Built* (feature 6).
 Your data shows how many entries and recordings there are. You shows the
 month the journal was started.
 

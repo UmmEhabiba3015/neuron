@@ -6,6 +6,7 @@ import { useEffect, type ReactNode } from 'react';
 import { CouldNotConnect } from '@/components/layout/CouldNotConnect';
 import { BlankScreen } from './AuthScreen';
 import { useSession } from '@/hooks/useSession';
+import { SIGN_IN_AFTER_DELETE } from '@/lib/your-data';
 
 /*
  * What stands in front of every screen of the journal. Its children are
@@ -14,17 +15,21 @@ import { useSession } from '@/hooks/useSession';
  * A person who is signed out leaves for /in. That is also what keeps Back
  * from showing the journal after a sign-out: the page that Back returns to
  * is drawn by this component first, and it draws nothing.
+ *
+ * A person who has just deleted their account leaves for the address where
+ * sign in says so (ADR-024).
  */
 export function Gate({ children }: { children: (user: User) => ReactNode }) {
   const state = useSession();
   const router = useRouter();
   const signedOut = state.status === 'signedOut';
+  const deleted = state.status === 'signedOut' && state.deleted === true;
 
   useEffect(() => {
     if (signedOut) {
-      router.replace('/in');
+      router.replace(deleted ? SIGN_IN_AFTER_DELETE : '/in');
     }
-  }, [signedOut, router]);
+  }, [signedOut, deleted, router]);
 
   if (state.status === 'unreachable') {
     return <CouldNotConnect asking={state.asking} asked={state.asked} />;

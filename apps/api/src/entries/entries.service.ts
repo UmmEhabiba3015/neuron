@@ -6,7 +6,7 @@ import { DaysService } from '../days/days.service';
 import { AudioStorage } from './audio-storage';
 import { EntriesRepository } from './entries.repository';
 import { EntryEntity } from './entities/entry.entity';
-import type { FiledEntry } from './types/filed-entry.type';
+import type { FiledEntry } from '../shared/types/filed-entry.type';
 import type { AudioRecording } from './types/audio-recording.interface';
 import type { EntryFilters } from './types/entry-filters.interface';
 import type { StoredAudio } from './types/stored-audio.interface';

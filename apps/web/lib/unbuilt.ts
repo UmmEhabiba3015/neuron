@@ -23,21 +23,6 @@ export interface Unbuilt {
 }
 
 export const UNBUILT = {
-  exportEverything: {
-    label: 'Export everything',
-    feature: 6,
-    where: 'Your data',
-  },
-  deleteAccount: {
-    label: 'Delete account',
-    feature: 6,
-    where: 'Your data',
-  },
-  keepingSince: {
-    label: 'Keeping',
-    feature: 6,
-    where: 'You',
-  },
   whatLeaves: {
     label: 'What leaves this device',
     feature: 15,

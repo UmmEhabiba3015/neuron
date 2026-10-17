@@ -2,9 +2,14 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 /*
- * ADR-020, decision 1: a query has to ask explicitly to see deleted entries,
- * and nothing in the application does. TypeORM's two ways of asking are the
- * withDeleted option and the restore method. Neither may appear in src.
+ * ADR-020, decision 1: a query has to ask explicitly to see deleted entries.
+ * TypeORM's two ways of asking are the withDeleted option and the restore
+ * method. restore may not appear in src at all.
+ *
+ * withDeleted may appear in one file, audio-keys.repository.ts, whose two
+ * reads answer with audio keys and never with an entry: the sweep at start
+ * must keep a deleted memo's file, and deleting an account must remove it
+ * (ADR-024). Anywhere else it is refused.
  *
  * softDelete is refused here as well. It would work, and it would write the
  * database's clock in the database's format into deleted_at.
@@ -35,14 +40,19 @@ describe('the application source', () => {
     );
   });
 
-  it.each(['withDeleted', 'softDelete', 'softRemove', 'restore', 'recover'])(
+  const using = (word: string): string[] =>
+    sources
+      .filter(({ code }) => new RegExp(`\\b${word}\\b`).test(code))
+      .map(({ path }) => path);
+
+  it.each(['softDelete', 'softRemove', 'restore', 'recover'])(
     'never uses %s',
     (word) => {
-      const using = sources
-        .filter(({ code }) => new RegExp(`\\b${word}\\b`).test(code))
-        .map(({ path }) => path);
-
-      expect(using).toEqual([]);
+      expect(using(word)).toEqual([]);
     },
   );
+
+  it('uses withDeleted only where audio keys are read for the files', () => {
+    expect(using('withDeleted')).toEqual(['entries/audio-keys.repository.ts']);
+  });
 });

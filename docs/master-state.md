@@ -30,7 +30,7 @@ reports in `docs/learning/` hold the rest.
 
 ## Where the project is
 
-**Last updated:** 2026-10-16, at the close of feature 5, Voice memos.
+**Last updated:** 2026-10-17, at the close of feature 6, Your data.
 
 **Work is planned by feature, not by day.** The scope is locked in
 [features.md](features.md), the order is in [roadmap.md](roadmap.md), and
@@ -38,8 +38,8 @@ what the designer is asked to change is
 [ui-handover-v4.md](ui-handover-v4.md).
 
 **Done:** everything up to Screens Day, the restructure, features 1, 2 and
-3 (merged), and feature 5, Voice memos, which is on the branch
-`feature-voice-memos` in a pull request for her to merge. **Feature 4,
+3 and 5 (merged), and feature 6, Your data, which is on the branch
+`feature-your-data` in a pull request for her to merge. **Feature 4,
 Drafts, is skipped for now:** the designer has not sent the composer
 changes (she confirmed on 2026-10-16), so by roadmap rule 4 it waits and is
 built as soon as they arrive.
@@ -52,22 +52,23 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-**601** API unit tests, **59** API end-to-end tests, **270** web tests, **10**
-checks on the shared package. 23 ADRs. 15 migrations. Use exactly these nine
+**662** API unit tests, **68** API end-to-end tests, **285** web tests, **10**
+checks on the shared package. 25 ADRs. 15 migrations. Use exactly these nine
 commands. A plain `npx jest` in `apps/api` skips the migration tests and
 still reports a pass.
 
 **What a person can do:** create an account (email, password, name; timezone
 from the browser), sign in, stay signed in across a reload, sign out, write,
 edit and delete entries, save with Enter, reset a forgotten password, see
-and sign out their devices, change their timezone, record, play and delete voice memos, set the mood of today or a past
+and sign out their devices, change their timezone, record, play and delete voice memos, export
+everything as one ZIP (PDF, JSON, audio), delete their account, set the mood of today or a past
 day, browse the Timeline as a list or a month calendar, and open a past day.
 Today opens at the newest entry, and every password field can show what was
 typed.
 
 **What a person can see:** every screen of the designer's v3 prototype. A
 control whose feature is not built says "This is not built yet." and sends
-nothing. The 12 such controls are listed in `apps/web/lib/unbuilt.ts`.
+nothing. The 9 such controls are listed in `apps/web/lib/unbuilt.ts`.
 
 **Branch.** Each feature has its own branch, `feature-<short-name>`, made
 from `main` before work starts, and closes through a pull request she merges.
@@ -77,26 +78,29 @@ The old `day-*` branches and four kept merged branches stay as they are.
 
 ## How to open the next session
 
-**First, check that she merged the pull request of feature 5** and that
-`main` holds it. Ask her to run `pnpm migration:run`; it may also hold
-feature 3's `AddSessionDevice` if she has not run it since. `AddVoiceMemos`
-rebuilds `entries`. Audio files go to `apps/api/data/audio/`, which git
-ignores.
+**First, check that she merged the pull request of feature 6** and that
+`main` holds it, and ask her to run `pnpm migration:run` (feature 6 adds no
+migration, but the API now refuses to start on a database that is not
+migrated, because the audio sweep reads `entries` first).
 
-**Then ask whether the designer has sent the composer changes for Drafts**
-(`ui-handover-v4.md`, C5). If yes, feature 4, Drafts, is next. If not,
-feature 6, **Your data** (Refs 36, 8, 37): export as PDF, JSON and audio;
-deleting the account with every foreign key settled (known debt: `ON DELETE
-NO ACTION` everywhere, and now audio files on disk too); the counts. Start
-from the problem: a hard delete must remove rows in five tables and files
-in a folder, and a crash halfway must not leave half an account.
+**Next is the first review point** (roadmap: after feature 6). It covers
+features 1, 2, 3, 5 and 6 together, on its own branch,
+`review-point-1`:
 
-Feature 6 is followed by the **first review point**: an audit, a sweep of
-several mutations, refactoring where justified, and a handbook entry.
+1. **An audit across the five features** against `CLAUDE.md`, the ADRs and
+   each other: duplication that has appeared (for example the SHA-256 token
+   hash in two services), conventions drifting, comments that point at
+   retired documents.
+2. **A sweep of several mutations** (three to five), chosen by the Master
+   Thread across the features, each predicted and run by her. Prefer the
+   ones whose tests are thinnest.
+3. **Refactoring only where the audit justifies it**, as one short worker
+   spec.
+4. **A handbook entry** on what features 1 to 6 taught, from the *Features
+   finished* section below.
 
-Open the feature in the usual order: the branch from `main`, the overview,
-learning debt (none is open), the problem first, her decisions as short
-choices, the worker, the audit with one mutation, the pull request.
+Then ask whether the designer has sent the composer changes for Drafts. If
+not, feature 7, the Quality pass, is next.
 
 ---
 
@@ -191,6 +195,29 @@ in `docs/learning/feature-5-voice-memos/`.
 - *A hidden trap the worker caught:* "an empty search matches nothing" was
   written as `content IS NULL`, true of no row until memos made it true of
   every memo.
+
+**Feature 6, Your data** (2026-10-17). Refs 36, 8, 37. ADR-024, ADR-025.
+Report in `docs/learning/feature-6-your-data/`.
+
+- *Built:* one ZIP export (PDF, JSON, audio) with a Ready state; deleting
+  the account with a password, in one transaction, files after the commit;
+  a sweep of orphan audio before the API listens; counts and "Keeping since
+  October 2026".
+- *Her decisions:* the sweep at start rather than a retry table, because a
+  scheduler belongs to feature 13; a server PDF because Neuron is English
+  only for now (the browser's print would draw any script); the password to
+  confirm; "Keep my account" kept so a phone can close the dialog.
+- *Her reasoning worth telling:* the orphan file ADR-023 accepted after a
+  failed upload is not acceptable after a delete, because the person asked
+  for everything to be gone. Same file, different intent.
+- *The mutation:* removing soft-deleted rows from the sweep's kept keys
+  failed four tests; she asked for that test herself before the worker ran.
+- *Her experiment:* she predicted SQLite would refuse to delete `days`
+  before `entries`, swapped the two lines and ran it: `FOREIGN KEY
+  constraint failed`, 5 of 7 tests. TypeORM switches foreign keys on for
+  each connection.
+- *Corrected by her:* the Master Thread said "KEEPING · since October 2026"
+  fits on one line before anyone had measured it.
 
 ---
 
@@ -313,7 +340,6 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 |---|---|---|
 | **No test reaches a React component.** That an unbuilt control sends nothing, every link between screens, and the calendar's jump are checked only by workers walking the app. In feature 1 she removed `event.preventDefault()` from `useEnterToSave.ts` and all 202 web tests passed | `apps/web` | Her decision in feature 7, Quality pass |
 | **Nothing enforces that the browser's clock never makes a date.** A lint rule forbidding `new Date()` and `Date.now()` in `apps/web` would | `apps/web` | Feature 7, Quality pass |
-| **A user cannot be deleted.** Foreign keys are `ON DELETE NO ACTION` | `sessions`, `entries`, `days` | Feature 6, Your data |
 | **The API's `pnpm lint` runs `--fix`**, so it rewrites files instead of only reporting | `apps/api/package.json` | Feature 8, Going live |
 | **The built API reads `packages/contracts/src` at run time**, and the package breaks if its `package.json` gains a `"type"` field | `apps/api/dist`, `packages/contracts` | The restructure (contracts build step) |
 | **`NEXT_PUBLIC_API_URL` is fixed at build time; the cookie has no `Secure` attribute** | web config, `refresh-cookie.ts` | Feature 8, Going live |
@@ -321,7 +347,6 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 | **`better-sqlite3@13` is outside TypeORM's peer range.** It works and is pinned | `apps/api/package.json` | Dissolves with Postgres in feature 8 |
 | **`Etc/GMT+5` is accepted as a timezone** | the registration check | Low; noted |
 | **Deleted entries must be kept out of every later reader**, and from feature 5 their audio too | search, embeddings, Ask, export | Features 6, 10, 12, 13 (ADR-020) |
-| **The Export row on Your data still says "Markdown and JSON"**; export is PDF, JSON and audio (features.md Ref 36). Screen wording, hers | `components/you/You.tsx` | Feature 6, Your data |
 | **TypeORM does not switch foreign keys off when reverting a migration** | ADR-010 | One line owed in ADR-010 |
 | **No ADR yet for the 2026-10-04 data-model decisions** (one `entries` table with a `kind` for recordings; drafts on the server) | `docs/decisions/` | Written when each is built |
 | **`useEnterToSave` is named and placed like a hook but calls no hook**; it is a plain function that returns a key handler | `apps/web/hooks/useEnterToSave.ts` | Feature 7, Quality pass |
@@ -333,9 +358,10 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 | **The `User-Agent` header is stored with no length limit** (Node caps headers at about 16 KB) | `sessions.user_agent` | Feature 16, Security pass |
 | **One timezone can be listed twice under two spellings** (`Asia/Kolkata`, `Asia/Calcutta`) | Timezone screen | Feature 7, Quality pass |
 | **A memo's length is the browser's claim**; the API checks the size (24 MB) but does not measure the audio (ADR-023) | `POST /entries/voice` | Feature 16, Security pass |
-| **Audio files left by a failed insert are never removed** (ADR-023) | `AUDIO_PATH` | Feature 13, with expired sessions and resets |
 | **A memo recorded in one browser may not play in a much older one** (WebM or MP4, kept as recorded) | playback | Accepted; noted |
 | **On Talk, the left rail is drawn over the content at tablet and desktop widths** (before feature 5 too) | `Talk.tsx`, `live.css` | Feature 7, Quality pass |
+| **No rate limit on the password check of `DELETE /auth/me`** | `auth.controller.ts` | Feature 16, Security pass |
+| **At 390 wide the counts value wraps** ("2 entries, 1 / recording") | Your data | Feature 7, Quality pass |
 | **ADR-015 and ADR-016 link to retired documents** | `docs/decisions/` | Left as records; git history holds the targets |
 
 ---
@@ -510,3 +536,5 @@ cost a second worker.
 - Told her the configuration would refuse the log mailer in production
   before checking that the configuration has any idea of production. It has
   none. Corrected within the block (feature 2).
+- Told her a wording would fit on one line before it was measured
+  (feature 6). She chose it partly for that reason.

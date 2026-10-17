@@ -10,6 +10,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { validate } from './config/env.validation';
 import { EntriesModule } from './entries/entries.module';
 import { DaysModule } from './days/days.module';
+import { ExportModule } from './export/export.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { DaysModule } from './days/days.module';
     AuthModule,
     DaysModule,
     EntriesModule,
+    ExportModule,
   ],
 
   providers: [

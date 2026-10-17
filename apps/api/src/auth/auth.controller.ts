@@ -17,6 +17,7 @@ import {
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { UsersService } from '../users/users.service';
+import { AccountDeletionService } from './account-deletion.service';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
 import { LoginDto } from './dto/login.dto';
@@ -28,13 +29,14 @@ import {
   unpackRefreshCookie,
 } from './refresh-cookie';
 import { AuthResponseDto } from './dto/auth-response.dto';
+import { DeleteAccountDto } from './dto/delete-account.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { PasswordResetService } from './password-reset.service';
 import { RegisterDto } from './dto/register.dto';
 import { SessionResponseDto } from './dto/session-response.dto';
 import { UpdateTimezoneDto } from './dto/update-timezone.dto';
-import { UserResponseDto } from '../users/dto/user-response.dto';
+import { UserResponseDto } from '../shared/dto/user-response.dto';
 import type { AuthenticatedRequest } from '../shared/types/authenticated-request.interface';
 import type { AuthenticatedSession } from './types/authenticated-session.interface';
 
@@ -45,12 +47,19 @@ import type { AuthenticatedSession } from './types/authenticated-session.interfa
 export const INVALID_RESET_LINK =
   'This reset link has expired or has already been used';
 
+/*
+ * A 400 and not a 401: the web app reads a 401 as a session that has ended,
+ * and this session has not (ADR-024).
+ */
+export const WRONG_PASSWORD = 'That password is not right';
+
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
     private readonly passwordResetService: PasswordResetService,
+    private readonly accountDeletionService: AccountDeletionService,
   ) {}
 
   @Public()
@@ -111,6 +120,27 @@ export class AuthController {
     }
 
     return new UserResponseDto(user);
+  }
+
+  /*
+   * Deletes the account and everything in it, confirmed with the password
+   * (ADR-024). Every session goes with it, so every device is signed out,
+   * and this one's cookie is cleared as logout clears it.
+   */
+  @Delete('me')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteMe(
+    @Body() dto: DeleteAccountDto,
+    @Req() request: AuthenticatedRequest,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    if (
+      !(await this.accountDeletionService.delete(request.user.id, dto.password))
+    ) {
+      throw new BadRequestException(WRONG_PASSWORD);
+    }
+
+    response.clearCookie(REFRESH_COOKIE_NAME, REFRESH_COOKIE_CLEAR_OPTIONS);
   }
 
   @Public()

@@ -1,6 +1,6 @@
-import { MAX_PAGE_SIZE } from '@neuron/contracts';
+import { EntryKind, MAX_PAGE_SIZE } from '@neuron/contracts';
 import { Type } from 'class-transformer';
-import { IsInt, IsString, Max, Min, ValidateIf } from 'class-validator';
+import { IsEnum, IsInt, IsString, Max, Min, ValidateIf } from 'class-validator';
 
 import { IsCalendarDate } from '../../shared/decorators/is-calendar-date.decorator';
 
@@ -17,6 +17,14 @@ export class FindEntriesQueryDto {
   @ValidateIf((query: FindEntriesQueryDto) => query.date !== undefined)
   @IsCalendarDate()
   date?: string;
+
+  /*
+   * Text or Voice, as the contract's EntryKind writes them. Present and
+   * empty is refused, as ?date= is.
+   */
+  @ValidateIf((query: FindEntriesQueryDto) => query.kind !== undefined)
+  @IsEnum(EntryKind)
+  kind?: EntryKind;
 
   /*
    * Query parameters arrive as strings, and transform:true on the global

@@ -1,4 +1,4 @@
-import type { FiledEntry } from './filed-entry.type';
+import type { FiledEntry } from '../../shared/types/filed-entry.type';
 
 /*
  * What an edit came to. A voice memo is found and still refused, which is a

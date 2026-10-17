@@ -1,5 +1,5 @@
 import type { DayEntity } from '../../days/entities/day.entity';
-import type { EntryEntity } from '../entities/entry.entity';
+import type { EntryEntity } from '../../entries/entities/entry.entity';
 
 /*
  * An entry as it is read: with the date of the day it points at, and nothing

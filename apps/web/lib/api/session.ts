@@ -27,6 +27,7 @@
 
 import type {
   AuthResponse,
+  DeleteAccount,
   ForgotPassword,
   Login,
   Register,
@@ -46,12 +47,15 @@ import type {
  *
  * `ended` is true when a session that was in use stopped working, and false
  * for a visitor who was never signed in on this page load.
+ *
+ * `deleted` is true when the person deleted their account, so that sign in
+ * can say so (ADR-024).
  */
 export type SessionState =
   | { status: 'unknown' }
   | { status: 'unreachable'; asking: boolean; asked: number }
   | { status: 'signedIn'; user: User }
-  | { status: 'signedOut'; ended: boolean };
+  | { status: 'signedOut'; ended: boolean; deleted?: true };
 
 /*
  * What a request came to. `unreachable` and `ended` are kept apart on
@@ -68,13 +72,21 @@ export type ApiResult<T> =
  * `body` is sent as JSON. `form` is sent as a multipart form instead, and the
  * browser writes its Content-Type, boundary included; a voice memo is sent
  * this way. `receive: 'blob'` reads a successful answer as bytes and not as
- * JSON; a memo's audio is read this way. A refusal is still read as JSON.
+ * JSON; a memo's audio is read this way. `receive: 'file'` reads it as bytes
+ * with the Content-Disposition header beside them, which names the file to
+ * save; the export is read this way. A refusal is still read as JSON.
  */
 export interface RequestOptions {
   method?: string;
   body?: unknown;
   form?: FormData;
-  receive?: 'json' | 'blob';
+  receive?: 'json' | 'blob' | 'file';
+}
+
+/* What `receive: 'file'` answers with. */
+export interface ReceivedFile {
+  blob: Blob;
+  disposition: string | null;
 }
 
 export type Fetch = (
@@ -89,6 +101,11 @@ export type Fetch = (
   status: number;
   json(): Promise<unknown>;
   blob(): Promise<Blob>;
+  /*
+   * A browser's fetch always has headers. A test's stand-in may leave them
+   * out, and is then read as having none.
+   */
+  headers?: { get(name: string): string | null };
 }>;
 
 export interface Session {
@@ -118,6 +135,12 @@ export interface Session {
    * it answered with, so every screen shows the new timezone at once.
    */
   setTimezone(timezone: string): Promise<ApiResult<User>>;
+  /*
+   * Deletes the account and everything in it, confirmed with the password
+   * (ADR-024). When the API agrees, every device is signed out, this one
+   * included, and the state says the account was deleted.
+   */
+  deleteAccount(password: string): Promise<DeleteAccountOutcome>;
   request<T>(path: string, options?: RequestOptions): Promise<ApiResult<T>>;
 }
 
@@ -130,6 +153,22 @@ export interface Session {
  * `failed`       the server answered, and not with a yes. Nothing has changed.
  */
 export type SignOut = 'signedOut' | 'unreachable' | 'failed';
+
+/*
+ * What a press of "Delete account" came to.
+ *
+ * `deleted`        the account and everything in it are gone.
+ * `wrongPassword`  the API refused the password. Nothing was deleted.
+ * `unreachable`    no answer arrived. Nothing was deleted.
+ * `failed`         any other answer. Nothing was deleted.
+ * `ended`          the session had already ended; the person is signed out.
+ */
+export type DeleteAccountOutcome =
+  | 'deleted'
+  | 'wrongPassword'
+  | 'unreachable'
+  | 'failed'
+  | 'ended';
 
 /* "Sign out of this device", or "Sign out everywhere". */
 export type SignOutScope = 'thisDevice' | 'everywhere';
@@ -210,7 +249,13 @@ export function createSession(config: {
       const body: unknown =
         succeeded && options.receive === 'blob'
           ? await response.blob()
-          : await response.json().catch(() => undefined);
+          : succeeded && options.receive === 'file'
+            ? ({
+                blob: await response.blob(),
+                disposition:
+                  response.headers?.get('Content-Disposition') ?? null,
+              } satisfies ReceivedFile)
+            : await response.json().catch(() => undefined);
 
       return { kind: 'answered', status: response.status, body };
     } catch {
@@ -481,6 +526,70 @@ export function createSession(config: {
   }
 
   /*
+   * DELETE /auth/me, with the password as its body. Sent like a sign-out:
+   * with the access token, which says whose account it is, and with the
+   * cookie, which the API clears. A 401 gets rule 3, one refresh and the
+   * request once more, as a sign-out's does.
+   *
+   * A wrong password is a 400, never a 401, so it is never read as the end
+   * of the session (ADR-024).
+   */
+  async function deleteAccount(
+    password: string,
+  ): Promise<DeleteAccountOutcome> {
+    if (refreshInFlight) {
+      await refreshInFlight;
+    }
+
+    const body: DeleteAccount = { password };
+    const sendIt = () =>
+      send(
+        '/auth/me',
+        { method: 'DELETE', body },
+        { token: accessToken, withCookie: true },
+      );
+
+    let answer = await sendIt();
+
+    if (answer.kind === 'answered' && answer.status === 401) {
+      const outcome = await refreshNow();
+
+      if (outcome === 'unreachable') {
+        return 'unreachable';
+      }
+
+      if (outcome === 'ended') {
+        endSession();
+        return 'ended';
+      }
+
+      answer = await sendIt();
+
+      if (answer.kind === 'answered' && answer.status === 401) {
+        endSession();
+        return 'ended';
+      }
+    }
+
+    if (answer.kind === 'unreachable') {
+      return 'unreachable';
+    }
+
+    if (answer.status === 400) {
+      return 'wrongPassword';
+    }
+
+    if (answer.status < 200 || answer.status >= 300) {
+      return 'failed';
+    }
+
+    accessToken = undefined;
+    setState({ status: 'signedOut', ended: false, deleted: true });
+
+    return 'deleted';
+  }
+
+  /*
    * POST /auth/logout ends the session on the server and clears the cookie.
    * POST /auth/logout-everywhere ends every session of the person, and
    * clears the cookie in the same way; everything below holds for both.
@@ -577,6 +686,7 @@ export function createSession(config: {
     resetPassword,
     signOut,
     setTimezone,
+    deleteAccount,
     request,
   };
 }

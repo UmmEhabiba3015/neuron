@@ -19,5 +19,10 @@ export function configureHttp(app: INestApplication): void {
   app.enableCors({
     origin: config.get('WEB_ORIGIN', { infer: true }),
     credentials: true,
+    /*
+     * GET /export names its file here, and a browser hides every header a
+     * cross-origin answer does not list (ADR-025).
+     */
+    exposedHeaders: ['Content-Disposition'],
   });
 }

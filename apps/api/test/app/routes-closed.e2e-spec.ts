@@ -25,6 +25,8 @@ describe('routes closed by default (e2e)', () => {
     ['GET', '/days/2031-01-01'],
     ['PUT', '/days/2026-08-09/mood'],
     ['GET', '/auth/me'],
+    ['DELETE', '/auth/me'],
+    ['GET', '/export'],
     ['GET', '/auth/sessions'],
     ['POST', '/auth/logout'],
     ['POST', '/auth/logout-everywhere'],

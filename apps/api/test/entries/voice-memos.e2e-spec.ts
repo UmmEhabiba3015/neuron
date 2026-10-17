@@ -95,6 +95,34 @@ describe('voice memos (e2e)', () => {
       .expect(404);
   });
 
+  it('lists and counts by kind, both routes alike, and refuses a kind that does not exist', async () => {
+    const memo = (await upload(alice).expect(201)).body as { id: string };
+    await alice.post('/entries').send({ content: 'typed' }).expect(201);
+    await upload(bob).expect(201);
+
+    const ids = async (query: string) =>
+      (
+        (await alice.get(`/entries${query}`).expect(200)).body as {
+          id: string;
+        }[]
+      ).map((entry) => entry.id);
+    const count = async (query: string) =>
+      (
+        (await alice.get(`/entries/count${query}`).expect(200)).body as {
+          count: number;
+        }
+      ).count;
+
+    expect(await ids(`?kind=${EntryKind.Voice}`)).toEqual([memo.id]);
+    expect(await ids(`?kind=${EntryKind.Text}`)).toHaveLength(1);
+    expect(await count(`?kind=${EntryKind.Voice}`)).toBe(1);
+    expect(await count(`?kind=${EntryKind.Text}`)).toBe(1);
+    expect(await count('')).toBe(2);
+
+    await alice.get('/entries?kind=Song').expect(400);
+    await alice.get('/entries/count?kind=Song').expect(400);
+  });
+
   it('refuses to edit a memo, for its owner too', async () => {
     const memo = (await upload(alice).expect(201)).body as { id: string };
 

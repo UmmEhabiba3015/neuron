@@ -10,7 +10,8 @@ import {
   LiveScreen,
   PushedScreen,
 } from '@/components/layout/LiveScreen';
-import { NotBuiltInPlace, NotBuiltRow } from '@/components/ui/NotBuilt';
+import { KeyBox } from '@/components/layout/Chrome';
+import { NotBuiltInPlace } from '@/components/ui/NotBuilt';
 import { Devices } from '@/components/you/Devices';
 import { session } from '@/lib/api/client';
 import type { SignOutScope } from '@/lib/api/session';
@@ -20,7 +21,8 @@ import {
   timezoneLabel,
   timezoneSaveOutcome,
 } from '@/lib/timezone';
-import { NOT_BUILT_YET, UNBUILT } from '@/lib/unbuilt';
+import { UNBUILT } from '@/lib/unbuilt';
+import { keepingSince } from '@/lib/your-data';
 
 /*
  * The designer's sentence says 4am. A day ends at midnight
@@ -34,31 +36,28 @@ const TIMEZONE_RULE =
  * You, from 07-you.html: what is private, what is yours, and your account.
  * Every row leads to its page.
  *
- * The date box says since when the journal has been kept. It is feature
- * 6's, so the sentence stands in the box (lib/unbuilt.ts). The line at the
- * foot says the same thing and is not drawn.
+ * The date box says since when the journal has been kept: the month the
+ * account was created, in the person's timezone (docs/features.md, Ref 37).
+ * The line at the foot says the same thing and is not drawn.
  *
- * Your data has no value. The comp's "148 and 31" is a count of entries and
- * recordings, and nothing counts them yet.
+ * Your data has no value here. Its counts are on Your data itself.
  */
 export function You() {
   return <Gate>{(user) => <YouRows user={user} />}</Gate>;
 }
 
-function KeepingSince() {
+function KeepingSince({ user }: { user: User }) {
   return (
-    <div className="keybox">
-      <span className="k">{UNBUILT.keepingSince.label}</span>
-      <span className="v printed" data-unbuilt="keepingSince">
-        {NOT_BUILT_YET}
-      </span>
-    </div>
+    <KeyBox
+      label="Keeping"
+      value={keepingSince(user.createdAt, user.timezone)}
+    />
   );
 }
 
 function YouRows({ user }: { user: User }) {
   return (
-    <LiveScreen current="You" title="You" aside={<KeepingSince />}>
+    <LiveScreen current="You" title="You" aside={<KeepingSince user={user} />}>
       <main className="sheet">
         <h2 className="shead">What is private</h2>
         <Link className="srowlink" href="/you/visible">
@@ -461,38 +460,5 @@ function TimezoneRows({ user }: { user: User }) {
         </div>
       </main>
     </LiveScreen>
-  );
-}
-
-/*
- * Your data, from #settings-data in 00-prototype.html. Export and deleting
- * the account are Day 34's (lib/unbuilt.ts): each row says so when pressed.
- * The confirmation dialog for deleting is not reachable and not built.
- *
- * Export is one row, as the comp has it. What it exports is the journal as
- * PDF and JSON, and the recordings as audio files (docs/features.md, Ref
- * 36). Its value, a count, is not drawn, because nothing counts yet.
- */
-export function YourData() {
-  return <Gate>{() => <YourDataRows />}</Gate>;
-}
-
-function YourDataRows() {
-  return (
-    <PushedScreen back={{ href: '/you', label: 'You' }} title="Your data">
-      <main className="sheet">
-        <h2 className="shead">Take it out</h2>
-        <NotBuiltRow
-          name="exportEverything"
-          why="Your journal as Markdown and as JSON, and your recordings as audio files, in one download."
-        />
-        <h2 className="shead">End it</h2>
-        <NotBuiltRow
-          name="deleteAccount"
-          why="Delete this account and everything in it. Export is directly above this for a reason."
-          value="Permanent"
-        />
-      </main>
-    </PushedScreen>
   );
 }

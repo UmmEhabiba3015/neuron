@@ -140,6 +140,9 @@ describe('search, pages and the count (e2e)', () => {
       '?date=2026-08-01',
       '?date=2026-08-09&word=flat',
       '?date=2026-08-08&word=sister',
+      '?kind=Text',
+      '?kind=Voice',
+      '?date=2026-08-09&kind=Text',
     ];
 
     const expectAgreement = async () => {
