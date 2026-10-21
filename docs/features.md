@@ -270,6 +270,8 @@ app.
 - May a mood be set on a day with no entries? (Today: yes.) An entry does
   not move when the timezone changes (decided 2026-10-15, feature 3).
 - Which AI provider.
+- Is a voice memo kept out of memory (Ref 25) transcribed (Ref 24)?
+  Transcription sends its audio to a model. Decided when feature 11 opens.
 
 ---
 

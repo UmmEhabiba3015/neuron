@@ -30,7 +30,7 @@ reports in `docs/learning/` hold the rest.
 
 ## Where the project is
 
-**Last updated:** 2026-10-21, at the close of the first review point.
+**Last updated:** 2026-10-21, the handoff after the first review point.
 
 **Work is planned by feature, not by day.** The scope is locked in
 [features.md](features.md), the order is in [roadmap.md](roadmap.md), and
@@ -38,8 +38,9 @@ what the designer is asked to change is
 [ui-handover-v4.md](ui-handover-v4.md).
 
 **Done:** everything up to Screens Day, the restructure, features 1, 2 and
-3, 5 and 6 (merged), and the first review point, which is on the branch
-`review-point-1` in a pull request for her to merge. **Feature 4,
+3, 5 and 6, and the first review point, all merged into `main`. The new
+order of the remaining work (her decision, 2026-10-21) is on the branch
+`roadmap-order-and-handoff`, in a pull request for her to merge. **Feature 4,
 Drafts, is skipped for now:** the designer has not sent the composer
 changes (she confirmed on 2026-10-16), so by roadmap rule 4 it waits and is
 built as soon as they arrive.
@@ -78,22 +79,51 @@ The old `day-*` branches and four kept merged branches stay as they are.
 
 ## How to open the next session
 
-**First, check that she merged the pull request of the first review point**
-and that `main` holds it.
+**This is a handoff.** She ended a long Master Thread on 2026-10-21 so that
+the next feature starts in a fresh context. The new thread knows nothing
+but these files.
 
-**Then ask whether the designer has sent the composer changes for Drafts**
-(`ui-handover-v4.md`, C5). If yes, feature 4, Drafts, is next. If not,
-feature 7, the **Quality pass** (Ref 40): responsive layout, keyboard
-access, accessibility, **her decision on a test that reaches React
-components** (the evidence is in the handbook's Phase 3 entry and the known
-debt: feature 1's `preventDefault` run), and a lint rule so the browser's
-clock never makes a date. The known-debt rows marked "Feature 7" are its
-list. Start from the problem: what a person using a keyboard, a screen
+1. **Read, in order:** `master-prompt.md`, `constitution.md`, `features.md`,
+   `roadmap.md` (read *The order of the work now*), this file, and
+   `CLAUDE.md`. Then *How To Work With The Learner*, below, before teaching
+   anything.
+2. **Check `main`.** The pull request of `roadmap-order-and-handoff` should
+   be merged. Run the nine checks and report the result in one line.
+   Expected: 663 API unit, 68 API end-to-end, 285 web, 10 contract.
+3. **Ask one question first:** has the designer sent any new screens
+   (`ui-handover-v4.md`)? She said on 2026-10-21 that they are still in
+   progress. If something has arrived, the feature it unblocks is placed
+   next (roadmap, *The order of the work now*).
+4. **Otherwise, feature 7, the Quality pass** (Ref 40). Make
+   `feature-quality-pass` from `main`. Open in the usual order: the
+   overview with its blocks; learning debt (none is open); the problem
+   first; her decisions as short choices with a default; the worker; the
+   audit with one mutation; the pull request.
+
+**What feature 7 holds**, from the known debt below (every row marked
+"Feature 7"):
+
+- **Her decision on a test that reaches React components.** The evidence:
+  in feature 1 she removed `event.preventDefault()` and all web tests still
+  passed (handbook, Phase 3). This is the feature's main decision and
+  probably its ADR. Research the options with her; none is chosen.
+- **A lint rule so the browser's clock never makes a date** (`new Date()`
+  without an argument, `Date.now()` in `apps/web`).
+- **Responsive faults already found:** the left rail drawn over Talk at
+  tablet and desktop widths; the counts on Your data wrapping at 390 wide;
+  a timezone listed twice under two spellings; entry icons shown only on
+  hover on desktop, under a long entry's words.
+- **Keyboard and screen reader access**, which has had no pass at all.
+
+Start from the problem: what a person using only a keyboard, a screen
 reader or a phone cannot do today.
 
-Open it in the usual order: the branch from `main`, the overview, learning
-debt (none is open), the problem first, her decisions as short choices, the
-worker, the audit with one mutation, the pull request.
+**How the last sessions went, for the new thread:** blocks were short, she
+chose defaults often, and most of her written answers were pasted (do not
+raise it; ask for runs and short choices). Her own runs this phase were
+`navigator.userAgent`, the SHA-256 digits, the `preventDefault` removal and
+the delete-order swap. At the review point she asked to go through
+everything at once and the sweep ran without her predictions.
 
 ---
 
