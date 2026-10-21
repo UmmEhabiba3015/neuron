@@ -4,7 +4,10 @@
 feature, not by day** (her husband, 2026-10-10). The scope of every feature
 is locked in [features.md](features.md); this file only says the order and
 what each feature teaches. The order was confirmed by her husband on
-2026-10-13, with Drafts placed fourth.
+2026-10-13, with Drafts placed fourth. **On 2026-10-21 she reordered the
+remaining work** so that everything ready is built first, while the
+designer's new screens are still in progress (see *The order of the work
+now*). The numbers did not change; they are the features' names.
 
 The day-numbered plans (v2.0 and v3.0, Days 0 to 39) are in git:
 
@@ -36,14 +39,36 @@ git show 4e49fc1:docs/roadmap.md
 6. **No LinkedIn posts while building** (her husband, 2026-10-13). When the
    project is finished, it is presented in public feature by feature.
 
-## Where the project stands (2026-10-10)
+## Where the project stands (2026-10-21)
 
-Built: accounts (sign up, sign in, staying signed in, sign out), writing and
-deleting entries, mood, the Timeline as a list and a month calendar, and a
-past day's page. Every screen of the designer's v3 prototype is drawn, and
-every control whose feature is not built says "This is not built yet."
-421 API unit tests, 42 API end-to-end tests, 170 web tests, 7 contract
-checks. 21 ADRs.
+Built: features 1, 2, 3, 5 and 6, and the first review point (the handbook's
+Phase 3 entry). Feature 4, Drafts, waits for the designer's composer
+changes. 663 API unit tests, 68 API end-to-end tests, 285 web tests, 10
+contract checks. 25 ADRs.
+
+## The order of the work now
+
+Her decision, 2026-10-21. The designer's new screens are still in progress,
+so the features that need no new screens come first. **A feature keeps its
+number**; only the order of building changes.
+
+| Order | Feature | Depends on |
+|---|---|---|
+| 1st | **7, Quality pass** | Nothing |
+| 2nd | **8, Going live** | Nothing; before any AI work on purpose |
+| 3rd | **9, Keep out of memory** | Nothing; before any text or audio reaches a model |
+| 4th | **11, Background work and transcription** | 5 (built), 8, 9 |
+| then, as the designer's screens arrive | **4** Drafts, **10** Search (needs 8, 9), **12** Ask (needs 9, 10, 11), **13** Reflections (needs 9, 11), **14** Looking back | The designer |
+| last | **15** The words (after 12 and 13), **16** Security pass and final audit | Everything |
+
+The second review point stays after feature 13, and the third is feature
+16. If the designer's screens arrive before the four ready features are
+done, the feature they unblock is placed next.
+
+**One question this order brings forward:** transcription (feature 11)
+sends a memo's audio to a model, and Ref 25 says a memo kept out of memory
+is never sent to one. Feature 9 comes first, so the question is decided when
+feature 11 opens (`features.md`, *Not yet decided*).
 
 ## Before feature 1: the restructure
 
@@ -52,7 +77,9 @@ conventions in `CLAUDE.md`, and the API's end-to-end tests are reorganised
 into flows. Two workers; no behaviour change. Specs in `docs/workers/`
 (`restructure-1-code.md`, `restructure-2-tests.md`).
 
-## The features, in order
+## The features, by number
+
+The order they are built in is *The order of the work now*, above.
 
 "Refs" are the row numbers in `features.md`. "Screens" says whether the
 feature can be built on today's screens, or waits for the designer.
