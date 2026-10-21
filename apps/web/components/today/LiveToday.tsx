@@ -75,7 +75,8 @@ function composerLine(save: TodayState['save']): string | undefined {
  * journal's.
  *
  * Its one row leads to the support resource. Words typed in the composer
- * and not saved are not carried here: keeping a draft is Day 18's.
+ * and not saved are not carried here: keeping a draft is
+ * feature 4, Drafts.
  */
 function ComposerOptions() {
   return (

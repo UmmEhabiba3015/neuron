@@ -10,7 +10,7 @@
  * such an import before running the file, so it never looks for the package.
  * Without the word, the tests would stop being Node alone.
  *
- * The four rules are the owner's (ADR-018, and the Day 15c prompt):
+ * The four rules are the owner's, decided on Day 15 (ADR-018):
  *
  *   1. The access token lives in a variable in memory and nowhere else.
  *   2. On load the app calls POST /auth/refresh before it decides which

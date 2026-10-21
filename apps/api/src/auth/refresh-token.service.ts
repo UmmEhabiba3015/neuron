@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
+import { randomBytes, timingSafeEqual } from 'node:crypto';
+import { hashToken } from './hash-token';
 
 export const REFRESH_TOKEN_BYTES = 32;
 
@@ -10,7 +11,7 @@ export class RefreshTokenService {
   }
 
   hash(token: string): string {
-    return createHash('sha256').update(token).digest('hex');
+    return hashToken(token);
   }
 
   matches(token: string, storedHash: string): boolean {

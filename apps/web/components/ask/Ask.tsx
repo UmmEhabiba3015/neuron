@@ -9,8 +9,8 @@ import { useTodayDate } from '@/hooks/useTodayDate';
 
 /*
  * Ask, from 04-ask.html: the one field for asking and searching. Asking is
- * Day 25's (lib/unbuilt.ts). What is typed stays in the field and goes
- * nowhere; a press of Ask, or Enter, says so under the field.
+ * feature 12, Ask (lib/unbuilt.ts). What is typed stays in the field and
+ * goes nowhere; a press of Ask, or Enter, says so under the field.
  *
  * The comp draws the field and no button. Ask is a button here, drawn as the
  * composer's Save is, so that a person with no keyboard has a way to send.

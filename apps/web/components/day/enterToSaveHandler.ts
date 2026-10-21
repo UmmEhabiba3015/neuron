@@ -1,17 +1,18 @@
-'use client';
-
 import type { KeyboardEvent } from 'react';
 import { enterSaves, TOUCH_ONLY } from '@/lib/keys';
 
 /*
  * The key handler of a text box that saves: the composer, and the editor of
- * an entry. Whether Enter saves is decided in lib/keys.ts. This reads the
- * event and the screen for it, and stops the new line when it does save.
+ * an entry. Whether Enter saves is decided in lib/keys.ts. The handler reads
+ * the event and the screen for it, and stops the new line when it does save.
+ *
+ * It is a plain function and not a hook: it calls no React hook, so it may
+ * be called anywhere, not only at the top of a component.
  *
  * The screen is asked at each press, not once: a tablet can gain or lose a
  * keyboard and a mouse while the page is open.
  */
-export function useEnterToSave(onSave: () => void) {
+export function enterToSaveHandler(onSave: () => void) {
   return (event: KeyboardEvent<HTMLTextAreaElement>) => {
     const press = {
       key: event.key,
