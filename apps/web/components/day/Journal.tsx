@@ -22,7 +22,7 @@ import {
 import type { Upload } from '@/lib/uploads';
 import { formatDuration, formatTime, speakDuration } from '@/lib/utils/format';
 import { NotBuiltYet } from '@/components/ui/NotBuilt';
-import { useEnterToSave } from '@/hooks/useEnterToSave';
+import { enterToSaveHandler } from './enterToSaveHandler';
 import { useNotBuilt } from '@/hooks/useNotBuilt';
 
 /*
@@ -93,7 +93,7 @@ export function LiveEntry({
   const row = useRef<HTMLDivElement>(null);
   const editIcon = useRef<HTMLButtonElement>(null);
   const field = useRef<HTMLTextAreaElement>(null);
-  const enterToSave = useEnterToSave(onEditSave);
+  const enterToSave = enterToSaveHandler(onEditSave);
 
   const editing = editor !== undefined;
   const wasEditing = useRef(editing);
@@ -502,7 +502,7 @@ export function LiveComposer({
   const field = useRef<HTMLTextAreaElement>(null);
   const hadButton = useRef(holdsWords);
   const memory = useNotBuilt('composerMemory');
-  const enterToSave = useEnterToSave(onSave);
+  const enterToSave = enterToSaveHandler(onSave);
 
   /*
    * A save that succeeds empties the field, and Save leaves the page. If

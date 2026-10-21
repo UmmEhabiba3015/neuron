@@ -1,12 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PASSWORD_RESET_LIFETIME_MINUTES } from '@neuron/contracts';
-import { createHash, randomBytes, randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { DataSource } from 'typeorm';
 import type { EnvironmentVariables } from '../config/env.validation';
 import { MailService } from '../shared/mail/mail.service';
 import { UsersService } from '../users/users.service';
 import { PasswordResetEntity } from './entities/password-reset.entity';
+import { hashToken } from './hash-token';
 import { PasswordResetsRepository } from './password-resets.repository';
 import { PasswordService } from './password.service';
 import { SessionsRepository } from './sessions.repository';
@@ -18,7 +19,7 @@ export const PASSWORD_RESET_LIFETIME_MS =
 
 export const RESET_EMAIL_SUBJECT = 'Reset your Neuron password';
 
-/* Her words (docs/workers/feature-2-forgot-password.md). */
+/* Her words (docs/features.md, Ref 4; decided 2026-10-15). */
 export const resetEmailText = (link: string): string =>
   'Someone asked to reset the password of the Neuron account for this ' +
   'email. If it was you, open this link to choose a new password. It works ' +
@@ -135,7 +136,3 @@ export class PasswordResetService {
     });
   }
 }
-
-/* SHA-256, as for refresh tokens: a token of 32 random bytes needs no salt. */
-const hashToken = (token: string): string =>
-  createHash('sha256').update(token).digest('hex');

@@ -20,7 +20,7 @@ the next phase inherits.
 |---|---|---|
 | [Phase 1 — The Request](phase-1-the-request.md) | Days 2–7 | Day 14, late |
 | [Phase 2 — Identity and Ownership](phase-2-identity-and-ownership.md) | Days 8–14 | Day 14 |
-| Phase 3 — The Interface | Days 15–17c and Screens Day | Not yet. Due at the first review point, after feature 6 |
+| [Phase 3 — A Person Can Use It](phase-3-a-person-can-use-it.md) | Days 15–17c, Screens Day, features 1–3, 5, 6 | 2026-10-21, at the first review point |
 
 **Phase 1's entry is late and says so.** The roadmap scheduled it for Day 7 and
 it was not written. It is reconstructed on Day 14 from the ADRs, the worker
@@ -58,10 +58,14 @@ three are now answered by features in `roadmap.md`.
 | [ADR-012](../decisions/ADR-012-authentication-endpoints.md) | Registration, login, how a request is identified | Amended by ADR-016: the identifier is now an email |
 | [ADR-013](../decisions/ADR-013-ownership-enforcement.md) | Ownership enforced in the query | Yes |
 | [ADR-014](../decisions/ADR-014-sessions-and-revocation.md) | Sessions, refresh tokens, real revocation | Yes |
-| [ADR-015](../decisions/ADR-015-the-day-is-the-aggregate.md) | The day is the aggregate, not the entry | Yes. Amended on Day 17b: a day ends at midnight in the user's own timezone, not at 4am UTC |
+| [ADR-015](../decisions/ADR-015-the-day-is-the-aggregate.md) | The day is the aggregate, not the entry | Yes. Amended on Day 17b (midnight in the user's own timezone) and in feature 3 (a day with entries always exists) |
 | [ADR-016](../decisions/ADR-016-design-alignment.md) | Aligning the API with the designs | Yes |
 | [ADR-017](../decisions/ADR-017-counting-a-filtered-collection.md) | Counting a filtered collection | Yes |
 | [ADR-018](../decisions/ADR-018-browser-credential-and-cors.md) | The refresh credential in an `HttpOnly` cookie, the access token in memory, one CORS origin | Yes |
 | [ADR-019](../decisions/ADR-019-shared-contracts-package.md) | A shared contracts package, chosen over a generated client | Yes. Reverses part of ADR-001 |
 | [ADR-020](../decisions/ADR-020-soft-delete-for-entries.md) | Deleting an entry is a soft delete | Yes |
 | [ADR-021](../decisions/ADR-021-what-the-screen-shows-while-waiting.md) | What the screen shows while waiting and when a request fails | Yes |
+| [ADR-022](../decisions/ADR-022-mail-in-development-is-a-log.md) | Mail in development is written to the log | Yes, until feature 8 |
+| [ADR-023](../decisions/ADR-023-audio-files-on-the-api-disk.md) | Audio on the API's disk behind `AudioStorage`; a memo is an entry of kind `Voice` | Yes, until feature 8 |
+| [ADR-024](../decisions/ADR-024-deleting-an-account.md) | Deleting an account: rows in one transaction, files after, a sweep at start | Yes |
+| [ADR-025](../decisions/ADR-025-export-built-on-the-server.md) | Export built on the server, a PDF and a ZIP | Yes, while Neuron is English only |

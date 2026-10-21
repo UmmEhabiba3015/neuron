@@ -111,7 +111,7 @@ function drawn(view: TimelineView) {
  * Five entries on three dates in two months, in the order the API sends
  * them: newest `createdAt` first. The two entries of 2 August do not sit
  * next to each other, which is what a list ordered by `createdAt` allows
- * once a person has changed timezone (Day 34).
+ * once a person has changed timezone (feature 3).
  */
 const FIVE = [
   entry('e', '2026-09-01', '2026-09-01T08:00:00.000Z'),

@@ -4,8 +4,8 @@
  * made each time the sessions are listed and never stored, so a better rule
  * here renames every device at once.
  *
- * Her decision (docs/workers/feature-3-account-and-devices.md): our own
- * small function and no library. It names four browsers and six systems,
+ * Her decision (docs/features.md, Ref 6; 2026-10-15): our own small
+ * function and no library. It names four browsers and six systems,
  * and nothing more.
  *
  * The order of the checks is the whole of the rule. Browsers copy each

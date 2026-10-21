@@ -30,7 +30,7 @@ reports in `docs/learning/` hold the rest.
 
 ## Where the project is
 
-**Last updated:** 2026-10-17, at the close of feature 6, Your data.
+**Last updated:** 2026-10-21, at the close of the first review point.
 
 **Work is planned by feature, not by day.** The scope is locked in
 [features.md](features.md), the order is in [roadmap.md](roadmap.md), and
@@ -38,8 +38,8 @@ what the designer is asked to change is
 [ui-handover-v4.md](ui-handover-v4.md).
 
 **Done:** everything up to Screens Day, the restructure, features 1, 2 and
-3 and 5 (merged), and feature 6, Your data, which is on the branch
-`feature-your-data` in a pull request for her to merge. **Feature 4,
+3, 5 and 6 (merged), and the first review point, which is on the branch
+`review-point-1` in a pull request for her to merge. **Feature 4,
 Drafts, is skipped for now:** the designer has not sent the composer
 changes (she confirmed on 2026-10-16), so by roadmap rule 4 it waits and is
 built as soon as they arrive.
@@ -52,7 +52,7 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-**662** API unit tests, **68** API end-to-end tests, **285** web tests, **10**
+**663** API unit tests, **68** API end-to-end tests, **285** web tests, **10**
 checks on the shared package. 25 ADRs. 15 migrations. Use exactly these nine
 commands. A plain `npx jest` in `apps/api` skips the migration tests and
 still reports a pass.
@@ -78,29 +78,22 @@ The old `day-*` branches and four kept merged branches stay as they are.
 
 ## How to open the next session
 
-**First, check that she merged the pull request of feature 6** and that
-`main` holds it, and ask her to run `pnpm migration:run` (feature 6 adds no
-migration, but the API now refuses to start on a database that is not
-migrated, because the audio sweep reads `entries` first).
+**First, check that she merged the pull request of the first review point**
+and that `main` holds it.
 
-**Next is the first review point** (roadmap: after feature 6). It covers
-features 1, 2, 3, 5 and 6 together, on its own branch,
-`review-point-1`:
+**Then ask whether the designer has sent the composer changes for Drafts**
+(`ui-handover-v4.md`, C5). If yes, feature 4, Drafts, is next. If not,
+feature 7, the **Quality pass** (Ref 40): responsive layout, keyboard
+access, accessibility, **her decision on a test that reaches React
+components** (the evidence is in the handbook's Phase 3 entry and the known
+debt: feature 1's `preventDefault` run), and a lint rule so the browser's
+clock never makes a date. The known-debt rows marked "Feature 7" are its
+list. Start from the problem: what a person using a keyboard, a screen
+reader or a phone cannot do today.
 
-1. **An audit across the five features** against `CLAUDE.md`, the ADRs and
-   each other: duplication that has appeared (for example the SHA-256 token
-   hash in two services), conventions drifting, comments that point at
-   retired documents.
-2. **A sweep of several mutations** (three to five), chosen by the Master
-   Thread across the features, each predicted and run by her. Prefer the
-   ones whose tests are thinnest.
-3. **Refactoring only where the audit justifies it**, as one short worker
-   spec.
-4. **A handbook entry** on what features 1 to 6 taught, from the *Features
-   finished* section below.
-
-Then ask whether the designer has sent the composer changes for Drafts. If
-not, feature 7, the Quality pass, is next.
+Open it in the usual order: the branch from `main`, the overview, learning
+debt (none is open), the problem first, her decisions as short choices, the
+worker, the audit with one mutation, the pull request.
 
 ---
 
@@ -218,6 +211,19 @@ Report in `docs/learning/feature-6-your-data/`.
   each connection.
 - *Corrected by her:* the Master Thread said "KEEPING · since October 2026"
   fits on one line before anyone had measured it.
+
+**The first review point** (2026-10-21), after feature 6. Report in
+`docs/learning/review-point-1/`. Handbook: `docs/handbook/phase-3-a-person-can-use-it.md`.
+
+- *The audit:* no bug. Comments citing `docs/workers/` (ignored by git) or
+  plans that no longer exist; the SHA-256 token hash written twice;
+  `useEnterToSave` named like a hook. All fixed by one worker.
+- *The sweep:* four mutations across features 2, 5 and 6, run by the Master
+  Thread. Three were caught. **Making forgot-password wait for its work was
+  caught by nothing**: the timing rule of feature 2 lived only in code and a
+  comment. It now has a unit test, and its mutation fails it.
+- *Skipped:* her predictions for the sweep. She asked to go through the
+  whole review, and the results were shown without them.
 
 ---
 
@@ -349,7 +355,6 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 | **Deleted entries must be kept out of every later reader**, and from feature 5 their audio too | search, embeddings, Ask, export | Features 6, 10, 12, 13 (ADR-020) |
 | **TypeORM does not switch foreign keys off when reverting a migration** | ADR-010 | One line owed in ADR-010 |
 | **No ADR yet for the 2026-10-04 data-model decisions** (one `entries` table with a `kind` for recordings; drafts on the server) | `docs/decisions/` | Written when each is built |
-| **`useEnterToSave` is named and placed like a hook but calls no hook**; it is a plain function that returns a key handler | `apps/web/hooks/useEnterToSave.ts` | Feature 7, Quality pass |
 | **On desktop the entry icons show only on hover, and a long entry's words sit over them** (worker's note, feature 1) | `Journal.tsx`, `lock.css` | Feature 7, Quality pass; may be the designer's |
 | **Nothing stops the log mailer in production.** A reset link in a log is a working key to an account; Neuron has no idea of production yet (ADR-022) | `MailService`, `env.validation.ts` | Feature 8, Going live |
 | **`shared/mail/` is a module folder the conventions do not list** (they list `decorators/`, `dto/`, `types/`, `utils/`). Mail belongs to no domain, so the Master Thread kept it | `apps/api/src/shared/mail/` | For her husband to confirm |

@@ -164,8 +164,8 @@ export function createDevices(config: { request: Request }): Devices {
 }
 
 /*
- * The line under a device's name. Her words (docs/workers/
- * feature-3-account-and-devices.md). The dates are in the person's
+ * The line under a device's name. Her words (docs/features.md, Ref 6;
+ * decided 2026-10-15). The dates are in the person's
  * timezone, as everywhere else. This device is in use as it is read, so it
  * was last used now.
  */

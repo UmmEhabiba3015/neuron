@@ -59,7 +59,7 @@ function SignedOutOnly({ children }: { children: ReactNode }) {
   return <AuthScreen>{children}</AuthScreen>;
 }
 
-/* Her words (docs/workers/feature-2-forgot-password.md). */
+/* Her words (docs/features.md, Ref 4; decided 2026-10-15). */
 const LINK_SENT = `If an account uses that email, we have sent it a link to choose a new password. The link works for ${PASSWORD_RESET_LIFETIME_MINUTES} minutes.`;
 const BAD_LINK = 'This link has expired or has already been used.';
 const ASK_AGAIN = 'Ask for a new one.';

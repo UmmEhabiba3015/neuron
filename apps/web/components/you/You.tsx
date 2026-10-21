@@ -186,7 +186,8 @@ function UndecidedRow({
 /*
  * What it sees, from #settings-visible in 10-settings-privacy.html. No model
  * reads anything yet, and what one may read is decided with the retrieval
- * work of Day 22 and "keep this out of memory" (docs/features.md, Ref 25).
+ * work of Search (feature 10) and
+ * "keep this out of memory" (docs/features.md, Ref 25).
  * So each part has its heading and the sentence; the comp's rows are counts
  * of entries, recordings and moods, and its note at the foot is a rule that
  * is not decided.

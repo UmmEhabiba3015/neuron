@@ -5,8 +5,8 @@ import type { RefreshCredential } from './types/refresh-credential.interface';
 export const REFRESH_COOKIE_NAME = 'neuron_refresh';
 
 /*
- * No `secure` here, and not conditionally either: ADR-018 adds it on Day 31,
- * when HTTPS exists.
+ * No `secure` here, and not conditionally either: ADR-018 adds it in
+ * feature 8, Going live, when HTTPS exists.
  *
  * A browser only clears a cookie when the clearing header carries the same
  * `Path` it was set with, so setting and clearing share these attributes.

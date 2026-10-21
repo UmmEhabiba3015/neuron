@@ -10,16 +10,16 @@
  *   `createdAt`, which is used only to order the entries inside one day.
  *
  *   The list from the API is ordered by `createdAt` and not by `date`. The
- *   two orders agree today and may not after Day 34, so entries of one date
- *   are not assumed to sit next to each other, and the days are ordered by
- *   their own date.
+ *   two orders can disagree once a person changes timezone (feature 3),
+ *   so entries of one date are not assumed to sit next to each other, and
+ *   the days are ordered by their own date.
  *
  * The calendar shows the month of the API's today, and marks the dates
  * GET /days says have a live entry. It is asked once, with the list, so the
  * Timeline opens, fails and is asked again as one thing.
  *
  * The whole journal is loaded in order to list it. That is known to be the
- * wrong long-term shape, and is Day 29's problem.
+ * wrong long-term shape. No feature in docs/roadmap.md fixes it yet.
  */
 
 import type { Day, Entry } from '@neuron/contracts';
