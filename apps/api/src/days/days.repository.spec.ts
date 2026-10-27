@@ -1,26 +1,20 @@
 import { Mood } from '@neuron/contracts';
 import { DataSource } from 'typeorm';
-import { entities } from '../database/entities';
-import { migrations } from '../database/migrations';
 import { DayEntity } from './entities/day.entity';
 import { DaysRepository } from './days.repository';
 import { UserEntity } from '../users/entities/user.entity';
-import { SEEDED_PASSWORD_HASH } from '../../test/support/test-database';
+import {
+  closeTestDataSource,
+  createTestDataSource,
+  SEEDED_PASSWORD_HASH,
+} from '../../test/support/test-database';
 
 describe('DaysRepository', () => {
   let dataSource: DataSource;
   let repository: DaysRepository;
 
   beforeEach(async () => {
-    dataSource = new DataSource({
-      type: 'better-sqlite3',
-      database: ':memory:',
-      entities,
-      migrations,
-      synchronize: false,
-    });
-    await dataSource.initialize();
-    await dataSource.runMigrations();
+    dataSource = await createTestDataSource();
 
     for (const id of ['alice', 'bob']) {
       await dataSource.getRepository(UserEntity).insert({
@@ -37,9 +31,7 @@ describe('DaysRepository', () => {
   });
 
   afterEach(async () => {
-    if (dataSource.isInitialized) {
-      await dataSource.destroy();
-    }
+    await closeTestDataSource(dataSource);
   });
 
   describe('findOrCreate', () => {
@@ -72,6 +64,58 @@ describe('DaysRepository', () => {
 
       expect(day.id).toBe('winner');
       expect(day.mood).toBe('Even');
+    });
+  });
+
+  /*
+   * Filing an entry finds or makes its day inside the entry's transaction.
+   * On Postgres an error ends a transaction, so a lost race must not be an
+   * error there: the read that follows it would fail too.
+   */
+  describe('findOrCreate inside a transaction', () => {
+    it('returns the winner when its own insert loses the race', async () => {
+      await dataSource.query(
+        `INSERT INTO days (id, date, mood, created_at, user_id)
+         VALUES ('winner', '2026-08-09', 'Even', '2026-08-09T00:00:00.000Z', 'alice')`,
+      );
+      /* Its look before the insert ran before the winner's row was there. */
+      jest.spyOn(repository, 'findByDate').mockResolvedValueOnce(undefined);
+
+      const day = await dataSource.transaction((manager) =>
+        repository.findOrCreate('alice', '2026-08-09', manager),
+      );
+
+      expect(day.id).toBe('winner');
+      expect(day.mood).toBe('Even');
+    });
+
+    it('gives two at once the one row, each in a transaction of its own', async () => {
+      const [first, second] = await Promise.all(
+        [1, 2].map(() =>
+          dataSource.transaction((manager) =>
+            repository.findOrCreate('alice', '2026-08-09', manager),
+          ),
+        ),
+      );
+
+      expect(second.id).toBe(first.id);
+      const rows = await dataSource.query<{ c: string }[]>(
+        'SELECT COUNT(*) AS c FROM days',
+      );
+      expect(Number(rows[0].c)).toBe(1);
+    });
+
+    it('makes nothing when the transaction it is in rolls back', async () => {
+      await expect(
+        dataSource.transaction(async (manager) => {
+          await repository.findOrCreate('alice', '2026-08-09', manager);
+          throw new Error('the entry could not be written');
+        }),
+      ).rejects.toThrow('the entry could not be written');
+
+      expect(
+        await repository.findByDate('alice', '2026-08-09'),
+      ).toBeUndefined();
     });
   });
 
@@ -132,7 +176,7 @@ describe('DaysRepository', () => {
     ) =>
       dataSource.query(
         `INSERT INTO entries (id, content, created_at, user_id, day_id, deleted_at)
-         VALUES (?, 'something', '2026-08-09T12:00:00.000Z', ?, ?, ?)`,
+         VALUES ($1, 'something', '2026-08-09T12:00:00.000Z', $2, $3, $4)`,
         [id, userId, dayId, deletedAt],
       );
 
@@ -241,7 +285,7 @@ describe('DaysRepository', () => {
     ) =>
       dataSource.query(
         `INSERT INTO entries (id, content, created_at, user_id, day_id, deleted_at)
-         VALUES (?, 'something', '2026-08-09T12:00:00.000Z', ?, ?, ?)`,
+         VALUES ($1, 'something', '2026-08-09T12:00:00.000Z', $2, $3, $4)`,
         [id, userId, dayId, deletedAt],
       );
 

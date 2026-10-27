@@ -86,6 +86,10 @@ export class EntriesService {
    * the rollback takes the day with it -- otherwise a failed write leaves an
    * empty day behind, and 00-flow.md is explicit that an empty day does not
    * exist.
+   *
+   * The day is found or made through the transaction's manager. Postgres
+   * keeps several connections, and a query sent any other way would run on
+   * another one, outside the transaction.
    */
   private async file(
     fields: Pick<
@@ -97,7 +101,7 @@ export class EntriesService {
     const createdAt = new Date().toISOString();
 
     const id = await this.dataSource.transaction(async (manager) => {
-      const day = await this.daysService.resolveFor(author, createdAt);
+      const day = await this.daysService.resolveFor(author, createdAt, manager);
 
       const entry: EntryEntity = {
         id: crypto.randomUUID(),

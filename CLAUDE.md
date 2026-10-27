@@ -22,6 +22,7 @@ does not repeat.
 
 ```bash
 pnpm install
+docker compose up -d # the local Postgres server (compose.yaml)
 pnpm migration:run   # creates or updates the database tables
 pnpm dev             # API on http://localhost:3000
 pnpm dev:web         # web app on http://localhost:3001
@@ -32,7 +33,8 @@ pnpm --filter @neuron/contracts dev   # only while editing packages/contracts
 first, but a running dev server does not see a change to it unless the watch
 command above is running.
 
-**The nine checks.** Run exactly these. A plain `npx jest` in `apps/api`
+**The nine checks.** They need a Postgres server: the one in `compose.yaml`,
+or another named by `TEST_DATABASE_URL`. Run exactly these. A plain `npx jest` in `apps/api`
 skips the migration tests and still reports a pass.
 
 ```bash
@@ -46,10 +48,14 @@ pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
    report under "Noticed, not done". Do not add dependencies unless the spec
    allows it.
 2. **Never touch git.** No commits, branches, stashes or resets.
-3. **Never use the owner's database** (`apps/api/data/neuron.db`) or the
-   ports 3000 and 3001. Use a throwaway database and your own ports, for
-   example `DATABASE_PATH=/tmp/neuron-worker.db PORT=3100`, with the web app
-   on another port and `NEXT_PUBLIC_API_URL` and `WEB_ORIGIN` set to match.
+3. **Never use the owner's database** (the `neuron` database of the
+   `compose.yaml` server, and anything in `apps/api/data/`) or the ports
+   3000, 3001 and 5432. Run your own Postgres container on another port, for
+   example `docker run -d --rm --name neuron-worker-postgres -e
+   POSTGRES_USER=neuron -e POSTGRES_PASSWORD=neuron -p 127.0.0.1:5498:5432
+   postgres:17-alpine`, and set `TEST_DATABASE_URL` and `DATABASE_URL` to it,
+   with `PORT=3100`, the web app on another port, and `NEXT_PUBLIC_API_URL`
+   and `WEB_ORIGIN` set to match. Stop the container when you finish.
 4. **Tests are part of the work.** Write or update tests for what you
    change. Never skip or weaken a test to make it pass.
 5. **One mutation.** Remove or break the one line that makes the feature

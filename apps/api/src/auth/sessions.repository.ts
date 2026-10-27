@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, LessThan, MoreThan, Repository } from 'typeorm';
+import {
+  IsNull,
+  LessThan,
+  MoreThan,
+  Repository,
+  type EntityManager,
+} from 'typeorm';
 import { SessionEntity } from './entities/session.entity';
 
 @Injectable()
@@ -47,8 +53,13 @@ export class SessionsRepository {
     return result.affected !== 0;
   }
 
-  async revokeAllForUser(userId: string, now: string): Promise<number> {
-    const result = await this.sessions.update(
+  async revokeAllForUser(
+    userId: string,
+    now: string,
+    manager: EntityManager = this.sessions.manager,
+  ): Promise<number> {
+    const result = await manager.update(
+      SessionEntity,
       { userId, revokedAt: IsNull() },
       { revokedAt: now },
     );

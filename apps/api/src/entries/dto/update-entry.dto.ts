@@ -1,6 +1,7 @@
 import type { UpdateEntry } from '@neuron/contracts';
 import { IsString, ValidateIf } from 'class-validator';
 import { ContainsAtLeastOneField } from '../../shared/decorators/contains-at-least-one-field.decorator';
+import { ContainsNoNulCharacter } from '../../shared/decorators/contains-no-nul-character.decorator';
 import { ContainsNonWhitespace } from '../../shared/decorators/contains-non-whitespace.decorator';
 
 /*
@@ -14,5 +15,6 @@ export class UpdateEntryDto implements UpdateEntry {
   @ValidateIf((dto: UpdateEntryDto) => dto.content !== undefined)
   @IsString()
   @ContainsNonWhitespace()
+  @ContainsNoNulCharacter()
   content!: string;
 }

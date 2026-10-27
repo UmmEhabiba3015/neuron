@@ -113,7 +113,7 @@ describe('DaysController', () => {
   it('hides a future day that is already stored, leaves it alone, and shows it on the day', async () => {
     await dataSource.query(
       `INSERT INTO days (id, date, mood, created_at, user_id)
-       VALUES ('set-early', '2026-08-11', 'Hard', '2026-08-01T10:00:00.000Z', ?)`,
+       VALUES ('set-early', '2026-08-11', 'Hard', '2026-08-01T10:00:00.000Z', $1)`,
       [KARACHI],
     );
 
@@ -138,12 +138,12 @@ describe('DaysController', () => {
   it('answers a future day that has an entry, and sets its mood', async () => {
     await dataSource.query(
       `INSERT INTO days (id, date, mood, created_at, user_id)
-       VALUES ('ahead', '2026-08-11', NULL, '2026-08-09T20:00:00.000Z', ?)`,
+       VALUES ('ahead', '2026-08-11', NULL, '2026-08-09T20:00:00.000Z', $1)`,
       [KARACHI],
     );
     await dataSource.query(
       `INSERT INTO entries (id, content, created_at, user_id, day_id)
-       VALUES ('e1', 'written further east', '2026-08-09T20:00:00.000Z', ?, 'ahead')`,
+       VALUES ('e1', 'written further east', '2026-08-09T20:00:00.000Z', $1, 'ahead')`,
       [KARACHI],
     );
 

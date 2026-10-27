@@ -44,10 +44,10 @@ describe('AccountDeletionService', () => {
     for (const table of TABLES) {
       const column = table === 'users' ? 'id' : 'user_id';
       const [{ n }] = await dataSource.query<{ n: number }[]>(
-        `SELECT COUNT(*) AS n FROM ${table} WHERE ${column} = ?`,
+        `SELECT COUNT(*) AS n FROM ${table} WHERE ${column} = $1`,
         [userId],
       );
-      counts[table] = n;
+      counts[table] = Number(n);
     }
 
     return counts;
@@ -227,9 +227,13 @@ describe('AccountDeletionService', () => {
     );
     await dataSource.query("INSERT INTO blocker (user_id) VALUES ('alice')");
 
-    await expect(service.delete('alice', PASSWORD)).rejects.toThrow(
-      /FOREIGN KEY/,
-    );
+    try {
+      await expect(service.delete('alice', PASSWORD)).rejects.toThrow(
+        /violates foreign key constraint/,
+      );
+    } finally {
+      await dataSource.query('DROP TABLE blocker');
+    }
     expect(await rowsOf('alice')).toEqual(everyRow);
     expect(existsSync(join(folder, ALICE_LIVE))).toBe(true);
     expect(existsSync(join(folder, ALICE_DELETED))).toBe(true);

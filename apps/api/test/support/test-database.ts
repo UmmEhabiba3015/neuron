@@ -1,8 +1,8 @@
+import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import type { App } from 'supertest/types';
 import { DataSource } from 'typeorm';
-import { entities } from '../../src/database/entities';
-import { migrations } from '../../src/database/migrations';
+import { buildDatabaseOptions } from '../../src/database/database.module';
 import { dayFor } from '../../src/days/day-boundary';
 import { DayEntity } from '../../src/days/entities/day.entity';
 import { DaysRepository } from '../../src/days/days.repository';
@@ -21,44 +21,138 @@ export const SEEDED_TIMEZONE = 'UTC';
  */
 export const SEEDED_PASSWORD_HASH = 'seeded-account-with-no-usable-password';
 
-export async function createTestDataSource(): Promise<DataSource> {
-  const dataSource = new DataSource({
-    type: 'better-sqlite3',
-    database: ':memory:',
-    entities,
-    migrations,
-    synchronize: false,
-  });
+/*
+ * The Postgres server the tests use. Every test file makes a database of its
+ * own in it, so files that run at the same time never see each other's
+ * rows, and drops it when the file is done. The default is the server in
+ * compose.yaml.
+ */
+export const TEST_DATABASE_URL =
+  process.env.TEST_DATABASE_URL ??
+  'postgres://neuron:neuron@localhost:5432/neuron';
 
-  await dataSource.initialize();
-  await dataSource.runMigrations();
+export const START_POSTGRES_HINT =
+  `The tests need the Postgres server at ${TEST_DATABASE_URL}. ` +
+  'Start it with `docker compose up -d` from the repository root, or set ' +
+  'TEST_DATABASE_URL to another server.';
 
-  return dataSource;
+/* The same server, another database in it. */
+export function urlOfDatabase(name: string): string {
+  const url = new URL(TEST_DATABASE_URL);
+  url.pathname = `/${name}`;
+
+  return url.toString();
 }
 
 /*
- * A database file with every migration applied, as `pnpm migration:run`
- * leaves it. A suite that starts the API as a real process needs one: the
- * sweep at start reads the entries table before the API listens (ADR-024).
+ * A connection to the server's own database, for making and dropping the
+ * test databases. One per file, made when first needed.
  */
-export async function migrateDatabaseFile(path: string): Promise<void> {
-  const dataSource = new DataSource({
-    type: 'better-sqlite3',
-    database: path,
-    entities,
-    migrations,
-    synchronize: false,
-  });
+let server: DataSource | undefined;
+
+async function theServer(): Promise<DataSource> {
+  if (server === undefined) {
+    server = new DataSource({ type: 'postgres', url: TEST_DATABASE_URL });
+
+    try {
+      await server.initialize();
+    } catch (error) {
+      server = undefined;
+      throw new Error(`${START_POSTGRES_HINT}\n${String(error)}`, {
+        cause: error,
+      });
+    }
+  }
+
+  return server;
+}
+
+const made: string[] = [];
+
+/*
+ * A new, empty database, dropped when the test file ends. The name is
+ * random, because files run side by side in several processes.
+ */
+export async function createEmptyDatabase(): Promise<string> {
+  const name = `neuron_test_${randomUUID().replaceAll('-', '')}`;
+
+  await (await theServer()).query(`CREATE DATABASE "${name}"`);
+  made.push(name);
+
+  return urlOfDatabase(name);
+}
+
+/*
+ * A database with every migration applied, as `pnpm migration:run` leaves
+ * it, and its address. A suite that starts the API as a real process needs
+ * one: the sweep at start reads the entries table before the API listens
+ * (ADR-024).
+ */
+export async function createMigratedDatabase(): Promise<string> {
+  const url = await createEmptyDatabase();
+  const dataSource = new DataSource(buildDatabaseOptions(url));
 
   await dataSource.initialize();
   await dataSource.runMigrations();
   await dataSource.destroy();
+
+  return url;
+}
+
+/*
+ * The database of this test file, migrated once and emptied for each test
+ * that asks for it, which is cheaper than a database per test and as clean:
+ * every table the application has is truncated, so each test starts from
+ * nothing, as it did with SQLite's in-memory database.
+ */
+let fileDatabase: string | undefined;
+
+export async function createTestDataSource(): Promise<DataSource> {
+  fileDatabase ??= await createMigratedDatabase();
+
+  const dataSource = new DataSource(buildDatabaseOptions(fileDatabase));
+  await dataSource.initialize();
+
+  const tables = dataSource.entityMetadatas
+    .map((metadata) => `"${metadata.tableName}"`)
+    .join(', ');
+  await dataSource.query(`TRUNCATE ${tables}`);
+
+  return dataSource;
 }
 
 export async function closeTestDataSource(dataSource: DataSource) {
   if (dataSource.isInitialized) {
     await dataSource.destroy();
   }
+}
+
+/*
+ * When the file is done, its databases go. WITH (FORCE) ends any connection
+ * a failed test left open, so a failure never leaves a database behind.
+ * Registered here, at import, because a hook can only be registered while
+ * the file is being read, and every file that makes a database imports this.
+ *
+ * Postgres makes and drops databases one at a time, so while a dozen files
+ * finish together a drop can wait several seconds for its turn: longer than
+ * Jest's five-second default for a hook.
+ */
+const DROP_TIMEOUT_MS = 60_000;
+
+if (typeof afterAll === 'function') {
+  afterAll(async () => {
+    if (server === undefined) {
+      return;
+    }
+
+    for (const name of made.splice(0)) {
+      await server.query(`DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`);
+    }
+
+    await server.destroy();
+    server = undefined;
+    fileDatabase = undefined;
+  }, DROP_TIMEOUT_MS);
 }
 
 /*

@@ -13,9 +13,10 @@ work moved from days to features.
 | Node | 24 or newer | The web app's tests run TypeScript files with Node alone, which Node does without a flag only from version 24 |
 | pnpm | 11.17.0 | `corepack enable` provides it. npm and yarn will not work: this is a pnpm workspace with a pnpm lockfile |
 | git and `gh` | any recent | `gh` is the GitHub command line tool; each feature closes with a pull request |
+| Docker, with `docker compose` | any recent | Runs the Postgres server the API and the tests use (`compose.yaml`) |
 
-`better-sqlite3` is a native module and compiles on install. On Linux that
-needs build tools (`build-essential` on Debian and Ubuntu, `gcc-c++ make` on
+`argon2` is a native module and may compile on install. On Linux that needs
+build tools (`build-essential` on Debian and Ubuntu, `gcc-c++ make` on
 Fedora). If `pnpm install` fails with a node-gyp error, this is why.
 
 ## 2. Getting it running
@@ -29,11 +30,25 @@ cp apps/web/.env.example apps/web/.env.local
 ```
 
 The root `.env` does not work as copied. `JWT_SECRET` must be replaced with a
-generated value; the command is written in `.env.example`. `WEB_ORIGIN` is
-already right for local work. `apps/web/.env.local` works as copied.
+generated value; the command is written in `.env.example`. `DATABASE_URL` and
+`WEB_ORIGIN` are already right for local work. `apps/web/.env.local` works as
+copied.
 
-There is no database yet, and that is expected. The API creates the file but
-never the tables:
+The journal lives in Postgres, in Docker. Start the server, from the
+repository root, before anything else:
+
+```bash
+docker compose up -d
+```
+
+It runs in the background and keeps its data in a Docker volume,
+`neuron-postgres`, so stopping it (`docker compose down`) or restarting the
+machine loses nothing. After a restart, run `docker compose up -d` again.
+`docker compose ps` says whether it is running. The database, the user and
+the password are all `neuron`, and the server answers only on this machine.
+
+The server starts with an empty database and no tables, and the API never
+makes them:
 
 ```bash
 pnpm migration:run
@@ -54,8 +69,16 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-Expected after the restructure (2026-10-13): all clean, 421 API unit tests,
-42 API end-to-end tests, 170 web tests and 7 checks on the shared package.
+`pnpm test` and `pnpm test:e2e` need the Postgres server running too. Each
+test file makes a database of its own in it, with a random name, and drops it
+when the file is done, so the journal's database is never touched. If the
+server cannot be reached, the run stops at once with a message that says to
+run `docker compose up -d`; it never skips the tests. To run them against
+another server, set `TEST_DATABASE_URL` to its address.
+
+Expected after the move to Postgres (2026-10-27): all clean, 585 API unit
+tests, 68 API end-to-end tests, 290 web tests and 5 component tests, and 10
+checks on the shared package.
 
 `packages/contracts` is compiled to `packages/contracts/dist/`, which is
 gitignored. Every root script that needs it builds it first. While changing
@@ -68,32 +91,19 @@ the next build.
 
 ## 3. Moving the existing journal
 
-`apps/api/data/neuron.db` is gitignored, so a clone starts empty. To carry
-the real journal across, copy that file, then run `pnpm migration:run`.
+Until feature 8 the journal was a SQLite file, `apps/api/data/neuron.db`. The
+API no longer reads it, and nothing copies it into Postgres: she archives that
+file herself. The voice memos' audio is still in `apps/api/data/audio`.
 
-**A database made before Day 8** has no `migrations` table, so TypeORM tries
-to create `entries` again and stops. Record the first migration as already
-applied, once, **from `apps/api`** (from the repository root the module is not
-found):
-
-```bash
-cd apps/api
-node -e "
-  const Database = require('better-sqlite3');
-  const db = new Database('data/neuron.db');
-  db.exec('CREATE TABLE IF NOT EXISTS migrations (id integer PRIMARY KEY AUTOINCREMENT NOT NULL, timestamp bigint NOT NULL, name varchar NOT NULL)');
-  db.prepare('INSERT INTO migrations (timestamp, name) VALUES (?, ?)')
-    .run(1788262448946, 'InitialSchema1788262448946');
-"
-pnpm migration:run
-```
-
-There is deliberately no `sqlite3` command here: that tool is not installed.
+To carry the journal to another machine now, copy the Postgres database with
+`pg_dump` and `pg_restore` (or `psql`), and copy `apps/api/data/audio` beside
+it. Run `pnpm migration:run` afterwards.
 
 ## 4. What git does not carry
 
 - **`.env` and `apps/web/.env.local`.** Recreate them from the examples.
-- **`apps/api/data/neuron.db`**, the journal itself.
+- **The journal itself**: the Postgres volume `neuron-postgres`, and the
+  audio in `apps/api/data/audio`.
 - **`docs/workers/`**, every worker prompt. Copy it by hand if you want it.
 - **Some worker reports.** `.gitignore` ignores any file named exactly
   `report.md` under `docs/learning/`, with a named exception for Day 8. Reports

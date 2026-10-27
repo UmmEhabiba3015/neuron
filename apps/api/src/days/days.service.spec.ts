@@ -158,7 +158,7 @@ describe('DaysService', () => {
 
       await dataSource.query(
         `INSERT INTO entries (id, content, created_at, user_id, day_id)
-         VALUES (?, 'written', '2026-08-09T20:00:00.000Z', ?, ?)`,
+         VALUES ($1, 'written', '2026-08-09T20:00:00.000Z', $2, $3)`,
         [`${owner.id}-${date}`, owner.id, day.id],
       );
     };

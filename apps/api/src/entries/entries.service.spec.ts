@@ -405,7 +405,7 @@ describe('EntriesService', () => {
     it('stays, with its mood, when its last entry is deleted, and takes the next entry', async () => {
       const only = await service.create('the only one', CALLER);
       const [day] = await dayRows();
-      await dataSource.query('UPDATE days SET mood = ? WHERE id = ?', [
+      await dataSource.query('UPDATE days SET mood = $1 WHERE id = $2', [
         'Good',
         day.id,
       ]);
@@ -416,7 +416,7 @@ describe('EntriesService', () => {
 
       const next = await service.create('written after', CALLER);
       const [row] = await dataSource.query<{ day_id: string }[]>(
-        'SELECT day_id FROM entries WHERE id = ?',
+        'SELECT day_id FROM entries WHERE id = $1',
         [next.id],
       );
 

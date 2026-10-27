@@ -27,7 +27,7 @@ not built yet." and sends nothing. The full list is
 
 ```
 apps/
-  api/          NestJS API on SQLite, through TypeORM
+  api/          NestJS API on Postgres, through TypeORM
     src/
       shared/       code that belongs to no one domain: decorators, types, utils
       config/       environment validation
@@ -94,7 +94,7 @@ rather than being quietly corrected
 | Variable | Default | Rule |
 |---|---|---|
 | `PORT` | `3000` | A whole number from 1 to 65535 |
-| `DATABASE_PATH` | `apps/api/data/neuron.db` | Any non-empty path. A file that does not exist is created, with a warning |
+| `DATABASE_URL` | **none, required** | A Postgres address, `postgres://user:password@host:port/database`. Locally `postgres://neuron:neuron@localhost:5432/neuron`, the server `docker compose up -d` starts |
 | `JWT_SECRET` | **none, required** | At least 32 characters. It signs every access token, so a default would let anyone who reads this repository forge one |
 | `WEB_ORIGIN` | **none, required** | The one origin allowed to call the API from a browser, for example `http://localhost:3001`. No path, no trailing slash |
 
@@ -160,10 +160,13 @@ The rules behind these answers:
 
 ## The database and migrations
 
-The journal is a SQLite file, `apps/api/data/neuron.db`, gitignored. The API
-creates the file but **never creates or changes tables itself**: every schema
+The journal is in Postgres 17, run locally by `docker compose up -d`
+(`compose.yaml`) and named by `DATABASE_URL`. The API **never creates or
+changes tables itself**: every schema
 change is a migration, and a test fails if TypeORM's `synchronize` is turned
-on ([ADR-010](docs/decisions/ADR-010-typeorm.md)).
+on ([ADR-010](docs/decisions/ADR-010-typeorm.md)). The schema starts from one baseline migration; the
+fifteen SQLite migrations before it are in git
+([ADR-028](docs/decisions/ADR-028-postgres-locally.md)).
 
 ```bash
 pnpm migration:run        # apply everything pending; run it whenever new ones arrive
@@ -171,13 +174,9 @@ pnpm migration:revert     # undo the most recent one
 pnpm migration:generate apps/api/src/database/migrations/<Name>
 ```
 
-Read a generated migration before trusting it. SQLite cannot add a constraint
-to an existing table, so TypeORM rebuilds the whole table, and twice a
-generated migration has copied a `NOT NULL` column without a value. Several of
-this project's migrations are hand-written for that reason.
-
-A database made before Day 8 has no `migrations` table and needs a one-time
-repair before migrations will run; [docs/SETUP.md](docs/SETUP.md) has it.
+Read a generated migration before trusting it. `UQ_users_email` (on
+`lower(email)`) and `CHK_entries_kind` live only in the migrations, because
+TypeORM cannot declare them on the entities.
 
 ## Checks
 

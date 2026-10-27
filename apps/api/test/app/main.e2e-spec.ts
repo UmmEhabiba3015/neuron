@@ -9,7 +9,7 @@ import {
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { migrateDatabaseFile } from '../support/test-database';
+import { createMigratedDatabase } from '../support/test-database';
 
 /*
  * Every other suite builds the application itself and calls configureHttp on
@@ -60,14 +60,12 @@ describe('main.ts wiring (e2e)', () => {
 
   beforeAll(async () => {
     directory = mkdtempSync(join(tmpdir(), 'neuron-main-wiring-'));
-    const databaseFile = join(directory, 'neuron.db');
-    writeFileSync(databaseFile, '');
 
     /*
      * The API reads the entries table before it listens, for the sweep, so
      * the database has its tables, as `pnpm migration:run` makes them.
      */
-    await migrateDatabaseFile(databaseFile);
+    const databaseUrl = await createMigratedDatabase();
 
     audioFolder = join(directory, 'audio');
     mkdirSync(audioFolder);
@@ -84,7 +82,7 @@ describe('main.ts wiring (e2e)', () => {
         env: {
           PATH: process.env.PATH,
           PORT: String(port),
-          DATABASE_PATH: databaseFile,
+          DATABASE_URL: databaseUrl,
           AUDIO_PATH: audioFolder,
           JWT_SECRET: 'test-only-signing-secret-never-use-this-anywhere-real',
           WEB_ORIGIN,

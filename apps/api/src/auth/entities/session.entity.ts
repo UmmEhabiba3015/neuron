@@ -1,5 +1,12 @@
 import { Exclude } from 'class-transformer';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { UserEntity } from '../../users/entities/user.entity';
 
 @Entity({ name: 'sessions' })
@@ -7,11 +14,15 @@ export class SessionEntity {
   @PrimaryColumn({ type: 'text' })
   id!: string;
 
+  @Index('IDX_sessions_user_id')
   @Column({ name: 'user_id', type: 'text' })
   userId!: string;
 
   @ManyToOne(() => UserEntity)
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({
+    name: 'user_id',
+    foreignKeyConstraintName: 'FK_sessions_user',
+  })
   user?: UserEntity;
 
   @Exclude()
@@ -21,6 +32,7 @@ export class SessionEntity {
   @Column({ name: 'created_at', type: 'text' })
   createdAt!: string;
 
+  @Index('IDX_sessions_expires_at')
   @Column({ name: 'expires_at', type: 'text' })
   expiresAt!: string;
 

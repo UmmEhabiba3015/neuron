@@ -317,6 +317,29 @@ describe('PasswordResetService', () => {
       });
     });
 
+    /*
+     * Each step is in the one transaction, so a step that fails takes the
+     * ones before it back with it. On Postgres that holds only because every
+     * step is handed the transaction's manager: a step sent another way runs
+     * on another connection and stays done.
+     */
+    it('changes nothing when its last step fails: the old password and the link still work', async () => {
+      const token = await ask();
+      jest
+        .spyOn(SessionsRepository.prototype, 'revokeAllForUser')
+        .mockRejectedValueOnce(new Error('the database went away'));
+
+      await expect(service.reset(token, NEW_PASSWORD)).rejects.toThrow(
+        'the database went away',
+      );
+
+      expect((await resetRows())[0].usedAt).toBeNull();
+      expect(
+        await authService.login('umer@example.com', OLD_PASSWORD),
+      ).toBeDefined();
+      expect(await service.reset(token, NEW_PASSWORD)).toBe(true);
+    });
+
     it('lets only one of two requests with the same link through', async () => {
       const token = await ask();
 
@@ -330,10 +353,16 @@ describe('PasswordResetService', () => {
   });
 });
 
-/* Waits, a turn of the event loop at a time, until `count` is not zero. */
+/*
+ * Waits until `count` is not zero, for five seconds at most. The work it
+ * waits for goes to Postgres over a socket, so it is measured in time and
+ * not in turns of the event loop.
+ */
 async function waitFor(count: () => number): Promise<void> {
-  for (let turn = 0; turn < 1000 && count() === 0; turn += 1) {
-    await new Promise((resolve) => setImmediate(resolve));
+  const deadline = Date.now() + 5_000;
+
+  while (count() === 0 && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 5));
   }
 
   expect(count()).toBeGreaterThan(0);

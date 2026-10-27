@@ -1,7 +1,8 @@
 import { Exclude } from 'class-transformer';
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 
 @Entity({ name: 'users' })
+@Index('UQ_users_email', { synchronize: false })
 export class UserEntity {
   @PrimaryColumn({ type: 'text' })
   id!: string;
@@ -9,7 +10,8 @@ export class UserEntity {
   /*
    * Unique, but the index that enforces it is on lower(email) and lives in
    * the migration rather than here: TypeORM's unique:true would emit a plain
-   * index and let one mailbox hold two accounts.
+   * index and let one mailbox hold two accounts. The class names it with
+   * synchronize: false, so that migration:generate leaves it alone.
    */
   @Column({ type: 'text' })
   email!: string;

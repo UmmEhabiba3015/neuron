@@ -1,6 +1,7 @@
 # ADR-003: Use SQLite (via `node:sqlite`) for Persistence
 
-**Status:** Accepted
+**Status:** Accepted; superseded by
+[ADR-028](ADR-028-postgres-locally.md) on 2026-10-27 (Postgres)
 **Date:** 2026-07-29 (Day 2)
 
 ---

@@ -1,9 +1,9 @@
 import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { migrateDatabaseFile } from '../support/test-database';
+import { createMigratedDatabase } from '../support/test-database';
 
 /*
  * Builds the API the way `pnpm build` does and starts the result the way
@@ -62,10 +62,8 @@ describe('the built API (e2e)', () => {
     );
 
     directory = mkdtempSync(join(tmpdir(), 'neuron-built-output-'));
-    const databaseFile = join(directory, 'neuron.db');
-    writeFileSync(databaseFile, '');
     /* The sweep at start reads the entries table (ADR-024). */
-    await migrateDatabaseFile(databaseFile);
+    const databaseUrl = await createMigratedDatabase();
 
     const port = await findAFreePort();
     baseUrl = `http://127.0.0.1:${port}`;
@@ -75,7 +73,12 @@ describe('the built API (e2e)', () => {
       env: {
         PATH: process.env.PATH,
         PORT: String(port),
-        DATABASE_PATH: databaseFile,
+        DATABASE_URL: databaseUrl,
+        /*
+         * Its own folder, never the default, which is the owner's
+         * apps/api/data/audio: the sweep at start would empty it.
+         */
+        AUDIO_PATH: join(directory, 'audio'),
         JWT_SECRET: 'test-only-signing-secret-never-use-this-anywhere-real',
         WEB_ORIGIN: 'http://localhost:3001',
       },

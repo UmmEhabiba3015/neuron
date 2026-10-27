@@ -33,7 +33,7 @@ describe('the journal (e2e)', () => {
     (
       await running.dataSource.query<
         { content: string; deleted_at: string | null }[]
-      >(`SELECT content, deleted_at FROM entries WHERE id = ?`, [id])
+      >(`SELECT content, deleted_at FROM entries WHERE id = $1`, [id])
     )[0];
 
   beforeEach(async () => {

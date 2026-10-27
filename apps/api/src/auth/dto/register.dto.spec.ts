@@ -145,4 +145,11 @@ describe('RegisterDto', () => {
       );
     });
   });
+
+  /* Postgres cannot store it (ADR-005: refused, not removed). */
+  it('should reject a name with the NUL character in it', () => {
+    expect(messagesFor({ ...valid, name: 'Ha\u0000biba' })).toEqual([
+      'name must not contain the NUL character (U+0000)',
+    ]);
+  });
 });

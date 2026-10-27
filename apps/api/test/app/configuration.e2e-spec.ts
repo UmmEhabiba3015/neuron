@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { Test as NestTest, TestingModule } from '@nestjs/testing';
 import type { DataSource } from 'typeorm';
+import { createEmptyDatabase } from '../support/test-database';
 
 /*
  * ADR-007: configuration is checked once, at start, and a bad value stops
@@ -15,13 +16,15 @@ import type { DataSource } from 'typeorm';
 describe('configuration at start (e2e)', () => {
   let environmentBeforeThisTest: NodeJS.ProcessEnv;
   let directory: string;
-  let databaseFile: string;
+  let databaseUrl: string;
+
+  beforeAll(async () => {
+    databaseUrl = await createEmptyDatabase();
+  });
 
   beforeEach(() => {
     environmentBeforeThisTest = { ...process.env };
     directory = mkdtempSync(join(tmpdir(), 'neuron-configuration-'));
-    databaseFile = join(directory, 'neuron.db');
-    writeFileSync(databaseFile, '');
   });
 
   afterEach(() => {
@@ -53,7 +56,7 @@ describe('configuration at start (e2e)', () => {
 
   it('refuses to start with a bad value, and names it', async () => {
     process.env.PORT = 'hello';
-    process.env.DATABASE_PATH = databaseFile;
+    process.env.DATABASE_URL = databaseUrl;
 
     await expect(buildTheRealApplication()).rejects.toThrow(
       'PORT must be a whole number between 1 and 65535, received "hello"',
@@ -65,6 +68,13 @@ describe('configuration at start (e2e)', () => {
     await expect(buildTheRealApplication()).rejects.toThrow(
       /^WEB_ORIGIN must be set/,
     );
+
+    process.env.WEB_ORIGIN = 'http://localhost:3001';
+    delete process.env.DATABASE_URL;
+
+    await expect(buildTheRealApplication()).rejects.toThrow(
+      /^DATABASE_URL must be set/,
+    );
   });
 
   /*
@@ -73,7 +83,7 @@ describe('configuration at start (e2e)', () => {
    */
   it('starts with a valid configuration, and leaves the schema alone', async () => {
     process.env.PORT = '3000';
-    process.env.DATABASE_PATH = databaseFile;
+    process.env.DATABASE_URL = databaseUrl;
 
     const application = await buildTheRealApplication();
 
@@ -88,7 +98,8 @@ describe('configuration at start (e2e)', () => {
       expect(dataSource.options.migrationsRun).not.toBe(true);
 
       const tables = await dataSource.query<{ name: string }[]>(
-        `SELECT name FROM sqlite_master WHERE type = 'table'`,
+        `SELECT table_name AS name FROM information_schema.tables
+          WHERE table_schema = 'public'`,
       );
 
       expect(tables).toEqual([]);

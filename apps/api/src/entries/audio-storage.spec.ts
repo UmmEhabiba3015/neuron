@@ -8,9 +8,12 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
-import { DEFAULT_DATABASE_PATH } from '../database/database.module';
-import { AudioStorage, resolveAudioPath } from './audio-storage';
+import { join } from 'node:path';
+import {
+  AudioStorage,
+  DEFAULT_AUDIO_PATH,
+  resolveAudioPath,
+} from './audio-storage';
 
 describe('AudioStorage', () => {
   const KEY = '0b7f2a52-41f6-4d38-9a5e-1c2d3e4f5a6b';
@@ -118,21 +121,22 @@ describe('resolveAudioPath', () => {
     }
   };
 
-  it('is "audio" beside the default database when neither path is set', () => {
-    expect(resolveAudioPath(undefined, undefined)).toBe(
-      join(dirname(DEFAULT_DATABASE_PATH), 'audio'),
+  it('is apps/api/data/audio when AUDIO_PATH is not set', () => {
+    expect(resolveAudioPath(undefined)).toBe(DEFAULT_AUDIO_PATH);
+    expect(DEFAULT_AUDIO_PATH).toBe(
+      join(__dirname, '..', '..', 'data', 'audio'),
     );
   });
 
-  it('is "audio" beside a database chosen with DATABASE_PATH', () => {
-    expect(
-      inDirectory(() => resolveAudioPath(undefined, 'scratch/worker.db')),
-    ).toBe(join(directory, 'scratch', 'audio'));
+  it('is the same folder from whichever directory the API starts in', () => {
+    expect(inDirectory(() => resolveAudioPath(undefined))).toBe(
+      DEFAULT_AUDIO_PATH,
+    );
   });
 
   it('is AUDIO_PATH, resolved from the working directory, when it is set', () => {
-    expect(
-      inDirectory(() => resolveAudioPath('memos', 'scratch/worker.db')),
-    ).toBe(join(directory, 'memos'));
+    expect(inDirectory(() => resolveAudioPath('memos'))).toBe(
+      join(directory, 'memos'),
+    );
   });
 });

@@ -1,6 +1,4 @@
-import { existsSync, mkdirSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { Logger, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import type { DataSourceOptions } from 'typeorm';
@@ -8,47 +6,18 @@ import type { EnvironmentVariables } from '../config/env.validation';
 import { entities } from './entities';
 import { migrations } from './migrations';
 
-const logger = new Logger('DatabaseModule');
-
-export const DEFAULT_DATABASE_PATH = resolve(
-  __dirname,
-  '../..',
-  'data/neuron.db',
-);
-
-export function resolveDatabasePath(
-  configuredPath: string | undefined,
-  defaultPath: string,
-): string {
-  if (configuredPath === undefined) {
-    return defaultPath;
-  }
-
-  const databasePath = resolve(process.cwd(), configuredPath);
-
-  if (!existsSync(databasePath)) {
-    logger.warn(
-      `DATABASE_PATH is set to ${JSON.stringify(configuredPath)} but no database exists at ${databasePath}. ` +
-        'A new, empty one is being created. If you expected to find your existing entries, check that path for a typo.',
-    );
-  }
-
-  return databasePath;
-}
-
-export function buildDatabaseOptions(
-  configuredPath: string | undefined,
-): DataSourceOptions {
-  const databasePath = resolveDatabasePath(
-    configuredPath,
-    DEFAULT_DATABASE_PATH,
-  );
-
-  mkdirSync(dirname(databasePath), { recursive: true });
-
+/*
+ * The one description of the database, used by the application, by the
+ * migration CLI (data-source.ts) and by the tests, so the three agree.
+ *
+ * The address is DATABASE_URL, which the configuration has already checked
+ * (ADR-007). A database that is not there, or a server that is not running,
+ * stops the start: TypeORM's first connection fails and retryAttempts is 0.
+ */
+export function buildDatabaseOptions(url: string): DataSourceOptions {
   return {
-    type: 'better-sqlite3',
-    database: databasePath,
+    type: 'postgres',
+    url,
 
     entities,
     migrations,
@@ -62,7 +31,7 @@ export function buildDatabaseOptions(
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService<EnvironmentVariables, true>) => ({
-        ...buildDatabaseOptions(config.get('DATABASE_PATH', { infer: true })),
+        ...buildDatabaseOptions(config.get('DATABASE_URL', { infer: true })),
 
         retryAttempts: 0,
       }),

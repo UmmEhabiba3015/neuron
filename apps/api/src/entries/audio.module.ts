@@ -29,10 +29,7 @@ import { EntryEntity } from './entities/entry.entity';
       inject: [ConfigService],
       useFactory: (config: ConfigService<EnvironmentVariables, true>) =>
         new AudioStorage(
-          resolveAudioPath(
-            config.get('AUDIO_PATH', { infer: true }),
-            config.get('DATABASE_PATH', { infer: true }),
-          ),
+          resolveAudioPath(config.get('AUDIO_PATH', { infer: true })),
         ),
     },
     AudioKeysRepository,

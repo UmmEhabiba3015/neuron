@@ -59,4 +59,11 @@ describe('CreateEntryDto', () => {
       }
     }
   });
+
+  /* Postgres cannot store it (ADR-005: refused, not removed). */
+  it('should reject content with the NUL character in it', () => {
+    expect(messagesFor({ content: 'before\u0000after' })).toEqual([
+      'content must not contain the NUL character (U+0000)',
+    ]);
+  });
 });

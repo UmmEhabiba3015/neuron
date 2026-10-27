@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { Register } from '@neuron/contracts';
-import { QueryFailedError } from 'typeorm';
+import { QueryFailedError, type EntityManager } from 'typeorm';
 import { randomUUID } from 'node:crypto';
 import { PasswordService } from '../auth/password.service';
 import { UserEntity } from './entities/user.entity';
@@ -69,19 +69,28 @@ export class UsersService {
   /*
    * Takes a hash and not a password, so that the slow hashing can be done
    * before a transaction opens rather than while it is open. The caller
-   * hashes with PasswordService, as register() does.
+   * hashes with PasswordService, as register() does. The manager is the
+   * transaction's, when there is one.
    */
-  setPasswordHash(id: string, passwordHash: string): Promise<void> {
-    return this.usersRepository.updatePasswordHash(id, passwordHash);
+  setPasswordHash(
+    id: string,
+    passwordHash: string,
+    manager?: EntityManager,
+  ): Promise<void> {
+    return this.usersRepository.updatePasswordHash(id, passwordHash, manager);
   }
 }
+
+/*
+ * 23505 is Postgres's code for a unique violation. Two registrations of one
+ * address at the same moment both pass the lookup above, and UQ_users_email
+ * lets only one of them in; the other is told the address is taken.
+ */
+const UNIQUE_VIOLATION = '23505';
 
 function isUniqueNameViolation(error: unknown): boolean {
   return (
     error instanceof QueryFailedError &&
-    typeof (error.driverError as { code?: unknown }).code === 'string' &&
-    (error.driverError as { code: string }).code.startsWith(
-      'SQLITE_CONSTRAINT_UNIQUE',
-    )
+    (error.driverError as { code?: unknown }).code === UNIQUE_VIOLATION
   );
 }

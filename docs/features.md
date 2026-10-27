@@ -220,7 +220,8 @@ built feature.* Each new feature designs its own waiting and failing.
 (feature 7). Walked at three widths; every built task works with the
 keyboard alone, and a screen reader announces saving and the mood.
 
-**Ref 41. Running it for real.** Keep. *Nothing.*
+**Ref 41. Running it for real.** Keep. *Postgres locally only* (feature 8,
+block 2, 2026-10-27).
 Deployment, Postgres, continuous integration, logging and error tracking,
 and rate limiting on the AI endpoints. No screens involved.
 
@@ -326,8 +327,9 @@ Each choice has an ADR and can be revisited.
 1. A pnpm workspace: `apps/api`, `apps/web`, `packages/contracts`. (ADR-001,
    ADR-019.)
 2. The API is NestJS on Node.js 24 or later. (ADR-002.)
-3. SQLite through TypeORM, until managed Postgres in the *Going live*
-   feature. (ADR-003, ADR-010.)
+3. Postgres 17 through TypeORM, locally in Docker since 2026-10-27
+   (ADR-028); managed Postgres comes with the rest of the *Going live*
+   feature. (ADR-010, ADR-028.)
 4. The web app is Next.js with React.
 5. Not chosen yet: the AI provider, the embedding model, the vector store,
    the queue, object storage, the mail service, and hosting. Each is chosen

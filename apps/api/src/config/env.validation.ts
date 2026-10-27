@@ -1,6 +1,6 @@
 export interface EnvironmentVariables {
   PORT: number;
-  DATABASE_PATH?: string;
+  DATABASE_URL: string;
   AUDIO_PATH?: string;
   JWT_SECRET: string;
   WEB_ORIGIN: string;
@@ -30,14 +30,70 @@ const parsePort = (raw: unknown): number => {
   return port;
 };
 
-const parseDatabasePath = (raw: unknown): string | undefined => {
-  if (raw === undefined) {
-    return undefined;
+const EXAMPLE_DATABASE_URL = 'postgres://neuron:neuron@localhost:5432/neuron';
+
+/*
+ * The address is quoted in a message with its password hidden, because the
+ * message goes to a log and a log is no place for a password.
+ */
+const withoutPassword = (raw: string): string => {
+  try {
+    const url = new URL(raw);
+
+    if (url.password !== '') {
+      url.password = '***';
+    }
+
+    return url.toString();
+  } catch {
+    return raw.replace(/\/\/([^:@/]*):[^@/]*@/, '//$1:***@');
+  }
+};
+
+/*
+ * URL would quietly drop surrounding whitespace, so it is refused first, as
+ * PORT refuses it (ADR-007).
+ */
+const isAPostgresUrl = (raw: string): boolean => {
+  if (raw.trim() !== raw) {
+    return false;
   }
 
-  if (typeof raw !== 'string' || raw === '') {
+  let url: URL;
+
+  try {
+    url = new URL(raw);
+  } catch {
+    return false;
+  }
+
+  return (
+    (url.protocol === 'postgres:' || url.protocol === 'postgresql:') &&
+    url.hostname !== '' &&
+    url.pathname.length > 1
+  );
+};
+
+/*
+ * Which Postgres database holds the journal. Required, as WEB_ORIGIN is:
+ * a built-in address could quietly open the wrong database in another
+ * environment, and an empty one would look like a journal that lost every
+ * entry (ADR-007).
+ */
+const parseDatabaseUrl = (raw: unknown): string => {
+  if (raw === undefined || raw === '') {
     throw new Error(
-      `DATABASE_PATH must be a non-empty path, received ${quote(raw)}`,
+      'DATABASE_URL must be set. It names the Postgres database that holds ' +
+        'the journal, so there is no safe default. For local development, ' +
+        `start the database with \`docker compose up -d\` and use ${quote(EXAMPLE_DATABASE_URL)}.`,
+    );
+  }
+
+  if (typeof raw !== 'string' || !isAPostgresUrl(raw)) {
+    throw new Error(
+      `DATABASE_URL must be a Postgres address such as ${quote(EXAMPLE_DATABASE_URL)} -- ` +
+        'postgres://, a user and password, a host, a port and the name of the ' +
+        `database -- received ${quote(typeof raw === 'string' ? withoutPassword(raw) : raw)}`,
     );
   }
 
@@ -45,8 +101,8 @@ const parseDatabasePath = (raw: unknown): string | undefined => {
 };
 
 /*
- * The folder voice memos are kept in (ADR-023). Like DATABASE_PATH it may be
- * left out, and the default is then beside the database.
+ * The folder voice memos are kept in (ADR-023). It may be left out, and the
+ * default is then apps/api/data/audio.
  */
 const parseAudioPath = (raw: unknown): string | undefined => {
   if (raw === undefined) {
@@ -142,13 +198,8 @@ export function validate(
     PORT: parsePort(config.PORT),
     JWT_SECRET: parseJwtSecret(config.JWT_SECRET),
     WEB_ORIGIN: parseWebOrigin(config.WEB_ORIGIN),
+    DATABASE_URL: parseDatabaseUrl(config.DATABASE_URL),
   };
-
-  const databasePath = parseDatabasePath(config.DATABASE_PATH);
-
-  if (databasePath !== undefined) {
-    validated.DATABASE_PATH = databasePath;
-  }
 
   const audioPath = parseAudioPath(config.AUDIO_PATH);
 
@@ -159,11 +210,13 @@ export function validate(
   return validated;
 }
 
+/*
+ * The migration CLI needs only the database, so it checks only that, with
+ * the same rule and the same message as the application.
+ */
 export function loadMigrationEnvironment(): Pick<
   EnvironmentVariables,
-  'DATABASE_PATH'
+  'DATABASE_URL'
 > {
-  const databasePath = parseDatabasePath(process.env.DATABASE_PATH);
-
-  return databasePath === undefined ? {} : { DATABASE_PATH: databasePath };
+  return { DATABASE_URL: parseDatabaseUrl(process.env.DATABASE_URL) };
 }
