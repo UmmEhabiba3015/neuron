@@ -12,5 +12,6 @@
   },
   "setupFiles": [
     "<rootDir>/support/setup-environment.ts"
-  ]
+  ],
+  "globalSetup": "<rootDir>/support/check-postgres.ts"
 }

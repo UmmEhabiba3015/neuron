@@ -100,8 +100,8 @@ export class PasswordResetService {
    * them apart and neither can anyone it tells.
    *
    * The password is hashed before the transaction opens. Hashing is slow on
-   * purpose, and the database has one connection, so anything another
-   * request asked of it meanwhile would land inside this transaction.
+   * purpose, and a transaction holds one of the database's connections for
+   * as long as it is open.
    *
    * Inside it, the reset is marked used first and only if it is still
    * unused, so of two requests with the same link only one gets past it.
@@ -109,9 +109,9 @@ export class PasswordResetService {
    * an older link in the inbox cannot undo this one, then every session
    * ends. Nothing signs the person in.
    *
-   * The repositories are not handed the transaction's manager. They do not
-   * need it: SQLite here has the one connection, so every query on it while
-   * the transaction is open is inside it, as in EntriesService.create.
+   * Every step is handed the transaction's manager. Postgres keeps several
+   * connections, and a step sent any other way would run on another one,
+   * outside the transaction, as in EntriesService.create.
    */
   async reset(token: string, password: string): Promise<boolean> {
     const found = await this.resetsRepository.findByTokenHash(hashToken(token));
@@ -123,14 +123,26 @@ export class PasswordResetService {
 
     const passwordHash = await this.passwordService.hash(password);
 
-    return this.dataSource.transaction(async () => {
-      if (!(await this.resetsRepository.markUsed(found.id, now))) {
+    return this.dataSource.transaction(async (manager) => {
+      if (!(await this.resetsRepository.markUsed(found.id, now, manager))) {
         return false;
       }
 
-      await this.usersService.setPasswordHash(found.userId, passwordHash);
-      await this.resetsRepository.markAllUsedForUser(found.userId, now);
-      await this.sessionsRepository.revokeAllForUser(found.userId, now);
+      await this.usersService.setPasswordHash(
+        found.userId,
+        passwordHash,
+        manager,
+      );
+      await this.resetsRepository.markAllUsedForUser(
+        found.userId,
+        now,
+        manager,
+      );
+      await this.sessionsRepository.revokeAllForUser(
+        found.userId,
+        now,
+        manager,
+      );
 
       return true;
     });

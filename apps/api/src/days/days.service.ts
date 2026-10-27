@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { dayFor, type DayOwner } from './day-boundary';
 import { DaysRepository } from './days.repository';
 import type { Mood } from '@neuron/contracts';
+import type { EntityManager } from 'typeorm';
 import type { DayEntity } from './entities/day.entity';
 
 @Injectable()
@@ -15,12 +16,18 @@ export class DaysService {
    * of mistake ADR-013 refused for ownership.
    *
    * The owner is the user the guard loaded for this request, so the timezone
-   * costs no query.
+   * costs no query. The manager, when there is one, is the transaction the
+   * day is made in.
    */
-  async resolveFor(owner: DayOwner, instant: string): Promise<DayEntity> {
+  async resolveFor(
+    owner: DayOwner,
+    instant: string,
+    manager?: EntityManager,
+  ): Promise<DayEntity> {
     return this.daysRepository.findOrCreate(
       owner.id,
       dayFor(instant, owner.timezone),
+      manager,
     );
   }
 

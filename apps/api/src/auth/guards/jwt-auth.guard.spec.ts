@@ -211,12 +211,15 @@ describe('JwtAuthGuard', () => {
   /*
    * The session has to outlive the user, or the session check refuses first
    * and the user check is never reached. Foreign keys are switched off for
-   * the one statement that makes that possible.
+   * the one statement that makes that possible: on Postgres, by making the
+   * one transaction it runs in a replica, which does not fire the triggers
+   * that check them. SET LOCAL ends with the transaction.
    */
   it('refuses the token of a user who no longer exists, without saying so', async () => {
-    await dataSource.query('PRAGMA foreign_keys = OFF');
-    await dataSource.query('DELETE FROM users WHERE id = ?', [userId]);
-    await dataSource.query('PRAGMA foreign_keys = ON');
+    await dataSource.transaction(async (manager) => {
+      await manager.query('SET LOCAL session_replication_role = replica');
+      await manager.query('DELETE FROM users WHERE id = $1', [userId]);
+    });
 
     const { error, challenge } = await attempt(authorization);
 

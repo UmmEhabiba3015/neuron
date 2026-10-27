@@ -30,8 +30,8 @@ reports in `docs/learning/` hold the rest.
 
 ## Where the project is
 
-**Last updated:** 2026-10-27, the handoff after feature 7 and the pause of
-feature 8.
+**Last updated:** 2026-10-27, at the close of the Postgres move (feature 8,
+block 2, brought forward).
 
 **Work is planned by feature, not by day.** The scope is locked in
 [features.md](features.md), the order is in [roadmap.md](roadmap.md), and
@@ -60,14 +60,12 @@ migrations use SQLite's table rebuild and `PRAGMA`.
 **Then her husband ruled (2026-10-27):** feature 11 is built and tested
 locally and deployed with feature 8; and block 2, SQLite to Postgres, is
 brought forward and done locally first, in Docker (installed and running).
-Order now: the Postgres move, feature 9, feature 11.
+Order now: the Postgres move (done the same evening, ADR-028), feature 9,
+feature 11.
 **A second reconciliation is coming** (her husband, 2026-10-27): the
 designer's new screens are almost done. After they arrive, `features.md`
 and the roadmap's order are reconciled again. Until then the order above
-stands; do not plan beyond feature 11. Ten API files use
-SQLite directly, mostly tests with in-memory databases. Decisions waiting
-for her: how tests get a database, translating the 15 migrations or one
-Postgres baseline, and whether her laptop's entries are copied across.
+stands; do not plan beyond feature 11.
 
 **Verified on 2026-10-27 by re-running, not by reading a report.** All nine
 checks pass:
@@ -77,9 +75,11 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-**663** API unit tests, **68** API end-to-end tests, **290** web tests on
+**585** API unit tests, **68** API end-to-end tests, **290** web tests on
 Node's runner (`lib/`) and **5** component tests on Vitest, **10** checks on
-the shared package. 26 ADRs. 15 migrations. Use exactly these nine
+the shared package. 28 ADRs (ADR-027 proposed). One baseline
+migration on Postgres. The API tests need Postgres: `docker compose up -d`,
+or `TEST_DATABASE_URL`. Use exactly these nine
 commands. A plain `npx jest` in `apps/api` skips the migration tests and
 still reports a pass. `test/app/main.e2e-spec.ts` fails now and then (known
 debt); run the end-to-end suite again before believing it.
@@ -106,30 +106,24 @@ The old `day-*` branches and four kept merged branches stay as they are.
 
 ## How to open the next session
 
-**This is a handoff.** The session of 2026-10-26 to 27 closed feature 7, and
-her husband then took the laptop to decide the hosting (feature 8, block 1).
-He paused feature 8 until a domain is bought, and set the order above. The
-next session continues with her, at the Postgres move.
+The session of 2026-10-27 did the Postgres move on `feature-postgres`. The
+next session continues with her, at feature 9.
 
 1. **Read, in order:** `master-prompt.md`, `constitution.md`, `features.md`,
    `roadmap.md` (read *The order of the work now*), this file, and
    `CLAUDE.md`. Then *How To Work With The Learner*, below, before teaching
    anything.
-2. **Check `main`** and run the nine checks; report the result in one line.
-   Expected: 663 API unit, 68 API end-to-end, 290 web `lib/`, 5 component,
-   10 contract. If `main.e2e-spec.ts` fails, run the end-to-end suite again
-   (known flaky).
+2. **Check `main`**, start Postgres (`docker compose up -d`) and run the nine
+   checks; report the result in one line. Expected: 585 API unit, 68 API
+   end-to-end, 290 web `lib/`, 5 component, 10 contract. If `main.e2e-spec.ts`
+   fails, run the end-to-end suite again (known flaky).
 3. **Ask two questions first:** have the designer's new screens arrived (a
    reconciliation follows them, led by her husband), and has the domain been
    bought (it resumes feature 8)?
-4. **Otherwise, the Postgres move** (feature 8, block 2, brought forward).
-   Make `feature-postgres` from `main`. Open it like a feature: the overview
-   with its blocks; the problem first (five migrations and every test speak
-   SQLite only); her decisions as short choices with a default; the worker;
-   the audit with one mutation; the pull request.
-5. **Then feature 9, Keep out of memory** (Ref 25), on
+4. **Otherwise, feature 9, Keep out of memory** (Ref 25), on
    `feature-keep-out-of-memory`, then **feature 11**, built and tested
-   locally.
+   locally. Feature 11 opens with the question in `features.md`: is a memo
+   kept out of memory transcribed?
 
 **What feature 8 holds when it resumes**, from the known debt and the ADRs
 (every row marked "Feature 8"):
@@ -141,9 +135,8 @@ next session continues with her, at the Postgres move.
 - **Audio:** object storage behind `AudioStorage` (ADR-023, ADR-024).
 - **The browser side:** `NEXT_PUBLIC_API_URL` fixed at build time; the
   refresh cookie has no `Secure` attribute.
-- **Smaller rows:** the API's `pnpm lint` runs `--fix`;
-  `better-sqlite3` outside TypeORM's range (dissolves with Postgres); the
-  flaky `main.e2e-spec.ts` (continuous integration will show it);
+- **Smaller rows:** the API's `pnpm lint` runs `--fix`; the flaky
+  `main.e2e-spec.ts` (continuous integration will show it);
   `@types/node` 20 in `apps/web` against Vitest's 22.
 
 **How feature 7 went, for the new thread:** blocks were short and she
@@ -273,6 +266,29 @@ Report in `docs/learning/feature-6-your-data/`.
 - *Corrected by her:* the Master Thread said "KEEPING · since October 2026"
   fits on one line before anyone had measured it.
 
+**The Postgres move** (2026-10-27). Feature 8, block 2, brought forward by
+her husband. ADR-028, accepted by her. Report in
+`docs/learning/postgres-move/`.
+
+- *Built:* Postgres 17 in Docker (`compose.yaml`), one hand-written baseline
+  migration, `DATABASE_URL` required, a database per test file. Her SQLite
+  file and audio are archived in `apps/api/data/sqlite-archive/`.
+- *Her decisions:* one baseline rather than fifteen translations; one server
+  with a database per test file rather than Testcontainers or SQLite for
+  unit tests; archive, not copy; dates stay `text` (Rule Zero); a NUL
+  character is a 400; accented capitals match.
+- *Her experiment worth telling:* `LIKE '%morning%'` found `Morning walk` on
+  SQLite and nothing on Postgres, silently, beside a loud `PRAGMA` syntax
+  error. She predicted both, and that all 30 lowercase search tests would
+  still pass. Rule of the move: no behaviour changes.
+- *What the worker found:* two transactions (filing an entry with its day,
+  a password reset) were atomic only because SQLite has one connection. She
+  explained the `manager` part; the one-connection part was taught.
+- *Trap avoided:* the start-up audio sweep would have deleted her 3 audio
+  files on an empty Postgres; she archived them before the worker ran.
+- *Her prediction, wrong:* `pnpm test` would be twice as slow. It went from
+  21.1 to 19.9 seconds.
+
 **The first review point** (2026-10-21), after feature 6. Report in
 `docs/learning/review-point-1/`. Handbook: `docs/handbook/phase-3-a-person-can-use-it.md`.
 
@@ -319,7 +335,8 @@ Report in `docs/learning/feature-6-your-data/`.
 
 ## What is built
 
-**`apps/api`**, NestJS on SQLite through TypeORM. Tables: `users` (email,
+**`apps/api`**, NestJS on Postgres 17 through TypeORM (ADR-028), locally in
+Docker. Tables: `users` (email,
 unique without regard to case; name; IANA timezone; argon2id hash),
 `sessions` (the raw `User-Agent` of the sign-in, `last_used_at`), `days`
 (`UNIQUE(user_id, date)`, the mood), `entries` (`user_id`
@@ -440,7 +457,10 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 | **The built API reads `packages/contracts/src` at run time**, and the package breaks if its `package.json` gains a `"type"` field | `apps/api/dist`, `packages/contracts` | The restructure (contracts build step) |
 | **`NEXT_PUBLIC_API_URL` is fixed at build time; the cookie has no `Secure` attribute** | web config, `refresh-cookie.ts` | Feature 8, Going live |
 | **`migration:generate` never comes back empty**, because TypeORM cannot describe two things the hand-written migrations made | migrations | Accepted |
-| **`better-sqlite3@13` is outside TypeORM's peer range.** It works and is pinned | `apps/api/package.json` | Dissolves with Postgres in feature 8 |
+| **Entries at the same `created_at` have no tiebreaker**, so paging between them is not guaranteed on Postgres (worker, Postgres move) | `entries.repository.ts` | Low; noted in ADR-028 |
+| **Supabase may sort text differently from the local image** (glibc or ICU against musl). Only fixed-format ISO dates are ordered today | collation | Feature 8, when Supabase is used |
+| **A memo's `audio_type` is stored without a NUL check** | `POST /entries/voice` | Feature 16, Security pass |
+| **ADR-003, ADR-007 and ADR-012 still describe SQLite** | `docs/decisions/` | Left as records; ADR-003 is marked superseded by ADR-028 |
 | **`Etc/GMT+5` is accepted as a timezone** | the registration check | Low; noted |
 | **Deleted entries must be kept out of every later reader**, and from feature 5 their audio too | search, embeddings, Ask, export | Features 6, 10, 12, 13 (ADR-020) |
 | **TypeORM does not switch foreign keys off when reverting a migration** | ADR-010 | One line owed in ADR-010 |

@@ -175,16 +175,25 @@ function whereFor(
    *
    * It is asked of id and not of content, because content is NULL for a
    * voice memo without a transcript, and IS NULL would find every one.
+   *
+   * A term with the NUL character in it matches nothing in the same way. No
+   * entry can hold that character, since Postgres cannot store it, and
+   * Postgres would refuse the query itself.
    */
-  if (filters.word === '') {
+  if (filters.word === '' || filters.word?.includes('\u0000')) {
     where.id = IsNull();
 
     return where;
   }
 
+  /*
+   * A search ignores capitals: "morning" finds "Morning walk". SQLite's LIKE
+   * did that by itself; Postgres's LIKE does not, and ILIKE is the one that
+   * does. The escape character is kept, so % and _ in a search are letters.
+   */
   if (filters.word !== undefined) {
     where.content = Raw(
-      (alias) => `${alias} LIKE :pattern ESCAPE '${LIKE_ESCAPE_CHARACTER}'`,
+      (alias) => `${alias} ILIKE :pattern ESCAPE '${LIKE_ESCAPE_CHARACTER}'`,
       { pattern: `%${escapeLikePattern(filters.word)}%` },
     );
   }

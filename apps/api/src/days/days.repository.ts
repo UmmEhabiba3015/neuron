@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryFailedError, Repository } from 'typeorm';
+import { Repository, type EntityManager } from 'typeorm';
 import type { Mood } from '@neuron/contracts';
 import { EntryEntity } from '../entries/entities/entry.entity';
 import { DayEntity } from './entities/day.entity';
@@ -15,23 +15,37 @@ export class DaysRepository {
   async findByDate(
     userId: string,
     date: string,
+    manager: EntityManager = this.days.manager,
   ): Promise<DayEntity | undefined> {
-    return (await this.days.findOneBy({ userId, date })) ?? undefined;
+    return (await manager.findOneBy(DayEntity, { userId, date })) ?? undefined;
   }
 
   /*
    * Find the day, or create it.
    *
    * The pre-check is an optimisation and the unique index is the guard. Two
-   * requests writing the first entry of the same day both see no row, both
-   * insert, and one of them loses on UQ_days_user_date -- so the loser reads
-   * back the row the winner created rather than failing the request.
+   * requests writing the first entry of the same day both see no row and
+   * both insert. ON CONFLICT DO NOTHING makes the loser's insert, on
+   * UQ_days_user_date, insert nothing instead of failing, and the read after
+   * it finds the row the winner created. If the winner has not committed
+   * yet, Postgres makes the loser's insert wait until it has.
+   *
+   * It is not a caught unique violation, as it was on SQLite, because this
+   * runs inside the transaction that files an entry, and on Postgres an
+   * error ends a transaction: the read after the catch would fail too.
+   *
+   * The manager is the transaction's when an entry is being filed, so the
+   * day and the entry are written together or not at all.
    *
    * This is the shape ADR-011 established for registration: application logic
    * decides what to attempt, the constraint decides what can exist.
    */
-  async findOrCreate(userId: string, date: string): Promise<DayEntity> {
-    const existing = await this.findByDate(userId, date);
+  async findOrCreate(
+    userId: string,
+    date: string,
+    manager: EntityManager = this.days.manager,
+  ): Promise<DayEntity> {
+    const existing = await this.findByDate(userId, date, manager);
 
     if (existing) {
       return existing;
@@ -45,23 +59,21 @@ export class DaysRepository {
       userId,
     };
 
-    try {
-      await this.days.insert(day);
-    } catch (error) {
-      if (!isUniqueViolation(error)) {
-        throw error;
-      }
+    await manager
+      .createQueryBuilder()
+      .insert()
+      .into(DayEntity)
+      .values(day)
+      .orIgnore()
+      .execute();
 
-      const winner = await this.findByDate(userId, date);
+    const stored = await this.findByDate(userId, date, manager);
 
-      if (!winner) {
-        throw error;
-      }
-
-      return winner;
+    if (!stored) {
+      throw new Error(`The day ${date} was neither found nor created.`);
     }
 
-    return day;
+    return stored;
   }
 
   async setMood(
@@ -137,11 +149,4 @@ export class DaysRepository {
       .orderBy('day.date', 'DESC')
       .getMany();
   }
-}
-
-function isUniqueViolation(error: unknown): boolean {
-  return (
-    error instanceof QueryFailedError &&
-    /UNIQUE constraint failed/i.test(error.message)
-  );
 }

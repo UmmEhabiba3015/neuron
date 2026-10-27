@@ -72,7 +72,7 @@ describe('deleting an account (e2e)', () => {
       .expect(200);
     await running.dataSource.query(
       `INSERT INTO password_resets (id, user_id, token_hash, expires_at, used_at, created_at)
-       VALUES (?, ?, ?, '2099-01-01T00:00:00.000Z', NULL, '2026-10-16T00:00:00.000Z')`,
+       VALUES ($1, $2, $3, '2099-01-01T00:00:00.000Z', NULL, '2026-10-16T00:00:00.000Z')`,
       [`${person.id}-reset`, person.id, `${person.id}-hash`],
     );
 
@@ -82,7 +82,7 @@ describe('deleting an account (e2e)', () => {
   const keysOf = async (person: Person): Promise<string[]> =>
     (
       await running.dataSource.query<{ audio_key: string }[]>(
-        'SELECT audio_key FROM entries WHERE user_id = ? AND audio_key IS NOT NULL',
+        'SELECT audio_key FROM entries WHERE user_id = $1 AND audio_key IS NOT NULL',
         [person.id],
       )
     ).map((row) => row.audio_key);
@@ -92,10 +92,10 @@ describe('deleting an account (e2e)', () => {
 
     for (const table of TABLES) {
       const [{ n }] = await running.dataSource.query<{ n: number }[]>(
-        `SELECT COUNT(*) AS n FROM ${table} WHERE ${table === 'users' ? 'id' : 'user_id'} = ?`,
+        `SELECT COUNT(*) AS n FROM ${table} WHERE ${table === 'users' ? 'id' : 'user_id'} = $1`,
         [person.id],
       );
-      counts.push(n);
+      counts.push(Number(n));
     }
 
     return counts;

@@ -1,4 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { UserEntity } from '../../users/entities/user.entity';
 
 /*
@@ -14,13 +21,18 @@ export class PasswordResetEntity {
   @PrimaryColumn({ type: 'text' })
   id!: string;
 
+  @Index('IDX_password_resets_user_id')
   @Column({ name: 'user_id', type: 'text' })
   userId!: string;
 
   @ManyToOne(() => UserEntity)
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({
+    name: 'user_id',
+    foreignKeyConstraintName: 'FK_password_resets_user',
+  })
   user?: UserEntity;
 
+  @Index('UQ_password_resets_token_hash', { unique: true })
   @Column({ name: 'token_hash', type: 'text' })
   tokenHash!: string;
 

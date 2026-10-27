@@ -37,9 +37,14 @@ describe('entry ownership', () => {
   };
 
   const columnsOf = (table: string) =>
-    dataSource.query<
-      { name: string; type: string; notnull: number; pk: number }[]
-    >(`PRAGMA table_info(${table})`);
+    dataSource.query<{ name: string; type: string; notnull: boolean }[]>(
+      `SELECT column_name AS name, data_type AS type,
+              is_nullable = 'NO' AS notnull
+         FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = $1
+        ORDER BY ordinal_position`,
+      [table],
+    );
 
   describe('the users table', () => {
     it('should have exactly id, email, created_at, password_hash, name and timezone', async () => {
@@ -66,7 +71,7 @@ describe('entry ownership', () => {
         (column) => column.name === 'password_hash',
       );
 
-      expect(passwordHash?.notnull).toBe(1);
+      expect(passwordHash?.notnull).toBe(true);
     });
 
     it('should require names to be unique', async () => {
@@ -90,7 +95,7 @@ describe('entry ownership', () => {
           name: 'Somebody',
           timezone: 'UTC',
         }),
-      ).rejects.toThrow(/UNIQUE constraint failed/);
+      ).rejects.toThrow(/duplicate key value violates unique constraint/);
     });
   });
 
@@ -101,15 +106,25 @@ describe('entry ownership', () => {
       );
 
       expect(userId).toBeDefined();
-      expect(userId?.type).toBe('TEXT');
+      expect(userId?.type).toBe('text');
 
-      expect(userId?.notnull).toBe(1);
+      expect(userId?.notnull).toBe(true);
     });
 
     it('should be a foreign key pointing at users.id', async () => {
       const foreignKeys = await dataSource.query<
         { table: string; from: string; to: string }[]
-      >(`PRAGMA foreign_key_list(entries)`);
+      >(
+        `SELECT target.table_name AS table, source.column_name AS from,
+                target.column_name AS to
+           FROM information_schema.table_constraints AS constraints
+           JOIN information_schema.key_column_usage AS source
+             ON source.constraint_name = constraints.constraint_name
+           JOIN information_schema.constraint_column_usage AS target
+             ON target.constraint_name = constraints.constraint_name
+          WHERE constraints.table_name = 'entries'
+            AND constraints.constraint_type = 'FOREIGN KEY'`,
+      );
 
       expect(foreignKeys).toContainEqual(
         expect.objectContaining({ table: 'users', from: 'user_id', to: 'id' }),
@@ -134,7 +149,7 @@ describe('entry ownership', () => {
           userId: 'no-such-user',
           dayId: await dayOf('user-1'),
         }),
-      ).rejects.toThrow('FOREIGN KEY constraint failed');
+      ).rejects.toThrow(/violates foreign key constraint "FK_entries_user"/);
     });
   });
 
@@ -173,7 +188,7 @@ describe('entry ownership', () => {
           content: 'written with nobody to own it',
           createdAt: '2026-09-02T09:00:00.000Z',
         }),
-      ).rejects.toThrow(/NOT NULL constraint failed: entries\.user_id/);
+      ).rejects.toThrow(/null value in column "user_id" of relation "entries"/);
     });
   });
 

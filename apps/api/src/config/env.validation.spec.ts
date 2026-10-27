@@ -4,9 +4,12 @@ import {
   validate,
 } from './env.validation';
 
+const LOCAL_DATABASE_URL = 'postgres://neuron:neuron@localhost:5432/neuron';
+
 const withRequired = (config: Record<string, unknown> = {}) => ({
   JWT_SECRET: 'a-valid-test-secret-of-more-than-32-characters',
   WEB_ORIGIN: 'http://localhost:3001',
+  DATABASE_URL: LOCAL_DATABASE_URL,
   ...config,
 });
 
@@ -58,30 +61,50 @@ describe('validate', () => {
     });
   });
 
-  describe('DATABASE_PATH', () => {
-    it('should refuse to boot for the empty string, naming the variable', () => {
-      expect(() => validate(withRequired({ DATABASE_PATH: '' }))).toThrow(
-        'DATABASE_PATH must be a non-empty path, received ""',
+  describe('DATABASE_URL', () => {
+    it.each([
+      ['not set', undefined],
+      ['the empty string', ''],
+    ])(
+      'should refuse to boot when it is %s, naming the variable',
+      (_l, raw) => {
+        expect(() => validate(withRequired({ DATABASE_URL: raw }))).toThrow(
+          /^DATABASE_URL must be set\..*docker compose up -d/s,
+        );
+      },
+    );
+
+    it.each([
+      ['the local database', LOCAL_DATABASE_URL],
+      ['the postgresql: spelling', 'postgresql://u:p@db.example.com:6543/x'],
+    ])('should pass %s through unchanged', (_label, raw) => {
+      expect(validate(withRequired({ DATABASE_URL: raw })).DATABASE_URL).toBe(
+        raw,
       );
     });
 
-    it('should pass an explicit path through unchanged', () => {
-      expect(
-        validate(withRequired({ DATABASE_PATH: 'data/scratch.db' }))
-          .DATABASE_PATH,
-      ).toBe('data/scratch.db');
+    it.each([
+      ['a SQLite file path', 'data/neuron.db'],
+      ['another kind of database', 'mysql://u:p@localhost:3306/neuron'],
+      ['an address with no database named', 'postgres://u:p@localhost:5432'],
+      ['an address with no host', 'postgres:///neuron'],
+      ['surrounding whitespace', ` ${LOCAL_DATABASE_URL} `],
+    ])('should refuse to boot for %s', (_label, raw) => {
+      expect(() => validate(withRequired({ DATABASE_URL: raw }))).toThrow(
+        /^DATABASE_URL must be a Postgres address/,
+      );
     });
 
-    it('should not trim surrounding whitespace from a path', () => {
-      const padded = '  data/scratch.db  ';
+    it('should quote the value it rejected with the password hidden', () => {
+      const attempt = () =>
+        validate(
+          withRequired({
+            DATABASE_URL: 'mysql://neuron:hunter2-secret@localhost:3306/x',
+          }),
+        );
 
-      expect(
-        validate(withRequired({ DATABASE_PATH: padded })).DATABASE_PATH,
-      ).toBe(padded);
-    });
-
-    it('should leave the key out entirely when DATABASE_PATH is not set', () => {
-      expect('DATABASE_PATH' in validate(withRequired())).toBe(false);
+      expect(attempt).toThrow('received "mysql://neuron:***@localhost:3306/x"');
+      expect(attempt).not.toThrow(/hunter2-secret/);
     });
   });
 
@@ -200,7 +223,6 @@ describe('validate', () => {
     const validated = validate(
       withRequired({
         PORT: '3000',
-        DATABASE_PATH: 'data/scratch.db',
         HOME: '/home/somebody',
         AWS_SECRET_ACCESS_KEY: 'not ours to carry around',
       }),
@@ -210,7 +232,7 @@ describe('validate', () => {
       'PORT',
       'JWT_SECRET',
       'WEB_ORIGIN',
-      'DATABASE_PATH',
+      'DATABASE_URL',
     ]);
   });
 
@@ -223,25 +245,27 @@ describe('validate', () => {
 
     it('should not require JWT_SECRET', () => {
       delete process.env.JWT_SECRET;
-      process.env.DATABASE_PATH = 'data/scratch.db';
+      process.env.DATABASE_URL = LOCAL_DATABASE_URL;
 
       expect(loadMigrationEnvironment()).toEqual({
-        DATABASE_PATH: 'data/scratch.db',
+        DATABASE_URL: LOCAL_DATABASE_URL,
       });
     });
 
-    it('should still reject an empty DATABASE_PATH', () => {
-      process.env.DATABASE_PATH = '';
+    it('should refuse to run without DATABASE_URL, as the application does', () => {
+      delete process.env.DATABASE_URL;
 
       expect(() => loadMigrationEnvironment()).toThrow(
-        /^DATABASE_PATH must be/,
+        /^DATABASE_URL must be set/,
       );
     });
 
-    it('should leave the key out entirely when DATABASE_PATH is not set', () => {
-      delete process.env.DATABASE_PATH;
+    it('should refuse an address that is not Postgres', () => {
+      process.env.DATABASE_URL = 'data/neuron.db';
 
-      expect(loadMigrationEnvironment()).toEqual({});
+      expect(() => loadMigrationEnvironment()).toThrow(
+        /^DATABASE_URL must be a Postgres address/,
+      );
     });
   });
 });

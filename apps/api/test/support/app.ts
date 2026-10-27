@@ -15,8 +15,8 @@ export interface RunningApp {
 }
 
 /*
- * The whole application, as main.ts builds it, on a fresh in-memory database
- * that has every migration applied. Every suite that talks HTTP starts here,
+ * The whole application, as main.ts builds it, on the test file's own
+ * Postgres database, with every migration applied and every table empty. Every suite that talks HTTP starts here,
  * so a new piece of wiring is added once.
  */
 export async function startApp(): Promise<RunningApp> {

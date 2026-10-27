@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { entities } from '../database/entities';
-import { migrations } from '../database/migrations';
+import {
+  closeTestDataSource,
+  createTestDataSource,
+} from '../../test/support/test-database';
 import { PasswordService } from '../auth/password.service';
 import { UserEntity } from './entities/user.entity';
 import { UsersRepository } from './users.repository';
@@ -18,17 +20,10 @@ const registration = (password: string) => ({
 describe('UsersService', () => {
   let service: UsersService;
   let users: Repository<UserEntity>;
+  let dataSource: DataSource;
 
   beforeEach(async () => {
-    const dataSource = new DataSource({
-      type: 'better-sqlite3',
-      database: ':memory:',
-      entities,
-      migrations,
-      synchronize: false,
-    });
-    await dataSource.initialize();
-    await dataSource.runMigrations();
+    dataSource = await createTestDataSource();
 
     users = dataSource.getRepository(UserEntity);
 
@@ -42,6 +37,10 @@ describe('UsersService', () => {
     }).compile();
 
     service = module.get<UsersService>(UsersService);
+  });
+
+  afterEach(async () => {
+    await closeTestDataSource(dataSource);
   });
 
   describe('register', () => {
@@ -75,6 +74,22 @@ describe('UsersService', () => {
       expect(await users.count()).toBe(1);
     });
 
+    /*
+     * Both pass the lookup before either has inserted, so it is
+     * UQ_users_email that refuses the second, with Postgres's unique
+     * violation, 23505. The loser is told the address is taken, as if the
+     * lookup had found it, and is not answered with an error.
+     */
+    it('should let one of two registrations of an address at once through, and say taken to the other', async () => {
+      const answers = await Promise.all([
+        service.register(registration('the-first-password')),
+        service.register(registration('the-second-password')),
+      ]);
+
+      expect(answers.filter((user) => user !== undefined)).toHaveLength(1);
+      expect(await users.count()).toBe(1);
+    });
+
     it('should not overwrite the existing user when the name is taken', async () => {
       await service.register(registration('the-first-password'));
       const first = await users.findOneByOrFail({ email: 'umer' });
@@ -90,6 +105,12 @@ describe('UsersService', () => {
   describe('findByEmail', () => {
     it('should return undefined when no user has that name', async () => {
       expect(await service.findByEmail('nobody')).toBeUndefined();
+    });
+
+    it('should find nobody, and not ask Postgres, for an address with the NUL character', async () => {
+      await service.register(registration('a-long-enough-password'));
+
+      expect(await service.findByEmail('umer\u0000')).toBeUndefined();
     });
 
     it('should find a registered user', async () => {

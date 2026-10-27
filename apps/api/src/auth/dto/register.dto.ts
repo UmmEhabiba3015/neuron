@@ -5,6 +5,7 @@ import {
 } from '@neuron/contracts';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
+import { ContainsNoNulCharacter } from '../../shared/decorators/contains-no-nul-character.decorator';
 import { ContainsNonWhitespace } from '../../shared/decorators/contains-non-whitespace.decorator';
 import {
   IsIanaTimeZone,
@@ -40,6 +41,7 @@ export class RegisterDto implements Register {
   )
   @IsString()
   @ContainsNonWhitespace()
+  @ContainsNoNulCharacter()
   @MaxLength(NAME_MAX_LENGTH)
   name!: string;
 

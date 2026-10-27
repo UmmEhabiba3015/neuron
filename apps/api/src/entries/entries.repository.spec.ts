@@ -48,7 +48,7 @@ describe('EntriesRepository', () => {
   const rowOf = async (id: string) =>
     (
       await dataSource.query<{ content: string; deleted_at: string | null }[]>(
-        'SELECT content, deleted_at FROM entries WHERE id = ?',
+        'SELECT content, deleted_at FROM entries WHERE id = $1',
         [id],
       )
     )[0];
@@ -201,6 +201,40 @@ describe('EntriesRepository', () => {
     });
   });
 
+  /*
+   * SQLite's LIKE ignored capitals by itself, and Postgres's does not, so
+   * every one of these was true before the move without anything saying so.
+   */
+  describe('the word filter', () => {
+    beforeEach(async () => {
+      await write('walk', 'bob', 'Morning walk', '2026-08-11T07:00:00.000Z');
+      await write('shout', 'bob', 'A LOUD DAY', '2026-08-11T08:00:00.000Z');
+      await write('odds', 'bob', '100% and a_b', '2026-08-11T09:00:00.000Z');
+    });
+
+    it('ignores capitals: morning finds Morning walk, and the count agrees', async () => {
+      expect(await ids('bob', { word: 'morning' })).toEqual(['walk']);
+      expect(await ids('bob', { word: 'MORNING WALK' })).toEqual(['walk']);
+      expect(await ids('bob', { word: 'loud day' })).toEqual(['shout']);
+      expect(await repository.count('bob', { word: 'morning' })).toBe(1);
+    });
+
+    it('takes % and _ as the letters they are, and not as wildcards', async () => {
+      expect(await ids('bob', { word: '100%' })).toEqual(['odds']);
+      expect(await ids('bob', { word: '%' })).toEqual(['odds']);
+      expect(await ids('bob', { word: 'a_b' })).toEqual(['odds']);
+      expect(await ids('bob', { word: '_' })).toEqual(['odds']);
+      expect(await ids('bob', { word: 'g%k' })).toEqual([]);
+      expect(await ids('bob', { word: 'Mornin_' })).toEqual([]);
+    });
+
+    it('finds nothing for the NUL character, which no entry can hold, without asking Postgres', async () => {
+      expect(await ids('bob', { word: '\u0000' })).toEqual([]);
+      expect(await ids('bob', { word: 'Morning\u0000' })).toEqual([]);
+      expect(await repository.count('bob', { word: '\u0000' })).toBe(0);
+    });
+  });
+
   describe('the date filter', () => {
     it('returns the entries filed on that day and only those, newest first', async () => {
       expect(await ids('alice', { date: '2026-08-09' })).toEqual([
@@ -347,13 +381,17 @@ describe('EntriesRepository', () => {
   });
 
   /*
-   * The date of each entry must not cost a query of its own. SQLite has one
-   * connection and TypeORM sends every statement through one query runner,
-   * so watching it sees every statement.
+   * The date of each entry must not cost a query of its own. Postgres has
+   * several connections, each with its own query runner, so the watch is on
+   * what every runner shares, the prototype of their query method, and it
+   * sees every statement whichever connection it goes on.
    */
   it('reads any number of entries, with their dates, in one query', async () => {
     const queriesDuring = async (ask: () => Promise<unknown>) => {
-      const spy = jest.spyOn(dataSource.createQueryRunner(), 'query');
+      const runners = Object.getPrototypeOf(dataSource.createQueryRunner()) as {
+        query: (sql: string) => Promise<unknown>;
+      };
+      const spy = jest.spyOn(runners, 'query');
 
       try {
         await ask();

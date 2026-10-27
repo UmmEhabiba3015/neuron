@@ -1,7 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { readFile, readdir, rm, writeFile } from 'node:fs/promises';
-import { dirname, join, resolve } from 'node:path';
-import { DEFAULT_DATABASE_PATH } from '../database/database.module';
+import { join, resolve } from 'node:path';
 
 /*
  * Where the audio of voice memos is kept (ADR-023). The rest of the API asks
@@ -70,24 +69,18 @@ const AUDIO_KEY =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 /*
- * The folder. AUDIO_PATH, when it is set, is resolved from the working
- * directory, as DATABASE_PATH is. When it is not, the folder is "audio",
- * beside the database the API opens: apps/api/data/audio by default, and
- * beside a database chosen with DATABASE_PATH otherwise, so that a
- * throwaway database never shares its recordings with the real one.
+ * The folder when AUDIO_PATH is not set: apps/api/data/audio, wherever the
+ * API was started from. It was "audio" beside the SQLite file until the move
+ * to Postgres, which left no database file for it to sit beside.
  */
-export function resolveAudioPath(
-  configuredPath: string | undefined,
-  databasePath: string | undefined,
-): string {
-  if (configuredPath !== undefined) {
-    return resolve(process.cwd(), configuredPath);
-  }
+export const DEFAULT_AUDIO_PATH = resolve(__dirname, '../..', 'data/audio');
 
-  const database =
-    databasePath === undefined
-      ? DEFAULT_DATABASE_PATH
-      : resolve(process.cwd(), databasePath);
-
-  return join(dirname(database), 'audio');
+/*
+ * The folder. AUDIO_PATH, when it is set, is resolved from the working
+ * directory. When it is not, the folder is DEFAULT_AUDIO_PATH.
+ */
+export function resolveAudioPath(configuredPath: string | undefined): string {
+  return configuredPath === undefined
+    ? DEFAULT_AUDIO_PATH
+    : resolve(process.cwd(), configuredPath);
 }

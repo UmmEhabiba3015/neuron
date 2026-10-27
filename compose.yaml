@@ -1,0 +1,23 @@
+# The database Neuron runs on locally: one Postgres server in Docker.
+#
+#   docker compose up -d     start it (and again after a restart of the machine)
+#   docker compose down      stop it; the data stays in the volume
+#
+# The database, the user and the password are all `neuron`. They are for this
+# laptop only and are not secrets: the server listens on localhost, and
+# nothing deployed uses these values. DATABASE_URL in `.env.example` names
+# them, and the tests make their own databases in the same server.
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: neuron
+      POSTGRES_USER: neuron
+      POSTGRES_PASSWORD: neuron
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - neuron-postgres:/var/lib/postgresql/data
+
+volumes:
+  neuron-postgres:
