@@ -44,7 +44,10 @@ git show 4e49fc1:docs/roadmap.md
 Built: features 1, 2, 3, 5, 6 and 7, and the first review point (the
 handbook's Phase 3 entry). Feature 4, Drafts, waits for the designer's
 composer changes. Feature 8, Going live, is paused until the domain is
-bought. Next: feature 9, Keep out of memory. 663 API unit tests, 68 API
+bought. Next: SQLite to Postgres locally (feature 8, block 2, brought
+forward), then feature 9, Keep out of memory, then feature 11. The
+designer's new screens are almost done; a second reconciliation of
+`features.md` and this order follows them (her husband, 2026-10-27). 663 API unit tests, 68 API
 end-to-end tests, 290 web tests and 5 component tests, 10 contract checks.
 26 ADRs.
 
@@ -58,8 +61,9 @@ number**; only the order of building changes.
 |---|---|---|
 | 1st | **7, Quality pass** | Nothing |
 | 2nd | **8, Going live**. *Paused 2026-10-27 until the domain is bought (her husband): it is done when it can end in a real deployment. Direction in ADR-027* | The domain |
+| 2nd, brought forward | **8, block 2 only: SQLite to Postgres, locally** (her husband, 2026-10-27). Every migration written on SQLite is one more to port, search needs Postgres, and feature 11's options widen with it | Nothing |
 | 3rd | **9, Keep out of memory** | Nothing; before any text or audio reaches a model |
-| 4th | **11, Background work and transcription** | 5 (built), 8, 9 |
+| 4th | **11, Background work and transcription** | 5 (built), 9, the Postgres move. *Built and tested locally, deployed with feature 8 (her husband, 2026-10-27)* |
 | then, as the designer's screens arrive | **4** Drafts, **10** Search (needs 8, 9), **12** Ask (needs 9, 10, 11), **13** Reflections (needs 9, 11), **14** Looking back | The designer |
 | last | **15** The words (after 12 and 13), **16** Security pass and final audit | Everything |
 
