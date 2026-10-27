@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import {
+  browserZoneName,
   notSavedSentence,
   timezoneChoices,
   timezoneLabel,
@@ -35,7 +36,53 @@ test('the list is the browser’s, in its order, and always holds the person’s
   assert.deepEqual(timezoneChoices(zones, 'UTC', OCTOBER)[0], {
     value: 'UTC',
     label: 'UTC (UTC+0)',
+    chosen: true,
   });
+});
+
+test('the person’s own zone is the one chosen, and only it', () => {
+  const zones = ['Africa/Abidjan', 'Asia/Karachi'];
+
+  assert.deepEqual(
+    timezoneChoices(zones, 'Asia/Karachi', OCTOBER).map((each) => each.chosen),
+    [false, true],
+  );
+});
+
+test('a zone the browser lists under another name is listed once, under the browser’s name', () => {
+  /* Firefox's list, and its naming: the API stored Node's name. */
+  const zones = ['Asia/Karachi', 'Asia/Kolkata'];
+  const firefox = (zone: string) =>
+    zone === 'Asia/Calcutta' ? 'Asia/Kolkata' : zone;
+
+  assert.deepEqual(
+    timezoneChoices(zones, 'Asia/Calcutta', OCTOBER, firefox),
+    [
+      { value: 'Asia/Karachi', label: 'Asia/Karachi (UTC+5)', chosen: false },
+      { value: 'Asia/Kolkata', label: 'Asia/Kolkata (UTC+5:30)', chosen: true },
+    ],
+  );
+});
+
+test('a zone is added only when even the browser’s name for it is absent', () => {
+  const zones = ['Asia/Karachi'];
+  const firefox = (zone: string) =>
+    zone === 'Asia/Calcutta' ? 'Asia/Kolkata' : zone;
+
+  assert.deepEqual(
+    timezoneChoices(zones, 'Asia/Calcutta', OCTOBER, firefox).map(
+      (each) => [each.value, each.chosen],
+    ),
+    [
+      ['Asia/Kolkata', true],
+      ['Asia/Karachi', false],
+    ],
+  );
+});
+
+test('the browser’s name for a zone is its own, and a name it does not know is kept', () => {
+  assert.equal(browserZoneName('Asia/Karachi'), 'Asia/Karachi');
+  assert.equal(browserZoneName('Mars/Olympus'), 'Mars/Olympus');
 });
 
 test('an answer to Save timezone is one of five outcomes', () => {

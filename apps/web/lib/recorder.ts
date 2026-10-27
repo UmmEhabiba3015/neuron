@@ -311,16 +311,3 @@ export function createRecorder(config: {
     leave,
   };
 }
-
-/* The clock of the page, for the recorder on Talk. */
-export const systemClock: Clock = {
-  now: () => Date.now(),
-  every(milliseconds, run) {
-    const timer = setInterval(run, milliseconds);
-    return () => clearInterval(timer);
-  },
-  after(milliseconds, run) {
-    const timer = setTimeout(run, milliseconds);
-    return () => clearTimeout(timer);
-  },
-};

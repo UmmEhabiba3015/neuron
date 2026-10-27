@@ -155,6 +155,23 @@ body {
 }
 
 /*
+ * 3.1 Talk's binding rail.
+ *
+ * Talk is a page of its own, .compact-recorder-app, with no .title beside
+ * it, so its rail belongs at its left edge. lock.css moves every rail to
+ * the page's column from 700 up, and puts Talk's back at the edge with a
+ * rule keyed on `.device:is(.t,.d)`, the comp's stage, which a running app
+ * does not have. Without it the rail was drawn over Talk's content at
+ * tablet and desktop widths. This restates that rule on the width, on the
+ * same 700 threshold, keyed on .compact-recorder-app, the container lock.css
+ * gives Talk. QUESTION FOR THE DESIGNER, as in section 3.
+ */
+
+@container (min-width: 700px) {
+  .compact-recorder-app > .rail { left: 0; }
+}
+
+/*
  * 4. The waveform is authored per platform rather than scaled
  * (direction-lock.md 12.7), so three are rendered and the width picks one,
  * on the same two thresholds lock.css already uses. Scaling one SVG would
@@ -303,4 +320,16 @@ dialog.dialog::backdrop {
 
 .dialog .delete-form {
   margin-top: var(--s5);
+}
+
+/*
+ * 5.8 The counts on Your data.
+ *
+ * "12 entries, 3 recordings" stands beside "Export everything", and at 390
+ * there is room for only part of it. The line may break between the two
+ * counts and never inside one (her choice, feature 7), so each count is
+ * kept on one line (components/you/YourData.tsx).
+ */
+.val .count {
+  white-space: nowrap;
 }

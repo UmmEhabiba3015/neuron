@@ -216,8 +216,9 @@ writes. Its words are hers to write.
 **Ref 39. Loading, failure and not-found states.** Keep. *Built for every
 built feature.* Each new feature designs its own waiting and failing.
 
-**Ref 40. Every screen size, keyboard use and accessibility.** Keep. *Drawn
-at three widths; no accessibility pass yet.*
+**Ref 40. Every screen size, keyboard use and accessibility.** Keep. *Built*
+(feature 7). Walked at three widths; every built task works with the
+keyboard alone, and a screen reader announces saving and the mood.
 
 **Ref 41. Running it for real.** Keep. *Nothing.*
 Deployment, Postgres, continuous integration, logging and error tracking,

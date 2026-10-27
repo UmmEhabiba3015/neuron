@@ -30,22 +30,21 @@ reports in `docs/learning/` hold the rest.
 
 ## Where the project is
 
-**Last updated:** 2026-10-21, the handoff after the first review point.
+**Last updated:** 2026-10-27, the close of feature 7.
 
 **Work is planned by feature, not by day.** The scope is locked in
 [features.md](features.md), the order is in [roadmap.md](roadmap.md), and
 what the designer is asked to change is
 [ui-handover-v4.md](ui-handover-v4.md).
 
-**Done:** everything up to Screens Day, the restructure, features 1, 2 and
-3, 5 and 6, and the first review point, all merged into `main`. The new
-order of the remaining work (her decision, 2026-10-21) is on the branch
-`roadmap-order-and-handoff`, in a pull request for her to merge. **Feature 4,
-Drafts, is skipped for now:** the designer has not sent the composer
-changes (she confirmed on 2026-10-16), so by roadmap rule 4 it waits and is
-built as soon as they arrive.
+**Done:** everything up to Screens Day, the restructure, features 1, 2, 3,
+5, 6 and 7, and the first review point. Feature 7 is in a pull request on
+`feature-quality-pass` for her to merge. **Feature 4, Drafts, is skipped
+for now:** the designer has not sent the composer changes, so by roadmap
+rule 4 it waits and is built as soon as they arrive. On 2026-10-26 she had
+received no new screens.
 
-**Verified on 2026-10-15 by re-running, not by reading a report.** All nine
+**Verified on 2026-10-27 by re-running, not by reading a report.** All nine
 checks pass:
 
 ```bash
@@ -53,19 +52,22 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-**663** API unit tests, **68** API end-to-end tests, **285** web tests, **10**
-checks on the shared package. 25 ADRs. 15 migrations. Use exactly these nine
+**663** API unit tests, **68** API end-to-end tests, **290** web tests on
+Node's runner (`lib/`) and **5** component tests on Vitest, **10** checks on
+the shared package. 26 ADRs. 15 migrations. Use exactly these nine
 commands. A plain `npx jest` in `apps/api` skips the migration tests and
-still reports a pass.
+still reports a pass. `test/app/main.e2e-spec.ts` fails now and then (known
+debt); run the end-to-end suite again before believing it.
 
 **What a person can do:** create an account (email, password, name; timezone
 from the browser), sign in, stay signed in across a reload, sign out, write,
 edit and delete entries, save with Enter, reset a forgotten password, see
-and sign out their devices, change their timezone, record, play and delete voice memos, export
-everything as one ZIP (PDF, JSON, audio), delete their account, set the mood of today or a past
-day, browse the Timeline as a list or a month calendar, and open a past day.
-Today opens at the newest entry, and every password field can show what was
-typed.
+and sign out their devices, change their timezone, record, play and delete
+voice memos, export everything as one ZIP (PDF, JSON, audio), delete their
+account, set the mood of today or a past day, browse the Timeline as a list
+or a month calendar, and open a past day. Today opens at the newest entry,
+and every password field can show what was typed. All of it works with the
+keyboard alone, and a screen reader announces saving (her runs, feature 7).
 
 **What a person can see:** every screen of the designer's v3 prototype. A
 control whose feature is not built says "This is not built yet." and sends
@@ -79,51 +81,48 @@ The old `day-*` branches and four kept merged branches stay as they are.
 
 ## How to open the next session
 
-**This is a handoff.** She ended a long Master Thread on 2026-10-21 so that
-the next feature starts in a fresh context. The new thread knows nothing
-but these files.
-
 1. **Read, in order:** `master-prompt.md`, `constitution.md`, `features.md`,
    `roadmap.md` (read *The order of the work now*), this file, and
    `CLAUDE.md`. Then *How To Work With The Learner*, below, before teaching
    anything.
-2. **Check `main`.** The pull request of `roadmap-order-and-handoff` should
-   be merged. Run the nine checks and report the result in one line.
-   Expected: 663 API unit, 68 API end-to-end, 285 web, 10 contract.
+2. **Check `main`.** The pull request of `feature-quality-pass` should be
+   merged. Run the nine checks and report the result in one line.
+   Expected: 663 API unit, 68 API end-to-end, 290 web `lib/`, 5 component,
+   10 contract.
 3. **Ask one question first:** has the designer sent any new screens
-   (`ui-handover-v4.md`)? She said on 2026-10-21 that they are still in
-   progress. If something has arrived, the feature it unblocks is placed
-   next (roadmap, *The order of the work now*).
-4. **Otherwise, feature 7, the Quality pass** (Ref 40). Make
-   `feature-quality-pass` from `main`. Open in the usual order: the
-   overview with its blocks; learning debt (none is open); the problem
-   first; her decisions as short choices with a default; the worker; the
-   audit with one mutation; the pull request.
+   (`ui-handover-v4.md`)? If something has arrived, the feature it unblocks
+   is placed next (roadmap, *The order of the work now*).
+4. **Otherwise, feature 8, Going live** (Ref 41). Make `feature-going-live`
+   from `main`. Open in the usual order: the overview with its blocks;
+   learning debt (none is open); the problem first ("it only runs on her
+   laptop"); her decisions as short choices with a default; the worker; the
+   audit with one mutation; the pull request. It is large: expect more than
+   one worker, and decide the hosting before anything is built.
 
-**What feature 7 holds**, from the known debt below (every row marked
-"Feature 7"):
+**What feature 8 holds**, from the known debt and the ADRs (every row marked
+"Feature 8"):
 
-- **Her decision on a test that reaches React components.** The evidence:
-  in feature 1 she removed `event.preventDefault()` and all web tests still
-  passed (handbook, Phase 3). This is the feature's main decision and
-  probably its ADR. Research the options with her; none is chosen.
-- **A lint rule so the browser's clock never makes a date** (`new Date()`
-  without an argument, `Date.now()` in `apps/web`).
-- **Responsive faults already found:** the left rail drawn over Talk at
-  tablet and desktop widths; the counts on Your data wrapping at 390 wide;
-  a timezone listed twice under two spellings; entry icons shown only on
-  hover on desktop, under a long entry's words.
-- **Keyboard and screen reader access**, which has had no pass at all.
+- **The hosting, managed Postgres, and continuous integration.** Nothing is
+  chosen. Rule Zero applies to each.
+- **Mail:** a real provider and its `MailService`, and the log mailer
+  refused in production (ADR-022). Neuron has no idea of production yet.
+- **Audio:** object storage behind `AudioStorage` (ADR-023, ADR-024).
+- **The browser side:** `NEXT_PUBLIC_API_URL` fixed at build time; the
+  refresh cookie has no `Secure` attribute.
+- **Smaller rows:** the API's `pnpm lint` runs `--fix`;
+  `better-sqlite3` outside TypeORM's range (dissolves with Postgres); the
+  flaky `main.e2e-spec.ts` (continuous integration will show it);
+  `@types/node` 20 in `apps/web` against Vitest's 22.
 
-Start from the problem: what a person using only a keyboard, a screen
-reader or a phone cannot do today.
-
-**How the last sessions went, for the new thread:** blocks were short, she
-chose defaults often, and most of her written answers were pasted (do not
-raise it; ask for runs and short choices). Her own runs this phase were
-`navigator.userAgent`, the SHA-256 digits, the `preventDefault` removal and
-the delete-order swap. At the review point she asked to go through
-everything at once and the sweep ran without her predictions.
+**How feature 7 went, for the new thread:** blocks were short and she
+answered each at once. Most written answers were pasted (do not raise it;
+ask for runs and short choices). Some pasted answers read as instructions
+to the Master Thread to run something; say plainly that the run is hers.
+Her own runs: the user-event and fireEvent experiment, a keyboard-only
+walk, and two Orca runs (the first logged nothing of Neuron, so a short
+second one was asked for). Her predictions were wrong three times, each
+useful: both simulated tests would pass, tasks 4 to 6 would fail by
+keyboard, and the save would be silent.
 
 ---
 
@@ -255,6 +254,35 @@ Report in `docs/learning/feature-6-your-data/`.
 - *Skipped:* her predictions for the sweep. She asked to go through the
   whole review, and the results were shown without them.
 
+**Feature 7, Quality pass** (2026-10-27). Ref 40. ADR-026. Report in
+`docs/learning/feature-7-quality-pass/`.
+
+- *Built:* component tests (Vitest, Testing Library and user-event on
+  jsdom) beside the old `lib/` tests; `lib/utils/clock.ts` as the one file
+  that reads the clock, with a lint rule for the rest of `apps/web`; Talk's
+  rail, the counts at 390, and a timezone listed once.
+- *Her decisions:* jsdom rather than Playwright, under Rule Zero, with the
+  revisit point a layout bug that gets past a walk; one clock file, not a
+  comment on each line, with her caveat that it returns no `Date` and no
+  timestamp; a screen reader run rather than axe; the browser's name for a
+  timezone; a break only between the two counts.
+- *Her experiment worth telling:* the same Enter test written two ways.
+  Without `preventDefault()`, user-event left `'hello\n'` in the box and
+  failed; fireEvent passed, because it only sends the event. She had
+  predicted both would pass. This is why the project's component tests
+  never use fireEvent.
+- *The mutation:* removing `preventDefault()` failed the composer's test.
+  The editor's test still passed: the editor becomes read-only while it
+  saves, so no new line is typed. One line can be guarded by one screen and
+  not by another.
+- *What the runs found:* nothing to fix for the keyboard or a screen
+  reader; the designer had built focus rings, icons revealed on focus, and
+  announced messages. The entry-icon fault from feature 1 could not be made
+  to appear in two browsers at any width, and was dropped.
+- *Mistake:* the Master Thread explained the duplicate timezone as
+  depending on the browser she signed up in, before reading that the API
+  stores Node's name. Corrected before the spec.
+
 ---
 
 ## What is built
@@ -290,7 +318,7 @@ minimum, the `Mood` enum. Interfaces, enums and constants only; compiled to
 | Sessions checked on every request, so signing out is immediate; refresh tokens rotate, and reuse ends every session | ADR-014 |
 | Refresh credential in an `HttpOnly`, `SameSite=Strict` cookie; access token in memory; one CORS origin, no default | ADR-018 |
 | A day ends at midnight in the user's timezone; the API files an entry on a day when it is written, and it never moves | ADR-015, amended Day 17b |
-| The browser's clock never makes a date | Day 17c, her ruling. Not enforced by any check |
+| The browser's clock never makes a date; only `lib/utils/clock.ts` reads it, and lint enforces it | Day 17c, her ruling; feature 7 |
 | Deleting an entry is a soft delete, `204`, a `404` afterwards everywhere; a day row stays | ADR-020 |
 | Writing waits for the API; deleting and mood show at once | ADR-021 |
 | Facts shared by both apps live once in `packages/contracts` | ADR-019 |
@@ -349,7 +377,9 @@ Named and not taught, under the depth guardrail: `<details>`,
 and one string, `scrollIntoView`, `aria-pressed`, a container query.
 From feature 1: `isComposing`, a media query asked through `matchMedia`,
 `useLayoutEffect`, `focus({ preventScroll: true })`, `preventDefault` on
-`mousedown`. `preventDefault` on Enter was taught by a run.
+`mousedown`. `preventDefault` on Enter was taught by a run. From feature 7:
+`vi.stubGlobal`, `white-space: nowrap`; `performance.now()` and
+`resolvedOptions().timeZone` were explained in her blocks.
 
 **Closed most recently:** Screens Day's two items, repaid on 2026-10-15 at
 the opening of feature 1 by runs. She predicted that each row of Your data
@@ -374,8 +404,6 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 
 | Item | Where | When |
 |---|---|---|
-| **No test reaches a React component.** That an unbuilt control sends nothing, every link between screens, and the calendar's jump are checked only by workers walking the app. In feature 1 she removed `event.preventDefault()` from `useEnterToSave.ts` and all 202 web tests passed | `apps/web` | Her decision in feature 7, Quality pass |
-| **Nothing enforces that the browser's clock never makes a date.** A lint rule forbidding `new Date()` and `Date.now()` in `apps/web` would | `apps/web` | Feature 7, Quality pass |
 | **The API's `pnpm lint` runs `--fix`**, so it rewrites files instead of only reporting | `apps/api/package.json` | Feature 8, Going live |
 | **The built API reads `packages/contracts/src` at run time**, and the package breaks if its `package.json` gains a `"type"` field | `apps/api/dist`, `packages/contracts` | The restructure (contracts build step) |
 | **`NEXT_PUBLIC_API_URL` is fixed at build time; the cookie has no `Secure` attribute** | web config, `refresh-cookie.ts` | Feature 8, Going live |
@@ -385,18 +413,19 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 | **Deleted entries must be kept out of every later reader**, and from feature 5 their audio too | search, embeddings, Ask, export | Features 6, 10, 12, 13 (ADR-020) |
 | **TypeORM does not switch foreign keys off when reverting a migration** | ADR-010 | One line owed in ADR-010 |
 | **No ADR yet for the 2026-10-04 data-model decisions** (one `entries` table with a `kind` for recordings; drafts on the server) | `docs/decisions/` | Written when each is built |
-| **On desktop the entry icons show only on hover, and a long entry's words sit over them** (worker's note, feature 1) | `Journal.tsx`, `lock.css` | Feature 7, Quality pass; may be the designer's |
 | **Nothing stops the log mailer in production.** A reset link in a log is a working key to an account; Neuron has no idea of production yet (ADR-022) | `MailService`, `env.validation.ts` | Feature 8, Going live |
 | **`shared/mail/` is a module folder the conventions do not list** (they list `decorators/`, `dto/`, `types/`, `utils/`). Mail belongs to no domain, so the Master Thread kept it | `apps/api/src/shared/mail/` | For her husband to confirm |
 | **Reset requests have no rate limit**, so anyone can fill another person's inbox once real mail is sent | `POST /auth/forgot-password` | Feature 16, Security pass |
 | **Expired and used password resets are never deleted** | `password_resets` | Feature 13, with expired sessions |
 | **The `User-Agent` header is stored with no length limit** (Node caps headers at about 16 KB) | `sessions.user_agent` | Feature 16, Security pass |
-| **One timezone can be listed twice under two spellings** (`Asia/Kolkata`, `Asia/Calcutta`) | Timezone screen | Feature 7, Quality pass |
 | **A memo's length is the browser's claim**; the API checks the size (24 MB) but does not measure the audio (ADR-023) | `POST /entries/voice` | Feature 16, Security pass |
 | **A memo recorded in one browser may not play in a much older one** (WebM or MP4, kept as recorded) | playback | Accepted; noted |
-| **On Talk, the left rail is drawn over the content at tablet and desktop widths** (before feature 5 too) | `Talk.tsx`, `live.css` | Feature 7, Quality pass |
 | **No rate limit on the password check of `DELETE /auth/me`** | `auth.controller.ts` | Feature 16, Security pass |
-| **At 390 wide the counts value wraps** ("2 entries, 1 / recording") | Your data | Feature 7, Quality pass |
+| **`test/app/main.e2e-spec.ts` is flaky**: 2 of 68 failed once in four full runs (2026-10-26), passing alone. Likely cause: it frees a port before `main.ts` takes it, and a parallel suite can take it first | `apps/api/test/app/` | Feature 8, Going live (continuous integration will show it) |
+| **Only the composer's component test sees `preventDefault()`.** The editor turns read-only while it saves, so the editor's test passes without it (feature 7 mutation) | `components/today/LiveToday.test.tsx` | Accepted; a real browser test would be the revisit point of ADR-026 |
+| **In Chromium from 1200 to about 1229 wide, Today collapses into a 360-pixel column**; Firefox does not (worker, feature 7) | `lock.css` layout | Feature 14, or the designer |
+| **`lock.css` 3405 keys Talk's fixed header on `.device`**, the prototype's stage, which the app does not have | `lock.css` | For the designer |
+| **Vitest wants `@types/node` 22 or later; `apps/web` has 20.** Typecheck passes | `apps/web/package.json` | Feature 8, with the Node version in production |
 | **ADR-015 and ADR-016 link to retired documents** | `docs/decisions/` | Left as records; git history holds the targets |
 
 ---
@@ -573,3 +602,6 @@ cost a second worker.
   none. Corrected within the block (feature 2).
 - Told her a wording would fit on one line before it was measured
   (feature 6). She chose it partly for that reason.
+- Explained the duplicate timezone as depending on the browser she signed
+  up in, before reading that the API stores Node's name (feature 7).
+  Corrected in the same block, before the spec.

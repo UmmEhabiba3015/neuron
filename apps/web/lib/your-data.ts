@@ -36,14 +36,20 @@ export function countsFrom(
 }
 
 /*
- * "12 entries, 3 recordings". A memo is counted only as a recording, so the
- * two never count the same thing.
+ * "12 entries, 3 recordings", in its two parts: "12 entries," and
+ * "3 recordings". A memo is counted only as a recording, so the two never
+ * count the same thing. A narrow screen may break the line only between the
+ * parts, never inside one (her choice, feature 7), so the screen keeps each
+ * part on one line.
  */
-export function countsLine({ entries, recordings }: Counts): string {
+export function countsParts({ entries, recordings }: Counts): [string, string] {
   const count = (n: number, one: string, many: string) =>
     `${n} ${n === 1 ? one : many}`;
 
-  return `${count(entries, 'entry', 'entries')}, ${count(recordings, 'recording', 'recordings')}`;
+  return [
+    `${count(entries, 'entry', 'entries')},`,
+    count(recordings, 'recording', 'recordings'),
+  ];
 }
 
 /*

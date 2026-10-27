@@ -15,13 +15,9 @@ import { NotBuiltInPlace } from '@/components/ui/NotBuilt';
 import { Devices } from '@/components/you/Devices';
 import { session } from '@/lib/api/client';
 import type { SignOutScope } from '@/lib/api/session';
-import {
-  notSavedSentence,
-  timezoneChoices,
-  timezoneLabel,
-  timezoneSaveOutcome,
-} from '@/lib/timezone';
+import { notSavedSentence, timezoneSaveOutcome } from '@/lib/timezone';
 import { UNBUILT } from '@/lib/unbuilt';
+import { timezoneLabelNow, timezoneChoicesNow } from '@/lib/utils/clock';
 import { keepingSince } from '@/lib/your-data';
 
 /*
@@ -315,7 +311,7 @@ function AccountRows({ user }: { user: User }) {
               <span className="why">{TIMEZONE_RULE}</span>
             </span>
             <span className="val">
-              {timezoneLabel(user.timezone, new Date())}
+              {timezoneLabelNow(user.timezone)}
             </span>
           </Link>
           <Devices timeZone={user.timezone} />
@@ -372,13 +368,11 @@ type TimezoneStep =
 function TimezoneRows({ user }: { user: User }) {
   const router = useRouter();
   const [choices] = useState(() =>
-    timezoneChoices(
-      Intl.supportedValuesOf('timeZone'),
-      user.timezone,
-      new Date(),
-    ),
+    timezoneChoicesNow(Intl.supportedValuesOf('timeZone'), user.timezone),
   );
-  const [chosen, setChosen] = useState(user.timezone);
+  const [chosen, setChosen] = useState(
+    () => choices.find((choice) => choice.chosen)?.value ?? user.timezone,
+  );
   const [step, setStep] = useState<TimezoneStep>({ status: 'choosing' });
   const inFlight = useRef(false);
 
@@ -420,7 +414,7 @@ function TimezoneRows({ user }: { user: User }) {
               {notSavedSentence(
                 step.why,
                 chosen,
-                timezoneLabel(user.timezone, new Date()),
+                timezoneLabelNow(user.timezone),
               )}
             </div>
           ) : null}
