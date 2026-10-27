@@ -16,10 +16,10 @@ import { uploads } from '@/lib/api/client';
 import { browserMicrophone } from '@/lib/microphone';
 import {
   createRecorder,
-  systemClock,
   type MicrophoneRefusal,
   type RecorderState,
 } from '@/lib/recorder';
+import { systemClock } from '@/lib/utils/clock';
 import { formatDuration } from '@/lib/utils/format';
 
 /*

@@ -15,7 +15,7 @@ import {
   NOTHING_TO_EXPORT,
   SIGN_IN_AFTER_DELETE,
   countsFrom,
-  countsLine,
+  countsParts,
   exportOutcome,
   exportStart,
   notDeletedSentence,
@@ -145,7 +145,7 @@ function YourDataRows() {
             Export everything
             <span className="why">{EXPORT_ROW}</span>
           </span>
-          {counts ? <span className="val">{countsLine(counts)}</span> : null}
+          {counts ? <CountsValue counts={counts} /> : null}
         </button>
         <ExportState exporting={exporting} />
         <h2 className="shead">End it</h2>
@@ -184,6 +184,21 @@ function YourDataRows() {
         ) : null}
       </main>
     </PushedScreen>
+  );
+}
+
+/*
+ * "12 entries, 3 recordings", in two parts that each stay on one line, so a
+ * narrow screen breaks the line only between the counts (live.css 5.8).
+ */
+function CountsValue({ counts }: { counts: Counts }) {
+  const [entries, recordings] = countsParts(counts);
+
+  return (
+    <span className="val">
+      <span className="count">{entries}</span>{' '}
+      <span className="count">{recordings}</span>
+    </span>
   );
 }
 

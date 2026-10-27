@@ -39,12 +39,13 @@ git show 4e49fc1:docs/roadmap.md
 6. **No LinkedIn posts while building** (her husband, 2026-10-13). When the
    project is finished, it is presented in public feature by feature.
 
-## Where the project stands (2026-10-21)
+## Where the project stands (2026-10-27)
 
-Built: features 1, 2, 3, 5 and 6, and the first review point (the handbook's
-Phase 3 entry). Feature 4, Drafts, waits for the designer's composer
-changes. 663 API unit tests, 68 API end-to-end tests, 285 web tests, 10
-contract checks. 25 ADRs.
+Built: features 1, 2, 3, 5, 6 and 7, and the first review point (the
+handbook's Phase 3 entry). Feature 4, Drafts, waits for the designer's
+composer changes. Next: feature 8, Going live. 663 API unit tests, 68 API
+end-to-end tests, 290 web tests and 5 component tests, 10 contract checks.
+26 ADRs.
 
 ## The order of the work now
 

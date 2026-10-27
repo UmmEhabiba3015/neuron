@@ -41,22 +41,49 @@ export function timezoneLabel(timeZone: string, at: Date): string {
 export interface TimezoneChoice {
   value: string;
   label: string;
+  /* The person's own zone, which the list opens on. Exactly one is. */
+  chosen: boolean;
 }
 
 /*
- * The zones the browser knows, in its order, each with its label. The
- * person's own zone is always in the list, so it can be the one chosen: a
- * browser may not list it under the name the API stored it under, and UTC,
+ * The name this browser gives a zone. Two names can be one zone: the API
+ * stores Node's name, such as Asia/Calcutta, and Firefox lists the same zone
+ * as Asia/Kolkata. A name the browser does not know is kept as it is.
+ */
+export function browserZoneName(timeZone: string): string {
+  try {
+    return new Intl.DateTimeFormat('en-US', { timeZone }).resolvedOptions()
+      .timeZone;
+  } catch {
+    return timeZone;
+  }
+}
+
+/*
+ * The zones the browser knows, in its order, each with its label, and the
+ * person's own zone marked as chosen. It is compared by the browser's own
+ * name for it, and shown under that name, so one zone is never listed
+ * twice. It is added at the top only when even that name is absent: UTC,
  * which older accounts have, is not in every browser's list.
+ *
+ * `nameOf` is the browser's naming. It is handed in only by a test, because
+ * Node, which runs the tests, names zones as the API does and not as
+ * Firefox does.
  */
 export function timezoneChoices(
   zones: readonly string[],
   current: string,
   at: Date,
+  nameOf: (timeZone: string) => string = browserZoneName,
 ): TimezoneChoice[] {
-  const all = zones.includes(current) ? zones : [current, ...zones];
+  const own = zones.includes(current) ? current : nameOf(current);
+  const all = zones.includes(own) ? zones : [own, ...zones];
 
-  return all.map((zone) => ({ value: zone, label: timezoneLabel(zone, at) }));
+  return all.map((zone) => ({
+    value: zone,
+    label: timezoneLabel(zone, at),
+    chosen: zone === own,
+  }));
 }
 
 /*

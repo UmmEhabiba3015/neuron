@@ -5,7 +5,7 @@ import {
   COUNT_PATHS,
   FALLBACK_FILENAME,
   countsFrom,
-  countsLine,
+  countsParts,
   exportOutcome,
   exportStart,
   filenameFrom,
@@ -20,9 +20,19 @@ test('entries and recordings are counted apart, by kind', () => {
 });
 
 test('the counts are said with their nouns, in the singular for one', () => {
-  assert.equal(countsLine({ entries: 12, recordings: 3 }), '12 entries, 3 recordings');
-  assert.equal(countsLine({ entries: 1, recordings: 1 }), '1 entry, 1 recording');
-  assert.equal(countsLine({ entries: 0, recordings: 0 }), '0 entries, 0 recordings');
+  const line = (entries: number, recordings: number) =>
+    countsParts({ entries, recordings }).join(' ');
+
+  assert.equal(line(12, 3), '12 entries, 3 recordings');
+  assert.equal(line(1, 1), '1 entry, 1 recording');
+  assert.equal(line(0, 0), '0 entries, 0 recordings');
+});
+
+test('the counts come in two parts, split only between the two counts', () => {
+  assert.deepEqual(countsParts({ entries: 2, recordings: 1 }), [
+    '2 entries,',
+    '1 recording',
+  ]);
 });
 
 test('the counts are both answers or nothing', () => {
