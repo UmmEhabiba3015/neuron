@@ -30,7 +30,8 @@ reports in `docs/learning/` hold the rest.
 
 ## Where the project is
 
-**Last updated:** 2026-10-27, the close of feature 7.
+**Last updated:** 2026-10-27, the handoff after feature 7 and the pause of
+feature 8.
 
 **Work is planned by feature, not by day.** The scope is locked in
 [features.md](features.md), the order is in [roadmap.md](roadmap.md), and
@@ -56,6 +57,17 @@ Cloud Storage, a 1-dollar budget alert. Oracle was judged too hard to
 obtain; Azure's year is the launch option. Blocks 2 to 7 are not started.
 Queues and Redis: not now (Rule Zero). Fact for block 2: five of the 15
 migrations use SQLite's table rebuild and `PRAGMA`.
+**Then her husband ruled (2026-10-27):** feature 11 is built and tested
+locally and deployed with feature 8; and block 2, SQLite to Postgres, is
+brought forward and done locally first, in Docker (installed and running).
+Order now: the Postgres move, feature 9, feature 11.
+**A second reconciliation is coming** (her husband, 2026-10-27): the
+designer's new screens are almost done. After they arrive, `features.md`
+and the roadmap's order are reconciled again. Until then the order above
+stands; do not plan beyond feature 11. Ten API files use
+SQLite directly, mostly tests with in-memory databases. Decisions waiting
+for her: how tests get a database, translating the 15 migrations or one
+Postgres baseline, and whether her laptop's entries are copied across.
 
 **Verified on 2026-10-27 by re-running, not by reading a report.** All nine
 checks pass:
@@ -94,24 +106,30 @@ The old `day-*` branches and four kept merged branches stay as they are.
 
 ## How to open the next session
 
+**This is a handoff.** The session of 2026-10-26 to 27 closed feature 7, and
+her husband then took the laptop to decide the hosting (feature 8, block 1).
+He paused feature 8 until a domain is bought, and set the order above. The
+next session continues with her, at the Postgres move.
+
 1. **Read, in order:** `master-prompt.md`, `constitution.md`, `features.md`,
    `roadmap.md` (read *The order of the work now*), this file, and
    `CLAUDE.md`. Then *How To Work With The Learner*, below, before teaching
    anything.
 2. **Check `main`** and run the nine checks; report the result in one line.
    Expected: 663 API unit, 68 API end-to-end, 290 web `lib/`, 5 component,
-   10 contract.
-3. **Ask two questions first:** has the designer sent new screens, and has
-   the domain been bought? A domain resumes feature 8; screens place the
-   feature they unblock next.
-4. **Otherwise, feature 9, Keep out of memory** (Ref 25). Make
-   `feature-keep-out-of-memory` from `main`. Open in the usual order: the
-   overview with its blocks; learning debt (none is open); the problem
-   first; her decisions as short choices with a default; the worker; the
-   audit with one mutation; the pull request.
-5. **When feature 9 closes**, the roadmap says feature 11 depends on 8. Ask
-   her husband whether 11 may be built before the deployment, or whether
-   work moves to whatever the designer has unblocked.
+   10 contract. If `main.e2e-spec.ts` fails, run the end-to-end suite again
+   (known flaky).
+3. **Ask two questions first:** have the designer's new screens arrived (a
+   reconciliation follows them, led by her husband), and has the domain been
+   bought (it resumes feature 8)?
+4. **Otherwise, the Postgres move** (feature 8, block 2, brought forward).
+   Make `feature-postgres` from `main`. Open it like a feature: the overview
+   with its blocks; the problem first (five migrations and every test speak
+   SQLite only); her decisions as short choices with a default; the worker;
+   the audit with one mutation; the pull request.
+5. **Then feature 9, Keep out of memory** (Ref 25), on
+   `feature-keep-out-of-memory`, then **feature 11**, built and tested
+   locally.
 
 **What feature 8 holds when it resumes**, from the known debt and the ADRs
 (every row marked "Feature 8"):
@@ -463,8 +481,13 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 7. **Day 0's LinkedIn post named PostgreSQL; Day 2 chose SQLite.** ADR-003
    explains when Postgres arrives (feature 8). Worth saying when the project
    is presented in public, after it is finished.
-8. **`docs/ui-handover-v4.md` is not yet sent to the designer.** Her husband
-   said he will discuss the UX-open flows with him.
+8. **The designer's new screens are almost done** (2026-10-27). A second
+   reconciliation of `features.md` and the roadmap follows them, led by her
+   husband.
+9. **After feature 11, nothing may be ready** unless the screens or the
+   domain have arrived. The options then: build Search's backend ahead of
+   its screens, or pause. Decided when feature 11 closes, likely settled by
+   the reconciliation.
 
 ---
 
