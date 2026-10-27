@@ -43,7 +43,8 @@ git show 4e49fc1:docs/roadmap.md
 
 Built: features 1, 2, 3, 5, 6 and 7, and the first review point (the
 handbook's Phase 3 entry). Feature 4, Drafts, waits for the designer's
-composer changes. Next: feature 8, Going live. 663 API unit tests, 68 API
+composer changes. Feature 8, Going live, is paused until the domain is
+bought. Next: feature 9, Keep out of memory. 663 API unit tests, 68 API
 end-to-end tests, 290 web tests and 5 component tests, 10 contract checks.
 26 ADRs.
 
@@ -56,7 +57,7 @@ number**; only the order of building changes.
 | Order | Feature | Depends on |
 |---|---|---|
 | 1st | **7, Quality pass** | Nothing |
-| 2nd | **8, Going live** | Nothing; before any AI work on purpose |
+| 2nd | **8, Going live**. *Paused 2026-10-27 until the domain is bought (her husband): it is done when it can end in a real deployment. Direction in ADR-027* | The domain |
 | 3rd | **9, Keep out of memory** | Nothing; before any text or audio reaches a model |
 | 4th | **11, Background work and transcription** | 5 (built), 8, 9 |
 | then, as the designer's screens arrive | **4** Drafts, **10** Search (needs 8, 9), **12** Ask (needs 9, 10, 11), **13** Reflections (needs 9, 11), **14** Looking back | The designer |
