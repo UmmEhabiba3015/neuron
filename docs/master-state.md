@@ -44,6 +44,19 @@ for now:** the designer has not sent the composer changes, so by roadmap
 rule 4 it waits and is built as soon as they arrive. On 2026-10-26 she had
 received no new screens.
 
+**Paused: feature 8, Going live** (opened 2026-10-27, paused the same
+day by her husband). He took the infrastructure decision and wants to do
+the feature only when it can end in a real deployment, which needs a domain
+he will buy; that takes time. By roadmap rule 4, work moves to feature 9.
+Block 1 reached a direction, recorded as **proposed** in ADR-027: Google's
+free e2-micro on IPv6 only behind Cloudflare (a public IPv4 costs about 3.65
+dollars a month; a console disk defaults to the non-free `pd-balanced`),
+Supabase Postgres, the frontend on a separate free host, nightly backups to
+Cloud Storage, a 1-dollar budget alert. Oracle was judged too hard to
+obtain; Azure's year is the launch option. Blocks 2 to 7 are not started.
+Queues and Redis: not now (Rule Zero). Fact for block 2: five of the 15
+migrations use SQLite's table rebuild and `PRAGMA`.
+
 **Verified on 2026-10-27 by re-running, not by reading a report.** All nine
 checks pass:
 
@@ -85,22 +98,23 @@ The old `day-*` branches and four kept merged branches stay as they are.
    `roadmap.md` (read *The order of the work now*), this file, and
    `CLAUDE.md`. Then *How To Work With The Learner*, below, before teaching
    anything.
-2. **Check `main`.** The pull request of `feature-quality-pass` should be
-   merged. Run the nine checks and report the result in one line.
+2. **Check `main`** and run the nine checks; report the result in one line.
    Expected: 663 API unit, 68 API end-to-end, 290 web `lib/`, 5 component,
    10 contract.
-3. **Ask one question first:** has the designer sent any new screens
-   (`ui-handover-v4.md`)? If something has arrived, the feature it unblocks
-   is placed next (roadmap, *The order of the work now*).
-4. **Otherwise, feature 8, Going live** (Ref 41). Make `feature-going-live`
-   from `main`. Open in the usual order: the overview with its blocks;
-   learning debt (none is open); the problem first ("it only runs on her
-   laptop"); her decisions as short choices with a default; the worker; the
-   audit with one mutation; the pull request. It is large: expect more than
-   one worker, and decide the hosting before anything is built.
+3. **Ask two questions first:** has the designer sent new screens, and has
+   the domain been bought? A domain resumes feature 8; screens place the
+   feature they unblock next.
+4. **Otherwise, feature 9, Keep out of memory** (Ref 25). Make
+   `feature-keep-out-of-memory` from `main`. Open in the usual order: the
+   overview with its blocks; learning debt (none is open); the problem
+   first; her decisions as short choices with a default; the worker; the
+   audit with one mutation; the pull request.
+5. **When feature 9 closes**, the roadmap says feature 11 depends on 8. Ask
+   her husband whether 11 may be built before the deployment, or whether
+   work moves to whatever the designer has unblocked.
 
-**What feature 8 holds**, from the known debt and the ADRs (every row marked
-"Feature 8"):
+**What feature 8 holds when it resumes**, from the known debt and the ADRs
+(every row marked "Feature 8"):
 
 - **The hosting, managed Postgres, and continuous integration.** Nothing is
   chosen. Rule Zero applies to each.
@@ -602,6 +616,8 @@ cost a second worker.
   none. Corrected within the block (feature 2).
 - Told her a wording would fit on one line before it was measured
   (feature 6). She chose it partly for that reason.
+- Wrote ADR-027 as "Accepted" from answers still under discussion
+  (feature 8). Her husband corrected it: weigh every option, then lock.
 - Explained the duplicate timezone as depending on the browser she signed
   up in, before reading that the API stores Node's name (feature 7).
   Corrected in the same block, before the spec.
