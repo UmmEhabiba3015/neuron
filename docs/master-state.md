@@ -30,8 +30,8 @@ reports in `docs/learning/` hold the rest.
 
 ## Where the project is
 
-**Last updated:** 2026-10-27, at the close of the Postgres move (feature 8,
-block 2, brought forward).
+**Last updated:** 2026-10-28, at the close of feature 9, Keep out of
+memory.
 
 **Work is planned by feature, not by day.** The scope is locked in
 [features.md](features.md), the order is in [roadmap.md](roadmap.md), and
@@ -39,8 +39,9 @@ what the designer is asked to change is
 [ui-handover-v4.md](ui-handover-v4.md).
 
 **Done:** everything up to Screens Day, the restructure, features 1, 2, 3,
-5, 6 and 7, and the first review point. Feature 7 is in a pull request on
-`feature-quality-pass` for her to merge. **Feature 4, Drafts, is skipped
+5, 6, 7 and 9, the first review point, and the Postgres move (feature 8,
+block 2). Feature 9 is in a pull request on `feature-keep-out-of-memory` for
+her to merge. **Feature 4, Drafts, is skipped
 for now:** the designer has not sent the composer changes, so by roadmap
 rule 4 it waits and is built as soon as they arrive. On 2026-10-26 she had
 received no new screens.
@@ -75,10 +76,10 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 ```
 
-**585** API unit tests, **68** API end-to-end tests, **290** web tests on
-Node's runner (`lib/`) and **5** component tests on Vitest, **10** checks on
-the shared package. 28 ADRs (ADR-027 proposed). One baseline
-migration on Postgres. The API tests need Postgres: `docker compose up -d`,
+**613** API unit tests, **72** API end-to-end tests, **318** web tests on
+Node's runner (`lib/`) and **6** component tests on Vitest, **10** checks on
+the shared package. 28 ADRs (ADR-027 proposed). A baseline and one migration on
+Postgres. The API tests need Postgres: `docker compose up -d`,
 or `TEST_DATABASE_URL`. Use exactly these nine
 commands. A plain `npx jest` in `apps/api` skips the migration tests and
 still reports a pass. `test/app/main.e2e-spec.ts` fails now and then (known
@@ -96,7 +97,7 @@ keyboard alone, and a screen reader announces saving (her runs, feature 7).
 
 **What a person can see:** every screen of the designer's v3 prototype. A
 control whose feature is not built says "This is not built yet." and sends
-nothing. The 9 such controls are listed in `apps/web/lib/unbuilt.ts`.
+nothing. The 7 such controls are listed in `apps/web/lib/unbuilt.ts`.
 
 **Branch.** Each feature has its own branch, `feature-<short-name>`, made
 from `main` before work starts, and closes through a pull request she merges.
@@ -106,24 +107,28 @@ The old `day-*` branches and four kept merged branches stay as they are.
 
 ## How to open the next session
 
-The session of 2026-10-27 did the Postgres move on `feature-postgres`. The
-next session continues with her, at feature 9.
+The session of 2026-10-27 to 28 did the Postgres move and feature 9. The
+next session continues with her, at feature 11.
 
 1. **Read, in order:** `master-prompt.md`, `constitution.md`, `features.md`,
    `roadmap.md` (read *The order of the work now*), this file, and
    `CLAUDE.md`. Then *How To Work With The Learner*, below, before teaching
    anything.
 2. **Check `main`**, start Postgres (`docker compose up -d`) and run the nine
-   checks; report the result in one line. Expected: 585 API unit, 68 API
-   end-to-end, 290 web `lib/`, 5 component, 10 contract. If `main.e2e-spec.ts`
-   fails, run the end-to-end suite again (known flaky).
+   checks; report the result in one line. Expected: 613 API unit, 72 API
+   end-to-end, 318 web `lib/`, 6 component, 10 contract. If `main.e2e-spec.ts`
+   or the forgot-password suite fails, run the end-to-end suite again (both
+   known flaky).
 3. **Ask two questions first:** have the designer's new screens arrived (a
    reconciliation follows them, led by her husband), and has the domain been
    bought (it resumes feature 8)?
-4. **Otherwise, feature 9, Keep out of memory** (Ref 25), on
-   `feature-keep-out-of-memory`, then **feature 11**, built and tested
-   locally. Feature 11 opens with the question in `features.md`: is a memo
-   kept out of memory transcribed?
+4. **Otherwise, feature 11, Background work and transcription** (Ref 24),
+   on `feature-background-work`, built and tested locally and deployed with
+   feature 8. It opens with the question in `features.md`: is a memo kept out
+   of memory transcribed? **Its spec must add the guard test of `CLAUDE.md`**
+   (an entry kept out never reaches a model), written with the first call to
+   a model, as ADR-020's guard was (feature 9, block 1).
+5. **After feature 11, nothing may be ready** (open question 9).
 
 **What feature 8 holds when it resumes**, from the known debt and the ADRs
 (every row marked "Feature 8"):
@@ -265,6 +270,36 @@ Report in `docs/learning/feature-6-your-data/`.
   each connection.
 - *Corrected by her:* the Master Thread said "KEEPING · since October 2026"
   fits on one line before anyone had measured it.
+
+**Feature 9, Keep out of memory** (2026-10-28). Ref 25. Report in
+`docs/learning/feature-9-keep-out-of-memory/`.
+
+- *Built:* `entries.kept_out_of_memory`; a tick on the composer and on Talk,
+  turned off after each save; `PUT /entries/:id/memory`, which only puts an
+  entry in memory; the row says "In memory" or "Kept out of memory"; the JSON
+  export carries the mark. A rule in `CLAUDE.md` for every later AI feature.
+- *Her rulings:* **the mark goes one way**: kept out can be put in memory,
+  in memory can never be kept out, because a model may already have read it
+  (Ref 25 changed, 2026-10-28). She first said the opposite, then settled
+  this after the conflict with Ref 25 was shown. So the recorder gained a
+  tick. "Use in memory" asks in place; the mark waits for the API.
+- *Her reasoning worth telling:* no shared "entries for AI" method and no
+  guard test now (Rule Zero): nothing calls a model yet, so either would
+  guard nothing. The rule goes where every worker reads, and the guard
+  comes with the first caller.
+- *Her experiment:* `Boolean("false")` is `true`. She then found which bug
+  cannot be undone under her rule: a ticked memo saved in memory.
+- *The audit's find:* that exact bug had no guard. `Talk.tsx` passed the
+  tick to `uploads.keep`, whose parameter defaulted to `false`; dropping it
+  passed every test and the typecheck. She predicted that correctly. The
+  default was removed, so the compiler guards it.
+- *Also found:* recording had failed in Chrome and Edge since feature 7:
+  `performance.now()` gives fractions, the API takes whole milliseconds, and
+  Firefox rounds. Fixed in the follow-up.
+- *Mistake of the Master Thread:* the first `CLAUDE.md` line said a marked
+  memo is never transcribed, deciding feature 11's open question. Corrected
+  at once. Also a `git checkout` to undo a mutation, which would have lost
+  the worker's uncommitted work; it was refused by the permission check.
 
 **The Postgres move** (2026-10-27). Feature 8, block 2, brought forward by
 her husband. ADR-028, accepted by her. Report in
@@ -473,6 +508,8 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 | **A memo's length is the browser's claim**; the API checks the size (24 MB) but does not measure the audio (ADR-023) | `POST /entries/voice` | Feature 16, Security pass |
 | **A memo recorded in one browser may not play in a much older one** (WebM or MP4, kept as recorded) | playback | Accepted; noted |
 | **No rate limit on the password check of `DELETE /auth/me`** | `auth.controller.ts` | Feature 16, Security pass |
+| **The forgot-password e2e helper is flaky**: it waits a fixed 1000 event-loop turns for the log line, which runs out when files run in parallel (2 of 5 runs, feature 9) | `apps/api/test/` | Feature 8, with continuous integration |
+| **A memo with no words has a tall empty body on desktop** (worker, feature 9) | `Journal.tsx` layout | Feature 11, when transcripts fill it, or feature 14 |
 | **`test/app/main.e2e-spec.ts` is flaky**: 2 of 68 failed once in four full runs (2026-10-26), passing alone. Likely cause: it frees a port before `main.ts` takes it, and a parallel suite can take it first | `apps/api/test/app/` | Feature 8, Going live (continuous integration will show it) |
 | **Only the composer's component test sees `preventDefault()`.** The editor turns read-only while it saves, so the editor's test passes without it (feature 7 mutation) | `components/today/LiveToday.test.tsx` | Accepted; a real browser test would be the revisit point of ADR-026 |
 | **In Chromium from 1200 to about 1229 wide, Today collapses into a 360-pixel column**; Firefox does not (worker, feature 7) | `lock.css` layout | Feature 14, or the designer |
@@ -664,3 +701,8 @@ cost a second worker.
 - Explained the duplicate timezone as depending on the browser she signed
   up in, before reading that the API stores Node's name (feature 7).
   Corrected in the same block, before the spec.
+- Wrote a `CLAUDE.md` rule that settled an open question (feature 9: a
+  marked memo is never transcribed). Corrected at once. Write a rule only as
+  far as its decisions go.
+- Tried to undo a mutation with `git checkout` on a branch holding a
+  worker's uncommitted work (feature 9). Undo a mutation with an edit.

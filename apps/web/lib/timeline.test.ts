@@ -25,6 +25,7 @@ const entry = (id: string, date: string, createdAt: string): Entry => ({
   durationMs: null,
   createdAt,
   date,
+  keptOutOfMemory: false,
 });
 
 function held() {

@@ -60,8 +60,6 @@ test('the list is the one the owner decided, each in its feature', () => {
     modelCanRead: 12,
     modelCannotRead: 12,
     ask: 12,
-    entryMemory: 9,
-    composerMemory: 9,
     supportResource: 15,
   });
 });

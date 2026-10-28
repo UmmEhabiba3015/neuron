@@ -40,4 +40,36 @@ describe('CreateVoiceMemoDto', () => {
   ])('refuses %s', (_label, body) => {
     expect(check(body).failed).toEqual(['durationMs']);
   });
+
+  describe('keptOutOfMemory, sent as text', () => {
+    it.each([
+      ['"true" as true', 'true', true],
+      ['"false" as false, not as true', 'false', false],
+    ])('reads %s', (_label, raw, expected) => {
+      const { dto, failed } = check({ durationMs: '1', keptOutOfMemory: raw });
+
+      expect(failed).toEqual([]);
+      expect(dto.keptOutOfMemory).toBe(expected);
+    });
+
+    it('leaves it missing when the form does not send it, which means in memory', () => {
+      const { dto, failed } = check({ durationMs: '1' });
+
+      expect(failed).toEqual([]);
+      expect(dto.keptOutOfMemory).toBeUndefined();
+    });
+
+    it.each([
+      ['an empty field', ''],
+      ['"yes"', 'yes'],
+      ['"1"', '1'],
+      ['"True" with a capital', 'True'],
+      ['" true" with a space', ' true'],
+      ['the field sent twice', ['true', 'true']],
+    ])('refuses %s', (_label, raw) => {
+      expect(check({ durationMs: '1', keptOutOfMemory: raw }).failed).toEqual([
+        'keptOutOfMemory',
+      ]);
+    });
+  });
 });

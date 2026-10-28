@@ -18,7 +18,15 @@ describe('what every route answers with (e2e)', () => {
   const DELETED_CONTENT = 'the canal again, and this one goes';
 
   const SHAPES = {
-    entry: ['id', 'kind', 'content', 'durationMs', 'createdAt', 'date'],
+    entry: [
+      'id',
+      'kind',
+      'content',
+      'durationMs',
+      'createdAt',
+      'date',
+      'keptOutOfMemory',
+    ],
     user: ['id', 'email', 'createdAt', 'name', 'timezone'],
     day: ['date', 'mood'],
     session: ['id', 'device', 'createdAt', 'lastUsedAt', 'current'],
@@ -110,6 +118,7 @@ describe('what every route answers with (e2e)', () => {
         .patch(`/entries/${keptId}`)
         .send({ content: 'this one stays, edited' })
         .expect(200),
+      inMemory: await habiba.put(`/entries/${keptId}/memory`).expect(200),
       range: await habiba.get(`/days?from=${date}&to=${date}`).expect(200),
       day: await habiba.get(`/days/${date}`).expect(200),
       mood: await habiba
@@ -137,6 +146,9 @@ describe('what every route answers with (e2e)', () => {
         .send({ content: 'x' })
         .expect(404),
       deletedAgain: await habiba.delete(`/entries/${doomedId}`).expect(404),
+      deletedInMemory: await habiba
+        .put(`/entries/${doomedId}/memory`)
+        .expect(404),
     };
 
     const everyAnswer: [string, request.Response][] = [
@@ -191,7 +203,13 @@ describe('what every route answers with (e2e)', () => {
 
     const keysOf = (body: unknown) => Object.keys(body as object);
 
-    for (const answer of [kept, doomed, before.one, before.edited]) {
+    for (const answer of [
+      kept,
+      doomed,
+      before.one,
+      before.edited,
+      before.inMemory,
+    ]) {
       expect(keysOf(answer.body)).toEqual(SHAPES.entry);
     }
     for (const answer of [before.list, before.byDate, before.search]) {

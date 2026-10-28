@@ -42,7 +42,11 @@ describe('the composer on Today', () => {
 
     expect(box).toHaveProperty('value', 'A quiet morning');
     expect(api.sent.filter((each) => each.path === '/entries')).toEqual([
-      { method: 'POST', path: '/entries', body: { content: 'A quiet morning' } },
+      {
+        method: 'POST',
+        path: '/entries',
+        body: { content: 'A quiet morning', keptOutOfMemory: false },
+      },
     ]);
   });
 
@@ -96,22 +100,61 @@ describe('the editor of an entry', () => {
   });
 });
 
-describe('an unbuilt control', () => {
-  test('a press says it is not built yet and sends no request', async () => {
+describe('keep out of memory', () => {
+  test('the composer`s tick is sent with the entry, and is turned off once it is saved', async () => {
     const api = fakeApi();
+    const { user, box } = await openToday();
+    const tick = screen.getByRole('button', { name: 'Keep this out of memory' });
+
+    expect(tick.getAttribute('aria-pressed')).toBe('false');
+    await user.click(tick);
+    expect(tick.getAttribute('aria-pressed')).toBe('true');
+
+    await user.type(box, 'Only for me');
+    await user.click(screen.getByRole('button', { name: 'Save entry' }));
+
+    expect(api.sent.filter((each) => each.method === 'POST' && each.path === '/entries')).toEqual([
+      {
+        method: 'POST',
+        path: '/entries',
+        body: { content: 'Only for me', keptOutOfMemory: true },
+      },
+    ]);
+    await waitFor(() =>
+      expect(
+        screen
+          .getByRole('button', { name: 'Keep this out of memory' })
+          .getAttribute('aria-pressed'),
+      ).toBe('false'),
+    );
+  });
+
+  test('an entry kept out asks first, waits for the API, and is then in memory', async () => {
+    const api = fakeApi({
+      entries: [{ ...entry('e1', 'Private words'), keptOutOfMemory: true }],
+    });
     const { user } = await openToday();
 
-    await waitFor(() => expect(api.calls()).toContain('GET /days/today'));
-    const before = api.calls().length;
+    const trigger = await screen.findByLabelText(
+      'Entry memory settings: kept out of memory',
+    );
+    await user.click(trigger);
+    await user.click(screen.getByRole('button', { name: 'Use in memory' }));
 
-    await user.click(
-      screen.getByRole('button', { name: 'Keep this out of memory' }),
+    expect(
+      screen.getByText('Use this entry in memory? This cannot be undone.'),
+    ).toBeTruthy();
+    expect(api.calls()).not.toContain('PUT /entries/e1/memory');
+    expect(document.activeElement).toBe(
+      screen.getByRole('button', { name: /Keep it out/ }),
     );
 
-    expect(screen.getByRole('status')).toHaveProperty(
-      'textContent',
-      'This is not built yet.',
-    );
-    expect(api.calls()).toHaveLength(before);
+    await user.click(screen.getByRole('button', { name: /^Use in memory/ }));
+
+    await screen.findByLabelText('Entry memory settings: in memory');
+    expect(api.calls()).toContain('PUT /entries/e1/memory');
+    expect(screen.getByText('This entry is in memory now.')).toBeTruthy();
+    expect(screen.getByText('This entry is in memory.')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Use in memory' })).toBeNull();
   });
 });

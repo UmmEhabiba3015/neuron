@@ -7,15 +7,18 @@ import {
   LiveMemo,
   MoodRow,
   type EntryEditor,
+  type MemoryControls,
 } from '@/components/day/Journal';
+import { memoryMenuOf, inMemoryQuestion } from '@/lib/memory';
 import { formatTime } from '@/lib/utils/format';
-import type {
-  DayPage,
-  DayState,
-  EditNotSaved,
-  Editing,
-  MoodNotSaved,
-  NotDeleted,
+import {
+  rowMemoryOf,
+  type DayPage,
+  type DayState,
+  type EditNotSaved,
+  type Editing,
+  type MoodNotSaved,
+  type NotDeleted,
 } from '@/lib/today';
 
 const NOT_DELETED: Record<NotDeleted, string> = {
@@ -137,6 +140,18 @@ export function DaySheet({
     }
   }, [view.editedGone]);
 
+  /* The memory menu of one row, from lib/memory.ts and lib/today.ts. */
+  const memoryOf = (entry: Entry): MemoryControls => ({
+    menu: memoryMenuOf(entry, rowMemoryOf(view.memory, entry.id)),
+    question:
+      view.memory.confirming === entry.id
+        ? inMemoryQuestion(entry)
+        : undefined,
+    onAsk: () => page.askToUseInMemory(entry.id),
+    onKeepOut: page.keepOutOfMemory,
+    onUseInMemory: () => void page.useInMemory(),
+  });
+
   return (
     <main className="sheet">
       {entries.map((entry) => {
@@ -163,6 +178,7 @@ export function DaySheet({
                 onLeaving(entry.id);
                 void page.goAhead();
               }}
+              memory={memoryOf(entry)}
             />
           );
         }
@@ -185,6 +201,7 @@ export function DaySheet({
               onLeaving(entry.id);
               void page.goAhead();
             }}
+            memory={memoryOf(entry)}
             editor={
               view.editing?.id === entry.id ? editorOf(view.editing) : undefined
             }

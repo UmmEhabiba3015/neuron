@@ -66,4 +66,34 @@ describe('CreateEntryDto', () => {
       'content must not contain the NUL character (U+0000)',
     ]);
   });
+
+  describe('keptOutOfMemory', () => {
+    it.each([true, false])('should accept %s', (value) => {
+      expect(messagesFor({ content: 'kept', keptOutOfMemory: value })).toEqual(
+        [],
+      );
+    });
+
+    it('should leave it missing when it is not sent, which means in memory', () => {
+      const dto = plainToInstance(CreateEntryDto, { content: 'kept' });
+
+      expect(validateSync(dto)).toEqual([]);
+      expect(dto.keptOutOfMemory).toBeUndefined();
+    });
+
+    it.each([
+      ['the text "true"', 'true'],
+      ['a number', 1],
+      ['null', null],
+    ])('should reject %s', (_label, value) => {
+      const failed = validateSync(
+        plainToInstance(CreateEntryDto, {
+          content: 'kept',
+          keptOutOfMemory: value,
+        }),
+      ).map((error) => error.property);
+
+      expect(failed).toEqual(['keptOutOfMemory']);
+    });
+  });
 });

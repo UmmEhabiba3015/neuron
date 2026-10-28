@@ -20,6 +20,7 @@ import { LiveComposer, PendingMemo } from '@/components/day/Journal';
 import { useSession } from '@/hooks/useSession';
 import { session, uploads } from '@/lib/api/client';
 import { followUploads, uploadsShownOn } from '@/lib/uploads';
+import { tickOf } from '@/lib/memory';
 import { formatDay } from '@/lib/utils/format';
 import {
   createToday,
@@ -294,8 +295,10 @@ export function LiveToday({ options }: { options?: boolean }) {
           holdsWords={!isBlank(view.text)}
           line={composerLine(save)}
           problem={composerProblem(save)}
+          tick={tickOf(view.keepOut)}
           onType={today.type}
           onSave={() => void today.save()}
+          onTick={today.toggleKeepOut}
         />
       ) : null}
     </LiveScreen>

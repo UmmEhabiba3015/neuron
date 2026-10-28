@@ -36,6 +36,7 @@ const entry = (id: string, minute: number, date = TODAY): Entry => ({
   durationMs: null,
   createdAt: `${date}T09:${String(minute).padStart(2, '0')}:00.000Z`,
   date,
+  keptOutOfMemory: false,
 });
 
 function held() {
@@ -97,8 +98,15 @@ function fakeApi(ids: string[] = [], mood: string | null = null) {
     }
 
     if (key === 'POST /entries') {
-      const { content } = options.body as { content: string };
-      const created = { ...entry(`new${stored.length}`, 30), content };
+      const { content, keptOutOfMemory = false } = options.body as {
+        content: string;
+        keptOutOfMemory?: boolean;
+      };
+      const created = {
+        ...entry(`new${stored.length}`, 30),
+        content,
+        keptOutOfMemory,
+      };
 
       stored = [...stored, created];
       return { kind: 'ok', data: created };
@@ -116,6 +124,21 @@ function fakeApi(ids: string[] = [], mood: string | null = null) {
       const changed = { ...found, content };
 
       stored = stored.map((item) => (item.id === id ? changed : item));
+      return { kind: 'ok', data: changed };
+    }
+
+    const memory = /^PUT \/entries\/([^/]+)\/memory$/.exec(key);
+
+    if (memory) {
+      const found = stored.find((item) => item.id === memory[1]);
+
+      if (!found) {
+        return NOT_FOUND;
+      }
+
+      const changed = { ...found, keptOutOfMemory: false };
+
+      stored = stored.map((item) => (item.id === found.id ? changed : item));
       return { kind: 'ok', data: changed };
     }
 
@@ -140,6 +163,12 @@ function fakeApi(ids: string[] = [], mood: string | null = null) {
     },
     restore(key: string) {
       delete overrides[key];
+    },
+    /* Marks stored entries as kept out of memory, as if saved with the tick. */
+    keepOut(...keptOut: string[]) {
+      stored = stored.map((item) =>
+        keptOut.includes(item.id) ? { ...item, keptOutOfMemory: true } : item,
+      );
     },
     /* Puts entries on another date, and gives that day a mood. */
     file(date: string, others: string[], felt: string | null = null) {
@@ -281,7 +310,10 @@ test('the body is the contract`s, holding the words without the space around the
   await today.save();
 
   const post = api.sent.find((s) => s.method === 'POST');
-  assert.deepEqual(post?.body, { content: 'first line\n\nsecond line' });
+  assert.deepEqual(post?.body, {
+    content: 'first line\n\nsecond line',
+    keptOutOfMemory: false,
+  });
 });
 
 test('after a save the entry comes from the API, which is asked for today again', async () => {
@@ -984,6 +1016,7 @@ test('the page of a past date cannot write: it has no save and no type, and send
 
   assert.equal('save' in page, false);
   assert.equal('type' in page, false);
+  assert.equal('toggleKeepOut' in page, false);
   assert.equal(api.count('POST', '/entries'), 0);
 });
 
@@ -1139,6 +1172,7 @@ test('a voice memo has no editor: pressing edit on one opens nothing and sends n
     durationMs: 72_000,
     createdAt: `${TODAY}T09:05:00.000Z`,
     date: TODAY,
+    keptOutOfMemory: false,
   };
   api.answer('GET /entries', () => ({ kind: 'ok', data: [memo] }));
   const today = createToday({ request: api.request, pageSize: 200 });
@@ -1503,4 +1537,271 @@ test('the mood body on Today is the contract`s shape too: one field, a word or n
     api.sent.filter((s) => s.method === 'PUT').map((s) => s.body),
     [{ mood: 'Even' }, { mood: null }],
   );
+});
+
+/* ---- Keep out of memory: the composer's tick ---------------------------- */
+
+const posted = (api: ReturnType<typeof fakeApi>) =>
+  api.sent.filter((s) => s.method === 'POST').map((s) => s.body);
+
+test('the tick starts off, and a press turns it on and off again', async () => {
+  const { today } = await openToday();
+
+  assert.equal(today.getState().keepOut, false);
+  today.toggleKeepOut();
+  assert.equal(today.getState().keepOut, true);
+  today.toggleKeepOut();
+  assert.equal(today.getState().keepOut, false);
+});
+
+test('the tick is sent with the entry, and turns off once the save succeeds', async () => {
+  const { api, today } = await openToday();
+  const post = held();
+  api.answer('POST /entries', () => post.reply);
+
+  today.toggleKeepOut();
+  today.type('only for me');
+  const saving = today.save();
+
+  assert.deepEqual(posted(api), [
+    { content: 'only for me', keptOutOfMemory: true },
+  ]);
+  assert.equal(today.getState().keepOut, true, 'still on while it saves');
+
+  post.release({
+    kind: 'ok',
+    data: { ...entry('n', 30), content: 'only for me', keptOutOfMemory: true },
+  });
+  await saving;
+
+  assert.equal(today.getState().keepOut, false);
+});
+
+for (const [name, reply] of [
+  ['gets no answer', NO_ANSWER],
+  ['is refused', SERVER_ERROR],
+] as const) {
+  test(`a save that ${name} keeps the tick as it was, with the words, and the next save sends it again`, async () => {
+    const { api, today } = await openToday();
+    api.answer('POST /entries', () => reply);
+
+    today.toggleKeepOut();
+    today.type('only for me');
+    await today.save();
+
+    assert.equal(today.getState().keepOut, true);
+    assert.equal(today.getState().text, 'only for me');
+
+    api.restore('POST /entries');
+    await today.save();
+
+    assert.deepEqual(posted(api), [
+      { content: 'only for me', keptOutOfMemory: true },
+      { content: 'only for me', keptOutOfMemory: true },
+    ]);
+    assert.equal(today.getState().keepOut, false);
+  });
+}
+
+/* ---- Keep out of memory: "Use in memory" ------------------------------- */
+
+const markOf = (page: { getState(): { day: unknown } }, id: string) =>
+  (page.getState().day as { entries: Entry[] }).entries.find(
+    (item) => item.id === id,
+  )?.keptOutOfMemory;
+
+const PUT_A_IN_MEMORY = 'PUT /entries/a/memory';
+
+test('asking about an entry kept out sends nothing, and keeping it out leaves it as it was', async () => {
+  const api = fakeApi(['a', 'b']);
+  api.keepOut('a');
+  const today = createToday({ request: api.request, pageSize: 200 });
+  await today.open();
+  const before = api.sent.length;
+
+  today.askToUseInMemory('a');
+  assert.equal(today.getState().memory.confirming, 'a');
+
+  today.keepOutOfMemory();
+  assert.equal(today.getState().memory.confirming, null);
+  assert.equal(markOf(today, 'a'), true);
+  assert.equal(api.sent.length, before);
+});
+
+test('an entry in memory cannot be asked about: it has no option, and nothing is sent', async () => {
+  const { api, today } = await openToday(['a']);
+  const before = api.sent.length;
+
+  today.askToUseInMemory('a');
+  await today.useInMemory();
+
+  assert.equal(today.getState().memory.confirming, null);
+  assert.equal(api.sent.length, before);
+});
+
+test('going ahead without having been asked sends nothing', async () => {
+  const api = fakeApi(['a']);
+  api.keepOut('a');
+  const today = createToday({ request: api.request, pageSize: 200 });
+  await today.open();
+  const before = api.sent.length;
+
+  await today.useInMemory();
+
+  assert.equal(api.sent.length, before);
+});
+
+test('yes waits for the API: the row stays kept out while it saves, then is in memory, and a screen reader is told', async () => {
+  const api = fakeApi(['a', 'b']);
+  api.keepOut('a', 'b');
+  const today = createToday({ request: api.request, pageSize: 200 });
+  await today.open();
+  const put = held();
+  api.answer(PUT_A_IN_MEMORY, () => put.reply);
+
+  today.askToUseInMemory('a');
+  const going = today.useInMemory();
+
+  assert.equal(markOf(today, 'a'), true, 'before any answer');
+  assert.deepEqual(today.getState().memory.saving, ['a']);
+  assert.equal(today.getState().memory.confirming, null);
+
+  put.release({
+    kind: 'ok',
+    data: { ...entry('a', 1), keptOutOfMemory: false },
+  });
+  await going;
+
+  assert.equal(markOf(today, 'a'), false);
+  assert.equal(markOf(today, 'b'), true, 'and no other');
+  assert.deepEqual(today.getState().memory.saving, []);
+  assert.deepEqual(today.getState().memory.heard, ['a']);
+  assert.deepEqual(
+    api.sent.filter((s) => s.method === 'PUT').map((s) => [s.path, s.body]),
+    [['/entries/a/memory', undefined]],
+  );
+});
+
+test('while it saves, asking again about the same entry does nothing, and a second yes sends nothing', async () => {
+  const api = fakeApi(['a']);
+  api.keepOut('a');
+  const today = createToday({ request: api.request, pageSize: 200 });
+  await today.open();
+  const put = held();
+  api.answer(PUT_A_IN_MEMORY, () => put.reply);
+
+  today.askToUseInMemory('a');
+  const going = today.useInMemory();
+
+  today.askToUseInMemory('a');
+  assert.equal(today.getState().memory.confirming, null);
+  await today.useInMemory();
+
+  put.release({ kind: 'ok', data: { ...entry('a', 1) } });
+  await going;
+
+  assert.equal(api.count('PUT', '/entries/a/memory'), 1);
+});
+
+for (const [name, reply, why] of [
+  ['gets no answer', NO_ANSWER, 'unreachable'],
+  ['is refused', SERVER_ERROR, 'refused'],
+] as const) {
+  test(`a yes that ${name} leaves the entry kept out, with its reason, until it is asked about again`, async () => {
+    const api = fakeApi(['a']);
+    api.keepOut('a');
+    const today = createToday({ request: api.request, pageSize: 200 });
+    await today.open();
+    api.answer(PUT_A_IN_MEMORY, () => reply);
+
+    today.askToUseInMemory('a');
+    await today.useInMemory();
+
+    assert.equal(markOf(today, 'a'), true);
+    assert.deepEqual(today.getState().memory.notSaved, { a: why });
+    assert.deepEqual(today.getState().memory.heard, []);
+
+    today.askToUseInMemory('a');
+    assert.deepEqual(today.getState().memory.notSaved, {});
+  });
+}
+
+test('a yes whose session has ended says nothing, and the entry stays kept out', async () => {
+  const api = fakeApi(['a']);
+  api.keepOut('a');
+  const today = createToday({ request: api.request, pageSize: 200 });
+  await today.open();
+  api.answer(PUT_A_IN_MEMORY, () => ENDED);
+
+  today.askToUseInMemory('a');
+  await today.useInMemory();
+
+  assert.equal(markOf(today, 'a'), true);
+  assert.deepEqual(today.getState().memory.notSaved, {});
+});
+
+test('a yes answered 404 takes the entry off the page, and says it had been deleted', async () => {
+  const api = fakeApi(['a', 'b']);
+  api.keepOut('a');
+  const today = createToday({ request: api.request, pageSize: 200 });
+  await today.open();
+  api.answer(PUT_A_IN_MEMORY, () => NOT_FOUND);
+
+  today.askToUseInMemory('a');
+  await today.useInMemory();
+
+  assert.deepEqual(shown(today), ['b']);
+  assert.equal(today.getState().editedGone, true);
+});
+
+test('an answer about the day that left the API before the entry was put in memory does not show it kept out again', async () => {
+  const api = fakeApi(['a']);
+  api.keepOut('a');
+  const today = createToday({ request: api.request, pageSize: 200 });
+  await today.open();
+
+  const stale = held();
+  api.answer('GET /entries', () => stale.reply);
+  const looking = today.look();
+
+  today.askToUseInMemory('a');
+  await today.useInMemory();
+
+  stale.release({
+    kind: 'ok',
+    data: [{ ...entry('a', 1), keptOutOfMemory: true }],
+  });
+  await looking;
+
+  assert.equal(markOf(today, 'a'), false);
+});
+
+test('asking about a delete closes the question about memory, and the other way round', async () => {
+  const api = fakeApi(['a', 'b']);
+  api.keepOut('a');
+  const today = createToday({ request: api.request, pageSize: 200 });
+  await today.open();
+
+  today.askToUseInMemory('a');
+  today.askToDelete('b');
+  assert.equal(today.getState().memory.confirming, null);
+  assert.equal(today.getState().confirming, 'b');
+
+  today.askToUseInMemory('a');
+  assert.equal(today.getState().confirming, null);
+  assert.equal(today.getState().memory.confirming, 'a');
+});
+
+test('a past date puts an entry in memory as Today does', async () => {
+  const api = fakeApi(['today1']);
+  api.file(PAST, ['a', 'b']);
+  api.keepOut('a');
+  const page = createPastDay({ request: api.request, pageSize: 200, date: PAST });
+  await page.open();
+
+  page.askToUseInMemory('a');
+  await page.useInMemory();
+
+  assert.equal(markOf(page, 'a'), false);
+  assert.equal(api.count('PUT', '/entries/a/memory'), 1);
 });

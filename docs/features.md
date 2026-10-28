@@ -150,12 +150,16 @@ normal state.
 
 ## 6. Memory and AI
 
-**Ref 25. Keep this out of memory.** Keep. *Drawn.*
-Any entry or memo can be marked so that it is never sent to an AI model:
+**Ref 25. Keep this out of memory.** Keep. *Built* (feature 9).
+An entry or memo can be kept out of memory, so that it is never sent to an
+AI model:
 it is never used for Ask, reflections, the recent overview, or anything
 else that feeds text to a model. **It is still found by keyword search and
 by search by meaning**, because those search the product's own database.
-The mark stays visible. It can also be set from the composer before saving.
+The mark stays visible. It is set before saving, from the composer or the
+recorder. **It goes one way** (her ruling, 2026-10-28): an entry kept out
+can later be put in memory, and an entry in memory can never be kept out,
+because a model may already have read it.
 **It must be built before Ask.**
 
 *Open, decided when search by meaning is built:* turning an entry into a

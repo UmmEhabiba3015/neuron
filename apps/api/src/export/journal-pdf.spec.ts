@@ -31,6 +31,7 @@ const typed = (
   durationMs: null,
   createdAt,
   date,
+  keptOutOfMemory: false,
 });
 
 describe('journalPdfLines', () => {
@@ -94,6 +95,7 @@ describe('journalPdfLines', () => {
       durationMs: 151_900,
       createdAt: '2026-10-16T04:00:00.000Z',
       date: '2026-10-16',
+      keptOutOfMemory: false,
     });
 
     const lines = journalPdfLines(
@@ -111,6 +113,30 @@ describe('journalPdfLines', () => {
       { kind: 'time', text: '09:00  Voice memo, 2:31' },
       { kind: 'words', text: 'what I said' },
     ]);
+  });
+
+  /* Her decision 3a: the PDF is the same whether an entry is kept out or not. */
+  it('draws an entry kept out of memory exactly as one in memory', () => {
+    const day = (keptOutOfMemory: boolean) =>
+      journal([
+        {
+          date: '2026-10-16',
+          mood: null,
+          entries: [
+            {
+              ...typed(
+                'e1',
+                'private',
+                '2026-10-16T04:00:00.000Z',
+                '2026-10-16',
+              ),
+              keptOutOfMemory,
+            },
+          ],
+        },
+      ]);
+
+    expect(journalPdfLines(day(true))).toEqual(journalPdfLines(day(false)));
   });
 
   it('replaces what the font cannot draw, in the words and in the name', () => {

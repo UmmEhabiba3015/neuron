@@ -55,6 +55,15 @@ export class EntryEntity {
   @Column({ name: 'created_at', type: 'text' })
   createdAt!: string;
 
+  /*
+   * True when the person chose, as the entry was saved, that it is never
+   * sent to an AI model (features.md, Ref 25). The mark goes one way: it can
+   * be taken off with putInMemory, and nothing sets it again after the
+   * entry is saved, because a model may already have read it.
+   */
+  @Column({ name: 'kept_out_of_memory', type: 'boolean', default: false })
+  keptOutOfMemory!: boolean;
+
   @Column({ name: 'user_id', type: 'text', select: false })
   userId?: string;
 

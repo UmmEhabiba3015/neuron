@@ -18,6 +18,7 @@ describe('routes closed by default (e2e)', () => {
     ['POST', '/entries/voice'],
     ['GET', '/entries/some-id/audio'],
     ['PATCH', '/entries/some-id'],
+    ['PUT', '/entries/some-id/memory'],
     ['DELETE', '/entries/some-id'],
     ['GET', '/days?from=2026-08-01&to=2026-08-31'],
     ['GET', '/days/today'],

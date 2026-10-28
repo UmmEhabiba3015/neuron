@@ -243,6 +243,20 @@ test('a memo stopped at once is still a millisecond long, which the API accepts'
   assert.equal(kept[0].durationMs, 1);
 });
 
+test('a clock that counts in fractions still keeps a whole number of milliseconds', async () => {
+  const { recorder, recording, time, kept } = setUp();
+  await recording();
+
+  time.advance(1_234.567);
+  recorder.pause();
+  recorder.resume();
+  time.advance(0.6);
+  await recorder.stopAndKeep();
+
+  assert.equal(kept[0].durationMs, 1_235);
+  assert.ok(Number.isInteger(kept[0].durationMs));
+});
+
 test('at the limit it stops and keeps by itself, at exactly the limit, and says so', async () => {
   const { recorder, recording, time, kept } = setUp();
   await recording();
