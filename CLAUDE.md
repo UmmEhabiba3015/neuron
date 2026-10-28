@@ -80,6 +80,11 @@ These are decided. The ADR named holds the reason.
   entry's day; the browser's clock never makes a date (ADR-015).
 - Deleting an entry is a soft delete; deleted entries are kept out of every
   reader (ADR-020).
+- An entry marked out of memory (`kept_out_of_memory`) never reaches an AI
+  model: no Ask, reflection or overview sends its text (`features.md`,
+  Ref 25). Whether a marked memo is transcribed is decided when feature 11
+  opens. The first code that calls a model adds a test that guards this, as
+  ADR-020's guard does for deleted rows.
 - Facts both apps depend on live once in `packages/contracts` (ADR-019).
 - Configuration is checked once at start (ADR-007).
 - In `apps/web`, logic lives in `lib/` without React, where tests reach it;

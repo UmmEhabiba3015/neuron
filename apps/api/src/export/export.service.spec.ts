@@ -79,6 +79,7 @@ describe('ExportService', () => {
           id: 'first',
           content: 'the first',
           createdAt: '2026-10-15T09:00:00.000Z',
+          keptOutOfMemory: true,
         },
         memo('webm', WEBM, 'audio/webm', '2026-10-15T10:00:00.000Z'),
         {
@@ -179,8 +180,24 @@ describe('ExportService', () => {
       durationMs: 151_000,
       createdAt: '2026-10-15T10:00:00.000Z',
       date: '2026-10-15',
+      keptOutOfMemory: false,
     });
     expect(strFromU8(files['journal.json'])).not.toContain(WEBM);
+  });
+
+  it('says of each entry whether it is kept out of memory', async () => {
+    const { journal } = await build();
+
+    expect(
+      journal.days.flatMap((day) =>
+        day.entries.map((e) => [e.id, e.keptOutOfMemory]),
+      ),
+    ).toEqual([
+      ['first', true],
+      ['webm', false],
+      ['mp4', false],
+      ['late', false],
+    ]);
   });
 
   it('keeps every character exactly in the JSON, emoji included', async () => {

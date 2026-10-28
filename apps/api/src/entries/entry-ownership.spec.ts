@@ -224,6 +224,7 @@ describe('entry ownership', () => {
         'content',
         'durationMs',
         'createdAt',
+        'keptOutOfMemory',
       ]);
     });
   });

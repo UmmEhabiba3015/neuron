@@ -37,9 +37,15 @@ export interface UploadsState {
 export interface Uploads {
   getState(): UploadsState;
   subscribe(listener: () => void): () => void;
-  /* Takes a kept memo and sends it. */
-  keep(memo: Kept): Promise<void>;
-  /* Sends a memo that was not saved again. Nothing for any other. */
+  /*
+   * Takes a kept memo and sends it, kept out of memory or not, as the tick
+   * on Talk said when it was kept.
+   */
+  keep(memo: Kept, keptOutOfMemory: boolean): Promise<void>;
+  /*
+   * Sends a memo that was not saved again, with the same choice about
+   * memory. Nothing for any other.
+   */
   retry(id: string): Promise<void>;
   /* A saved memo that the day now shows. */
   forget(id: string): void;
@@ -58,8 +64,11 @@ export function createUploads(config: {
   const newId = config.newId ?? (() => crypto.randomUUID());
 
   let uploads: Upload[] = [];
-  /* The audio of each memo not yet saved. Dropped once it is. */
-  const audio = new Map<string, Kept>();
+  /*
+   * The audio of each memo not yet saved, and whether it is kept out of
+   * memory. Dropped once it is saved.
+   */
+  const audio = new Map<string, Kept & { keptOutOfMemory: boolean }>();
 
   const listeners = new Set<() => void>();
   let state: UploadsState = { uploads };
@@ -83,9 +92,14 @@ export function createUploads(config: {
 
     replace({ id, durationMs: memo.durationMs, status: 'saving' });
 
-    const fields: CreateVoiceMemo = { durationMs: memo.durationMs };
+    const fields: Required<CreateVoiceMemo> = {
+      durationMs: memo.durationMs,
+      keptOutOfMemory: memo.keptOutOfMemory,
+    };
     const form = new FormData();
     form.append('durationMs', String(fields.durationMs));
+    /* A form sends text: exactly "true" or "false", as the API reads it. */
+    form.append('keptOutOfMemory', String(fields.keptOutOfMemory));
     form.append(
       AUDIO_FIELD,
       new Blob([memo.audio], { type: memo.type }),
@@ -124,10 +138,10 @@ export function createUploads(config: {
         listeners.delete(listener);
       };
     },
-    async keep(memo) {
+    async keep(memo, keptOutOfMemory) {
       const id = newId();
 
-      audio.set(id, memo);
+      audio.set(id, { ...memo, keptOutOfMemory });
       uploads = [
         ...uploads,
         { id, durationMs: memo.durationMs, status: 'saving' },

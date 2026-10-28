@@ -25,6 +25,7 @@ const memoEntry = (id: string, date = TODAY): Entry => ({
   durationMs: 72_000,
   createdAt: `${date}T21:58:00.000Z`,
   date,
+  keptOutOfMemory: false,
 });
 
 const KEPT = {
@@ -72,7 +73,7 @@ test('a kept memo is drawn as saving at once, and sent as a form with its length
   const api = fakeApi([answer.reply]);
   const uploads = createUploads({ request: api.request, newId });
 
-  const sending = uploads.keep(KEPT);
+  const sending = uploads.keep(KEPT, false);
 
   assert.deepEqual(statuses(uploads.getState().uploads), ['saving']);
 
@@ -106,7 +107,7 @@ test('a memo the API did not take is kept, and Try again sends the same audio ag
   const api = fakeApi([NO_ANSWER, SERVER_ERROR, { kind: 'ok', data: memoEntry('m1') }]);
   const uploads = createUploads({ request: api.request, newId });
 
-  await uploads.keep(KEPT);
+  await uploads.keep(KEPT, false);
   assert.deepEqual(statuses(uploads.getState().uploads), ['notSaved']);
 
   const [{ id }] = uploads.getState().uploads;
@@ -124,12 +125,42 @@ test('a memo the API did not take is kept, and Try again sends the same audio ag
   assert.deepEqual(sizes, [4, 4, 4]);
 });
 
+test('a memo is sent kept out of memory or not, as the tick said, as the text "true" or "false"', async () => {
+  const api = fakeApi([
+    { kind: 'ok', data: memoEntry('m1') },
+    { kind: 'ok', data: memoEntry('m2') },
+  ]);
+  const uploads = createUploads({ request: api.request, newId });
+
+  await uploads.keep(KEPT, false);
+  await uploads.keep(KEPT, true);
+
+  assert.deepEqual(
+    api.sent.map((each) => each.form?.get('keptOutOfMemory')),
+    ['false', 'true'],
+  );
+});
+
+test('Try again sends the same choice about memory', async () => {
+  const api = fakeApi([NO_ANSWER, { kind: 'ok', data: memoEntry('m1') }]);
+  const uploads = createUploads({ request: api.request, newId });
+
+  await uploads.keep(KEPT, true);
+  const [{ id }] = uploads.getState().uploads;
+  await uploads.retry(id);
+
+  assert.deepEqual(
+    api.sent.map((each) => each.form?.get('keptOutOfMemory')),
+    ['true', 'true'],
+  );
+});
+
 test('Try again is drawn as saving while it is out, and sends nothing for a memo that is saving or saved', async () => {
   const answer = held();
   const api = fakeApi([NO_ANSWER, answer.reply]);
   const uploads = createUploads({ request: api.request, newId });
 
-  await uploads.keep(KEPT);
+  await uploads.keep(KEPT, false);
   const [{ id }] = uploads.getState().uploads;
 
   const retrying = uploads.retry(id);
@@ -148,8 +179,8 @@ test('two memos are sent and kept apart, in the order they were kept', async () 
   const api = fakeApi([NO_ANSWER, { kind: 'ok', data: memoEntry('m2') }]);
   const uploads = createUploads({ request: api.request, newId });
 
-  await uploads.keep(KEPT);
-  await uploads.keep({ ...KEPT, durationMs: 5_000 });
+  await uploads.keep(KEPT, false);
+  await uploads.keep({ ...KEPT, durationMs: 5_000 }, false);
 
   assert.deepEqual(
     uploads.getState().uploads.map((upload) => [upload.durationMs, upload.status]),
@@ -165,10 +196,10 @@ test('an ended session leaves the memo not saved, and signing out clears every m
   const api = fakeApi([{ kind: 'ended' }, answer.reply]);
   const uploads = createUploads({ request: api.request, newId });
 
-  await uploads.keep(KEPT);
+  await uploads.keep(KEPT, false);
   assert.deepEqual(statuses(uploads.getState().uploads), ['notSaved']);
 
-  const sending = uploads.keep(KEPT);
+  const sending = uploads.keep(KEPT, false);
   uploads.clear();
   answer.release({ kind: 'ok', data: memoEntry('m1') });
   await sending;
@@ -180,7 +211,7 @@ test('forget takes a memo away, and its audio with it', async () => {
   const api = fakeApi([NO_ANSWER]);
   const uploads = createUploads({ request: api.request, newId });
 
-  await uploads.keep(KEPT);
+  await uploads.keep(KEPT, false);
   const [{ id }] = uploads.getState().uploads;
   uploads.forget(id);
   await uploads.retry(id);
@@ -253,7 +284,7 @@ test('a saved memo makes Today ask again once, and is forgotten when the day hol
   const { today, looks, answer } = fakeToday();
   const untie = followUploads(uploads, today);
 
-  await uploads.keep(KEPT);
+  await uploads.keep(KEPT, false);
   assert.equal(looks(), 1);
   assert.deepEqual(statuses(uploads.getState().uploads), ['saved']);
 
@@ -271,7 +302,7 @@ test('a question already out when the memo is saved is waited for, and then aske
   const untie = followUploads(uploads, fake.today);
 
   fake.set({ asking: true });
-  await uploads.keep(KEPT);
+  await uploads.keep(KEPT, false);
   assert.equal(fake.looks(), 0);
 
   /* That answer left the API before the memo existed. */
@@ -294,8 +325,8 @@ test('a saved memo the API filed on another day is forgotten, and a memo not yet
   const fake = fakeToday();
   const untie = followUploads(uploads, fake.today);
 
-  await uploads.keep(KEPT);
-  await uploads.keep(KEPT);
+  await uploads.keep(KEPT, false);
+  await uploads.keep(KEPT, false);
   fake.answer([]);
 
   assert.deepEqual(statuses(uploads.getState().uploads), ['notSaved']);

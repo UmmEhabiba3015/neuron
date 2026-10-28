@@ -23,6 +23,11 @@
  *   Editing   wait, then show, as writing does. The editor stays open with
  *             the changed words until the API has confirmed them, and keeps
  *             them if it does not.
+ *   Memory    wait, then show, as writing does. "Use in memory" asks first,
+ *             as deleting does; once confirmed, the row stays kept out until
+ *             the API has put it in memory, and stays kept out if it does
+ *             not (features.md, Ref 25). The mark goes one way, so nothing
+ *             here keeps an entry out once it is in.
  */
 
 /*
@@ -39,6 +44,7 @@ import {
   type UpdateEntry,
 } from '@neuron/contracts';
 import { isCalendarDate } from './utils/format.ts';
+import type { MemoryNotSaved, RowMemory } from './memory.ts';
 import type { ApiResult, RequestOptions } from './api/session.ts';
 
 export type Request = <T>(
@@ -107,6 +113,28 @@ export interface Editing {
     | { status: 'notSaved'; why: EditNotSaved };
 }
 
+/*
+ * "Use in memory", for the entries of the day. `confirming` is the entry
+ * the person is being asked about; `saving` the ones confirmed and not yet
+ * answered; `notSaved` those whose answer was a failure; `heard` those put
+ * in memory on this page, which a screen reader is told about.
+ */
+export interface MemoryState {
+  confirming: string | null;
+  saving: readonly string[];
+  notSaved: Readonly<Record<string, MemoryNotSaved>>;
+  heard: readonly string[];
+}
+
+/* What the row of one entry is told about its mark (lib/memory.ts). */
+export function rowMemoryOf(memory: MemoryState, id: string): RowMemory {
+  return {
+    saving: memory.saving.includes(id),
+    notSaved: memory.notSaved[id],
+    heard: memory.heard.includes(id),
+  };
+}
+
 /* A press on a mood word: the day it was pressed on, and what it asks for. */
 type MoodPress = { date: string; mood: Mood | null };
 
@@ -116,6 +144,12 @@ export interface TodayState {
   asking: boolean;
   text: string;
   save: Save;
+  /*
+   * The composer's "Keep this out of memory". It is sent with the entry,
+   * stays as it is when a save fails, and turns off once one succeeds (her
+   * decision 2a).
+   */
+  keepOut: boolean;
   /* The entry the person is being asked about, before it is deleted. */
   confirming: string | null;
   /* Entries whose delete failed, and that are back on the screen. */
@@ -128,10 +162,11 @@ export interface TodayState {
    * has left this page too. It lasts until the next edit or delete is begun.
    */
   editedGone: boolean;
+  memory: MemoryState;
 }
 
 /* What the page of a date shows: everything Today shows but the composer. */
-export type DayState = Omit<TodayState, 'text' | 'save'>;
+export type DayState = Omit<TodayState, 'text' | 'save' | 'keepOut'>;
 
 /*
  * The page of a date that is not today. It has no `type` and no `save`, and
@@ -169,11 +204,26 @@ export interface DayPage {
   cancelEdit(): void;
   /* Sends the changed words. A press while they are being sent sends nothing. */
   saveEdit(): Promise<void>;
+  /*
+   * Asks "Use this entry in memory?" about an entry kept out. Nothing for
+   * one in memory, or one already being put there. Asking about one closes
+   * the question about a delete, and the other way round.
+   */
+  askToUseInMemory(id: string): void;
+  /* The safe answer: the entry stays kept out, and nothing is sent. */
+  keepOutOfMemory(): void;
+  /*
+   * The answer yes: PUT /entries/:id/memory for the entry asked about, and
+   * no other. The row changes once the API has answered.
+   */
+  useInMemory(): Promise<void>;
 }
 
 export interface Today extends DayPage {
   getState(): TodayState;
   type(text: string): void;
+  /* The composer's tick, on and off. */
+  toggleKeepOut(): void;
   save(): Promise<void>;
 }
 
@@ -243,6 +293,7 @@ function createDay(config: DayConfig, date?: string): Today {
 
   let text = '';
   let save: Save = { status: 'idle' };
+  let keepOut = false;
   let confirming: string | null = null;
   let notDeleted: Record<string, NotDeleted> = {};
 
@@ -275,6 +326,19 @@ function createDay(config: DayConfig, date?: string): Today {
     string,
     { content: string | null; at: number }
   >();
+
+  /*
+   * The entries the API has put in memory while this page has been open.
+   * The mark goes one way, so an answer about the day that left the API
+   * before one of them was put in memory is corrected by this set.
+   */
+  const putInMemory = new Set<string>();
+  let memory: MemoryState = {
+    confirming: null,
+    saving: [],
+    notSaved: {},
+    heard: [],
+  };
 
   const listeners = new Set<() => void>();
   let state = snapshot();
@@ -316,11 +380,13 @@ function createDay(config: DayConfig, date?: string): Today {
       asking,
       text,
       save,
+      keepOut,
       confirming,
       notDeleted,
       moodNotSaved,
       editing,
       editedGone,
+      memory,
     };
   }
 
@@ -440,10 +506,14 @@ function createDay(config: DayConfig, date?: string): Today {
           : answer.day,
         entries: answer.entries.map((item) => {
           const confirmed = confirmedEdits.get(item.id);
+          const edited =
+            confirmed && confirmed.at > editAnswersBefore
+              ? { ...item, content: confirmed.content }
+              : item;
 
-          return confirmed && confirmed.at > editAnswersBefore
-            ? { ...item, content: confirmed.content }
-            : item;
+          return putInMemory.has(item.id)
+            ? { ...edited, keptOutOfMemory: false }
+            : edited;
         }),
       };
       trouble = undefined;
@@ -503,7 +573,10 @@ function createDay(config: DayConfig, date?: string): Today {
     }
 
     const typed = text;
-    const body: CreateEntry = { content: typed.trim() };
+    const body: CreateEntry = {
+      content: typed.trim(),
+      keptOutOfMemory: keepOut,
+    };
 
     save = { status: 'saving' };
     publish();
@@ -525,6 +598,7 @@ function createDay(config: DayConfig, date?: string): Today {
      */
     text = text.startsWith(typed) ? text.slice(typed.length).trimStart() : text;
     save = { status: 'saved' };
+    keepOut = false;
 
     /*
      * The entry is not added to the page here. Its time and its day are the
@@ -539,6 +613,7 @@ function createDay(config: DayConfig, date?: string): Today {
     confirming = id;
     editedGone = false;
     notDeleted = without(notDeleted, id);
+    memory = { ...memory, confirming: null, heard: [] };
     publish();
   }
 
@@ -648,6 +723,89 @@ function createDay(config: DayConfig, date?: string): Today {
     publish();
   }
 
+  function askToUseInMemory(id: string): void {
+    const shown = fetched?.entries.find((item) => item.id === id);
+
+    if (
+      !shown ||
+      hidden.has(id) ||
+      !shown.keptOutOfMemory ||
+      memory.saving.includes(id)
+    ) {
+      return;
+    }
+
+    confirming = null;
+    editedGone = false;
+    memory = {
+      ...memory,
+      confirming: id,
+      notSaved: without(memory.notSaved, id),
+      heard: [],
+    };
+    publish();
+  }
+
+  function keepOutOfMemory(): void {
+    memory = { ...memory, confirming: null };
+    publish();
+  }
+
+  async function useInMemory(): Promise<void> {
+    const id = memory.confirming;
+
+    if (id === null || memory.saving.includes(id) || hidden.has(id)) {
+      return;
+    }
+
+    memory = {
+      ...memory,
+      confirming: null,
+      saving: [...memory.saving, id],
+      notSaved: without(memory.notSaved, id),
+    };
+    publish();
+
+    const result = await request<Entry>(`/entries/${id}/memory`, {
+      method: 'PUT',
+    });
+
+    memory = {
+      ...memory,
+      saving: memory.saving.filter((each) => each !== id),
+    };
+
+    if (result.kind === 'ok') {
+      putInMemory.add(id);
+      memory = { ...memory, heard: [...memory.heard, id] };
+
+      if (fetched) {
+        fetched = {
+          ...fetched,
+          entries: fetched.entries.map((item) =>
+            item.id === id
+              ? { ...item, keptOutOfMemory: result.data.keptOutOfMemory }
+              : item,
+          ),
+        };
+      }
+    } else if (result.kind === 'rejected' && result.status === 404) {
+      /* Deleted somewhere else: it leaves this page, and the page says so. */
+      hidden.add(id);
+      editedGone = true;
+    } else if (result.kind !== 'ended') {
+      memory = {
+        ...memory,
+        notSaved: {
+          ...memory.notSaved,
+          [id]: result.kind === 'unreachable' ? 'unreachable' : 'refused',
+        },
+      };
+    }
+
+    publish();
+  }
+
   function startEdit(id: string): void {
     if (editing?.save.status === 'saving') {
       return;
@@ -667,6 +825,7 @@ function createDay(config: DayConfig, date?: string): Today {
 
     editing = { id, text: shown.content, save: { status: 'idle' } };
     editedGone = false;
+    memory = { ...memory, heard: [] };
     publish();
   }
 
@@ -772,6 +931,10 @@ function createDay(config: DayConfig, date?: string): Today {
       text = next;
       publish();
     },
+    toggleKeepOut() {
+      keepOut = !keepOut;
+      publish();
+    },
     save: saveEntry,
     askToDelete,
     keep: keepEntry,
@@ -782,6 +945,9 @@ function createDay(config: DayConfig, date?: string): Today {
     typeEdit,
     cancelEdit,
     saveEdit,
+    askToUseInMemory,
+    keepOutOfMemory,
+    useInMemory,
   };
 }
 
@@ -810,6 +976,9 @@ export function createPastDay(config: DayConfig & { date: string }): DayPage {
     typeEdit: day.typeEdit,
     cancelEdit: day.cancelEdit,
     saveEdit: day.saveEdit,
+    askToUseInMemory: day.askToUseInMemory,
+    keepOutOfMemory: day.keepOutOfMemory,
+    useInMemory: day.useInMemory,
   };
 }
 

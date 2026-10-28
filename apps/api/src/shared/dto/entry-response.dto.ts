@@ -2,7 +2,7 @@ import type { Entry, EntryKind } from '@neuron/contracts';
 import type { FiledEntry } from '../types/filed-entry.type';
 
 /*
- * An entry as the API sends it. Built field by field, so it holds these six
+ * An entry as the API sends it. Built field by field, so it holds these seven
  * things and nothing else the entity or its day may be carrying: a voice
  * memo's audio key in particular never leaves the API. The compiler would
  * not notice an extra field.
@@ -16,6 +16,7 @@ export class EntryResponseDto implements Entry {
   durationMs: number | null;
   createdAt: string;
   date: string;
+  keptOutOfMemory: boolean;
 
   constructor(entry: FiledEntry) {
     this.id = entry.id;
@@ -24,5 +25,6 @@ export class EntryResponseDto implements Entry {
     this.durationMs = entry.durationMs;
     this.createdAt = entry.createdAt;
     this.date = entry.day.date;
+    this.keptOutOfMemory = entry.keptOutOfMemory;
   }
 }

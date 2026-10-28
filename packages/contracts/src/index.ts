@@ -83,6 +83,14 @@ export interface Entry {
    * from createdAt, and the two can disagree.
    */
   date: string;
+  /*
+   * True when the entry is kept out of memory: it is never sent to an AI
+   * model (features.md, Ref 25). It is chosen when the entry is saved, and
+   * goes one way: PUT /entries/:id/memory puts the entry in memory, and
+   * nothing keeps an entry out once it is in, because a model may already
+   * have read it. Search finds it either way.
+   */
+  keptOutOfMemory: boolean;
 }
 
 export interface Day {
@@ -139,6 +147,8 @@ export interface AuthResponse {
 /* The body of POST /entries. */
 export interface CreateEntry {
   content: string;
+  /* Missing means false: the entry is in memory. */
+  keptOutOfMemory?: boolean;
 }
 
 /*
@@ -148,6 +158,11 @@ export interface CreateEntry {
  */
 export interface CreateVoiceMemo {
   durationMs: number;
+  /*
+   * Sent as the text "true" or "false"; anything else is refused. Missing
+   * means false: the memo is in memory.
+   */
+  keptOutOfMemory?: boolean;
 }
 
 /*
@@ -157,6 +172,11 @@ export interface CreateVoiceMemo {
 export interface UpdateEntry {
   content: string;
 }
+
+/*
+ * PUT /entries/:id/memory has no body. It puts a kept-out entry in memory
+ * and answers with the entry; an entry already in memory answers the same.
+ */
 
 /* The body of PUT /days/:date/mood. null clears the mood. */
 export interface SetMood {

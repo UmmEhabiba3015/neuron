@@ -27,6 +27,7 @@ export class ExportRepository {
         content: true,
         durationMs: true,
         createdAt: true,
+        keptOutOfMemory: true,
         audioKey: true,
         audioType: true,
         day: { id: true, date: true, mood: true },

@@ -60,6 +60,7 @@ describe('the journal (e2e)', () => {
       durationMs: null,
       createdAt: '2026-08-09T12:00:00.000Z',
       date: '2026-08-09',
+      keptOutOfMemory: false,
     });
     expect(Object.keys(created)).toEqual([
       'id',
@@ -68,6 +69,7 @@ describe('the journal (e2e)', () => {
       'durationMs',
       'createdAt',
       'date',
+      'keptOutOfMemory',
     ]);
 
     moveClockTo('2026-08-09T12:01:00.000Z');

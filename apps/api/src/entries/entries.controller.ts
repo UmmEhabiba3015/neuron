@@ -9,6 +9,7 @@ import {
   NotFoundException,
   Patch,
   Post,
+  Put,
   Param,
   Query,
   Req,
@@ -71,7 +72,11 @@ export class EntriesController {
     @Req() request: AuthenticatedRequest,
   ): Promise<EntryResponseDto> {
     return new EntryResponseDto(
-      await this.entriesService.create(dto.content, request.user),
+      await this.entriesService.create(
+        dto.content,
+        request.user,
+        dto.keptOutOfMemory,
+      ),
     );
   }
 
@@ -100,6 +105,7 @@ export class EntriesController {
         { bytes: audio.buffer, type: audio.mimetype },
         dto.durationMs,
         request.user,
+        dto.keptOutOfMemory,
       ),
     );
   }
@@ -171,6 +177,27 @@ export class EntriesController {
     }
 
     return new EntryResponseDto(outcome.entry);
+  }
+
+  /*
+   * Puts a kept-out entry, typed or memo, in memory (features.md, Ref 25).
+   * It has no body. An entry already in memory answers the same. Nothing
+   * here or anywhere else keeps an entry out after it is saved: a model may
+   * already have read it. Another person's entry, a deleted one and one that
+   * does not exist are the same 404.
+   */
+  @Put(':id/memory')
+  async putInMemory(
+    @Param('id') id: string,
+    @Req() request: AuthenticatedRequest,
+  ): Promise<EntryResponseDto> {
+    const entry = await this.entriesService.putInMemory(id, request.user.id);
+
+    if (!entry) {
+      throw new NotFoundException(`Entry with ID ${id} not found`);
+    }
+
+    return new EntryResponseDto(entry);
   }
 
   @Delete(':id')

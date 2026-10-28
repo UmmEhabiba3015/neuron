@@ -34,7 +34,15 @@ export class EntriesService {
     return this.entriesRepository.count(userId, filters);
   }
 
-  create(content: string, author: DayOwner): Promise<FiledEntry> {
+  /*
+   * keptOutOfMemory is chosen here, when the entry is saved, and only here
+   * (features.md, Ref 25). Missing means in memory.
+   */
+  create(
+    content: string,
+    author: DayOwner,
+    keptOutOfMemory = false,
+  ): Promise<FiledEntry> {
     return this.file(
       {
         kind: EntryKind.Text,
@@ -42,6 +50,7 @@ export class EntriesService {
         audioKey: null,
         audioType: null,
         durationMs: null,
+        keptOutOfMemory,
       },
       author,
     );
@@ -60,6 +69,7 @@ export class EntriesService {
     audio: AudioRecording,
     durationMs: number,
     author: DayOwner,
+    keptOutOfMemory = false,
   ): Promise<FiledEntry> {
     const audioKey = crypto.randomUUID();
 
@@ -72,6 +82,7 @@ export class EntriesService {
         audioKey,
         audioType: audio.type,
         durationMs,
+        keptOutOfMemory,
       },
       author,
     );
@@ -94,7 +105,12 @@ export class EntriesService {
   private async file(
     fields: Pick<
       EntryEntity,
-      'kind' | 'content' | 'audioKey' | 'audioType' | 'durationMs'
+      | 'kind'
+      | 'content'
+      | 'audioKey'
+      | 'audioType'
+      | 'durationMs'
+      | 'keptOutOfMemory'
     >,
     author: DayOwner,
   ): Promise<FiledEntry> {
@@ -144,6 +160,15 @@ export class EntriesService {
     return found?.kind === EntryKind.Voice
       ? { status: 'isVoiceMemo' }
       : { status: 'notFound' };
+  }
+
+  /*
+   * Puts a kept-out entry, typed or memo, in memory. One way only: there is
+   * no method that keeps an entry out after it is saved. undefined for an
+   * entry that is not there, not the caller's, or deleted.
+   */
+  putInMemory(id: string, userId: string): Promise<FiledEntry | undefined> {
+    return this.entriesRepository.putInMemory(id, userId);
   }
 
   /*

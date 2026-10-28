@@ -15,6 +15,7 @@ describe('EntryResponseDto', () => {
     deletedAt: null,
     audioKey: null,
     audioType: null,
+    keptOutOfMemory: false,
     day: { date: '2026-10-07', id: 'day-1', userId: 'user-1' },
   } as unknown as FiledEntry;
 
@@ -26,9 +27,10 @@ describe('EntryResponseDto', () => {
     durationMs: 72_000,
     audioKey: '0b7f2a52-41f6-4d38-9a5e-1c2d3e4f5a6b',
     audioType: 'audio/webm;codecs=opus',
+    keptOutOfMemory: true,
   } as unknown as FiledEntry;
 
-  it('carries the id, the kind, the content, the length, when it was written and the date of its day, in that order', () => {
+  it('carries the id, the kind, the content, the length, when it was written, the date of its day and whether it is kept out of memory, in that order', () => {
     expect(new EntryResponseDto(filed)).toEqual({
       id: 'entry-1',
       kind: EntryKind.Text,
@@ -36,6 +38,7 @@ describe('EntryResponseDto', () => {
       durationMs: null,
       createdAt: '2026-10-08T05:00:00.000Z',
       date: '2026-10-07',
+      keptOutOfMemory: false,
     });
     expect(Object.keys(new EntryResponseDto(filed))).toEqual([
       'id',
@@ -44,10 +47,11 @@ describe('EntryResponseDto', () => {
       'durationMs',
       'createdAt',
       'date',
+      'keptOutOfMemory',
     ]);
   });
 
-  it('carries a voice memo with no words and its length', () => {
+  it('carries a voice memo with no words, its length and its mark', () => {
     expect(new EntryResponseDto(memo)).toEqual({
       id: 'memo-1',
       kind: EntryKind.Voice,
@@ -55,6 +59,7 @@ describe('EntryResponseDto', () => {
       durationMs: 72_000,
       createdAt: '2026-10-08T05:00:00.000Z',
       date: '2026-10-07',
+      keptOutOfMemory: true,
     });
   });
 

@@ -44,7 +44,10 @@ describe('Baseline', () => {
       [...APPLICATION_TABLES, 'migrations'].sort(),
     );
 
-    await dataSource.undoLastMigration();
+    /* The migrations after the baseline are undone first, newest first. */
+    for (let undone = 0; undone < dataSource.migrations.length; undone++) {
+      await dataSource.undoLastMigration();
+    }
     expect(await tables()).toEqual(['migrations']);
 
     await dataSource.runMigrations();

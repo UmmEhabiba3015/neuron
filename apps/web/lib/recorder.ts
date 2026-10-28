@@ -238,9 +238,14 @@ export function createRecorder(config: {
     /*
      * A memo is at least a millisecond long, because the API refuses
      * nothing at all. The limit's own timer can fire a moment late, so the
-     * length is never more than the limit either.
+     * length is never more than the limit either. The clock can count in
+     * fractions of a millisecond (performance.now() in Chromium), and the
+     * API takes only whole ones, so the length is rounded here, once.
      */
-    const durationMs = Math.max(1, byLimit ? maxMilliseconds : banked);
+    const durationMs = Math.min(
+      maxMilliseconds,
+      Math.max(1, Math.round(byLimit ? maxMilliseconds : banked)),
+    );
     confirmingCancel = false;
     set({ phase: 'keeping', byLimit, elapsedMs: durationMs });
 

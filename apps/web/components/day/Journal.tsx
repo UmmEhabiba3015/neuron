@@ -21,9 +21,13 @@ import {
 } from '@/lib/playback';
 import type { Upload } from '@/lib/uploads';
 import { formatDuration, formatTime, speakDuration } from '@/lib/utils/format';
-import { NotBuiltYet } from '@/components/ui/NotBuilt';
+import {
+  KEEP_IT_OUT,
+  USE_IN_MEMORY,
+  type MemoryMenu,
+  type Tick,
+} from '@/lib/memory';
 import { enterToSaveHandler } from './enterToSaveHandler';
-import { useNotBuilt } from '@/hooks/useNotBuilt';
 
 /*
  * What the editor of an entry draws, worked out from lib/today.ts by the
@@ -47,14 +51,14 @@ export interface EntryEditor {
  * it moves focus into its text box; closing it, by Save changes, Cancel or
  * Escape, returns focus to the edit icon. Neither scrolls the page.
  *
- * "Keep this out of memory" is feature 9's. Its menu is drawn under the
- * icons, as #entry-options draws it, and opens as the comp's does. An entry
- * that is not kept out is in memory (docs/features.md, Ref 25), so the
- * menu says "In memory" and its one option is pressed. A press of the
- * option says so in the row, as edit does, and changes nothing.
+ * The memory menu is drawn under the icons, as #entry-options draws it, and
+ * opens as the comp's does (docs/features.md, Ref 25). Its words are
+ * lib/memory.ts's: an entry in memory says so and has no option; an entry
+ * kept out has one, "Use in memory", which asks first.
  *
- * The icons, the memory menu and the panel that asks before a delete are
- * EntryTools, below, which a voice memo draws too.
+ * The icons, the memory menu and the panels that ask before a delete or
+ * before "Use in memory" are EntryTools, below, which a voice memo draws
+ * too.
  */
 export function LiveEntry({
   id,
@@ -66,6 +70,7 @@ export function LiveEntry({
   onAsk,
   onKeep,
   onGoAhead,
+  memory,
   editor,
   onEdit,
   onEditType,
@@ -81,6 +86,7 @@ export function LiveEntry({
   onAsk: () => void;
   onKeep: () => void;
   onGoAhead: () => void;
+  memory: MemoryControls;
   /* The editor, while this entry is being edited. */
   editor?: EntryEditor;
   onEdit: () => void;
@@ -209,6 +215,7 @@ export function LiveEntry({
             onAsk={onAsk}
             onKeep={onKeep}
             onGoAhead={onGoAhead}
+            memory={memory}
             editIcon={editIcon}
             onEdit={onEdit}
           />
@@ -219,11 +226,24 @@ export function LiveEntry({
 }
 
 /*
+ * The memory menu of one row: what it draws (lib/memory.ts), the question
+ * while it is being asked, and the three presses.
+ */
+export interface MemoryControls {
+  menu: MemoryMenu;
+  /* The question, while the person is being asked about this row. */
+  question?: string;
+  onAsk: () => void;
+  onKeepOut: () => void;
+  onUseInMemory: () => void;
+}
+
+/*
  * What sits beside an entry's words, or under a voice memo: at rest the
  * designer's icons and the memory menu, and while the person is being asked,
  * or after a delete has failed, a panel with a sentence and two buttons in
- * their place (18-entry-system-states.html). Which of the three it is, is
- * decided in lib/today.ts.
+ * their place (18-entry-system-states.html). "Use in memory" asks in the
+ * same panel, as deleting does. Which it is, is decided in lib/today.ts.
  *
  * A voice memo has no edit icon (features.md, Ref 11), so `onEdit` is left
  * out for one.
@@ -237,6 +257,13 @@ export function LiveEntry({
  *
  * Where focus goes after "Delete entry" is the screen's to decide, because
  * this row is no longer there (LiveToday.tsx).
+ *
+ * The question about memory is the same, with the memory trigger in the
+ * icon's place: its safe answer, "Keep it out", takes focus, and focus
+ * returns to the trigger when the panel closes either way.
+ *
+ * The line a screen reader hears is always on the page, so that a change of
+ * its words is announced.
  */
 function EntryTools({
   row,
@@ -246,6 +273,7 @@ function EntryTools({
   onAsk,
   onKeep,
   onGoAhead,
+  memory,
   editIcon,
   onEdit,
 }: {
@@ -256,16 +284,24 @@ function EntryTools({
   onAsk: () => void;
   onKeep: () => void;
   onGoAhead: () => void;
+  memory: MemoryControls;
   editIcon?: RefObject<HTMLButtonElement | null>;
   onEdit?: () => void;
 }) {
   const sentence = useId();
   const icon = useRef<HTMLButtonElement>(null);
+  const trigger = useRef<HTMLElement>(null);
   const keep = useRef<HTMLButtonElement>(null);
-  const memory = useNotBuilt('entryMemory');
+  const keepOut = useRef<HTMLButtonElement>(null);
   const name = what === 'memo' ? 'Voice memo' : 'Entry';
+  const { menu } = memory;
+  const asking = memory.question !== undefined;
 
-  const panel = confirming || notDeleted !== undefined;
+  const panel: 'delete' | 'memory' | null = asking
+    ? 'memory'
+    : confirming || notDeleted !== undefined
+      ? 'delete'
+      : null;
   const hadPanel = useRef(panel);
 
   /*
@@ -274,7 +310,8 @@ function EntryTools({
    * person has moved on to something else, it stays with them.
    */
   useEffect(() => {
-    const closed = hadPanel.current && !panel;
+    const closed = hadPanel.current !== null && panel === null;
+    const was = hadPanel.current;
     hadPanel.current = panel;
 
     if (!closed) {
@@ -284,7 +321,7 @@ function EntryTools({
     const focused = document.activeElement;
 
     if (focused === document.body || row.current?.contains(focused)) {
-      icon.current?.focus();
+      (was === 'memory' ? trigger : icon).current?.focus();
     }
   }, [panel, row]);
 
@@ -298,7 +335,63 @@ function EntryTools({
     }
   }, [confirming]);
 
-  if (panel) {
+  useEffect(() => {
+    if (asking) {
+      keepOut.current?.focus();
+    }
+  }, [asking]);
+
+  const lines = (
+    <>
+      <p
+        className={
+          menu.line && !menu.line.hidden
+            ? 'auth-help state-message'
+            : 'visually-hidden'
+        }
+        role="status"
+      >
+        {menu.line?.text}
+      </p>
+      {menu.problem ? (
+        <p className="auth-help state-message" role="alert">
+          {menu.problem}
+        </p>
+      ) : null}
+    </>
+  );
+
+  if (panel === 'memory') {
+    return (
+      <>
+        <div className="entry-confirm">
+          <p id={sentence}>{memory.question}</p>
+          <div className="auth-actions">
+            <button
+              className="btn quiet"
+              type="button"
+              aria-describedby={sentence}
+              onClick={memory.onUseInMemory}
+            >
+              {USE_IN_MEMORY}
+            </button>
+            <button
+              className="btn solid"
+              type="button"
+              ref={keepOut}
+              aria-describedby={sentence}
+              onClick={memory.onKeepOut}
+            >
+              {KEEP_IT_OUT}
+            </button>
+          </div>
+        </div>
+        {lines}
+      </>
+    );
+  }
+
+  if (panel === 'delete') {
     return (
       <div className="entry-confirm">
         <p id={sentence} role={confirming ? undefined : 'alert'}>
@@ -374,12 +467,16 @@ function EntryTools({
             </svg>
           </button>
         </div>
-        <details className="entry-memory-dropdown" data-excluded="false">
+        <details
+          className="entry-memory-dropdown"
+          data-excluded={menu.excluded ? 'true' : 'false'}
+        >
           <summary
             className="entry-memory-trigger"
-            aria-label={`${name} memory settings: in memory`}
+            ref={trigger}
+            aria-label={menu.ariaLabel}
           >
-            <span className="memory-state">In memory</span>
+            <span className="memory-state">{menu.trigger}</span>
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -393,23 +490,24 @@ function EntryTools({
             </svg>
           </summary>
           <div className="entry-memory-menu">
-            <button
-              className="opt"
-              type="button"
-              data-entry-action="memory"
-              aria-pressed="true"
-              onClick={memory.press}
-              {...memory.marker}
-            >
-              <span className="tick" aria-hidden="true" />
-              <span>{memory.label}</span>
-            </button>
+            {menu.option ? (
+              <button
+                className="opt"
+                type="button"
+                data-entry-action="memory"
+                disabled={menu.option.disabled}
+                onClick={memory.onAsk}
+              >
+                <span className="tick" aria-hidden="true" />
+                <span>{menu.option.label}</span>
+              </button>
+            ) : (
+              <p className="memory-note">{menu.note}</p>
+            )}
           </div>
         </details>
       </div>
-      {memory.said ? (
-        <NotBuiltYet className="auth-help state-message" />
-      ) : null}
+      {lines}
     </>
   );
 }
@@ -475,33 +573,35 @@ export function MoodRow({
  * disabled; a second press while a save is in flight is stopped in
  * lib/today.ts.
  *
- * Under the field, as 01-today.html draws them: "Keep this out of memory",
- * which is not scheduled (lib/unbuilt.ts), and "More options", which leads
- * to the composer's options. The option is not pressed, because nothing is
- * kept out of memory.
+ * Under the field, as 01-today.html draws them: the tick "Keep this out of
+ * memory", which is sent with the entry and pressed while on (lib/today.ts
+ * decides when it turns off), and "More options", which leads to the
+ * composer's options.
  *
  * `line` is the request in flight and `problem` is a save that failed. Both
- * are drawn where 18-entry-system-states.html draws `save-failed`, and so is
- * the sentence when the memory option is pressed.
+ * are drawn where 18-entry-system-states.html draws `save-failed`.
  */
 export function LiveComposer({
   text,
   holdsWords,
   line,
   problem,
+  tick,
   onType,
   onSave,
+  onTick,
 }: {
   text: string;
   holdsWords: boolean;
   line?: string;
   problem?: string;
+  tick: Tick;
   onType: (text: string) => void;
   onSave: () => void;
+  onTick: () => void;
 }) {
   const field = useRef<HTMLTextAreaElement>(null);
   const hadButton = useRef(holdsWords);
-  const memory = useNotBuilt('composerMemory');
   const enterToSave = enterToSaveHandler(onSave);
 
   /*
@@ -562,15 +662,7 @@ export function LiveComposer({
         )}
       </form>
       <div className="composer-tools">
-        <button
-          className="opt"
-          type="button"
-          aria-pressed="false"
-          onClick={memory.press}
-          {...memory.marker}
-        >
-          <span className="tick" aria-hidden="true" /> {memory.label}
-        </button>
+        <MemoryTick tick={tick} onTick={onTick} />
         <Link className="btn quiet" href="/options">
           More options
         </Link>
@@ -583,10 +675,25 @@ export function LiveComposer({
         <p className="auth-help state-message" role="status">
           {line}
         </p>
-      ) : memory.said ? (
-        <NotBuiltYet className="auth-help state-message" />
       ) : null}
     </div>
+  );
+}
+
+/*
+ * "Keep this out of memory", as the composer draws it. Talk draws the same
+ * one. `aria-pressed` says whether it is on, so a screen reader hears it.
+ */
+export function MemoryTick({ tick, onTick }: { tick: Tick; onTick: () => void }) {
+  return (
+    <button
+      className="opt"
+      type="button"
+      aria-pressed={tick.pressed}
+      onClick={onTick}
+    >
+      <span className="tick" aria-hidden="true" /> {tick.label}
+    </button>
   );
 }
 
@@ -784,6 +891,7 @@ export function LiveMemo({
   onAsk,
   onKeep,
   onGoAhead,
+  memory,
 }: {
   id: string;
   time: string;
@@ -795,6 +903,7 @@ export function LiveMemo({
   onAsk: () => void;
   onKeep: () => void;
   onGoAhead: () => void;
+  memory: MemoryControls;
 }) {
   const row = useRef<HTMLDivElement>(null);
   const player = useMemoPlayer(id);
@@ -814,6 +923,7 @@ export function LiveMemo({
             onAsk={onAsk}
             onKeep={onKeep}
             onGoAhead={onGoAhead}
+            memory={memory}
           />
           <NotPlayedLine player={player} />
         </div>

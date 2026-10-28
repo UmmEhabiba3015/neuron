@@ -63,6 +63,7 @@ describe('voice memos (e2e)', () => {
       durationMs: 72_000,
       createdAt: expect.any(String) as string,
       date: today.date,
+      keptOutOfMemory: false,
     });
 
     const listed = (await alice.get(`/entries?date=${today.date}`).expect(200))

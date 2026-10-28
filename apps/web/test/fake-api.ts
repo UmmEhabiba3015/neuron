@@ -37,6 +37,7 @@ export function entry(id: string, content: string): Entry {
     durationMs: null,
     createdAt: `${TODAY}T05:00:00.000Z`,
     date: TODAY,
+    keptOutOfMemory: false,
   };
 }
 
@@ -45,6 +46,7 @@ export function fakeApi({
   hold = [],
 }: { entries?: Entry[]; hold?: string[] } = {}) {
   const sent: SentRequest[] = [];
+  let stored = entries;
 
   function answer(status: number, body?: unknown) {
     return {
@@ -55,7 +57,7 @@ export function fakeApi({
     };
   }
 
-  function route(method: string, path: string) {
+  function route(method: string, path: string, body: unknown) {
     const bare = path.split('?')[0];
 
     if (method === 'POST' && bare === '/auth/refresh') {
@@ -67,7 +69,33 @@ export function fakeApi({
     }
 
     if (method === 'GET' && bare === '/entries') {
-      return answer(200, entries);
+      return answer(200, stored);
+    }
+
+    /* A new entry is the words and the mark it was sent with. */
+    if (method === 'POST' && bare === '/entries') {
+      const sent = body as { content: string; keptOutOfMemory?: boolean };
+      const created: Entry = {
+        ...entry(`new-${stored.length}`, sent.content),
+        keptOutOfMemory: sent.keptOutOfMemory ?? false,
+      };
+
+      stored = [...stored, created];
+      return answer(201, created);
+    }
+
+    const memory = /^\/entries\/([^/]+)\/memory$/.exec(bare);
+
+    if (method === 'PUT' && memory) {
+      const found = stored.find((each) => each.id === memory[1]);
+
+      if (!found) {
+        return answer(404, { message: 'Not Found' });
+      }
+
+      const changed = { ...found, keptOutOfMemory: false };
+      stored = stored.map((each) => (each.id === found.id ? changed : each));
+      return answer(200, changed);
     }
 
     return answer(404, { message: 'Not Found' });
@@ -85,7 +113,7 @@ export function fakeApi({
         return new Promise<never>(() => {});
       }
 
-      return route(init.method, path);
+      return route(init.method, path, body);
     },
   );
 

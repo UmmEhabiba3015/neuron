@@ -12,7 +12,9 @@ import {
 import { Gate } from '@/components/layout/Gate';
 import { KeyBox } from '@/components/layout/LiveScreen';
 import { useTodayDate } from '@/hooks/useTodayDate';
+import { MemoryTick } from '@/components/day/Journal';
 import { uploads } from '@/lib/api/client';
+import { createMemoryTick, tickOf } from '@/lib/memory';
 import { browserMicrophone } from '@/lib/microphone';
 import {
   createRecorder,
@@ -52,6 +54,11 @@ const DISCARD_QUESTION = 'Discard this recording?';
  *   At the limit    the memo is kept, and the page says so and stays.
  *   Leaving         by Back, the wordmark or "Today", stops and keeps.
  *
+ * Under the buttons, before and while recording, is the composer's tick,
+ * "Keep this out of memory" (features.md, Ref 25). A memo is sent with the
+ * tick as it was when the memo was kept, and a retried upload sends the
+ * same; the tick then turns off (lib/memory.ts).
+ *
  * The date and time of the recording are not drawn: a time would come from
  * the browser's clock, which never makes a date. Their place is kept, empty.
  * No control is ever disabled; a press that cannot do anything does nothing.
@@ -64,11 +71,12 @@ function Recorder() {
   const date = useTodayDate();
   const router = useRouter();
 
+  const [tick] = useState(() => createMemoryTick());
   const [recorder] = useState(() =>
     createRecorder({
       microphone: browserMicrophone(),
       clock: systemClock,
-      keep: (memo) => void uploads.keep(memo),
+      keep: (memo) => void uploads.keep(memo, tick.take()),
       maxMilliseconds: MAX_MILLISECONDS,
     }),
   );
@@ -76,6 +84,11 @@ function Recorder() {
     recorder.subscribe,
     recorder.getState,
     recorder.getState,
+  );
+  const keepOut = useSyncExternalStore(
+    tick.subscribe,
+    tick.getState,
+    tick.getState,
   );
 
   /* The page is going away: a recording in progress is kept. */
@@ -179,6 +192,11 @@ function Recorder() {
               </div>
             </div>
             <Controls view={view} recorder={recorder} />
+            {view.phase === 'ready' || running ? (
+              <div className="composer-tools">
+                <MemoryTick tick={tickOf(keepOut)} onTick={tick.toggle} />
+              </div>
+            ) : null}
           </div>
         </main>
       </div>

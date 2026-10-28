@@ -57,6 +57,7 @@ export class EntriesRepository {
         content: true,
         durationMs: true,
         createdAt: true,
+        keptOutOfMemory: true,
         day: { date: true },
       },
       order: { createdAt: 'DESC' },
@@ -82,6 +83,32 @@ export class EntriesRepository {
     const result = await this.entries.update(
       { id, userId, kind: EntryKind.Text, deletedAt: IsNull() },
       { content },
+    );
+
+    if (result.affected === 0) {
+      return undefined;
+    }
+
+    return this.findById(id, userId);
+  }
+
+  /*
+   * Puts an entry in memory, typed or memo (features.md, Ref 25). It only
+   * ever writes false: nothing in the API sets the mark to true after the
+   * entry is saved. An entry already in memory is matched and written again
+   * with the same value, so the answer is the same, and Postgres counts it
+   * as affected.
+   *
+   * The owner is in the WHERE clause (ADR-013), and so is deletedAt, for the
+   * reason given in update (ADR-020).
+   */
+  async putInMemory(
+    id: string,
+    userId: string,
+  ): Promise<FiledEntry | undefined> {
+    const result = await this.entries.update(
+      { id, userId, deletedAt: IsNull() },
+      { keptOutOfMemory: false },
     );
 
     if (result.affected === 0) {

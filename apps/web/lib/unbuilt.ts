@@ -53,16 +53,6 @@ export const UNBUILT = {
     feature: 12,
     where: 'Ask',
   },
-  entryMemory: {
-    label: 'Use in memory',
-    feature: 9,
-    where: 'Today, and the page of a past day',
-  },
-  composerMemory: {
-    label: 'Keep this out of memory',
-    feature: 9,
-    where: 'Today, under the composer',
-  },
   supportResource: {
     label: 'If you want to talk to someone',
     feature: 15,

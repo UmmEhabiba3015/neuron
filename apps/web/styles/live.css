@@ -333,3 +333,33 @@ dialog.dialog::backdrop {
 .val .count {
   white-space: nowrap;
 }
+
+/*
+ * 5.9 Keep out of memory (feature 9).
+ *
+ * A line only a screen reader reads: "This entry is in memory now." once
+ * "Use in memory" has been saved. The trigger already shows the new state,
+ * so the line is not drawn. It is the usual visually-hidden rule.
+ *
+ * The menu of an entry in memory has no option, only a sentence that says
+ * so, in the menu's own size and colour.
+ */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.entry-memory-menu > .memory-note {
+  margin: 0;
+  min-height: var(--tap);
+  display: flex;
+  align-items: center;
+  color: var(--rule-2);
+}
