@@ -124,10 +124,15 @@ next session continues with her, at feature 11.
    bought (it resumes feature 8)?
 4. **Otherwise, feature 11, Background work and transcription** (Ref 24),
    on `feature-background-work`, built and tested locally and deployed with
-   feature 8. It opens with the question in `features.md`: is a memo kept out
-   of memory transcribed? **Its spec must add the guard test of `CLAUDE.md`**
-   (an entry kept out never reaches a model), written with the first call to
-   a model, as ADR-020's guard was (feature 9, block 1).
+   feature 8. **The first question, before anything else:** is a memo kept
+   out of memory transcribed? It is open; do not treat it as decided from
+   any wording. Her boundary (2026-10-28): *decided*, an entry kept out
+   never reaches a model through any path that treats it as memory,
+   background jobs included; *open*, whether transcription itself is
+   prohibited for such a memo. **The spec must add a guard test** for the
+   agreed boundary across background processing and transcription, written
+   with the first call to a model, as ADR-020's guard was. The test enforces
+   her answer and must not decide it.
 5. **After feature 11, nothing may be ready** (open question 9).
 
 **What feature 8 holds when it resumes**, from the known debt and the ADRs
