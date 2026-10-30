@@ -1,0 +1,13 @@
+{
+  "file": "06-conversation.html",
+  "title": "A past day",
+  "comment": "Journal v3 design of record: 06-conversation.html. Product scope is V3-REVISION.md; visual and motion rules remain in lock.css.",
+  "written": true,
+  "devices": [
+    {
+      "page": "day",
+      "state": "default",
+      "caption": { "title": "A past day", "text": "Journal v3 design of record. Product behavior and state transitions are specified in V3-REVISION.md." }
+    }
+  ]
+}

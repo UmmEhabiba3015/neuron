@@ -1,0 +1,149 @@
+{
+  "name": "day",
+  "layer": "pages",
+  "version": "0.5.0",
+  "description": "A past day: its record as it was written (entries, the product's notes and questions), its mood, which stays changeable, on a page reached from Timeline. Composed as Today's sheet is, with no composer. One render for every platform; desktop puts the masthead in the title block beside the page.",
+  "variants": {
+    "platform": {
+      "values": [
+        "mobile",
+        "tablet",
+        "desktop"
+      ],
+      "default": "mobile",
+      "description": "The device the page is drawn for. Desktop's rule: the masthead (back to Timeline, the day's keybox) is the title block (mast form title) beside the page (shell layout sidebar), and the page is headed untitled. Mobile and tablet: the masthead row inside the page.",
+      "noRule": {
+        "mobile": "a page has no CSS: the platform chooses which modules it composes and how",
+        "tablet": "a page has no CSS: the platform chooses which modules it composes and how",
+        "desktop": "a page has no CSS: the platform chooses which modules it composes and how"
+      }
+    },
+    "state": {
+      "values": [
+        "default",
+        "fetch-failed",
+        "last-deleted",
+        "loading",
+        "without-note"
+      ],
+      "default": "default",
+      "description": "The page's states (journal-website.html #day). A past day has one.",
+      "noRule": {
+        "default": "a page has no CSS: a state chooses the content and modules it composes",
+        "fetch-failed": "a page has no CSS: a state chooses what it composes",
+        "last-deleted": "a page has no CSS: a state chooses what it composes",
+        "loading": "a page has no CSS: a state chooses what it composes",
+        "without-note": "a page has no CSS: a state chooses what it composes"
+      }
+    },
+    "context": {
+      "values": [
+        "screen",
+        "walkthrough"
+      ],
+      "default": "screen",
+      "description": "Where the page is drawn. screen: the numbered screens (the static header). walkthrough: the prototypes and the website; below desktop a page with the header section draws it in its navbar form and puts its blocks in the page's reader (layout page, option reader). Pages without the header section draw the same in both.",
+      "noRule": {
+        "screen": "a page has no CSS: the context chooses how it composes its modules",
+        "walkthrough": "a page has no CSS: the context chooses how it composes its modules"
+      }
+    }
+  },
+  "options": {},
+  "content": {
+    "data": {
+      "type": "data",
+      "description": "data.mjs: the day, its entries, the product's notes and question, the mood and the foot line (06-conversation). Real copy: a page is not stress-tested (its components are)."
+    }
+  },
+  "slots": {},
+  "places": {},
+  "tokens": {
+    "reads": [],
+    "exposes": {},
+    "sets": []
+  },
+  "states": {
+    "default": "yes: the past day as written",
+    "hover": "n/a: a page; its controls carry their own",
+    "focus-visible": "n/a: a page; its controls carry their own",
+    "active": "n/a: a page; its controls carry their own",
+    "disabled": "n/a: a page; its controls carry their own",
+    "selected": "n/a: a page; its controls carry their own",
+    "loading": "yes: day-loading, the day's skeleton in the real sheet, the rows in the record's order (open notes as drawn, their words bones), then the mood row; \"Loading this day.\" announced",
+    "error": "yes: fetch-failed shows a notice and a retry in the sheet",
+    "empty": "n/a: a day with no record arrives with the state packs"
+  },
+  "events": {},
+  "uses": {
+    "shell": "0.x",
+    "rail": "0.x",
+    "page": "0.x",
+    "mast": "0.x",
+    "back": "0.x",
+    "keybox": "0.x",
+    "sheet": "0.x",
+    "srow": "0.x",
+    "text": "0.x",
+    "entry-actions": "0.x",
+    "button": "0.x",
+    "said": "0.x",
+    "moodrow": "0.x",
+    "foot": "0.x",
+    "header": "0.x",
+    "dest": "0.x",
+    "auth-form": "0.x",
+    "notice": "0.x",
+    "state-message": "0.x",
+    "cluster": "0.x",
+    "recrow": "0.x",
+    "play": "0.x",
+    "wave": "0.x",
+    "thumbs": "0.x",
+    "bone": "0.x",
+    "dayrow": "0.x",
+    "leafpic": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none of its own: the masthead (header), the record (main) and its notes (aside) are its landmarks",
+    "keyboard": "its links and buttons, in reading order",
+    "labels": "each note: its label; the mood: How was this day?"
+  },
+  "responsive": {
+    "1200": "desktop: the masthead becomes the title block beside the page"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-14",
+      "kind": "internal",
+      "change": "Pages round 2: 06-conversation (a past day) on the three platforms, at parity with the screens."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "internal",
+      "change": "Pages round 4b: the states fetch-failed (the sheet holds a state message: notice and retry) and last-deleted (the generic state page), at parity with 18-entry-system-states. Loading and without-note are not built (a state-message paragraph the text module cannot write; the recording row's label-form transcript the recrow module cannot write)."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-15",
+      "kind": "added",
+      "change": "Variant context (screen, walkthrough): the walkthroughs render the page directly (pages round 5)."
+    },
+    {
+      "version": "0.4.0",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 round 10: a note's foot is its source and the thumbs (Ask's mechanic), in place of That's not right. A recording's waveform is the wave's own (the memo's phrase at a fixed pitch); today's waves.mjs retired."
+    },
+    {
+      "version": "0.5.0",
+      "date": "2026-10-30",
+      "kind": "changed",
+      "change": "v4 round 10: loading is a skeleton (bone, system/content/skeleton.mjs) in the page's real frame, in place of the one-line state message."
+    }
+  ]
+}

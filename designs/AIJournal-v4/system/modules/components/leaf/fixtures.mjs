@@ -1,0 +1,26 @@
+// The week of the approved design (explore booklet-feel f-mix): 3 to 9 Aug, as 02-timeline records it. Links point
+// into the prototype, as the screens' do. The long and non-Latin fixtures are stress tests, not product copy.
+export default ({ html, use }) => {
+  const DOW = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  const MOODS = ['even', null, 'low', 'low', null, 'good', 'even'];
+  const week = DOW.map((dow, i) => ({ dow, ...(MOODS[i] ? { mood: MOODS[i] } : {}) }));
+  const dots = days => use('leafpic', { kind: 'week', days, say: 'Monday even, Wednesday low, Thursday low, Saturday good, Sunday even.', caption: 'Mon even · Wed low · Thu low · Sat good · Sun even', place: 'pic' });
+  const kept = use('leafpic', { kind: 'kept', days: DOW.map((dow, i) => ({ dow, written: [0, 3, 6].includes(i), recorded: [2, 5, 6].includes(i) })), say: 'Written on 3 days, recorded on 3.', place: 'pic' });
+  const sleep = use('leafpic', { kind: 'week', days: week.map((d, i) => [2, 3, 5, 6].includes(i) ? d : { dow: d.dow }), say: 'Sleep on Wednesday, Thursday, Saturday, Sunday.', caption: 'Wed, Thu, Sat, Sun', place: 'pic' });
+  const recs = use('leafpic', { kind: 'recordings', recs: [{ day: 'Wed', len: '11:47' }, { day: 'Sat', len: '5:08' }, { day: 'Sun', len: '2:41' }], say: '3 recordings: Wednesday 11:47, Saturday 5:08, Sunday 2:41.', place: 'pic' });
+  const foot = n => html`${use('button', { grade: 'cite', href: '00-prototype.html#timeline', label: n === 1 ? '1 entry' : `${n} entries` })}${use('thumbs', { id: `leaf-${n}`, form: 'pair' })}`;
+  const sleepNote = { form: 'note', number: '3', kicker: 'What came up', date: '6 Aug', big: [{ n: '4', unit: 'days with sleep' }], words: 'Sleep came up on Thursday. It has come up on four of the last six days.' };
+  return [
+    { name: 'Week', note: 'The first leaf: "This week" and the dates, the week\'s line, the seven mood dots at the foot.', props: { form: 'week', number: '1', kicker: 'This week', date: '3 to 9 Aug', line: 'Five days here, and sleep on your mind.' }, slots: { picture: dots(week) } },
+    { name: 'Note', note: 'A note’s leaf: kicker and date, the big number, the picture, the words at the foot, its entries and its thumbs.', props: { form: 'note', number: '4', kicker: 'Your recordings', date: '5 Aug', big: [{ n: '11:47', unit: 'Wednesday' }], words: 'Your longest recording this week was Wednesday, at 11 minutes 47. Is it the sleep you’re writing about, or the hour you’re writing at?' }, slots: { picture: recs, foot: foot(1) } },
+    { name: 'Kept', note: 'What you kept: "3 written 3 recorded" over a pen and a microphone under each day.', props: { form: 'note', number: '2', kicker: 'What you kept', date: '3 to 9 Aug', big: [{ n: '3', unit: 'written' }, { n: '3', unit: 'recorded' }], words: 'You wrote on three of the seven days, and recorded on three.' }, slots: { picture: kept } },
+    { name: 'Note, a day', note: 'What came up: the leaf\'s date is the note\'s day (6 Aug).', props: sleepNote, slots: { picture: sleep, foot: foot(4) } },
+    { name: 'Note, asking why', note: 'Its thumbs down pressed: the form open from the pair’s end (thumbs, asking).', props: { ...sleepNote, number: '6' }, slots: { picture: sleep, foot: html`${use('button', { grade: 'cite', href: '00-prototype.html#timeline', label: '4 entries' })}${use('thumbs', { id: 'leaf-ask', form: 'pair', asking: true })}` } },
+    { name: 'Next week', note: 'A first reflection\'s "Next week" leaf: the line alone.', props: { form: 'week', number: '5', kicker: 'Next week', line: 'Next week\'s reflection will compare against this one.' } },
+    { name: 'Week so far', note: 'A new account: the week so far, its second line under the dots.', props: { form: 'week', number: '1', kicker: 'This week so far', date: '3 to 9 Aug', line: 'Your first reflection is written at the end of your first week.', words: 'You\'ve been here once so far. When Sunday ends, the week is read back to you here.' }, slots: { picture: use('leafpic', { kind: 'week', days: DOW.map((dow, i) => i < 3 ? { dow, day: 'before' } : i === 3 ? { dow, mood: 'low', today: true } : { dow, day: 'ahead' }), say: 'So far: Thursday low. Friday to Sunday are still ahead.', place: 'pic' }) } },
+    { name: 'End', note: 'The last leaf, signed, with the way to the earlier weeks.', props: { form: 'end', number: '6', back: { label: 'Earlier weeks', href: '#earlier' } } },
+    { name: 'End, first week', note: 'A first reflection has no earlier weeks: the signature alone.', props: { form: 'end', number: '6' } },
+    { name: 'Long', tags: ['long'], note: 'Stress test only.', props: { form: 'note', number: '12', kicker: 'What came up again and again over the whole of this week', date: '27 Jul to 2 Aug', big: [{ n: '11:47', unit: 'Wednesday, late at night after the long call' }], words: 'Your longest recording this week was Wednesday, at 11 minutes 47. Is it the sleep you\'re writing about, or the hour you\'re writing at, or the call, or the flat, or all of them together, one after another?' }, slots: { foot: foot(14) } },
+    { name: 'Non-Latin', tags: ['non-latin'], note: 'Stress test only: Russian and Japanese, not product copy.', props: { form: 'week', number: '1', kicker: 'Эта неделя', date: '3–9 авг', line: '五日間ここにいて、眠りのことを考えていた。' }, slots: { picture: dots(week) } },
+  ];
+};

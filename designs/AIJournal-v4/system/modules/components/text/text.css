@@ -1,0 +1,24 @@
+/* text: the product's shared text styles, one form each. Typography only: the margins it had in
+   lock.css are its parents' (data-place: copy, help, note). Moved from lock.css (.prose, .lede,
+   .auth-copy, .auth-help, .prose.audio-label and the September motion integration). */
+.aj-c-text[data-form="prose"]{font-family:var(--f-prose);font-size:var(--t-body);line-height:var(--lh-body);color:var(--ink)}
+.aj-c-text[data-form="lede"]{font-family:var(--f-prose);font-size:var(--t-note);line-height:var(--lh-note);color:var(--ink)}
+.aj-c-text[data-form="copy"]{font:400 var(--t-note)/var(--lh-body) var(--f-prose);color:var(--rule)}
+.aj-c-text[data-form="help"]{font:400 var(--t-quiet)/1.6 var(--f-label);color:var(--rule-2)}
+.aj-c-text[data-form="label"]{font-family:var(--f-label);font-size:var(--t-quiet);line-height:calc(var(--t-body) * var(--lh-body));color:var(--rule-2)}
+@container (min-width:1200px){
+  .aj-c-text:is([data-form="prose"],[data-form="lede"]){max-width:none}
+}
+
+/* SEPTEMBER MOTION INTEGRATION: the printed-line gesture extended to the first explanatory sentence
+   on new account and flow screens. 820ms / 48 characters is the established 17.083ms character
+   interval; each authored span carries its measured character count, never user input. The
+   paragraph keeps its wrapping and geometry. Only inside the product shell's motion scope. */
+@keyframes aj-c-text-draw{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+/* context: the product shell's motion scope (data-motion) */
+[data-motion] .aj-c-text[data-form="copy"] [data-motion-copy]{
+  animation:aj-c-text-draw calc(var(--g-type) * var(--aj-c-text-chars) / 48) steps(var(--aj-c-text-chars),start) backwards/* token-exempt: one step per authored character, the printed-line gesture (September motion integration) */}
+@media (prefers-reduced-motion:reduce){
+  /* context: the product shell's motion scope; the review switch lifts the guard */
+  [data-motion]:not(:where(html[data-motion-review="play"] *)) .aj-c-text[data-form="copy"] [data-motion-copy]{animation:none}
+}

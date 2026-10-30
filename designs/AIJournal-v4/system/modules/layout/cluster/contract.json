@@ -1,0 +1,63 @@
+{
+  "name": "cluster",
+  "layer": "layout",
+  "version": "0.1.0",
+  "inventory": "L2",
+  "description": "A row of children with a gap that wraps when it runs out of room: an action row, a preview's links, a field with its button. It sits on an element that already exists or wraps children; it never knows what its children are. A child takes a placement role with data-place: grow (takes the room left) or fixed (keeps its own size).",
+  "variants": {},
+  "options": {
+    "tag": {
+      "values": ["div", "nav"],
+      "default": "div",
+      "description": "The element it is drawn on, when it is not put on an existing one."
+    }
+  },
+  "content": {},
+  "slots": {
+    "children": {
+      "accepts": ["any module or element"],
+      "required": true,
+      "description": "In reading order. A child may carry data-place=\"grow\" or data-place=\"fixed\"."
+    }
+  },
+  "places": {
+    "grow": "takes the room left",
+    "fixed": "keeps its own size"
+  },
+  "tokens": {
+    "reads": [],
+    "exposes": {
+      "--aj-l-cluster-gap": "The gap between children, row then column as in gap (default 0). The owner sets it on its own element, or legacy CSS during the migration.",
+      "--aj-l-cluster-align": "Cross-axis alignment (default center).",
+      "--aj-l-cluster-wrap": "wrap (default) or nowrap."
+    }
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: arrangement only, never a control",
+    "focus-visible": "n/a: arrangement only; its children carry the ring",
+    "active": "n/a: not a control",
+    "disabled": "n/a: not a control",
+    "selected": "n/a: not selectable",
+    "loading": "n/a: arrangement only",
+    "error": "n/a: arrangement only",
+    "empty": "n/a: an arrangement with no children is not drawn"
+  },
+  "events": {},
+  "uses": {},
+  "assets": [],
+  "a11y": {
+    "role": "none: it adds no semantics",
+    "keyboard": "none",
+    "labels": "none"
+  },
+  "responsive": {},
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-12",
+      "kind": "internal",
+      "change": "New layout primitive (decision 2026-10-12: a parent's placement of its children lives in layout primitives). A wrapping row with a gap; children grow or stay fixed."
+    }
+  ]
+}

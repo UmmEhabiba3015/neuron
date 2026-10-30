@@ -1,0 +1,67 @@
+{
+  "name": "rail",
+  "layer": "layout",
+  "version": "0.1.0",
+  "inventory": "A3",
+  "description": "The spiral binding down the paper's left edge. Decorative, aria-hidden, no tap area, never navigation; every screen. Positioned in the shell and welded to the page: at tablet it follows the centred page, at desktop it sits at the title block's edge (--title-w), on iOS it stops at the tab bar.",
+  "variants": {},
+  "options": {},
+  "content": {},
+  "slots": {},
+  "tokens": {
+    "reads": [
+      "--rail",
+      "--paper-2",
+      "--grid",
+      "--w",
+      "--rule-2",
+      "--page-w",
+      "--title-w",
+      "--tabh",
+      "--safe-b"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: decorative, no tap area",
+    "focus-visible": "n/a: decorative, never focusable",
+    "active": "n/a: decorative",
+    "disabled": "n/a: decorative",
+    "selected": "n/a: decorative",
+    "loading": "n/a: decorative",
+    "error": "n/a: decorative",
+    "empty": "n/a: always drawn"
+  },
+  "events": {},
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "aria-hidden=\"true\": decoration only",
+    "keyboard": "none: never focusable, never a target",
+    "labels": "none"
+  },
+  "responsive": {
+    "700": "left: centred with the page, calc((100% - --rail - --page-w) / 2) (revision 19)",
+    "1200": "left: --title-w, the title block's edge (revision 33)"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-10",
+      "kind": "internal",
+      "change": "Converted from lock.css A3 (.rail) and the website preview's rail rules."
+    }
+  ],
+  "catalogue": {
+    "height": 240,
+    "note": "The rail is absolutely positioned and fills its container top to bottom; the frame stands in for the shell."
+  },
+  "contexts": [
+    "data-motion",
+    "data-platform",
+    "data-site",
+    "data-surface"
+  ]
+}

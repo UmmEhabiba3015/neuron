@@ -1,0 +1,90 @@
+{
+  "name": "keybox",
+  "layer": "components",
+  "version": "0.2.0",
+  "inventory": "D1",
+  "description": "A printed caps key, then its value: every date the product shows, and the price. The value is handwritten (the date, written in as the page arrives) or printed (a label or a price). On a pushed page with no wordmark the date box names the page and its value is the h1.",
+  "variants": {
+    "date": {
+      "values": ["hand", "printed"],
+      "default": "printed",
+      "description": "hand: the value is the date written by hand, which writes itself in on arrival. printed: a label or a price in print (data-printed on the value, set in --f-prose and --t-field, never written in; was .v.printed). Contexts read it (the glance waits for a hand date).",
+      "noRule": {
+        "hand": "the hand is the value's base style and its write-in is keyed on the absence of data-printed; data-date=\"hand\" is the context mark the glance's date wait reads"
+      }
+    }
+  },
+  "options": {
+    "valueTag": {
+      "values": ["span", "h1"],
+      "default": "span",
+      "description": "h1 when the date box names the page (a past day, an answer)."
+    }
+  },
+  "content": {
+    "key": {
+      "type": "text",
+      "required": true,
+      "description": "The key, final copy (\"Day\", \"Keeping\", \"Account\"), set in printed caps."
+    },
+    "value": {
+      "type": "text",
+      "required": true,
+      "description": "The value (\"Sun 9 Aug '26\", \"Since March '26\")."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": ["--ctl", "--w", "--rule", "--r", "--paper-2", "--s5", "--paper", "--t-key", "--f-hand", "--t-hand-l", "--lh-flat", "--s6", "--s4", "--f-prose", "--t-field", "--lh-tight", "--t-note", "--g-date", "--gc"],
+    "exposes": {
+      "--aj-c-keybox-value-size": "The value's size (--t-hand-l); the compact recorder sets 22px below 620."
+    }
+  },
+  "states": {
+    "default": "yes: as rendered, a handwritten value writes itself in on arrival (C3 motion, --g-date)",
+    "hover": "n/a: printed matter, not interactive",
+    "focus-visible": "n/a: not focusable",
+    "active": "n/a: not interactive",
+    "disabled": "n/a: not interactive",
+    "selected": "n/a: not interactive",
+    "loading": "n/a: a date is known before the page draws",
+    "error": "n/a: printed matter",
+    "empty": "n/a: key and value are required"
+  },
+  "events": {},
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none: text; the value is the page's h1 when valueTag is h1",
+    "keyboard": "none",
+    "labels": "the key labels the value visually; both are read in order"
+  },
+  "responsive": {},
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-10",
+      "kind": "internal",
+      "change": "Converted from lock.css D1 (.keybox, .k, .v, .v.printed), its write-in motion and its masthead, auth and recorder contexts."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-13",
+      "kind": "added",
+      "change": "Variant date (data-date) and the date hook on the value."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-13",
+      "kind": "internal",
+      "change": "One way to say hand or print: the date variant (the printed option is gone); its default, printed, is the render's too."
+    }
+  ],
+  "contexts": ["data-motion", "data-surface"],
+  "behaviour": {
+    "hooks": {
+      "date": "The value a masthead shows as its date; the runtime reads it."
+    }
+  }
+}

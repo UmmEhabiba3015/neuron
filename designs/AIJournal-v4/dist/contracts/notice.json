@@ -1,0 +1,90 @@
+{
+  "name": "notice",
+  "layer": "components",
+  "version": "0.2.1",
+  "inventory": "F1",
+  "description": "An inline notice: offline, guest, allowance, or the outcome of something the user just did. One short paragraph in the product's voice. Never touches history.",
+  "variants": {},
+  "options": {
+    "announce": {
+      "type": "boolean",
+      "default": false,
+      "description": "Reports something that just happened, so assistive technology announces it (role=\"status\"). Leave off for a notice that is part of the page from the start."
+    }
+  },
+  "content": {
+    "text": {
+      "type": "text",
+      "required": true,
+      "description": "One or two sentences of final copy. Plain text: no links or emphasis."
+    }
+  },
+  "slots": {
+    "action": {
+      "accepts": [
+        "button (quiet)"
+      ],
+      "required": false,
+      "description": "A control that acts on what the notice says, after its text on the same line (05-reflection: Change that)."
+    }
+  },
+  "tokens": {
+    "reads": [
+      "--s5",
+      "--s6",
+      "--paper-2",
+      "--w",
+      "--rule-2",
+      "--r",
+      "--f-prose",
+      "--t-note",
+      "--lh-note",
+      "--rule"
+    ],
+    "exposes": {
+      "--aj-c-notice-padding": "Inner padding. Default var(--s5) var(--s6); the auth screens set var(--s6)."
+    }
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: not interactive",
+    "focus-visible": "n/a: not interactive and never focusable",
+    "active": "n/a: not interactive",
+    "disabled": "n/a: not interactive",
+    "selected": "n/a: not interactive",
+    "loading": "n/a: a notice reports a state",
+    "error": "n/a: failures are stated in words, never colour-coded (direction-lock rule 2.4)",
+    "empty": "n/a: a notice with nothing to say is not rendered"
+  },
+  "events": {},
+  "uses": {
+    "button": "0.x"
+  },
+  "assets": [],
+  "a11y": {
+    "role": "status when announce is set; otherwise none",
+    "keyboard": "none: not focusable",
+    "labels": "the text is the content; no label needed"
+  },
+  "responsive": {},
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-09",
+      "kind": "internal",
+      "change": "Converted from lock.css F1 .notice. Margins stay with the parents; the auth screens' larger padding is the exposed --aj-c-notice-padding."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "Slot action: a control after the text, on the same line (the page modules render the screens' notices with their buttons)."
+    },
+    {
+      "version": "0.2.1",
+      "date": "2026-10-24",
+      "kind": "changed",
+      "change": "The loading state no longer points at F4 progress, which is removed."
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "file": "13-login.html",
+  "title": "Sign in",
+  "comment": "Journal v3 design of record: 13-login.html. Approved plain-paper open spread; source styling is in lock.css and preview behavior in scripts/prototype-runtime.js.",
+  "written": true,
+  "devices": [
+    {
+      "page": "login",
+      "state": "default",
+      "caption": {
+        "title": "Sign in",
+        "text": "Approved plain-paper open spread with an opaque form and soft shadows. Sign-up confirms the password. Interactive validation runs in the generated previews; these numbered comps contain no scripts."
+      }
+    }
+  ]
+}

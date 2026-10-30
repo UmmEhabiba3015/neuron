@@ -1,0 +1,9 @@
+Subject: Choose a new Journal password
+
+A password reset was requested for your Journal account.
+
+Choose a new password: [reset link]
+Copy this address if the link does not open: [reset URL]
+
+This link works for 30 minutes and can be used once.
+If you did not ask for this, ignore this email. Nothing changes.

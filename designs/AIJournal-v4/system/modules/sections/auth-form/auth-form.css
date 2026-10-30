@@ -1,0 +1,80 @@
+/* auth-form: the content column of every account screen. Moved from lock.css (AUTHENTICATION
+   EXTENSION, September 2026, and OCTOBER APPROVED AUTH) and from the website preview's own rules.
+   Its column width and centring are its parent's (the account sheet, the spread's region), by role
+   (data-place="form"); it places its own children by role (below). The shared .auth-copy,
+   .auth-help and .auth-actions are not this section's. */
+/* context: marks the account sheet (the sheet module's legacy class) */
+.aj-s-auth-form{padding:var(--s8) var(--gut) var(--s9)}
+.aj-s-auth-form__heading{font:400 29px/1.2 var(--f-prose);/* token-exempt: the account heading's size, 29px (--t-hand-l has the same value but is the handwritten title's size); no recorded reason */
+  color:var(--rule);margin:0 0 var(--s6);overflow-wrap:anywhere}
+.aj-s-auth-form__form{display:flex;flex-direction:column;gap:var(--s6);margin:var(--s8) 0}
+.aj-s-auth-form__field{display:flex;flex-direction:column;gap:var(--s3);min-width:0}
+.aj-s-auth-form__field label{font:600 var(--t-print)/1.5 var(--f-label);letter-spacing:.07em;/* token-exempt: the printed-caps tracking, .07em (tokens.json, --t-print) */
+  color:var(--rule)}
+
+/* The plain-paper open spread: the form is an opaque card. The user's chosen soft shadows apply
+   only to the sign-in and sign-up form, not other sheets. */
+/* context: [data-surface="auth"] is the plain-paper auth shell; the account sheet */
+[data-surface="auth"] .aj-s-auth-form{padding:var(--s8);background:var(--paper-2);opacity:1;
+  box-shadow:0 18px 42px color-mix(in srgb,var(--ink) 9%,transparent),0 3px 10px color-mix(in srgb,var(--ink) 5%,transparent);/* token-exempt: the user's chosen soft shadows on the sign-in and sign-up form (October approved auth) */}
+/* context: [data-surface="auth"] is the plain-paper auth shell */
+[data-surface="auth"] .aj-s-auth-form__heading{font-size:var(--t-hand-l)}
+/* context: [data-surface="auth"] is the plain-paper auth shell */
+[data-surface="auth"] .aj-s-auth-form__form{max-width:none;margin:0;gap:var(--s6)}
+/* context: [data-surface="auth"] is the plain-paper auth shell */
+[data-surface="auth"] .aj-s-auth-form__inner{display:flex;flex-direction:column;gap:0;min-width:0}
+/* context: [data-surface="auth"] is the plain-paper auth shell */
+[data-surface="auth"] .aj-s-auth-form__switch{font:400 var(--t-quiet)/1.6 var(--f-label)}
+.aj-s-auth-form__password{position:relative;width:100%}
+
+@container (max-width:1000px){
+ /* context: [data-surface="auth"] is the plain-paper auth shell; the account sheet */
+ [data-surface="auth"] .aj-s-auth-form{padding:var(--s7)}
+}
+
+/* The website preview (scripts/build-website-preview.mjs): informational sheets use their full
+   column; controls keep a readable width. Behind :where([data-site]), the preview's root. */
+/* context: #journal is the website preview's root; .device the stage; the account sheet */
+:where([data-site]) [data-platform="tablet"] .aj-s-auth-form,:where([data-site]) [data-platform="desktop"] .aj-s-auth-form{padding-inline:var(--s8)}
+/* context: #journal is the website preview's root; .device the stage; the account sheet */
+:where([data-site]) [data-platform="tablet"] .aj-s-auth-form__form{max-width:560px/* token-exempt: the website preview's readable control width at tablet */}
+/* context: #journal is the website preview's root; .device the stage; the account sheet */
+:where([data-site]) [data-platform="desktop"] .aj-s-auth-form__form{max-width:700px/* token-exempt: the website preview's readable control width at desktop */}
+/* context: #journal is the website preview's root; .device the stage; [data-surface="auth"] the plain-paper auth shell */
+:where([data-site]) :is([data-platform="tablet"],[data-platform="desktop"]) [data-surface="auth"] .aj-s-auth-form__form{max-width:none}
+
+/* PLACEMENT BY ROLE (decision 2026-10-12). A block in the auth content (a notice) sits flush, --s6 below, its
+   padding --s6; a settings row (row) --s3 above the next; a section head (head) --s8 below what it
+   follows. A field (fill) takes its field's width; the submit (fill) the form's; on the plain-paper
+   spread the submit sits --s4 lower and the forgot link (start) keeps to the start. */
+.aj-s-auth-form > [data-place~="block"]{margin:0 0 var(--s6);--aj-c-notice-padding:var(--s6)}
+.aj-s-auth-form > [data-place~="row"]{margin-bottom:var(--s3)}
+.aj-s-auth-form > [data-place~="head"]{margin-top:var(--s8)}
+.aj-s-auth-form__field > [data-place~="fill"],.aj-s-auth-form__inner > [data-place~="fill"],.aj-s-auth-form__password > [data-place~="fill"]{width:100%;min-width:0}
+.aj-s-auth-form__form > [data-place~="fill"]{width:100%}
+/* the password field leaves room for its show/hide toggle (toggle), which sits inside it */
+.aj-s-auth-form__password > [data-place~="fill"]{padding-right:calc(var(--tap) + var(--s4))}
+.aj-s-auth-form__password > [data-place~="toggle"]{position:absolute;right:3px;/* token-exempt: the password eye; no recorded reason */top:50%;transform:translateY(-50%)}
+/* context: [data-surface="auth"] is the plain-paper auth shell */
+[data-surface="auth"] .aj-s-auth-form__form > [data-place~="fill"]{margin-top:var(--s4)}
+/* context: [data-surface="auth"] is the plain-paper auth shell */
+[data-surface="auth"] .aj-s-auth-form__inner > [data-place~="start"]{align-self:flex-start}
+
+/* The explanatory copy (copy) sits --s6 above what follows, --s8 on the plain-paper spread. On the spread a
+   field's help line (help) sits --s4 under the field, tracked .04em. */
+.aj-s-auth-form > [data-place~="copy"]{margin:0 0 var(--s6)}
+/* context: the plain-paper spread (data-surface="auth") */
+[data-surface="auth"] .aj-s-auth-form > [data-place~="copy"]{margin:0 0 var(--s8)}
+/* context: the plain-paper spread (data-surface="auth") */
+[data-surface="auth"] .aj-s-auth-form__inner > [data-place~="help"]{margin:var(--s4) 0 0;letter-spacing:.04em/* token-exempt: the approved auth spread's field note tracking, .04em */}
+/* context: the plain-paper spread (data-surface="auth") */
+/* A field's note and error lines (note) stand on its label's row (head), at its end, right aligned and centred on
+   the label; they never add room between the fields or above Forgot your password (v4 round 10, the user). */
+.aj-s-auth-form__head{display:flex;align-items:center;justify-content:space-between;gap:var(--s2) var(--s6);min-width:0}
+.aj-s-auth-form__head > label{flex:none}
+.aj-s-auth-form__head > [data-place~="note"]{flex:0 1 auto;min-width:0;margin:0;padding:0;text-align:right}
+
+/* Its action row (actions, a cluster): --s4 by --s7 apart, --s7 below the form; on the plain-paper spread 0 by --s4, --s6 below. */
+.aj-s-auth-form > [data-place~="actions"]{--aj-l-cluster-gap:var(--s4) var(--s7);margin-top:var(--s7)}
+/* context: the plain-paper spread (data-surface="auth") */
+[data-surface="auth"] .aj-s-auth-form > [data-place~="actions"]{--aj-l-cluster-gap:0 var(--s4);margin-top:var(--s6)}

@@ -1,0 +1,93 @@
+/* bubble. A message in Ask (v4 C2, explore ask-readable a-mirror-bubble, as revised). Both voices sit on paper,
+   so the grid is only the table they lie on: yours on the right, its tail at the lower right; the answer on the
+   left, wider, its tail at the lower left. The bubbles round, an exception to --r (DESIGN.md 2026-10-25). The space
+   between messages is the chat's. */
+
+@keyframes aj-c-bubble-word{from{opacity:0}}
+@keyframes aj-c-bubble-dot{0%,100%{opacity:.25}40%{opacity:1}}
+
+.aj-c-bubble__in{box-sizing:border-box;
+  border:var(--w) solid color-mix(in srgb,var(--rule) 45%,transparent);/* token-exempt: the bubble's edge, a 45% --rule */
+  background:var(--paper-2)}
+
+/* yours: on the right, the person's words */
+.aj-c-bubble[data-voice="you"]{display:flex;flex-direction:column;align-items:flex-end}
+.aj-c-bubble[data-voice="you"] .aj-c-bubble__in{max-width:min(80%,var(--chat-you));/* token-exempt: the bubble's share of a narrow column */
+  padding:var(--s5) var(--s6);
+  border-radius:16px 16px 4px 16px;/* token-exempt: the bubble's corners, its tail at the lower right */
+  color:var(--ink);font-family:var(--f-prose);font-weight:400;font-size:var(--t-body);
+  line-height:1.45;/* token-exempt: a bubble's leading, tighter than the page's prose */}
+
+/* the answer: on the left, wider, the journal's voice; its tools inside it */
+.aj-c-bubble[data-voice="answer"] .aj-c-bubble__in{max-width:min(94%,var(--chat-answer));/* token-exempt: the bubble's share of a narrow column */
+  padding:var(--s5) var(--s6) var(--s2);
+  border-radius:16px 16px 16px 4px;/* token-exempt: the bubble's corners, its tail at the lower left */
+  color:var(--rule);font-family:var(--f-prose);font-weight:400;font-size:var(--t-body);line-height:var(--lh-body)}
+
+.aj-c-bubble__text p{margin:0}
+.aj-c-bubble__text p+p{margin-top:var(--s4)}
+
+/* a reference: the date, in brackets that never part from it, opening that day */
+.aj-c-bubble__refw{white-space:nowrap}
+.aj-c-bubble__ref{padding:0 var(--w);color:var(--rule);text-decoration:underline;text-decoration-thickness:var(--w);
+  text-underline-offset:3px;/* token-exempt: the product's underline offset */
+  text-decoration-color:color-mix(in srgb,var(--rule) 50%,transparent);/* token-exempt: the reference's underline, a 50% --rule */}
+
+/* "n entries used": the entries under the answer, each opening its day */
+.aj-c-bubble__used{margin:var(--s3) 0 0}
+.aj-c-bubble__used summary{display:inline-flex;align-items:center;gap:var(--s3);min-height:var(--tap);cursor:pointer;list-style:none;
+  font-family:var(--f-label);font-weight:400;line-height:1;
+  font-size:12px;/* token-exempt: the summary's 12px, approved */
+  color:var(--rule)}
+.aj-c-bubble__used summary::-webkit-details-marker{display:none}
+.aj-c-bubble__used summary svg{display:block;width:10px;/* token-exempt: the chevron's 10px */height:10px;/* token-exempt: the chevron's 10px */}
+.aj-c-bubble__used[open] summary svg{transform:rotate(180deg)}
+.aj-c-bubble__used ul{list-style:none;margin:0 0 var(--s3);padding:0}
+/* the person's own words, quoted: --w-quote in --rule, as the token says */
+.aj-c-bubble__used a{display:block;padding:var(--s3) var(--s5);margin-bottom:var(--s2);border-left:var(--w-quote) solid var(--rule);
+  background:var(--paper);color:var(--ink);text-decoration:none;font-family:var(--f-prose);font-size:var(--t-note);
+  line-height:1.45;/* token-exempt: a bubble's leading */}
+.aj-c-bubble__used small{display:block;margin-top:var(--s1);font-family:var(--f-label);font-size:var(--t-quiet);line-height:var(--lh-tight);color:var(--rule);
+  text-decoration:underline;text-underline-offset:3px;/* token-exempt: the product's underline offset */}
+
+/* the tools: inside the answer, under yours; their glyphs line up with the bubble's edge */
+.aj-c-bubble__tools{position:relative;display:flex;align-items:center;flex-wrap:wrap;gap:var(--s1)}
+.aj-c-bubble[data-voice="you"] .aj-c-bubble__tools{margin-right:calc(-1 * var(--s3))}
+.aj-c-bubble[data-voice="answer"] .aj-c-bubble__tools{margin-left:calc(-1 * var(--s4))}
+/* with a mouse the tools rest hidden and fade in on the message's hover or focus (the button keeps a set one shown) */
+@media (hover:hover) and (pointer:fine){
+  .aj-c-bubble__tools{--aj-c-button-rest:0}
+  .aj-c-bubble:is(:hover,:focus-within) .aj-c-bubble__tools{--aj-c-button-rest:1}
+  .aj-c-bubble__ref:hover,.aj-c-bubble__used a:hover small,.aj-c-bubble__next a:hover{color:var(--block);text-decoration-color:currentColor}
+}
+
+
+/* can't answer: the bubble left unfilled, its edge dashed, flagged (ask-cant-loading f-mix, A's) */
+.aj-c-bubble[data-cant] .aj-c-bubble__in{background:var(--paper);border:var(--w-dash) dashed var(--rule-2)}
+.aj-c-bubble__flag{display:flex;align-items:center;gap:var(--s3);margin:0 0 var(--s3);
+  font-family:var(--f-label);font-size:var(--t-print);font-weight:400;line-height:1.2;/* token-exempt: the label's leading */
+  letter-spacing:.06em;/* token-exempt: the uppercase label tracking */
+  text-transform:uppercase;color:var(--rule)}
+.aj-c-bubble__flag svg{display:block;flex:0 0 auto;width:16px;/* token-exempt: the icon's 16px */height:16px;/* token-exempt: the icon's 16px */}
+.aj-c-bubble__next{margin:var(--s4) 0 var(--s2);font-size:var(--t-note);line-height:1.4;/* token-exempt: the next line's leading */}
+.aj-c-bubble__next a{color:var(--rule);text-decoration:underline;text-decoration-thickness:var(--w);text-underline-offset:3px;/* token-exempt: the product's underline offset */}
+
+/* yours, not sent: dimmed and dashed, said under it (ask-states D) */
+.aj-c-bubble[data-unsent] .aj-c-bubble__in{opacity:.55;/* token-exempt: the unsent bubble's 55% */border-style:dashed}
+.aj-c-bubble__unsent{margin:var(--s2) 0 0;font-family:var(--f-label);
+  font-size:12px;/* token-exempt: the note's 12px, approved */
+  line-height:var(--lh-tight);color:var(--rule)}
+
+/* arriving: the reading line before the first word, then the words softly; the rest waits until done */
+.aj-c-bubble__reading{display:inline-flex;align-items:center;gap:var(--s4);margin:0;
+  font-family:var(--f-label);font-size:var(--t-quiet);line-height:1.4;/* token-exempt: the quiet line's leading */color:var(--rule-2)}
+.aj-c-bubble__reading i{width:5px;/* token-exempt: the reading dots */height:5px;/* token-exempt: the reading dots */border-radius:50%;background:var(--rule-2);
+  animation:aj-c-bubble-dot 1.2s var(--gc) infinite;/* token-exempt: the reading dots' 1.2s loop, approved */}
+.aj-c-bubble__reading i:nth-of-type(2){animation-delay:.15s;/* token-exempt: the dots' stagger */}
+.aj-c-bubble__reading i:nth-of-type(3){animation-delay:.3s;/* token-exempt: the dots' stagger */}
+.aj-c-bubble__w{animation:aj-c-bubble-word 260ms var(--gc) both;/* token-exempt: a word's 260ms arrival, approved */}
+
+@media (prefers-reduced-motion:reduce){
+  .aj-c-bubble:not(:where(html[data-motion-review="play"] *)) .aj-c-bubble__w,
+  .aj-c-bubble:not(:where(html[data-motion-review="play"] *)) .aj-c-bubble__reading i{animation:none}
+}

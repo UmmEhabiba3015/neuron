@@ -1,0 +1,81 @@
+{
+  "file": "16-flow-states.html",
+  "title": "Flow states",
+  "comment": "Journal v3 design of record. Static states use the closed component inventory and lock.css.",
+  "viewport": "width=device-width,initial-scale=1",
+  "written": true,
+  "devices": [
+    {
+      "page": "talk",
+      "state": "flow-mic-permission",
+      "caption": {
+        "title": "Voice memo / pending",
+        "text": "Compact Transport. Native browser permission; inline recovery. Stop and keep returns directly to the journal."
+      },
+      "route": "s-mic-permission"
+    },
+    {
+      "page": "talk",
+      "state": "flow-mic-denied",
+      "caption": {
+        "title": "Voice memo / denied",
+        "text": "Compact Transport. Native browser permission; inline recovery. Stop and keep returns directly to the journal."
+      },
+      "route": "s-mic-denied"
+    },
+    {
+      "page": "talk",
+      "state": "flow-mic-missing",
+      "caption": {
+        "title": "Voice memo / missing",
+        "text": "Compact Transport. Native browser permission; inline recovery. Stop and keep returns directly to the journal."
+      },
+      "route": "s-mic-missing"
+    },
+    {
+      "page": "talk",
+      "state": "recording",
+      "caption": {
+        "title": "Voice memo / recording",
+        "text": "Compact Transport. The waveform is a fixed decorative shape; it does not follow the sound. Stop and keep returns directly to the journal."
+      },
+      "route": "s-recording"
+    },
+    {
+      "page": "talk",
+      "state": "paused",
+      "caption": {
+        "title": "Voice memo / paused",
+        "text": "Compact Transport. Native browser permission; inline recovery. Stop and keep returns directly to the journal."
+      },
+      "route": "s-recording-paused"
+    },
+    {
+      "page": "talk",
+      "state": "paused-draft",
+      "caption": {
+        "title": "Voice memo / draft",
+        "text": "Compact Transport. Leaving keeps a paused memo as the one draft on this device; the mic and Today's Continue line open it."
+      },
+      "route": "s-recording-draft"
+    },
+    {
+      "page": "talk",
+      "state": "discard-confirm",
+      "caption": {
+        "title": "Voice memo / discard",
+        "text": "Compact Transport. Discard asks first; Discard memo returns to Today with nothing kept."
+      },
+      "route": "s-recording-discard"
+    },
+    {
+      "page": "talk",
+      "state": "kept-notice",
+      "caption": {
+        "title": "Recording kept · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "s-recording-kept"
+    }
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "name": "mast",
+  "layer": "layout",
+  "version": "0.1.2",
+  "inventory": "A4",
+  "description": "The masthead: the wordmark and the second-row object (the date box or the zoom control). The same height on every destination, so nothing below it moves when you switch (rule 7.6, revision 17). A row at the top of the page at 390 and 834; at 1440 its title form is the column left of the page that also holds the destinations.",
+  "variants": {
+    "form": {
+      "values": [
+        "row",
+        "title"
+      ],
+      "default": "row",
+      "description": "row is the masthead inside the page (was .mast): two lines at 390, one row from 700 that wraps a pushed page's back control onto its own line (revision 21). title is the desktop title block (was .title), a child of the shell beside the page, --title-w wide, sticky in the comps (revisions 33, 36, 39, 45)."
+    }
+  },
+  "options": {
+    "collapsed": {
+      "type": "boolean",
+      "default": false,
+      "description": "iOS only, once the large title has scrolled away (was .mast.collapsed): a --navh bar with the wordmark at --t-field, centred, ruled underneath."
+    }
+  },
+  "content": {
+    "wordmark": {
+      "type": "text",
+      "required": false,
+      "description": "\"Journal\" on a destination, the page's name on a pushed page. One text node, so a rename is one edit (§6 A4). Required in the row form; a desktop pushed page's title block may hold only its back control (03-talk and four others), so the title form renders no wordmark without it."
+    }
+  },
+  "slots": {
+    "back": {
+      "accepts": [
+        "back (B3)"
+      ],
+      "required": false,
+      "description": "Pushed pages only: the back control above the wordmark, on its own line."
+    },
+    "children": {
+      "accepts": [
+        "keybox",
+        "dest (title form)",
+        "glance, total (title form)"
+      ],
+      "required": false,
+      "description": "The second-row object, pinned to --ctl by the legacy rules until those components migrate; in the title form also the destinations and the printed line."
+    }
+  },
+  "places": {
+    "block": "a printed line under the masthead (the glance, the sync line): the page gutter; flush in the title block",
+    "tool": "the date box or the zoom: keeps its size in the row; --s7 below in the title block",
+    "line": "the back control: holds the first line in the row; --s6 below in the title block"
+  },
+  "tokens": {
+    "reads": [
+      "--s7",
+      "--gut",
+      "--s5",
+      "--f-prose",
+      "--t-mast",
+      "--lh-flat",
+      "--rule",
+      "--s6",
+      "--s9",
+      "--title-w",
+      "--rail",
+      "--paper",
+      "--g-hide",
+      "--navh",
+      "--w",
+      "--t-field",
+      "--lh-tight",
+      "--s8"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: the wordmark is text (a link only in the compact recorder, which keeps the legacy link styles); its children carry their own states",
+    "focus-visible": "n/a: not focusable itself",
+    "active": "n/a: not interactive itself",
+    "disabled": "n/a: not interactive itself",
+    "selected": "n/a: the destinations carry the current page",
+    "loading": "n/a: the masthead is drawn before anything loads",
+    "error": "n/a: errors belong to the page's content",
+    "empty": "n/a: a masthead always holds a wordmark, or in the title form at least its back control"
+  },
+  "events": {},
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "row form: a header element (banner). title form: a div, as today (whether it becomes the banner landmark is an open question for the developers)",
+    "keyboard": "none of its own",
+    "labels": "the wordmark is the page's h1"
+  },
+  "responsive": {
+    "700": "row form: one flex row, wordmark and second-row object side by side, wrapping a back control onto its own line; the wordmark loses its bottom margin",
+    "1200": "title form: the --title-w column, padded --s7 --s5 --s7 --s9 (revision 45)"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-10",
+      "kind": "internal",
+      "change": "Converted from lock.css A4 (.mast, .wordmark), the desktop title block (.title) and the website preview's title rule."
+    },
+    {
+      "version": "0.1.1",
+      "date": "2026-10-20",
+      "kind": "internal",
+      "change": "The title block's sticky binding column keys on the container's 1200, no longer on the stage's desktop platform (v4 D1); same weight, no visual change."
+    },
+    {
+      "version": "0.1.2",
+      "date": "2026-10-23",
+      "kind": "removed",
+      "change": "seg from the children it accepts and the 'Row with zoom' fixture: Timeline's zoom is gone (v4 C1)."
+    }
+  ],
+  "catalogue": {
+    "height": 220,
+    "note": "From 1200 the title form is absolutely positioned down its container (top:0;bottom:0) and takes no height of its own; the frame stands in for the shell."
+  },
+  "contexts": [
+    "data-layout",
+    "data-motion",
+    "data-platform",
+    "data-site",
+    "data-surface"
+  ]
+}

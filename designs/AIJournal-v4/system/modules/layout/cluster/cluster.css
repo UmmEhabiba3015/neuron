@@ -1,0 +1,6 @@
+/* cluster (L2): a row that wraps, with a gap. Placement only; it never names what its children are.
+   The owner sets the gap, the alignment and the wrap through its exposed properties (decision 2026-10-12). */
+.aj-l-cluster{display:flex;flex-wrap:var(--aj-l-cluster-wrap,wrap);align-items:var(--aj-l-cluster-align,center);gap:var(--aj-l-cluster-gap,0)}
+/* A child's placement role. grow: takes the room left. fixed: keeps its own size. */
+.aj-l-cluster > [data-place~="grow"]{flex:1 1 auto;min-width:0}
+.aj-l-cluster > [data-place~="fixed"]{flex:0 0 auto}

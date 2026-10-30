@@ -1,0 +1,107 @@
+{
+  "name": "error",
+  "layer": "pages",
+  "version": "0.2.0",
+  "description": "The error pages: a page that could not be found, and a page that could not be shown. Generic state pages (system/content/state-page.mjs): the journal masthead, the destinations, the message and the way back.",
+  "variants": {
+    "platform": {
+      "values": [
+        "mobile",
+        "tablet",
+        "desktop"
+      ],
+      "default": "mobile",
+      "description": "The generic state page's rule: desktop's title block (masthead, keybox, destinations) beside the page; mobile and tablet the header section.",
+      "noRule": {
+        "mobile": "a page has no CSS: the platform chooses which modules it composes and how",
+        "tablet": "a page has no CSS: the platform chooses which modules it composes and how",
+        "desktop": "a page has no CSS: the platform chooses which modules it composes and how"
+      }
+    },
+    "state": {
+      "values": [
+        "not-found",
+        "server-error"
+      ],
+      "default": "not-found",
+      "description": "journal-website.html #not-found, #server-error.",
+      "noRule": {
+        "not-found": "a page has no CSS: a state is its body",
+        "server-error": "a page has no CSS: a state is its body"
+      }
+    },
+    "context": {
+      "values": [
+        "screen",
+        "walkthrough"
+      ],
+      "default": "screen",
+      "description": "Where the page is drawn. screen: the numbered screens (the static header). walkthrough: the prototypes and the website; below desktop a page with the header section draws it in its navbar form and puts its blocks in the page's reader (layout page, option reader). Pages without the header section draw the same in both.",
+      "noRule": {
+        "screen": "a page has no CSS: the context chooses how it composes its modules",
+        "walkthrough": "a page has no CSS: the context chooses how it composes its modules"
+      }
+    }
+  },
+  "options": {},
+  "content": {
+    "data": {
+      "type": "data",
+      "description": "data.mjs: each state's title and body blocks (18-entry-system-states). Real copy: a page is not stress-tested."
+    }
+  },
+  "slots": {},
+  "places": {},
+  "tokens": {
+    "reads": [],
+    "exposes": {},
+    "sets": []
+  },
+  "states": {
+    "default": "yes: page not found",
+    "hover": "n/a: a page; its controls carry their own",
+    "focus-visible": "n/a: a page; its controls carry their own",
+    "active": "n/a: a page; its controls carry their own",
+    "disabled": "n/a: a page; its controls carry their own",
+    "selected": "n/a: a page; its controls carry their own",
+    "loading": "n/a: an error page does not load",
+    "error": "yes: both states are errors",
+    "empty": "n/a: an error page"
+  },
+  "events": {},
+  "uses": {
+    "shell": "0.x",
+    "rail": "0.x",
+    "page": "0.x",
+    "mast": "0.x",
+    "header": "0.x",
+    "keybox": "0.x",
+    "dest": "0.x",
+    "sheet": "0.x",
+    "auth-form": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none of its own: the masthead, the destinations, the message (main)",
+    "keyboard": "the destinations and the way back",
+    "labels": "Destinations"
+  },
+  "responsive": {
+    "1200": "desktop: the title block beside the page"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-14",
+      "kind": "internal",
+      "change": "Pages round 4b: the error pages (not found, server error), the first generic state pages."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-15",
+      "kind": "added",
+      "change": "Variant context (screen, walkthrough): the walkthroughs render the page directly (pages round 5)."
+    }
+  ]
+}

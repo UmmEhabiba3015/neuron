@@ -1,0 +1,169 @@
+{
+  "name": "header",
+  "layer": "sections",
+  "version": "0.2.4",
+  "description": "The website's pinned header on mobile and tablet (the quiet navbar): the masthead above the destinations, pinned over the page's reader. Reading away from the journal's end, it compacts: the masthead clears, the destinations rise to the top and the date settles into their slot; back at the end it expands again. Desktop keeps the masthead and its sticky column, never this header.",
+  "variants": {
+    "form": {
+      "values": [
+        "static",
+        "navbar"
+      ],
+      "default": "static",
+      "description": "static: the masthead and the destinations pinned as one unit, as the numbered comps draw them (no script, nothing added). navbar: the quiet navbar's end state, with the compact wordmark and date parts, the destinations' date slot and the masthead's aria-hidden placeholders; header.js drives it.",
+      "noRule": {
+        "navbar": "no rule of its own: its rules read the parts (aj-s-header__brand, aj-s-header__date) the navbar form renders and the data-state header.js sets, not the attribute"
+      }
+    }
+  },
+  "options": {},
+  "content": {},
+  "slots": {
+    "children": {
+      "accepts": [
+        "mast",
+        "dest"
+      ],
+      "required": true,
+      "description": "The masthead (role head) and the destinations with their date slot (role nav, dest slot: true)."
+    }
+  },
+  "places": {
+    "head": "the masthead: the full head while expanded; cleared (opacity 0, inert) while compact",
+    "nav": "the destinations: under the masthead while expanded, at the top while compact; the header sets their link sizing through the dest's exposed properties"
+  },
+  "tokens": {
+    "reads": [
+      "--paper",
+      "--s4",
+      "--g-hide",
+      "--gc",
+      "--t-mast",
+      "--lh-flat",
+      "--f-prose",
+      "--rule",
+      "--t-hand-l",
+      "--f-hand"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: expanded at the reading end (data-state=\"expanded\")",
+    "hover": "n/a: a section is not a control; its links carry their own",
+    "focus-visible": "n/a: not focusable; its links carry the ring",
+    "active": "n/a: not a control",
+    "disabled": "n/a: not a control",
+    "selected": "yes: compact (data-state=\"compact\") while the reader is away from its end",
+    "loading": "n/a: written with the page; its geometry is measured once fonts are ready",
+    "error": "n/a: static",
+    "empty": "n/a: rendered only on pages with the five destinations"
+  },
+  "behaviour": {
+    "script": "header.js, inside its root only: measures its masthead, destinations, wordmark and date; lays out and tweens the compact wordmark and date (transforms, its own height, the masthead's opacity and inert); writes data-state, data-type (large when the destinations' type is enlarged on a narrow page) and data-tween (off while it must not animate, and under reduced motion unless the review switch is on); dispatches header:resize with its height. It follows data-reading, which the app sets.",
+    "state": {
+      "data-reading": {
+        "values": [
+          "home",
+          "away"
+        ],
+        "setBy": "runtime",
+        "description": "The reader's intent as the app reads it from scroll, wheel, touch and keys: home (at the journal's end, or a page's top) or away."
+      },
+      "data-state": {
+        "values": [
+          "expanded",
+          "compact"
+        ],
+        "setBy": "script",
+        "description": "What the header shows: the full masthead (expanded) or the destinations alone at the top (compact)."
+      },
+      "data-type": {
+        "values": [
+          "large"
+        ],
+        "setBy": "script",
+        "description": "The destinations' type is enlarged on a page narrower than 600: they wrap onto three lines (Today and Reflections; Timeline and Ask; the date's row before You)."
+      },
+      "data-date": {
+        "values": [
+          "full",
+          "short",
+          "none"
+        ],
+        "setBy": "script",
+        "description": "The compact date's form (v4 B7), set only while compact: full where the whole date fits at its compact size (18px: tablets); short, its core (9 Aug) alone with the weekday and year faded, if that reaches the destinations' size (at most 12px); none, faded out, if neither does (a phone under about 355px)."
+      },
+      "data-tween": {
+        "values": [
+          "off"
+        ],
+        "setBy": "script",
+        "description": "No transition this frame (a layout pass, or reduced motion without the review switch)."
+      }
+    },
+    "hooks": {}
+  },
+  "events": {
+    "resize": {
+      "detail": "{ height }: the header's height in px",
+      "description": "After every layout: the app sets the composer's --journal-header-height from it."
+    }
+  },
+  "uses": {
+    "mast": "0.x",
+    "dest": "0.x",
+    "keybox": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "header (banner of the page's reader); the compact wordmark and date are aria-hidden copies, the masthead stays the named source",
+    "keyboard": "none of its own: its links; the masthead is inert while compact",
+    "labels": "the masthead's wordmark and the destinations' labels"
+  },
+  "responsive": {
+    "600": "below 600 the destinations may take large type (data-type)",
+    "desktop": "not rendered: desktop keeps the masthead's sticky column"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-13",
+      "kind": "internal",
+      "change": "New section (behaviour round 3): the website's pinned header, which journal-navbar.js used to build at runtime."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-20",
+      "kind": "changed",
+      "change": "v4 B7: five destinations (Reflections next to Today). The navbar form needs five; enlarged type wraps to three rows; phones under 414 take the 360px tightening; the compact date is written in parts and drawn full, short (9 Aug) or not at all (data-date)."
+    },
+    {
+      "version": "0.2.1",
+      "date": "2026-10-23",
+      "kind": "removed",
+      "change": "seg from uses and the Timeline fixture: Timeline's List/Calendar zoom is gone (v4 C1); its masthead carries the date box."
+    },
+    {
+      "version": "0.2.2",
+      "date": "2026-10-26",
+      "kind": "fixed",
+      "change": "The compact date follows the date box: when the app writes another date into the masthead (Ask opening a past day), header.js rewrites its parts and measures again."
+    },
+    {
+      "version": "0.2.3",
+      "date": "2026-10-28",
+      "kind": "fixed",
+      "change": "The masthead markers the navbar hides (the wordmark and the date box it redraws) leave icons out: a back control in the masthead (Timeline's way back to a reflection, v4 C3) keeps its chevron, and the script no longer takes the chevron for the date."
+    },
+    {
+      "version": "0.2.4",
+      "date": "2026-10-30",
+      "kind": "fixed",
+      "change": "v4 round 10 fixes 5: the quiet navbar hides only its held placeholders (data-held), not everything aria-hidden in the masthead; You's loading date, a bone, was hidden."
+    }
+  ],
+  "contexts": [
+    "data-motion"
+  ]
+}

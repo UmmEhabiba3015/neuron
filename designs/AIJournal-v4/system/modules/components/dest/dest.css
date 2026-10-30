@@ -1,0 +1,171 @@
+/* B1 the destination row. five items, always five, every screen (v4 B7 added Reflections next to
+   Today; the four below is the history of revision 28, which still holds for You).
+   Moved from lock.css section 3.B.
+   REVISION 28. YOU IS SET APART FROM THE OTHER THREE, ON EVERY PLATFORM.
+   The four were equal-width tabs dividing the row, which said all four are the
+   same kind of place. They are not. Today, Timeline and Ask are the journal;
+   You is the account, and it is the only one of the four that is about the
+   software rather than about the writing. An auto left margin on the last item
+   states that in the layout instead of leaving it to be learned.
+   The three take their own width now rather than a quarter of the row each,
+   which is what makes the gap before You readable as a gap. Order is unchanged
+   was Today, Timeline, Ask, You; it is now Today, Reflections, Timeline, Ask, You.
+   The placement it had there belongs to its parents: the tab bar's negative margin-left is
+   the shell's, by role (data-place="tabbar"); the quiet navbar's margin:0 stays in the legacy layer. The !important
+   lines for the quiet navbar (margin on the items, the no-tween and reduced-motion transition
+   lists) stay there too. */
+.aj-c-dest{display:flex;gap:var(--s3);padding:0 var(--gut) var(--s6)}
+.aj-c-dest a:last-child{margin-left:var(--aj-c-dest-last-margin,auto)}
+.aj-c-dest a{flex:0 1 auto;padding:0 var(--aj-c-dest-pad-x,var(--s6));min-height:var(--tap);min-width:var(--tap);
+        display:inline-flex;align-items:center;justify-content:center;
+        font-size:var(--aj-c-dest-size,var(--t-print));line-height:var(--aj-c-dest-leading,inherit);
+        white-space:var(--aj-c-dest-wrap,inherit);text-align:var(--aj-c-dest-align,inherit);
+        letter-spacing:.07em;/* token-exempt: the printed-caps tracking, .07em on destinations, chips and the note's summary (tokens.json) */
+        text-transform:uppercase;
+        color:var(--rule);text-decoration:none;background:var(--paper-2);
+        border:var(--w) solid var(--rule-2);border-radius:var(--r)}
+/* a destination that leads back (Reflections, on Timeline opened from a leaf's N entries) wears the back chevron
+   first; a script adds it and takes it away, so the row never changes height */
+.aj-c-dest__back{width:12px;/* token-exempt: the back chevron drawn at 12px inside a destination's printed caps */
+        height:12px;/* token-exempt: the back chevron drawn at 12px inside a destination's printed caps */
+        flex:0 0 auto;margin-right:var(--s2)}
+.aj-c-dest a[aria-current="page"]{background:var(--block);border-color:var(--block);color:var(--paper)}
+.aj-c-dest a:not([aria-current]):not(:last-child){background:var(--aj-c-dest-ground,var(--paper-2));border-color:var(--aj-c-dest-line,var(--rule-2))}
+.aj-c-dest a:hover:not([aria-current]){border-color:var(--rule)}
+/* a parent (the header's compact state) may drop the keylines of the unselected destinations and underline them on hover instead */
+.aj-c-dest a:not([aria-current]):not(:last-child):hover{border-color:var(--aj-c-dest-line,var(--rule));text-decoration:var(--aj-c-dest-hover-decoration,none);text-underline-offset:var(--aj-c-dest-hover-offset,auto)}
+
+/* A press moves the destination 1px down: transform only, so it costs no layout and
+   repaints nothing but the control itself. prefers-reduced-motion is deliberately not
+   consulted: this is a state, not a transition (direction-lock.md 7.5). */
+.aj-c-dest a:active{transform:translateY(1px)}
+
+/* The shell's motion: the press ramp, and a press scales the destination under it. */
+/* context: the motion belongs to the product shell (.app) */
+[data-motion] .aj-c-dest a{transition:var(--aj-c-dest-transition,transform 280ms var(--gc));/* token-exempt: the shell's glide duration, 280ms (3.10 motion) */}
+/* context: the motion belongs to the product shell (.app) */
+[data-motion] .aj-c-dest a:active{transform:scale(.97);/* token-exempt: the shell's press scale */transition-duration:160ms;/* token-exempt: the shell's press duration */}
+
+/* THE HOVER RAMP IS TRANSFORM ONLY, AND THAT IS A FIX RATHER THAN AN OMISSION.
+   It used to transition background-color, border-color and color as well. On a
+   slow first paint Chromium resolves the initial style before the authored one
+   and then TRANSITIONS THE DESTINATIONS FROM THE BROWSER'S DEFAULT BLUE LINK
+   over 280ms, so the header briefly draws as unstyled boxes. Measured on the
+   motion comps at 3 of 9 renders on the desktop states pack and 2 of 6 on
+   mobile Today, in Chromium headless, and 0 of 1 in Gecko. Removing the three
+   colour properties removes the flash outright. Hover now changes colour
+   instantly, which is what it did for the first ten revisions of this file. */
+@media (hover:hover) and (pointer:fine){
+  /* legacy-context: the motion belongs to the product shell (.app) */
+  [data-motion] .aj-c-dest a{transition:var(--aj-c-dest-transition,transform 280ms var(--gc));/* token-exempt: the shell's glide duration, 280ms (3.10 motion) */}
+}
+
+/* Reduced motion: the destinations draw still. */
+@media (prefers-reduced-motion:reduce){
+  /* context: the motion belongs to the product shell (.app) */
+  [data-motion]:not(:where(html[data-motion-review="play"] *)) .aj-c-dest a{transition:none}
+}
+
+/* Destinations take their own width instead of dividing the page. Four items
+   stretched across 504px would be 126px of box around an 11px word. */
+@container (min-width:700px){
+  .aj-c-dest a{flex:0 0 auto;padding:0 var(--aj-c-dest-pad-x,var(--s7))}
+}
+
+/* The desktop title block stands the destinations in a column, You set apart by --s7. */
+@container (min-width:1200px){
+  /* context: the title block (data-form="title") lays the destinations out as a column */
+  [data-form="title"] .aj-c-dest{flex-direction:column;gap:var(--s3);padding:0 0 var(--s7)}
+  /* context: the title block (data-form="title") lays the destinations out as a column */
+  [data-form="title"] .aj-c-dest a{flex:0 0 auto;justify-content:flex-start;padding:0 var(--s6)}
+  /* context: the title block (data-form="title") lays the destinations out as a column */
+  [data-form="title"] .aj-c-dest a:last-child{margin-left:0;margin-top:var(--s7)}
+}
+
+/* THE BAR CARRIES THE HEIGHT, NOT ITS ITEMS, AND THAT IS RULE 7.6's LESSON
+   ARRIVING IN A THIRD PLACE. Written first as min-height:--tabh on each item,
+   which measured the bar at 84 rather than 83: the item's 49 sits INSIDE the
+   bar's own 1px hairline, so the bar came out a pixel over and the binding
+   overshot its top edge by exactly that pixel. It is the same mistake 7.6
+   records against .seg, where giving the children --ctl pushed the container to
+   52. The bar takes min-height and everything is border-box, so the hairline and
+   the 34px of home indicator are inside the 83 and the items stretch to 48,
+   still 4 clear of the --tap floor. min-height rather than height, so labels
+   under enlarged type push the bar taller instead of clipping. */
+/* context: the native app ([data-platform="ios"]) draws the destinations as its tab bar */
+[data-platform="ios"] .aj-c-dest[data-form="tab"]{
+  min-height:calc(var(--tabh) + var(--safe-b));
+  gap:0;
+  padding:0 0 var(--safe-b);
+  position:relative;
+  background:var(--paper-2);
+  border-top:var(--w) solid var(--rule);
+}
+/* min-width:min-content IS THE 200% TYPE FIX, AND IT IS THE EQUAL DIVISION THAT
+   BREAKS RATHER THAN THE WIDTH. Measured at 200% with the device held at 390:
+   TIMELINE needs 101px of a 97.25px column and it is ONE WORD, so it cannot
+   wrap; it spilled over the tab beside it. .dest a has overflow:visible, so it
+   was not clipping and a clipping check could not see it. Only asking each tab
+   for its scrollWidth against its clientWidth found it.
+   THE FOUR LABELS DO FIT AT 200%: TODAY, TIMELINE, ASK and YOU come to about
+   301px of 390 with their padding. What did not fit was one QUARTER of 390.
+   So the basis stays 0 and the items still grow to an equal 97.25 while there is
+   room, and min-content stops any of them being pushed narrower than its own
+   word: at 200% TIMELINE claims 113 and the other three share 277.
+   THE --tap FLOOR IS NOT LOST WITH THE BASE min-width. Four equal columns of 390
+   are 97.5 each, so the floor is satisfied by the geometry rather than by a
+   declaration, and it is measured on every render. */
+/* context: the native app ([data-platform="ios"]) draws the destinations as its tab bar */
+[data-platform="ios"] .aj-c-dest[data-form="tab"] a{
+  flex:1 1 0;
+  min-width:min-content;
+  padding:0 var(--s3);
+  background:none;
+  border:0;
+  border-radius:0;
+}
+/* AND THE CURRENT DESTINATION HAS TO BE RESTATED, WHICH IS THE ONE THING IN
+   THIS BLOCK THAT ONLY A RENDER COULD HAVE CAUGHT.
+   The rule above is four classes and beats the base's
+   .dest a[aria-current="page"] on specificity, so background:none won and the
+   fill disappeared, while the base's color:var(--paper) did NOT lose and kept
+   applying. The current tab drew --paper text on a --paper-2 bar: 1.08:1, an
+   invisible label on the one item that has to be legible.
+   THE COMMENT ABOVE ASSERTED THIS RULE BEFORE THE SELECTOR EXISTED, which is
+   revision 35's fault exactly: prose describing behaviour the selectors do not
+   have. Found by looking at the render. */
+/* context: the native app ([data-platform="ios"]) draws the destinations as its tab bar */
+[data-platform="ios"] .aj-c-dest[data-form="tab"] a[aria-current="page"]{background:var(--block);color:var(--paper)}
+/* REVISION 28 SURVIVES, IN A DIFFERENT MECHANISM AND FOR THE SAME REASON.
+   You is set apart because it is the only destination that is about the
+   software rather than about the writing. On the web platforms that is said
+   with an auto left margin, which cannot be said in a bar whose four items
+   divide it equally, and equal division is what a tab bar IS. The hairline says
+   the same thing in the product's own vocabulary: one weight, one colour, and
+   it survives greyscale. The HIERARCHY is held identical across platforms, as
+   the rules require; only the mechanism is chrome, which is allowed to change.
+   REJECTED: keeping the auto margin. It leaves a 107px hole in a 390px bar and
+   reads as a layout fault rather than as a statement.
+   :last-of-type AND NOT :last-child, WHICH COST A MEASURING PASS. The bar's
+   last child is the decorative home indicator, not a destination, so
+   a:last-child matched NOTHING and the divider silently never drew. The base's
+   own .dest a:last-child{margin-left:auto} was disabled by the same span, which
+   is why the four items divided equally and the bar LOOKED right: two rules
+   failed and the failure of one hid the failure of the other. The span is now
+   the bar's first child as well, so the base rule behaves, and this selector no
+   longer depends on where it sits. A DECORATIVE ELEMENT INSIDE A COMPONENT CAN
+   BREAK A STRUCTURAL SELECTOR IN THAT COMPONENT, and nothing on the screen says
+   so. */
+/* context: the native app ([data-platform="ios"]) draws the destinations as its tab bar */
+[data-platform="ios"] .aj-c-dest[data-form="tab"] a:last-of-type{margin-left:0;border-left:var(--w) solid var(--rule)}
+/* border-color is deliberately NOT reset here. The base hover sets it, and this
+   selector is five classes, so resetting it would erase the You divider on
+   hover: the one hairline in the bar would vanish exactly when a pointer asked
+   about the item it sets apart. */
+/* context: the native app ([data-platform="ios"]) draws the destinations as its tab bar */
+[data-platform="ios"] .aj-c-dest[data-form="tab"] a:hover:not([aria-current]){background:var(--paper)}
+
+/* The date slot (variant slot): an empty, aria-hidden cell before the last destination, where a parent
+   (the header) draws the compact date. Not drawn unless the parent asks (--aj-c-dest-slot); a parent
+   that lays the row out as a grid may place it (--aj-c-dest-slot-column, --aj-c-dest-slot-row). */
+.aj-c-dest__slot{display:var(--aj-c-dest-slot,none);min-width:0;align-self:stretch;grid-column:var(--aj-c-dest-slot-column,auto);grid-row:var(--aj-c-dest-slot-row,auto)}
