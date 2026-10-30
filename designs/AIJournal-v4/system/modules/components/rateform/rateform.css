@@ -1,0 +1,27 @@
+/* rateform. The thumbs-down form (v4 C2; v4 round 10: one line everywhere, the user). One row as tall as the
+   thumb's box (--tap), in the row that holds the thumbs, after the thumbs down: the field and Send inside one --rule
+   border, which thickens inward on focus as every field's does. No question line and no shadow: it never floats
+   over the next message or entry. Where it sits is the thumbs', by role (rate). */
+
+@keyframes aj-c-rateform-in{from{opacity:0;transform:translateX(-4px)/* token-exempt: the form's small arrival from its thumb */}}
+
+.aj-c-rateform{box-sizing:border-box;display:flex;align-items:stretch;min-width:0;height:var(--tap);margin:0;padding:0;
+  background:var(--paper);border:var(--w) solid var(--rule);border-radius:var(--r);
+  animation:aj-c-rateform-in 160ms var(--gc);/* token-exempt: the form's 160ms arrival, approved */}
+/* focus: the box's own border, 2px in --block, drawn inward (v4 round 10, --w-focus) */
+.aj-c-rateform:focus-within{border-color:var(--block);outline:calc(var(--w-focus) - var(--w)) solid var(--block);outline-offset:calc(-1 * var(--w-focus))}
+
+/* the field: one line; longer words scroll inside it */
+.aj-c-rateform__why{flex:1 1 auto;min-width:0;margin:0;padding:0 var(--s3) 0 var(--s4);border:0;background:none;outline:0;
+  font-family:var(--f-prose);font-weight:400;
+  font-size:15px;/* token-exempt: the form's words, 15px */
+  color:var(--ink)}
+.aj-c-rateform__why::placeholder{color:var(--rule-2);opacity:1}
+.aj-c-rateform__why:focus{outline:0}
+
+/* Send at the end of the line: no box, the row's height */
+.aj-c-rateform > [data-place~="send"]{flex:none;align-self:stretch;padding:0 var(--s4);min-width:0}
+
+@media (prefers-reduced-motion:reduce){
+  .aj-c-rateform:not(:where(html[data-motion-review="play"] *)){animation:none}
+}

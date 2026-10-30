@@ -1,0 +1,342 @@
+{
+  "file": "18-entry-system-states.html",
+  "title": "Entry and system states",
+  "comment": "Journal v3 design of record. Static states use the closed component inventory and lock.css.",
+  "viewport": "width=device-width,initial-scale=1",
+  "written": true,
+  "devices": [
+    {
+      "page": "today",
+      "state": "without-note",
+      "caption": {
+        "title": "Today before model features",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "today-without-note"
+    },
+    {
+      "page": "day",
+      "state": "fetch-failed",
+      "caption": {
+        "title": "Could not open this day",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "day-fetch-failed"
+    },
+    {
+      "page": "today",
+      "state": "composer-options",
+      "caption": {
+        "title": "Composer options · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "composer-options"
+    },
+    {
+      "page": "today",
+      "state": "support-resource",
+      "caption": {
+        "title": "If you want to talk to someone · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "support-resource"
+    },
+    {
+      "page": "today",
+      "state": "entry-options",
+      "caption": {
+        "title": "Entry · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "entry-options"
+    },
+    {
+      "page": "today",
+      "state": "recording-options",
+      "caption": {
+        "title": "Voice memo · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "recording-options"
+    },
+    {
+      "page": "today",
+      "state": "entry-memory",
+      "caption": {
+        "title": "Out of memory · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "entry-memory"
+    },
+    {
+      "page": "today",
+      "state": "entry-memory-return",
+      "caption": {
+        "title": "In memory · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "entry-memory-return"
+    },
+    {
+      "page": "today",
+      "state": "recording-memory",
+      "caption": {
+        "title": "Out of memory · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "recording-memory"
+    },
+    {
+      "page": "today",
+      "state": "recording-memory-return",
+      "caption": {
+        "title": "In memory · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "recording-memory-return"
+    },
+    {
+      "page": "today",
+      "state": "entry-edit",
+      "caption": {
+        "title": "Edit entry",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "entry-edit"
+    },
+    {
+      "page": "today",
+      "state": "entry-saved",
+      "caption": {
+        "title": "Entry · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "entry-saved"
+    },
+    {
+      "page": "today",
+      "state": "entry-edit-empty",
+      "caption": {
+        "title": "An entry cannot be empty",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "entry-edit-empty"
+    },
+    {
+      "page": "today",
+      "state": "entry-edit-failed",
+      "caption": {
+        "title": "Changes not saved",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "entry-edit-failed"
+    },
+    {
+      "page": "today",
+      "state": "entry-delete-confirm",
+      "caption": {
+        "title": "Delete this entry?",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "entry-delete-confirm"
+    },
+    {
+      "page": "today",
+      "state": "recording-delete-confirm",
+      "caption": {
+        "title": "Delete this recording?",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "recording-delete-confirm"
+    },
+    {
+      "page": "today",
+      "state": "entry-deleted",
+      "caption": {
+        "title": "Entry deleted · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "entry-deleted"
+    },
+    {
+      "page": "today",
+      "state": "entry-delete-failed",
+      "caption": {
+        "title": "Entry not deleted",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "entry-delete-failed"
+    },
+    {
+      "page": "today",
+      "state": "recording-deleted",
+      "caption": {
+        "title": "Recording deleted · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "recording-deleted"
+    },
+    {
+      "page": "today",
+      "state": "recording-delete-failed",
+      "caption": {
+        "title": "Recording not deleted",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "recording-delete-failed"
+    },
+    {
+      "page": "day",
+      "state": "last-deleted",
+      "caption": {
+        "title": "Nothing on this day · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "day-last-deleted"
+    },
+    {
+      "page": "today",
+      "state": "entry-unsent",
+      "caption": {
+        "title": "Not uploaded yet",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "entry-unsent"
+    },
+    {
+      "page": "today",
+      "state": "entry-unsent-stopped",
+      "caption": {
+        "title": "Not uploaded",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "entry-unsent-stopped"
+    },
+    {
+      "page": "today",
+      "state": "mood-failed",
+      "caption": {
+        "title": "Mood not changed",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "mood-failed"
+    },
+    {
+      "page": "today",
+      "state": "loading",
+      "caption": {
+        "title": "Opening Today",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "today-loading"
+    },
+    {
+      "page": "timeline",
+      "state": "loading",
+      "caption": {
+        "title": "Opening Timeline",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "timeline-loading"
+    },
+    {
+      "page": "day",
+      "state": "loading",
+      "caption": {
+        "title": "Opening a day",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "day-loading"
+    },
+    {
+      "page": "ask",
+      "state": "loading",
+      "caption": {
+        "title": "Opening Ask",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "ask-loading"
+    },
+    {
+      "page": "you",
+      "state": "loading",
+      "caption": {
+        "title": "Opening You",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "you-loading"
+    },
+    {
+      "page": "reflection",
+      "state": "loading",
+      "caption": {
+        "title": "Opening Reflections",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "reflections-loading"
+    },
+    {
+      "page": "settings",
+      "state": "loading",
+      "caption": {
+        "title": "Opening What it sees",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "settings-loading"
+    },
+    {
+      "page": "timeline",
+      "state": "earlier",
+      "caption": {
+        "title": "Earlier days",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "timeline-earlier"
+    },
+    {
+      "page": "timeline",
+      "state": "end",
+      "caption": {
+        "title": "The beginning",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "timeline-end"
+    },
+    {
+      "page": "today",
+      "state": "fetch-failed",
+      "caption": {
+        "title": "Could not open this page",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "fetch-failed"
+    },
+    {
+      "page": "error",
+      "state": "not-found",
+      "caption": {
+        "title": "Page not found · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "not-found"
+    },
+    {
+      "page": "error",
+      "state": "server-error",
+      "caption": {
+        "title": "Something went wrong · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "server-error"
+    },
+    {
+      "page": "day",
+      "state": "without-note",
+      "caption": {
+        "title": "A day without a note",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "day-without-note"
+    }
+  ]
+}

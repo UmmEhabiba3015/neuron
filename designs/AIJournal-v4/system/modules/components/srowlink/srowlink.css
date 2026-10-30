@@ -1,0 +1,38 @@
+/* E6 a settings row. label, value, and one sentence of explanation.
+   Carries its own flat fill, because the value is --rule-2 and the row is
+   often placed on the open graph ground. Top-aligned, so the value sits with
+   the label rather than floating against the middle of a two-line block.
+   Its place on a page (the margin below it in the auth content): by role, sections/auth-form/. */
+.aj-c-srowlink{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s6);
+          min-height:var(--tap);padding:var(--s6);text-decoration:none;color:var(--ink);
+          background:var(--paper-2)}
+.aj-c-srowlink .aj-c-srowlink__label{flex:1 1 auto;min-width:0;
+               font-family:var(--f-prose);font-size:var(--t-field);color:var(--ink)}
+.aj-c-srowlink .aj-c-srowlink__value{flex:0 1 auto;text-align:right;
+               font-size:var(--t-quiet);letter-spacing:.04em/* token-exempt: the quiet tracking, .04em (tokens.json, --t-quiet) */;
+               color:var(--rule-2);line-height:var(--lh-body)}
+.aj-c-srowlink .aj-c-srowlink__why{display:block;font-family:var(--f-prose);font-size:var(--t-note);
+               line-height:var(--lh-note);color:var(--rule);margin-top:var(--s2);
+               max-width:38ch/* token-exempt: the explanation's reading measure; no recorded reason */}
+
+@container (min-width:700px){
+  .aj-c-srowlink .aj-c-srowlink__why{max-width:none}
+
+  /* REVISION 32. THE SETTINGS VALUE STOPS BEING SHRUNK ONCE THERE IS ROOM.
+     .srowlink is a flex row of a label and a value, and both were allowed to
+     shrink. At 390 that is correct: the row is 310px of content and there
+     genuinely is not room for both, so the value wraps and that is the honest
+     outcome. At 834 the row is 476 and the label's text only reaches about 424
+     of it, but revision 25 released .srowlink .why, which raised the label's
+     flex base to its full max-content and let it claim the slack anyway. The
+     value was squeezed to 32px and set "Read it" as "Read / it" on a row with
+     50px going spare, which reads as broken rather than as tight.
+     flex:0 0 auto lets the value take its own width and leaves the label to
+     absorb the wrapping, which is what the label is for. Layout and reflow
+     only, so it stays inside this block and 390 is untouched. */
+  .aj-c-srowlink .aj-c-srowlink__value{flex:0 0 auto}
+}
+
+@container (min-width:1200px){
+  .aj-c-srowlink .aj-c-srowlink__why{max-width:none}
+}

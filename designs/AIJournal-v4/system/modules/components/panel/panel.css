@@ -1,0 +1,59 @@
+/* G1 a panel. slides over, pushes a history entry, Back closes it.
+      keep-this, mood edit, install, crisis resource.
+   Moved from lock.css section G1. On desktop split pages its grid placement (grid-column, grid-row,
+   align-self) is the page's, by role (data-place="aside"). */
+.aj-c-panel{position:absolute;left:var(--rail);right:0;bottom:0;
+       background:var(--paper);border-top:var(--w) solid var(--rule);
+       padding:var(--s6) var(--gut) var(--s7);box-shadow:var(--elev)}
+.aj-c-panel h2{font-family:var(--f-prose);font-size:var(--t-field);color:var(--rule);
+          margin-bottom:var(--s5)}
+
+@container (min-width:700px){
+  /* REVISION 22. THE PANEL FOLLOWS THE PAGE, NOT THE VIEWPORT.
+     .panel is absolutely positioned and its containing block is .app, because
+     .page is not positioned. At 390 that is invisible: left:--rail and right:0
+     land exactly on the page. At 834 it would span the full 834 and float over
+     the cream margins, which is the same stranding bug the rail had. */
+  .aj-c-panel{left:calc(var(--rail) + (100% - var(--rail) - var(--page-w))/2);
+         right:calc((100% - var(--rail) - var(--page-w))/2)}
+}
+
+@container (min-width:1200px){
+  /* REVISION 44. THE PANEL FOLLOWS THE PAGE, AND THIS IS THE THIRD PLATFORM
+     TO NEED THAT SENTENCE WRITTEN OUT.
+     .panel is absolutely positioned and its containing block is .app, because
+     .page is not positioned. At 390 left:--rail and right:0 land exactly on
+     the page and the bug does not exist. At 834 revision 22 had to give it the
+     tablet's own centring arithmetic. That arithmetic is written in terms of
+     --page-w, which is still 560 here and no longer describes anything: it
+     computes left 452 and right 428 for a page that runs 384 to 1440, so the
+     guest panel sat 68px inside the page's left edge and stopped 428px short
+     of its right. Found by building the states pack, which is the only screen
+     that renders a panel, exactly as it was at tablet.
+     PROJECT.md's standing lesson is "treat anything positioned against [data-motion] as
+     suspect at every new platform". Revisions 22, 23 and 24 were the tablet's
+     three; this is desktop's, and it is the same object. */
+  .aj-c-panel{left:calc(var(--title-w) + var(--rail));right:0}
+
+  /* context: on a split page the panel stops being absolute and sticks beside the page;
+     its grid placement is the page's (by role). It gives up its fill and keyline and its children their inline margins:
+     every object on this shell carries its own fill and keyline, and the column is already the measure. */
+  [data-layout="split"] > .aj-c-panel{position:sticky;top:var(--s9);
+                     left:auto;right:auto;bottom:auto}
+  /* context: the split page's panel gives up its fill, keyline and padding */
+  [data-layout="split"] > .aj-c-panel{background:none;border-top:0;padding:0}
+  /* context: the split page's children give up their inline margins */
+  [data-layout="split"] > .aj-c-panel > *{margin-inline:0}
+}
+
+/* PLACEMENT BY ROLE (decision 2026-10-12): a block in the panel takes the page gutter; in the split
+   page's second column it sits between the panel's rules. */
+.aj-c-panel > [data-place~="block"]{margin:0 var(--gut) var(--s6)}
+@container (min-width:1200px){
+  /* context: on the split page (data-layout="split") a block sits flush in the column, between the panel's rules */
+  [data-layout="split"] > .aj-c-panel > [data-place~="block"]{margin-inline:0;margin-top:var(--s6);margin-bottom:var(--s5)}
+}
+
+
+/* Its action row (actions, a cluster): --s4 by --s7 apart, --s7 below. */
+.aj-c-panel > [data-place~="actions"]{--aj-l-cluster-gap:var(--s4) var(--s7);margin-top:var(--s7)}

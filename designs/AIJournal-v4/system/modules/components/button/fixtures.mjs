@@ -1,0 +1,50 @@
+// Copy from the screens (login, Today, the entry tools, the answer's citation pair). The glyphs
+// are the screens' own. The long and non-Latin fixtures are stress tests, not product copy.
+import { HISTORY, BOOKMARK, BOOKMARK_SOLID, COPY, THUMB_UP, THUMB_DOWN, PLUS } from '../../../content/icons.mjs';
+const LINE = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+const PENCIL = `<svg ${LINE}><path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15z"/></svg>`;
+const BIN = `<svg ${LINE}><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg>`;
+const EYE = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2.5 12c2.4-3.5 5.5-5.25 9.5-5.25s7.1 1.75 9.5 5.25c-2.4 3.5-5.5 5.25-9.5 5.25S4.9 15.5 2.5 12Z"/><circle cx="12" cy="12" r="2.5"/><path class="eye-slash" d="M3 3l18 18"/></svg>';
+export default [
+  { name: 'Solid', note: 'The one committing action of a view (login).', props: { grade: 'solid', label: 'Sign in' } },
+  { name: 'Keyline', note: 'A secondary action.', props: { grade: 'keyline', label: 'Delete everything' } },
+  { name: 'Quiet', note: 'The least weight: a dotted-underlined word.', props: { grade: 'quiet', label: 'Create an account', href: '00-prototype.html#auth-register' } },
+  { name: 'Cite', note: 'The citation under an answer; always with Wrong.', props: { grade: 'cite', label: 'The source', href: '00-prototype.html#day' } },
+  { name: 'Text', note: 'A word, the default form.', props: { grade: 'solid', form: 'text', label: 'Sign in' } },
+  { name: 'Icon', note: 'The entry tools’ edit, a --tap square holding a glyph.', props: { grade: 'quiet', form: 'icon', label: 'Edit entry', href: '00-prototype.html#entry-edit' }, slots: { icon: PENCIL } },
+  { name: 'Icon delete', note: 'The entry tools’ delete.', props: { grade: 'quiet', form: 'icon', label: 'Delete entry', href: '00-prototype.html#entry-delete-confirm' }, slots: { icon: BIN } },
+  { name: 'Toggle', note: 'The password field’s show/hide control (placed inside the field by its parent).', props: { grade: 'quiet', form: 'toggle', label: 'Show password' }, slots: { icon: EYE } },
+  { name: 'Note', note: 'The forgot line under the password field.', props: { grade: 'quiet', form: 'note', label: 'Forgot your password?', href: '00-prototype.html#auth-forgot' } },
+  { name: 'Hover', state: 'hover', note: 'Solid fills --block.', props: { grade: 'solid', label: 'Sign in' } },
+  { name: 'Focus', state: 'focus-visible', note: 'The product focus ring (base).', props: { grade: 'solid', label: 'Sign in' } },
+  { name: 'Active', state: 'active', note: 'Pressed 1px down, and scaled .97 under the shell’s motion.', props: { grade: 'solid', label: 'Sign in' } },
+  { name: 'Transport', note: 'The compact recorder\'s transport (03-talk): its own gap and a 20px glyph.', props: { grade: 'solid', form: 'transport', label: 'Start recording' } },
+  { name: 'Disabled', state: 'disabled', note: 'Drawn only inside the compact recorder’s transport (--grid ground, grey, not-allowed cursor).', props: { form: 'transport', grade: 'solid', label: 'Start recording', disabled: true } },
+  { name: 'Selected', state: 'selected', note: 'The toggle with aria-pressed="true" (the password is shown) hides the eye’s slash.', props: { grade: 'quiet', form: 'toggle', label: 'Hide password' }, slots: { icon: EYE } },
+  { name: 'Switch', note: 'Timeline search’s “By meaning”: an on/off setting written as a word with a track and knob; the grade does not apply.', props: { form: 'switch', label: 'By meaning' } },
+  { name: 'Switch, on', state: 'selected', note: 'aria-checked="true": the track fills --rule, the knob is --paper and moves to the end.', props: { form: 'switch', label: 'By meaning', checked: true } },
+  { name: 'Switch focus', state: 'focus-visible', note: 'The product focus ring (base).', props: { form: 'switch', label: 'By meaning' } },
+  { name: 'Pill', note: 'Ask’s head: History, an icon then the word (icon only below the container’s 1200).', props: { form: 'pill', label: 'History' }, slots: { icon: HISTORY } },
+  { name: 'Pill, count', note: 'Bookmarks with the day’s count badge.', props: { form: 'pill', label: 'Bookmarks', count: 3 }, slots: { icon: BOOKMARK_SOLID } },
+  { name: 'Pill, no bookmarks', note: 'Count 0 draws the empty badge (no fill, a 40% ring).', props: { form: 'pill', label: 'Bookmarks', count: 0 }, slots: { icon: BOOKMARK_SOLID } },
+  { name: 'Pill, new', note: 'New, with the plus.', props: { form: 'pill', label: 'New' }, slots: { icon: PLUS } },
+  { name: 'Pill, word only', note: 'No icon: the word stays at every width.', props: { form: 'pill', label: 'Today' } },
+  { name: 'Pill, open', state: 'selected', note: 'expanded true: its drawer is open; drawn as hover.', props: { form: 'pill', label: 'History', expanded: true }, slots: { icon: HISTORY } },
+  { name: 'Pill hover', state: 'hover', note: '--rule ground, --paper words, the count inverted.', props: { form: 'pill', label: 'History' }, slots: { icon: HISTORY } },
+  { name: 'Pill focus', state: 'focus-visible', note: 'The product focus ring (base).', props: { form: 'pill', label: 'History' }, slots: { icon: HISTORY } },
+  { name: 'Tool bookmark', note: 'A message tool: bookmark.', props: { grade: 'quiet', form: 'icon', tool: 'bookmark', label: 'Bookmark' }, slots: { icon: BOOKMARK } },
+  { name: 'Tool copy', note: 'A message tool: copy (writes no aria-pressed).', props: { grade: 'quiet', form: 'icon', tool: 'copy', label: 'Copy' }, slots: { icon: COPY } },
+  { name: 'Tool up', note: 'A message tool: thumbs up.', props: { grade: 'quiet', form: 'icon', tool: 'up', label: 'Helpful' }, slots: { icon: THUMB_UP } },
+  { name: 'Tool down', note: 'A message tool: thumbs down (also writes aria-expanded).', props: { grade: 'quiet', form: 'icon', tool: 'down', label: 'Not helpful' }, slots: { icon: THUMB_DOWN } },
+  { name: 'Tool bookmark, set', state: 'selected', note: 'Pressed: --rule, the glyph filled.', props: { grade: 'quiet', form: 'icon', tool: 'bookmark', label: 'Bookmark', pressed: true }, slots: { icon: BOOKMARK } },
+  { name: 'Tool up, set', state: 'selected', note: 'Pressed: --rate-up, the glyph filled.', props: { grade: 'quiet', form: 'icon', tool: 'up', label: 'Helpful', pressed: true }, slots: { icon: THUMB_UP } },
+  { name: 'Tool down, set', state: 'selected', note: 'Pressed: --rate-down, the glyph filled.', props: { grade: 'quiet', form: 'icon', tool: 'down', label: 'Not helpful', pressed: true }, slots: { icon: THUMB_DOWN } },
+  { name: 'Tool hover', state: 'hover', note: 'Thumbs up on its tinted ground.', props: { grade: 'quiet', form: 'icon', tool: 'up', label: 'Helpful' }, slots: { icon: THUMB_UP } },
+  { name: 'Tool focus', state: 'focus-visible', note: 'The product focus ring (base).', props: { grade: 'quiet', form: 'icon', tool: 'bookmark', label: 'Bookmark' }, slots: { icon: BOOKMARK } },
+  { name: 'Long', tags: ['long'], note: 'Stress test only.', props: { grade: 'solid', label: 'Export everything I have written and recorded since I started' } },
+  { name: 'Non-Latin', tags: ['non-latin'], note: 'Stress test only: Russian and Japanese, not product copy.', props: { grade: 'keyline', label: 'Войти · ログイン' } },
+  { name: 'Pill long', tags: ['long'], note: 'Stress test only.', props: { form: 'pill', label: 'Bookmarks from every session this week', count: 12 }, slots: { icon: BOOKMARK_SOLID } },
+  { name: 'Pill non-Latin', tags: ['non-latin'], note: 'Stress test only: Russian, not product copy.', props: { form: 'pill', label: 'История' }, slots: { icon: HISTORY } },
+  { name: 'Switch long', tags: ['long'], note: 'Stress test only.', props: { form: 'switch', label: 'By meaning, in any words you used' } },
+  { name: 'Switch non-Latin', tags: ['non-latin'], note: 'Stress test only: Russian, not product copy.', props: { form: 'switch', label: 'По смыслу' } },
+];

@@ -1,0 +1,193 @@
+{
+  "file": "15-auth-states.html",
+  "title": "Account states",
+  "comment": "Journal v3 design of record. Static states use the closed component inventory and lock.css.",
+  "viewport": "width=device-width,initial-scale=1",
+  "written": true,
+  "devices": [
+    {
+      "page": "login",
+      "state": "error",
+      "caption": {
+        "title": "Try again",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "login",
+      "state": "invalid",
+      "caption": {
+        "title": "Check the fields",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "login",
+      "state": "sending",
+      "caption": {
+        "title": "Signing in",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "login",
+      "state": "network",
+      "caption": {
+        "title": "Could not sign in",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "login",
+      "state": "after-reset",
+      "caption": {
+        "title": "Password changed",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "login",
+      "state": "after-delete",
+      "caption": {
+        "title": "Account deleted",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "login",
+      "state": "after-session",
+      "caption": {
+        "title": "Sign in again",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "register",
+      "state": "error",
+      "caption": {
+        "title": "Email already in use",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "register",
+      "state": "invalid",
+      "caption": {
+        "title": "Enter an email address",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "register",
+      "state": "short",
+      "caption": {
+        "title": "Use a longer password",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "register",
+      "state": "creating",
+      "caption": {
+        "title": "Creating account",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "register",
+      "state": "network",
+      "caption": {
+        "title": "Could not create account",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "forgot",
+      "state": "default",
+      "caption": {
+        "title": "Reset your password",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "forgot",
+      "state": "invalid",
+      "caption": {
+        "title": "Enter an email address",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "forgot",
+      "state": "sending",
+      "caption": {
+        "title": "Sending the link",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "forgot",
+      "state": "sent",
+      "caption": {
+        "title": "Check your email",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "forgot",
+      "state": "network",
+      "caption": {
+        "title": "Link not sent",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "reset",
+      "state": "default",
+      "caption": {
+        "title": "Choose a new password",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "reset",
+      "state": "short",
+      "caption": {
+        "title": "Use a longer password",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "reset",
+      "state": "saving",
+      "caption": {
+        "title": "Saving password",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "reset",
+      "state": "expired",
+      "caption": {
+        "title": "This link no longer works",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "reset",
+      "state": "network",
+      "caption": {
+        "title": "Password not changed",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    },
+    {
+      "page": "login",
+      "state": "signed-out",
+      "caption": {
+        "title": "Signed out",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      }
+    }
+  ]
+}

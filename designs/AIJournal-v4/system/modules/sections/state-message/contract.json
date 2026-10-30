@@ -1,0 +1,90 @@
+{
+  "name": "state-message",
+  "layer": "sections",
+  "version": "0.2.0",
+  "description": "A state the page is in, written where the content would be: loading, a failure, nothing found. A line of copy or help, and sometimes a row of actions (try again). In a sheet it takes the sheet's padding.",
+  "variants": {},
+  "options": {
+    "tag": {
+      "values": [
+        "div",
+        "p",
+        "line"
+      ],
+      "default": "div",
+      "description": "p for a single line. line: the text module's help line with this section's class mixed in (one element, role status)."
+    }
+  },
+  "content": {
+    "text": {
+      "type": "text",
+      "required": true,
+      "description": "The state, product copy."
+    }
+  },
+  "slots": {
+    "children": {
+      "accepts": [
+        "button",
+        "text"
+      ],
+      "required": false,
+      "description": "The copy or help line (the shared .auth-copy / .auth-help) and the action row."
+    }
+  },
+  "places": {
+    "block": "a notice: the page gutter",
+    "span": "a nested state message: the full grid",
+    "copy": "the explanatory copy: --s6 above what follows",
+    "help": "a help line (a nested status line): --s4 above what follows",
+    "actions": "its action row (a cluster): --s4 by --s7 apart, --s7 below"
+  },
+  "tokens": {
+    "reads": [
+      "--s6",
+      "--gut",
+      "--s4",
+      "--s7"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: a section is not a control; its controls carry their own",
+    "focus-visible": "n/a: not focusable; its controls carry the ring",
+    "active": "n/a: not a control",
+    "disabled": "n/a: not a control",
+    "selected": "n/a: not selectable",
+    "loading": "n/a: it is how loading is shown, not a state of it",
+    "error": "n/a: it is how a failure is shown",
+    "empty": "n/a: always has its line"
+  },
+  "events": {},
+  "uses": {
+    "button": "0.x",
+    "cluster": "0.x",
+    "text": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "status where it announces (the copy carries role=status or alert)",
+    "keyboard": "Tab to its actions",
+    "labels": "its copy"
+  },
+  "responsive": {},
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-12",
+      "kind": "internal",
+      "change": "Converted from lock.css (the state message)."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "Tag line: the text module's help line carrying this section's class (a mix), announced (18-entry-system-states: an edit that didn't save, a recording that didn't send). Pages round 4b."
+    }
+  ]
+}

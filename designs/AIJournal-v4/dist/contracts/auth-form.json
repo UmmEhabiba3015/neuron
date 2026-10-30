@@ -1,0 +1,213 @@
+{
+  "name": "auth-form",
+  "layer": "sections",
+  "version": "0.5.0",
+  "description": "The content column of every account screen: sign in, create account, forgot and reset password, and the account and data states. A heading, an optional line of copy, an optional form of labelled fields (the password field with its show control, a note and an error line), and a row of actions. On the plain-paper spread it is the opaque card with soft shadows; on an account sheet it is a 440px column.",
+  "variants": {},
+  "options": {
+    "headingId": {
+      "type": "string",
+      "default": "",
+      "description": "The heading's id: the region names itself by it (aria-labelledby)."
+    },
+    "copyChars": {
+      "type": "number",
+      "default": 0,
+      "description": "The copy's length in characters: its type-in runs over it."
+    },
+    "form": {
+      "type": "object",
+      "default": null,
+      "description": "{ name, action }: the form (data-auth-form, action), when the section carries one."
+    },
+    "switchLink": {
+      "type": "object",
+      "default": null,
+      "description": "{ label, href }: the action row's link (Create an account, Sign in)."
+    }
+  },
+  "content": {
+    "heading": {
+      "type": "text",
+      "required": true,
+      "description": "\"Sign in\", \"Create account\"…"
+    },
+    "copy": {
+      "type": "text",
+      "required": false,
+      "description": "The explanatory copy under the heading (the text module, form copy; it types in by its length)."
+    },
+    "fields": {
+      "type": "list",
+      "required": false,
+      "description": "The form's fields: { id, label, type, autocomplete, inputmode, minlength, auth (data-auth-input), hint, toggle (the show/hide label of a password), forgot: { label, href } }. Each is a row: its label, the field, the toggle, the hint, the hidden error line and the forgot link. A field with options ({ value, label }) is a select. inner: false sets the field beside its label without the inner column (17's timezone chooser)."
+    },
+    "submit": {
+      "type": "text",
+      "required": false,
+      "description": "The submit's label (Sign in, Create account)."
+    },
+    "switchText": {
+      "type": "text",
+      "required": false,
+      "description": "The line before the action link (Already have an account?)."
+    },
+    "preview": {
+      "type": "list",
+      "required": false,
+      "description": "Prototype furniture: { label, href } links to the screen's other states, in a details block. A shipped app passes none."
+    },
+    "blocks": {
+      "type": "list",
+      "required": false,
+      "description": "The generic state pages' bodies in their own order (pages round 4b): { type: notice | copy | form | actions, … } or markup a page composed (rows, cards). Given, it replaces the fixed order."
+    }
+  },
+  "slots": {
+    "children": {
+      "accepts": [
+        "field",
+        "button",
+        "notice",
+        "srowlink",
+        "shead",
+        "text"
+      ],
+      "required": true,
+      "description": "The copy, the form and its fields, the action row (the shared .auth-actions), notices and settings rows, in reading order."
+    }
+  },
+  "places": {
+    "block": "a notice: flush, --s6 below, padding --s6",
+    "row": "a settings row: --s3 below",
+    "head": "a section head: --s8 above",
+    "fill": "a field (its field's width) or the submit (the form's width; --s4 lower on the plain-paper spread); the password field leaves room for its toggle",
+    "start": "the forgot link: at the start (plain-paper spread)",
+    "toggle": "the password field's show/hide toggle: inside the field, at its right edge",
+    "copy": "the explanatory copy: --s6 above what follows (--s8 on the plain-paper spread)",
+    "help": "a help line in a field: --s4 under the field on the spread, tracked .04em",
+    "note": "a field's note or error line: on the label's row (the head), at its end, right aligned, centred on the label",
+    "actions": "its action row (a cluster): --s4 by --s7 apart, --s7 below (0 by --s4, --s6 below on the spread)"
+  },
+  "tokens": {
+    "reads": [
+      "--s8",
+      "--gut",
+      "--s9",
+      "--f-prose",
+      "--rule",
+      "--s6",
+      "--s3",
+      "--t-print",
+      "--f-label",
+      "--t-hand-l",
+      "--paper-2",
+      "--ink",
+      "--s7",
+      "--t-quiet",
+      "--s4",
+      "--tap",
+      "--s2"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: a section is not a control; its controls carry their own",
+    "focus-visible": "n/a: not focusable; its controls carry the ring",
+    "active": "n/a: not a control",
+    "disabled": "n/a: not a control",
+    "selected": "n/a: not selectable",
+    "loading": "n/a: a sending form is a state of the screen (its own markup), not of the section",
+    "error": "n/a: errors are the field's and the notice's",
+    "empty": "n/a: always has a heading"
+  },
+  "events": {},
+  "uses": {
+    "field": "0.x",
+    "button": "0.x",
+    "srowlink": "0.x",
+    "notice": "0.x",
+    "cluster": "0.x",
+    "text": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none; the heading names the region (the auth region is aria-labelledby it)",
+    "keyboard": "Tab through the fields and actions",
+    "labels": "every field has a visible label"
+  },
+  "responsive": {
+    "1000": "on the plain-paper spread the card's padding tightens (legacy context: .auth-paper)"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-12",
+      "kind": "internal",
+      "change": "Converted from lock.css (the auth content: heading, form, fields, the password control, the spread's card)."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "Renders its form from data (13-login, 14-register): the form, a row per field (label, field, password toggle, hint, hidden error line, forgot link), the submit, the action row and the prototype's state links; the heading takes an id. Pages auth round."
+    },
+    {
+      "version": "0.4.0",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "Content blocks: a body in its own order (the generic state pages, system/content/state-page.mjs). Pages round 4b."
+    },
+    {
+      "version": "0.4.1",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "A field with options is a select row (17's timezone chooser). Pages round 4b."
+    },
+    {
+      "version": "0.4.2",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "A field row without its inner column (inner: false). Pages round 4b."
+    },
+    {
+      "version": "0.4.3",
+      "date": "2026-10-29",
+      "kind": "fixed",
+      "change": "v4 round 10: a field's note and error lines on the spread are as tall as their words; the --tap line under each pushed the next field and Forgot your password too far away when a sign in failed."
+    },
+    {
+      "version": "0.4.4",
+      "date": "2026-10-29",
+      "kind": "fixed",
+      "change": "v4 round 10: a field's note and error lines sit --s1 under the field (they were --s4, further from the field than from Forgot your password under them)."
+    },
+    {
+      "version": "0.4.5",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 round 10: a field's note and error lines on the spread are right aligned, ending at the field's right edge (the user)."
+    },
+    {
+      "version": "0.5.0",
+      "date": "2026-10-30",
+      "kind": "changed",
+      "change": "v4 round 10: a field's note and error lines stand on its label's row (new part head: the label, then the lines at its end, right aligned and centred on the label), so an error never adds room between the fields or above Forgot your password (the user)."
+    }
+  ],
+  "contexts": [
+    "data-platform",
+    "data-site",
+    "data-surface"
+  ],
+  "behaviour": {
+    "hooks": {
+      "data-auth-form": "The form's kind (login, register, …); the runtime finds the form by it.",
+      "data-auth-input": "On each input: its field (email, password, …); the runtime validates by it.",
+      "data-password-hint": "The password field's hint line; the runtime shows and hides it.",
+      "help": "A field's help or error line; the runtime writes it."
+    }
+  }
+}

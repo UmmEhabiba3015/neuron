@@ -1,0 +1,218 @@
+/* composer. Every selector starts from .aj-c-composer; values come from tokens.
+   Moved from lock.css E1. Its margin-top:auto (the foot): by role, layout/page/; the
+   overview, option, tools button and state message inside it are placed here by role. */
+
+/* The companion form (form: companion, data-form="companion") has its rule last in this file, after every animation rule. */
+/* E1 the composer. sticky, the foot of Today, never on any other screen. */
+.aj-c-composer{position:sticky;bottom:0;background:var(--paper);
+          border-top:var(--w) solid var(--rule);padding:var(--s6) var(--gut) var(--s7)}
+/* The row (it was the base .crow, which the find section carries too). */
+.aj-c-composer__row{display:flex;align-items:center;gap:var(--s5)}
+/* V3 composer overflow occupies the option's existing row, preserving its travel. */
+.aj-c-composer__tools{display:flex;align-items:center;justify-content:space-between;gap:var(--s4)}
+
+/* REVISION 12, and the fix for the one blocking flow defect.
+   ONE CONTROL, TWO STATES. The composer's single filled control is the record
+   control while the field is empty, and the commit control the moment it is
+   not. Same box, same size, same fill, different glyph and different label.
+
+   Why not a third permanent button: the empty state is most of the life of
+   this screen, and a send button sitting dead in it is a control that is
+   wrong more often than it is right.
+
+   Why the mic goes away mid-draft: accepted, and it is the one real cost.
+   Someone with half a sentence typed who then wants to record has to clear
+   the field first. That is rare, it is recoverable, and it buys the two-tap
+   typed path that 00-flow.md section 3.3 requires.
+
+   Both are --rule, not --block, because they are the product acting.
+   --block marks audio that exists, never the act of making it. */
+.aj-c-composer__mic{flex:0 0 auto;width:var(--ctl);height:var(--ctl);border-radius:var(--r);
+     background:var(--rule);border:0;color:var(--paper);cursor:pointer;
+     display:grid;place-items:center;text-decoration:none}
+.aj-c-composer__mic svg{width:22px /* token-exempt: the record glyph's size; no recorded reason */;height:22px /* token-exempt: the record glyph's size; no recorded reason */}
+.aj-c-composer__mic:hover{background:var(--block)}
+.aj-c-composer__mic:active{transform:translateY(1px)}
+
+/* context: [data-motion] is the motion scope; the shell owns the glide. */
+[data-motion] .aj-c-composer__mic{transition:transform 280ms /* token-exempt: the shell's glide duration, 280ms (3.10 motion) */ var(--gc)}
+/* context: [data-motion] is the motion scope; the shell owns the glide. */
+[data-motion] .aj-c-composer__mic:active{transform:scale(.97) /* token-exempt: the shell's press scale */;transition-duration:160ms /* token-exempt: the shell's press duration */}
+/* THE HOVER RAMP IS TRANSFORM ONLY, AND THAT IS A FIX RATHER THAN AN OMISSION.
+   It used to transition background-color, border-color and color as well. On a
+   slow first paint Chromium resolves the initial style before the authored one
+   and then TRANSITIONS THE DESTINATIONS FROM THE BROWSER'S DEFAULT BLUE LINK
+   over 280ms, so the header briefly draws as unstyled boxes. Measured on the
+   motion comps at 3 of 9 renders on the desktop states pack and 2 of 6 on
+   mobile Today, in Chromium headless, and 0 of 1 in Gecko. Removing the three
+   colour properties removes the flash outright. Hover now changes colour
+   instantly, which is what it did for the first ten revisions of this file. */
+@media (hover:hover) and (pointer:fine){
+  /* legacy-context: [data-motion] is the motion scope; the shell owns the glide. */
+  [data-motion] .aj-c-composer__mic{transition:transform 280ms /* token-exempt: the shell's glide duration, 280ms (3.10 motion) */ var(--gc)}
+}
+
+@keyframes aj-c-composer-lift{from{transform:translateY(var(--g-hide))}to{transform:none}}
+/* aj-c-composer-tuck IS ON translate AND NOT ON transform, so the load rise keeps transform
+   to itself and the two compose rather than overwrite.
+   AND ITS DISTANCE IS SCALED BY A REGISTERED NUMBER, WHICH IS WHAT MAKES
+   INSTANCE 4 WORK. --aj-c-composer-tuckable is 1 normally and 0 while the composer is
+   focused, it transitions between them, and the keyframe re-resolves its
+   var() every frame, so the tuck's magnitude walks to zero and the composer
+   rises. See the four instances above the rule. */
+@property --aj-c-composer-tuckable{syntax:"<number>";inherits:false;initial-value:1}
+@keyframes aj-c-composer-tuck{from{translate:0 0}
+                  to{translate:0 calc(var(--g-hide) * var(--aj-c-composer-tuckable))}}
+/* THE COMPOSER MOVES ON FOUR OCCASIONS AND ON NO OTHERS. CLIENT INSTRUCTION AT
+   SESSION 14, and it is written out here because "only these four" is the rule
+   rather than a description of what happens to fall out.
+     1  THE APP OPENS. It rises 64px, once, over --g-comp. aj-c-composer-lift.
+     2  THE JOURNAL IS SCROLLED UP, meaning the reader is moving further into
+        the day. It goes DOWN by the same 64px until the out-of-memory option
+        is hidden and the field and the record control are all that is left.
+     3  THE JOURNAL IS SCROLLED BACK DOWN. It comes UP again. 2 and 3 are one
+        mechanism rather than two: a scroll timeline has no direction of its
+        own, so going back up the document runs the same move backwards at
+        exactly the speed of the thumb.
+     4  IT IS INTERACTED WITH WHILE DOWN. It comes up, so the option is
+        reachable the moment there is something to keep out of memory.
+   AND NOWHERE ELSE. Interacting with it while it is already up does nothing at
+   all, which is what 4 is scoped to make true: the rise is not a response to
+   being touched, it is a response to being touched WHILE HIDDEN.
+
+   INSTANCE 4 SCALES THE TUCK RATHER THAN CANCELLING IT, AND THE FIRST
+   MECHANISM WAS BUILT, MEASURED AND THROWN AWAY.
+   An animation outranks a declaration, so a :focus-within rule setting the
+   composer back to 0 cannot win against a running scroll animation. THE
+   OBVIOUS ANSWER IS TO DROP aj-c-composer-tuck FROM THE LIST ON FOCUS and let the value
+   fall back to its declared one with a transition to carry it. It was built.
+   IT DOES NOT ANIMATE: MEASURED IN AN ISOLATED CALIBRATION PAGE with a
+   negative transition-delay, an element whose animation is removed jumps
+   straight to the declared value at every sampled percentage, 0px at -10ms,
+   at -120ms and at 0s alike. A TRANSITION DOES NOT FIRE WHEN AN ANIMATION IS
+   REMOVED. It also had a second fault: on blur the animation re-applies and
+   wins outright, so the composer would have snapped back down.
+   WHAT WORKS IS SCALING THE ANIMATION'S OWN DISTANCE. --aj-c-composer-tuckable is a
+   registered number, 1 at rest and 0 while the composer holds focus, and
+   aj-c-composer-tuck's end value is `--g-hide * --aj-c-composer-tuckable`. The keyframe re-resolves
+   its var() as the number transitions, so the tuck's magnitude walks to zero
+   and the composer rises. Calibrated the same way: 200, 164, 59, 0 across the
+   sampled percentages, which is a value walking rather than a value jumping.
+   THREE THINGS FALL OUT OF IT, AND ALL THREE ARE THE INSTRUCTION.
+     Focus while tucked rises, over --g-comp.
+     BLUR TUCKS BACK, over the same --g-comp, because the number transitions
+     both ways. The first mechanism could not do this at all.
+     FOCUS WHILE ALREADY UP DOES NOTHING, and that is the part the instruction
+     is really about. Below 24px of scroll aj-c-composer-tuck is out of range and does not
+     apply, so its end value is not being used and changing the number it is
+     scaled by has no effect on anything. The composer cannot twitch when it is
+     already where it belongs. */
+/* context: the shell; .opt, the option's legacy class, marks the Today composer, the one whose option the rise hides */
+[data-motion] .aj-c-composer:has([data-place~="option"]){
+  --aj-c-composer-tuckable:1;
+  animation:aj-c-composer-lift var(--g-comp) var(--gc-rise) backwards;
+  transition:--aj-c-composer-tuckable var(--g-comp) var(--gc-rise)}
+/* context: the shell; .opt, the option's legacy class, marks the Today composer, the one whose option the rise hides */
+[data-motion] .aj-c-composer:has([data-place~="option"]):focus-within{--aj-c-composer-tuckable:0}
+
+/* A second state of one screen is not an arrival, so the composer must not re-enter (direction-lock 7.4,
+   a build obligation). The prototype's restate marker that did this is gone (2026-10-13): nothing set it. */
+@supports (animation-timeline:scroll()){
+  /* context: the shell; .opt, the option's legacy class, marks the Today composer, the one whose option the rise hides */
+  [data-motion] .aj-c-composer:has([data-place~="option"]){
+    animation-name:aj-c-composer-lift,aj-c-composer-tuck;
+    animation-duration:var(--g-comp),auto;
+    animation-timing-function:var(--gc-rise),linear;
+    /* Keep the option tucked beyond 120px; forwards does not apply before 24px,
+       so the initial rise remains unopposed. Motion integration, September 2026. */
+    animation-fill-mode:backwards,forwards;
+    animation-timeline:auto,scroll();
+    animation-range:normal,24px 120px /* token-exempt: the tuck runs over the first 24px to 120px of scroll (motion integration, September 2026) */}
+}
+
+@media (prefers-reduced-motion:reduce){
+  /* context: [data-motion] is the motion scope; the review switch lifts the guard. */
+  [data-motion]:not(:where(html[data-motion-review="play"] *)) .aj-c-composer__mic{transition:none}
+  /* context: [data-motion] is the motion scope; the review switch lifts the guard. */
+  [data-motion]:not(:where(html[data-motion-review="play"] *)) .aj-c-composer:has([data-place~="option"]){transition:none}
+  /* context: [data-motion] is the motion scope; the review switch lifts the guard. */
+  [data-motion]:not(:where(html[data-motion-review="play"] *)) .aj-c-composer:has([data-place~="option"]){animation:none}
+}
+
+/* The composer's rule still spans the page, which is what a foot does, and
+   its content sits on the sheet's own vertical axis rather than against the
+   sheet's left edge. 700px, because a 504 box centred under a 972 sheet
+   reads as a small object adrift rather than as the place you write.
+   Measured: composer centre 912, sheet centre 912. */
+@container (min-width:1200px){
+  .aj-c-composer{padding-inline:calc((100% - 700px /* token-exempt: the composer's column centres on the sheet, 700px (the comment in lock.css says why) */)/2)}
+  .aj-c-composer .aj-c-composer__row{max-width:none}
+}
+
+
+/* PLACEMENT BY ROLE (decision 2026-10-12). The overview above the input (head) sits --s5 over it; a state
+   message (span) --s4 under it; the option (option) --s3 under what it follows; the tools' quiet button (fixed) keeps its size. */
+.aj-c-composer > [data-place~="head"]{min-width:0;margin:0 0 var(--s5)}
+.aj-c-composer > [data-place~="span"]{grid-column:1 / -1;margin-top:var(--s4)}
+.aj-c-composer > [data-place~="option"],.aj-c-composer .aj-c-composer__tools > [data-place~="option"]{margin-top:var(--s3)}
+.aj-c-composer .aj-c-composer__tools > [data-place~="fixed"]{flex:0 0 auto}
+
+/* THE WRITING COMPANION (form: companion, data-form="companion"). It is the composer with the recent overview above
+   the field. It does not rise or tuck (no transform, no animation) and stays within the screen under the pinned
+   header, scrolling inside itself. It was lock.css's .composer.writing-companion with !important on the first two;
+   modules cannot use !important, so this rule is the LAST in the file and equals the specificity of the rise
+   (`[data-motion] .aj-c-composer:has(...)`, 0,3,0), after every animation rule, the reduced-motion ones included. */
+[data-motion] .aj-c-composer[data-form="companion"],
+.aj-c-composer[data-form="companion"]{transform:none;animation:none;
+  max-height:calc(var(--aj-l-page-view-height,100dvh) - var(--aj-c-composer-header-height,0px) - 44px /* token-exempt: one tap target (44px) left under the pinned header; the approved navbar comp, a calc cannot take a token here */);
+  overflow-y:auto;z-index:2 /* token-exempt: the companion sits over the page rows; no recorded reason */}
+
+/* THE CHAT FORM (form: chat, data-form="chat"; Ask). A form element, sticky at the foot over a fade: the thread slides under
+   it. It is additive: no top rule, no rise, no tuck (the rise rules above match only a composer holding the option, which
+   this form never does; the exclusion below is the companion's pattern), no mic, no tools row. Its width is the parent's. */
+.aj-c-composer[data-form="chat"],
+[data-motion] .aj-c-composer[data-form="chat"]{position:sticky;bottom:0;z-index:6 /* token-exempt: the chat form sits over the thread it fades; the page's foot layer */;
+  border-top:0;transform:none;animation:none;
+  padding:var(--s7) 0 calc(var(--s5) + env(safe-area-inset-bottom));
+  background:linear-gradient(transparent,var(--paper) var(--s7))}
+.aj-c-composer[data-form="chat"] .aj-c-composer__lead{margin:0 0 var(--s4);padding:var(--s5) var(--s6) var(--s4);
+  border:var(--w) solid color-mix(in srgb,var(--rule) 30% /* token-exempt: the lead's 30% hairline, the approved design */,transparent);
+  border-radius:20px /* token-exempt: the lead's corners, the approved design */;background:var(--paper-2)}
+.aj-c-composer[data-form="chat"] .aj-c-composer__box{display:flex;align-items:flex-end;gap:var(--s3);
+  border:var(--w) solid var(--rule);border-radius:26px /* token-exempt: rounded to half its height */;background:var(--paper-2);
+  padding:var(--s2) var(--s2) var(--s2) var(--s4)}
+/* focus: the box's own border, 2px in --block, drawn inward (v4 round 10, --w-focus) */
+.aj-c-composer[data-form="chat"] .aj-c-composer__box:focus-within{border-color:var(--block);outline:calc(var(--w-focus) - var(--w)) solid var(--block);outline-offset:calc(-1 * var(--w-focus))}
+/* The label is read, not seen: the placeholder says the same words. */
+.aj-c-composer[data-form="chat"] .aj-c-composer__label{position:absolute;width:1px /* token-exempt: visually hidden */;height:1px /* token-exempt: visually hidden */;margin:-1px /* token-exempt: visually hidden */;padding:0;border:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.aj-c-composer[data-form="chat"] .aj-c-composer__text{flex:1;min-width:0;min-height:var(--tap);max-height:200px /* token-exempt: the field stops growing at about eight lines, then scrolls */;
+  resize:none;border:0;background:transparent;
+  field-sizing:content;/* the field grows with its words up to max-height, with no script */
+  padding:11px /* token-exempt: centres one 16px line in the 44px box */ var(--s5);
+  font:400 var(--t-field)/1.4 /* token-exempt: the field's line height, the approved design */ var(--f-prose);color:var(--ink)}
+.aj-c-composer[data-form="chat"] .aj-c-composer__text:focus{outline:none}
+.aj-c-composer[data-form="chat"] .aj-c-composer__text::placeholder{color:var(--rule-2);opacity:1}
+.aj-c-composer[data-form="chat"] .aj-c-composer__ask{flex:0 0 auto;display:grid;place-items:center;width:var(--tap);height:var(--tap);
+  border-radius:50%;border:0;background:var(--rule);color:var(--paper);cursor:pointer}
+.aj-c-composer[data-form="chat"] .aj-c-composer__ask svg{width:14px /* token-exempt: the send glyph's drawn size */;height:14px /* token-exempt: the send glyph's drawn size */}
+.aj-c-composer[data-form="chat"] .aj-c-composer__ask:active{transform:translateY(1px)}
+@media (hover:hover) and (pointer:fine){
+  .aj-c-composer[data-form="chat"] .aj-c-composer__ask:hover{background:var(--block)}
+}
+/* context: [data-motion] is the motion scope; the shell owns the glide and the press, as for the mic. */
+[data-motion] .aj-c-composer[data-form="chat"] .aj-c-composer__ask{transition:transform 280ms /* token-exempt: the shell's glide duration, 280ms (3.10 motion) */ var(--gc)}
+/* context: [data-motion] is the motion scope; the shell owns the glide and the press, as for the mic. */
+[data-motion] .aj-c-composer[data-form="chat"] .aj-c-composer__ask:active{transform:scale(.97) /* token-exempt: the shell's press scale */;transition-duration:160ms /* token-exempt: the shell's press duration */}
+@media (prefers-reduced-motion:reduce){
+  /* context: [data-motion] is the motion scope; the review switch lifts the guard. */
+  [data-motion]:not(:where(html[data-motion-review="play"] *)) .aj-c-composer[data-form="chat"] .aj-c-composer__ask{transition:none}
+}
+.aj-c-composer[data-form="chat"] .aj-c-composer__note{display:table;margin:var(--s3) auto 0;padding:0 var(--s4);
+  border-radius:999px /* token-exempt: a pill's ends */;background:var(--paper);
+  font:400 var(--t-quiet)/1.4 /* token-exempt: the note's line height, the approved design */ var(--f-label);color:var(--rule-2);text-align:center}
+.aj-c-composer[data-form="chat"] .aj-c-composer__readonly{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+  gap:var(--s2) var(--s4);padding:var(--s5) var(--s6);
+  border:var(--w) dashed color-mix(in srgb,var(--rule) 50% /* token-exempt: the slip's 50% dashed edge, the approved design */,transparent);
+  border-radius:999px /* token-exempt: rounded to half its height */;background:var(--paper-2);margin:0;
+  font:400 var(--t-quiet)/1.4 /* token-exempt: the slip's line height, the approved design */ var(--f-label);color:var(--rule-2)}
+.aj-c-composer[data-form="chat"][data-waiting] .aj-c-composer__box{opacity:.6 /* token-exempt: the approved 60% of a waiting field */}

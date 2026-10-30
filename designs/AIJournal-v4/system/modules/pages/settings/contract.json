@@ -1,0 +1,164 @@
+{
+  "name": "settings",
+  "layer": "pages",
+  "version": "0.4.0",
+  "description": "Settings: privacy, what the model can see, and your data, three states of one pushed page (back to You). One render for every platform; desktop puts the masthead in the title block beside the page.",
+  "variants": {
+    "platform": {
+      "values": [
+        "mobile",
+        "tablet",
+        "desktop"
+      ],
+      "default": "mobile",
+      "description": "The device the page is drawn for. Desktop's rule: the masthead is the title block (mast form title) beside the page (shell layout sidebar), and the page is headed pushed. Mobile and tablet: the masthead row inside the page.",
+      "noRule": {
+        "mobile": "a page has no CSS: the platform chooses which modules it composes and how",
+        "tablet": "a page has no CSS: the platform chooses which modules it composes and how",
+        "desktop": "a page has no CSS: the platform chooses which modules it composes and how"
+      }
+    },
+    "state": {
+      "values": [
+        "privacy",
+        "visible",
+        "data",
+        "delete-confirm",
+        "devices",
+        "only-device",
+        "device-signed-out",
+        "device-failed",
+        "timezone-failed",
+        "export-preparing",
+        "export-ready",
+        "export-empty",
+        "export-failed",
+        "delete-pending",
+        "delete-failed",
+        "timezone"
+      ],
+      "default": "privacy",
+      "description": "The page's states, named as the routes: privacy (settings-privacy), visible (settings-visible), data (settings-data); and the account and data states of 17-account-data: delete-confirm (the data page with the delete dialog after the record (account-delete-confirm)); devices (the account state page: email, timezone, two signed-in devices (account-devices)); only-device (the account state page with this device only (account-only-device)); device-signed-out (the account state page after a device is signed out (account-device-signed-out)); device-failed (the account state page with the sign-out failure notice (account-device-failed)); timezone-failed (the account state page: the timezone was not changed (timezone-failed)); export-preparing (the data page with the export-preparing message (export-preparing)); export-ready (the data page with the export-ready message (export-ready)); export-empty (the data page with nothing to export (export-empty)); export-failed (the data page with the export failure message (export-failed)); delete-pending (the account state page while the account is deleted (account-delete-pending)); delete-failed (the data page with the delete dialog and its failure line (account-delete-failed)). The timezone chooser (timezone) joins when the field module can write a select with options.",
+      "noRule": {
+        "privacy": "a page has no CSS: a state chooses the content and modules it composes",
+        "visible": "a page has no CSS: a state chooses the content and modules it composes",
+        "data": "a page has no CSS: a state chooses the content and modules it composes",
+        "delete-confirm": "a page has no CSS: a state chooses the content and modules it composes",
+        "devices": "a page has no CSS: a state chooses the content and modules it composes",
+        "only-device": "a page has no CSS: a state chooses the content and modules it composes",
+        "device-signed-out": "a page has no CSS: a state chooses the content and modules it composes",
+        "device-failed": "a page has no CSS: a state chooses the content and modules it composes",
+        "timezone-failed": "a page has no CSS: a state chooses the content and modules it composes",
+        "export-preparing": "a page has no CSS: a state chooses the content and modules it composes",
+        "export-ready": "a page has no CSS: a state chooses the content and modules it composes",
+        "export-empty": "a page has no CSS: a state chooses the content and modules it composes",
+        "export-failed": "a page has no CSS: a state chooses the content and modules it composes",
+        "delete-pending": "a page has no CSS: a state chooses the content and modules it composes",
+        "delete-failed": "a page has no CSS: a state chooses the content and modules it composes",
+        "timezone": "a page has no CSS: a state chooses what it composes"
+      }
+    },
+    "context": {
+      "values": [
+        "screen",
+        "walkthrough"
+      ],
+      "default": "screen",
+      "description": "Where the page is drawn. screen: the numbered screens (the static header). walkthrough: the prototypes and the website; below desktop a page with the header section draws it in its navbar form and puts its blocks in the page's reader (layout page, option reader). Pages without the header section draw the same in both.",
+      "noRule": {
+        "screen": "a page has no CSS: the context chooses how it composes its modules",
+        "walkthrough": "a page has no CSS: the context chooses how it composes its modules"
+      }
+    }
+  },
+  "options": {},
+  "content": {
+    "data": {
+      "type": "data",
+      "description": "data.mjs: the rows, headings, notice and foot of each state (10-settings-privacy), the contextual data states (message, dialog) and the account states (blocks), read from the 17-account-data pack. Real copy: a page is not stress-tested (its components are)."
+    }
+  },
+  "slots": {},
+  "places": {},
+  "tokens": {
+    "reads": [],
+    "exposes": {},
+    "sets": []
+  },
+  "states": {
+    "default": "yes: each state as written",
+    "hover": "n/a: a page; its controls carry their own",
+    "focus-visible": "n/a: a page; its controls carry their own",
+    "active": "n/a: a page; its controls carry their own",
+    "disabled": "n/a: a page; its controls carry their own",
+    "selected": "n/a: a page; its controls carry their own",
+    "loading": "yes: settings-loading, What it sees with each row's line and value in bones, no row a link yet; \"Loading what it can see.\" announced",
+    "error": "yes: the failed states (device-failed, timezone-failed, export-failed, delete-failed) show their notice",
+    "empty": "yes: export-empty. Every other state has its rows in journal-website.html"
+  },
+  "events": {},
+  "uses": {
+    "shell": "0.x",
+    "rail": "0.x",
+    "page": "0.x",
+    "mast": "0.x",
+    "back": "0.x",
+    "sheet": "0.x",
+    "shead": "0.x",
+    "srowlink": "0.x",
+    "notice": "0.x",
+    "foot": "0.x",
+    "header": "0.x",
+    "keybox": "0.x",
+    "dest": "0.x",
+    "auth-form": "0.x",
+    "dialog": "0.x",
+    "card": "0.x",
+    "button": "0.x",
+    "cluster": "0.x",
+    "state-message": "0.x",
+    "text": "0.x",
+    "bone": "0.x",
+    "srow": "0.x",
+    "said": "0.x",
+    "dayrow": "0.x",
+    "recrow": "0.x",
+    "leafpic": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none of its own: the masthead (header) and the record (main) are its landmarks",
+    "keyboard": "its links, in reading order",
+    "labels": "each row: its label names it"
+  },
+  "responsive": {
+    "1200": "desktop: the masthead becomes the title block beside the page"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-14",
+      "kind": "internal",
+      "change": "Pages round 2: 10-settings-privacy on the three platforms (privacy, visible, data), at parity with the screens."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "internal",
+      "change": "Pages round 4b: the account and data states of 17-account-data (12 of 13; the timezone chooser waits for a select with options), as generic state pages and the data page with a dialog or a state message."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-15",
+      "kind": "added",
+      "change": "Variant context (screen, walkthrough): the walkthroughs render the page directly (pages round 5)."
+    },
+    {
+      "version": "0.4.0",
+      "date": "2026-10-30",
+      "kind": "added",
+      "change": "v4 round 10: loading is a skeleton (bone, system/content/skeleton.mjs) in the page's real frame, a new state and route."
+    }
+  ]
+}

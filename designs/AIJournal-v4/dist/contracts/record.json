@@ -1,0 +1,154 @@
+{
+  "name": "record",
+  "layer": "sections",
+  "version": "0.3.0",
+  "description": "The Timeline's list (v4 C1): the sheet with its rows as the old design draws them (month headings, a day's writing with its lede and any mark, a recording with its player, its transcript row and its tools), and the jump's arrival drawn over it: the list scrolls to the day, waits for the scroll to end, a wash in each day's mood passes through its rows, and a frame is drawn round them (one round each run of neighbouring days) and held with each date in its mood colour. The jump takes one day (the card) or several (a reflection's entries).",
+  "variants": {},
+  "options": {},
+  "content": {
+    "items": {
+      "type": "list",
+      "required": true,
+      "description": "The rows, newest first, as Timeline's data.mjs has them: { kind: month, text } | { kind: day, date, datetime, text, mark?, id? } | { kind: recording, date, datetime, play, duration, transcript, excluded, wave?, id? }. A day's first row has its datetime (and its anchor id); the rows after it continue the day."
+    },
+    "moods": {
+      "type": "object",
+      "required": false,
+      "description": "{ YYYY-MM-DD: light|good|even|low|hard }: each day's mood, written on its first row; the arrival's colour."
+    },
+    "marks": {
+      "type": "list",
+      "required": false,
+      "description": "The words a search found, marked in the writing from a word's start (the page passes only the matching days)."
+    },
+    "message": {
+      "type": "object",
+      "required": false,
+      "description": "{ heading, text } in place of the rows: no matches (by keyword Ask's own wording, by meaning its own; DESIGN.md 2026-10-23)."
+    },
+    "arrive": {
+      "type": "text",
+      "required": false,
+      "description": "Days to jump to once the page runs (data-jump), YYYY-MM-DD, space-separated: a scripted view's state. The numbered comps run no script and show no arrival."
+    },
+    "deleteHref": {
+      "type": "text",
+      "required": false,
+      "description": "Where a recording's delete goes (the prototype's confirmation)."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": [
+      "--g-wash",
+      "--g-wash-step",
+      "--mood-light-wash",
+      "--mood-good-wash",
+      "--mood-even-wash",
+      "--mood-low-wash",
+      "--mood-hard-wash",
+      "--gc-c1",
+      "--rule",
+      "--g-frame",
+      "--g-panel",
+      "--mood-light",
+      "--mood-good",
+      "--mood-even",
+      "--mood-low",
+      "--mood-hard"
+    ],
+    "exposes": {
+      "--aj-s-record-offset": "Where a jumped-to day lands below the top (96px: under the floating search). The app adds a pinned header's height on mobile and tablet.",
+      "--aj-s-record-i": "A wash's place in its day (0, 1, …): written by record.js on each wash, never by a parent; it delays that row's wash by --g-wash-step each."
+    }
+  },
+  "states": {
+    "default": "yes: the rows as the old design draws them",
+    "hover": "n/a: a section is not a control; its rows' controls carry their own",
+    "focus-visible": "n/a: its controls carry the ring; a jumped-to day takes focus without one",
+    "active": "n/a: not a control",
+    "disabled": "n/a: not a control",
+    "selected": "yes: arrived: the days framed and held (one frame per run of neighbouring days), each date in its mood colour (drawn by record.js)",
+    "loading": "n/a: loading is the page's state message",
+    "error": "n/a: the page reports it",
+    "empty": "yes: no matches: the explanation in place of the rows"
+  },
+  "events": {
+    "day": "the day in view changed as the list scrolled (bubbling; detail: { date }): the app sets data-day on the card"
+  },
+  "behaviour": {
+    "script": "record.js, inside its root: when the app sets data-jump (one day, or several space-separated) it scrolls the first of their rows to the top (under the search), focuses it, waits for scrollend (or 1.4s), then arrives: a wash per row in its own layer, in its day's mood (--g-wash, each row --g-wash-step later), a frame drawn round each run of neighbouring days (--g-frame) and held, the rows marked data-framed with their day's mood for the date's colour; the next jump or leaving the page clears it. The frame follows the rows when the sheet resizes or a search hides rows, and hides when its days are hidden. As the list scrolls it dispatches day with the first day whose rows reach below the search. Under reduced motion (unless the review switch is on) the scroll is instant, the wash fades in place and the frame is there at once.",
+    "state": {
+      "data-jump": {
+        "values": [
+          "YYYY-MM-DD",
+          "YYYY-MM-DD YYYY-MM-DD …"
+        ],
+        "setBy": "both",
+        "description": "Days to jump to: the app sets it (the card's day, or a reflection's days), record.js takes it and removes it. Rendered from arrive."
+      }
+    },
+    "hooks": {
+      "data-day": "on every row: its day (YYYY-MM-DD), which the jump, the arrival and the day in view read; the app's search reads it too",
+      "data-mood": "on each day's first row: its mood, the arrival's colour",
+      "data-framed": "on the arrived days' rows, set by record.js to the day's mood (light, good, even, low, hard): their date takes it",
+      "hidden": "on a row or a month heading, set by the app's search: the row is not shown"
+    }
+  },
+  "uses": {
+    "sheet": "0.x",
+    "shead": "0.x",
+    "dayrow": "0.x",
+    "recrow": "0.x",
+    "text": "0.x",
+    "mark": "0.x",
+    "play": "0.x",
+    "wave": "0.x",
+    "entry-actions": "0.x",
+    "button": "0.x",
+    "srow": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "the sheet's (main); the arrival's layer is aria-hidden",
+    "keyboard": "its rows' controls; a jump moves focus to the day's first row (tabindex -1)",
+    "labels": "its rows' own"
+  },
+  "responsive": {
+    "all": "the arrival is measured round the rows at any width and follows them when the layout changes"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-23",
+      "kind": "added",
+      "change": "New (v4 C1 round 2): Timeline's rows from the page (unchanged), and the jump's arrival from explore timeline-jump-arrival f-wash-and-frame."
+    },
+    {
+      "version": "0.1.1",
+      "date": "2026-10-23",
+      "kind": "fixed",
+      "change": "min-width:0, so on a split page the record shrinks to its column as the clipping sheet did (the recordings' fixed drawings no longer push the side card off the page). The day in view and a jump's 'already there' are measured from the top of the list's scroller (a walkthrough's reader), not the window's."
+    },
+    {
+      "version": "0.1.2",
+      "date": "2026-10-23",
+      "kind": "fixed",
+      "change": "The top of the list's scroller stops below the document: where the window scrolls (the website on desktop) html computes overflow auto, and its top was taken as the edge, so the card never followed the day in view."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-28",
+      "kind": "added",
+      "change": "v4 C3: the jump takes several days (a reflection's N entries lands on the days behind its note): one frame round each run of neighbouring days, each day's wash and date in its own mood. The mood moves from the root (data-mood, removed) to each wash and each framed row (data-framed=\"<mood>\"). One day arrives as before."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-29",
+      "kind": "removed",
+      "change": "v4 round 10: the waves list goes: a recording's waveform is the wave's own (the memo's phrase at a fixed pitch)."
+    }
+  ],
+  "contexts": []
+}

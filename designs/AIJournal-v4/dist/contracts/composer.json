@@ -1,0 +1,275 @@
+{
+  "name": "composer",
+  "layer": "components",
+  "version": "0.4.1",
+  "inventory": "E1",
+  "description": "The composer: sticky at the foot of Today, never on any other screen. A row holding the field and exactly one filled control, the record control (mic part) while the field is empty and send while it holds words; below it the tools row with the keep-out-of-memory option and More options. The Today composer (the one with the option) rises 64px when the app opens and, where scroll timelines exist, tucks the same 64px while the journal is read; focus inside brings it back up. On the website's Today it is the writing companion, with the recent overview above the row. v4 C2: Ask's chat form, at the foot of Ask.",
+  "variants": {
+    "form": {
+      "values": [
+        "plain",
+        "companion",
+        "chat"
+      ],
+      "default": "plain",
+      "description": "plain: the composer (no attribute). companion: the website's writing companion, the recent overview above the row (was .writing-companion): it does not rise or tuck, and keeps within the screen under the pinned header. chat (v4 C2, Ask): a form element; the lead (when given) above a rounded field holding the textarea and a round Ask button, then the note on a slip under it. Sticky at the foot of the page over a fade (the thread slides under it): no top rule, no rise or tuck, no mic, no tools row. The page or section gives it the chat column's width (--chat-w)."
+    }
+  },
+  "options": {
+    "filled": {
+      "type": "boolean",
+      "default": false,
+      "description": "The field holds words: send (in the row slot) stands where the mic was. A composer carries exactly one filled control."
+    },
+    "toolsRow": {
+      "type": "boolean",
+      "default": true,
+      "description": "false: the native app's form, the option straight after the row with no tools row."
+    },
+    "hooks": {
+      "type": "boolean",
+      "default": false,
+      "description": "The developer runtime's hooks (journal-components.js): data-journal-component=\"composer\" on the root, data-action=\"record\" on the mic."
+    },
+    "readonly": {
+      "type": "boolean",
+      "default": false,
+      "description": "The chat form only: a past day. In place of the lead, the field and the note: one dashed slip, rounded to half its height, holding readonlyText and a quiet button, todayLabel, to todayHref (\"Past sessions are read only. Back to today\")."
+    },
+    "waiting": {
+      "type": "boolean",
+      "default": false,
+      "description": "The chat form only: a day is loading. The rounded field draws at 60% (data-waiting); the lead says what it waits for. The field stays usable."
+    }
+  },
+  "content": {
+    "placeholder": {
+      "type": "text",
+      "required": false,
+      "description": "The field's placeholder, \"Add to today\"."
+    },
+    "value": {
+      "type": "text",
+      "required": false,
+      "description": "The chat form only: words already in the field (a question that was not sent goes back into the box)."
+    },
+    "label": {
+      "type": "text",
+      "required": false,
+      "description": "The chat form only: the field's visually hidden label and placeholder, \"Ask your journal\"; also the Ask button's accessible name is \"Ask\"."
+    },
+    "note": {
+      "type": "text",
+      "required": false,
+      "description": "The chat form only: the line under the field, on a slip of --paper rounded to half its height (\"Ask reads only your own entries. The 4 kept out of memory are never read.\")."
+    },
+    "readonlyText": {
+      "type": "text",
+      "required": false,
+      "description": "readonly: \"Past sessions are read only.\""
+    },
+    "todayLabel": {
+      "type": "text",
+      "required": false,
+      "description": "readonly: \"Back to today\"."
+    },
+    "todayHref": {
+      "type": "text",
+      "required": false,
+      "description": "readonly: where Back to today goes (Ask on today). Without it the quiet button is a button element (data-hook=\"today\")."
+    },
+    "fieldId": {
+      "type": "text",
+      "required": false,
+      "description": "The chat form only: the field's id, which its label names, default \"aj-ask\" (one chat composer on a screen)."
+    }
+  },
+  "slots": {
+    "overview": {
+      "accepts": [
+        "overview",
+        "text"
+      ],
+      "required": false,
+      "description": "companion: the overview section (v4 C4: the latest weekly reflection's line and its chevron); the catalogue draws a text line in its place."
+    },
+    "row": {
+      "accepts": [
+        "field",
+        "send"
+      ],
+      "required": true,
+      "description": "The field, then send when it holds words (the mic part otherwise)."
+    },
+    "standby": {
+      "accepts": [
+        "send"
+      ],
+      "required": false,
+      "description": "After the mic: the hidden send the developer runtime swaps in when the field fills."
+    },
+    "draft": {
+      "accepts": [
+        "pending"
+      ],
+      "required": false,
+      "description": "v4 C5: the voice memo draft line (pending, form draft, place span) under the row and before the tools, with or without words in the field, on Today and Empty Today. The page gives it the hook draft; it opens the recorder on the draft."
+    },
+    "tools": {
+      "accepts": [
+        "opt",
+        "button"
+      ],
+      "required": false,
+      "description": "The keep-out-of-memory option and More options, in the tools row; with toolsRow false the option follows the row directly."
+    },
+    "after": {
+      "accepts": [
+        "text"
+      ],
+      "required": false,
+      "description": "A status or help line after the tools (the empty-entry help). v4 C5: no longer the save-failed line; an unsent entry is in the list with its own pending line."
+    },
+    "lead": {
+      "accepts": [
+        "text",
+        "button"
+      ],
+      "required": false,
+      "description": "The chat form only: the lead above the field (round 3 fills it: an empty session's \"What would you like to ask?\" and questions to start from; after a can't-answer, questions the journal can answer; while a day loads, what it waits for). Framed by the composer: --paper-2, a 30% --rule hairline, 20px corners, --s5 --s6 --s4 padding, --s4 above the field. Not drawn when empty."
+    }
+  },
+  "places": {
+    "head": "the overview above the input: --s5 below",
+    "span": "a state message: the full grid, --s4 above",
+    "option": "the option: --s3 above (in the composer or its tools)",
+    "fixed": "the tools' quiet button: keeps its size"
+  },
+  "tokens": {
+    "reads": [
+      "--paper",
+      "--w",
+      "--rule",
+      "--s6",
+      "--gut",
+      "--s7",
+      "--s5",
+      "--s4",
+      "--ctl",
+      "--r",
+      "--block",
+      "--gc",
+      "--g-comp",
+      "--gc-rise",
+      "--g-hide",
+      "--s3",
+      "--paper-2",
+      "--s2",
+      "--tap",
+      "--t-field",
+      "--f-prose",
+      "--ink",
+      "--rule-2",
+      "--t-quiet",
+      "--f-label",
+      "--w-focus"
+    ],
+    "exposes": {
+      "--aj-c-composer-header-height": "The pinned header's height; the companion's height cap leaves room for it (0px without one). The page script sets it from the header's resize."
+    }
+  },
+  "states": {
+    "default": "yes: the empty field and the mic; chat: the empty field, its placeholder, the round Ask button",
+    "hover": "yes: the mic turns --block; chat: the Ask button turns --block",
+    "focus-visible": "yes: the product focus ring on the field and the mic (base); focus inside brings a tucked composer up; chat: the rounded field takes the focus ring (2px --block, 2px out) while its textarea has focus; the Ask button its own",
+    "active": "yes: the mic presses (scale .97 in the shell, 1px down without it)",
+    "disabled": "yes: chat readonly, a past day: the read-only slip in place of the field",
+    "selected": "n/a: nothing in it is selected; the option has its own pressed state",
+    "loading": "yes: chat waiting: the field at 60% while a day loads",
+    "error": "n/a: an entry that does not upload is in the list with its pending line (v4 C5); the composer is clear",
+    "empty": "yes: the field shows its placeholder and the filled control is the mic (with words, send); chat: placeholder \"Ask your journal\""
+  },
+  "events": {
+    "save": "send pressed",
+    "record": "the mic pressed",
+    "memory": "the option toggled",
+    "ask": "chat: the form submitted (the Ask button, or Enter in the field; Shift+Enter is a new line: the app runtime, round 3). The native submit event; the composer has no script."
+  },
+  "uses": {
+    "field": "0.x",
+    "send": "0.x",
+    "opt": "0.x",
+    "button": "0.x",
+    "text": "0.x",
+    "page": "0.x",
+    "pending": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none (a div) at the foot of the page",
+    "keyboard": "Tab through the field, the mic or send, the option and More options",
+    "labels": "the field has a visible or visually hidden label, or aria-label; the mic is labelled \"Record\"; chat: the textarea has a visually hidden label (\"Ask your journal\"), the Ask button aria-label \"Ask\""
+  },
+  "responsive": {
+    "1200": "its content centres on the sheet: a 700px column inside a rule that still spans the page; chat: no change of its own (its width is the column the parent gives it)"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-11",
+      "kind": "internal",
+      "change": "Converted from lock.css E1 (.composer, .crow, .mic, .composer-tools, and the rise and tuck motion)."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-13",
+      "kind": "added",
+      "change": "Variant companion (data-companion), the writing companion's own rule; the behaviour hooks (input, row, mic, tools, memory) in the render."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-13",
+      "kind": "internal",
+      "change": "The companion is form: companion (data-form), which already named it; the second variant (companion, data-companion) is gone and its rule is now the form's."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-25",
+      "kind": "added",
+      "change": "v4 C2: the chat form (Ask): a form with the lead slot, the rounded field (textarea and round Ask button), the note on a slip; options readonly (the past day's slip) and waiting (loading)."
+    },
+    {
+      "version": "0.3.1",
+      "date": "2026-10-29",
+      "kind": "internal",
+      "change": "v4 C4: the overview slot takes the overview section (0.2.0), no longer a glance; the catalogue draws a text line in its place (a component cannot use a section)."
+    },
+    {
+      "version": "0.4.0",
+      "date": "2026-10-29",
+      "kind": "added",
+      "change": "v4 C5 (explore drafts a-quiet-line): slot draft, the voice memo draft line (pending) under the row; the after slot no longer holds the save-failed line."
+    },
+    {
+      "version": "0.4.1",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 round 10: the chat box's focus is its own border at 2px in --block, drawn inward, not a ring outside it."
+    }
+  ],
+  "contexts": [
+    "data-motion"
+  ],
+  "behaviour": {
+    "hooks": {
+      "input": "The composer's text field; the runtime reads, clears and sizes it. In the chat form, its own textarea.",
+      "memory": "Its keep-out-of-memory option; the runtime reads and sets its pressed state.",
+      "mic": "Its record control; the runtime opens the recorder from it.",
+      "row": "The row that holds the field and its controls; the runtime measures it.",
+      "tools": "Its tools group; the runtime finds the options in it.",
+      "today": "chat readonly: Back to today when it is a button.",
+      "draft": "v4 C5: the voice memo draft line (pending, form draft) in the draft slot; the runtime opens the recorder on the draft from it and puts it in while a draft is kept (template memo-draft-line)."
+    }
+  }
+}

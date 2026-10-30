@@ -1,0 +1,10 @@
+/* F3 an empty or not-enough state. one line of prose. no illustration, ever.
+   Moved from lock.css. Its measure (34ch, and none at 700 and 1200) is its own (pages round 1). */
+.aj-c-empty{padding:var(--s8) var(--gut);font-family:var(--f-prose);font-size:var(--t-body);
+       line-height:var(--lh-body);color:var(--rule)}
+
+/* Its own size (moved from lock.css, 2026-10-12): intrinsic to the control, not where a parent puts it. Its reading measure, released from 700px of container. */
+.aj-c-empty{max-width:34ch/* token-exempt: the empty state's reading measure; no recorded reason */}
+@container (min-width:700px){
+  .aj-c-empty{max-width:none}
+}

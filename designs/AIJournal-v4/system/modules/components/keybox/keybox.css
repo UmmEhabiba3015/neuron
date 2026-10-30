@@ -1,0 +1,61 @@
+/* keybox. Every selector starts from .aj-c-keybox; values come from tokens. */
+
+
+/* D1 the keyline box. printed caps key, written value. every date the
+   product shows. also the price on /you/plan. */
+.aj-c-keybox{display:flex;align-items:stretch;min-height:var(--ctl);
+        border:var(--w) solid var(--rule);
+        border-radius:var(--r);background:var(--paper-2);overflow:hidden}
+.aj-c-keybox .aj-c-keybox__key{display:flex;align-items:center;padding:0 var(--s5);
+           background:var(--rule);color:var(--paper);font-size:var(--t-key);
+           letter-spacing:.18em /* token-exempt: printed-caps tracking of the key, set once in D1 */;text-transform:uppercase}
+/* REVISION 48. The weight, for the same reason .wordmark takes it: on /talk, on
+   an answer and on a past day there is no wordmark, so the date box IS the
+   object that names the page and becomes the h1. Revision 42 made that argument
+   at desktop; it is not a desktop fact and now sits in the base. */
+.aj-c-keybox .aj-c-keybox__value{font-family:var(--f-hand);font-size:var(--aj-c-keybox-value-size,var(--t-hand-l));line-height:var(--lh-flat);
+           font-weight:400;
+           color:var(--rule);padding:9px /* token-exempt: the hand's top inset from v3's D1, no step on the scale; no recorded reason */ var(--s6) var(--s4)}
+/* printed variant, used when the hand has already appeared twice.
+   Vertical padding is 0 and the box centres instead: with padding the content
+   came to 50.8px and broke the fixed masthead height by eight tenths of a
+   pixel, which is invisible on one screen and a visible twitch when you
+   switch between screens. */
+.aj-c-keybox .aj-c-keybox__value[data-printed]{display:flex;align-items:center;
+                   font-family:var(--f-prose);font-size:var(--t-field);
+                   line-height:var(--lh-tight);padding:0 var(--s6)}
+
+/* The hand writes the date in as the page arrives. Printed values are never swept: the
+   sweep claims the order a hand would write in (motion 15.11e, session 14 fault 1). */
+@keyframes aj-c-keybox-write{
+  from{-webkit-mask-image:linear-gradient(to right,rgb(0 0 0) 0 47.06%,rgb(0 0 0 / 0) 52.94% 100%);
+       mask-image:linear-gradient(to right,rgb(0 0 0) 0 47.06%,rgb(0 0 0 / 0) 52.94% 100%);
+       -webkit-mask-size:212.5% 100%;mask-size:212.5% 100%;
+       -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+       -webkit-mask-position:100% 0;mask-position:100% 0}
+  to  {-webkit-mask-image:linear-gradient(to right,rgb(0 0 0) 0 47.06%,rgb(0 0 0 / 0) 52.94% 100%);
+       mask-image:linear-gradient(to right,rgb(0 0 0) 0 47.06%,rgb(0 0 0 / 0) 52.94% 100%);
+       -webkit-mask-size:212.5% 100%;mask-size:212.5% 100%;
+       -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+       -webkit-mask-position:0% 0;mask-position:0% 0}
+}
+/* context: [data-motion] is the motion scope; arrival motion runs only inside the app. */
+[data-motion] .aj-c-keybox .aj-c-keybox__value:not([data-printed]){
+  animation:aj-c-keybox-write var(--g-date) var(--gc) backwards}
+
+@media (prefers-reduced-motion:reduce){
+  /* context: [data-motion] is the motion scope; the review switch lifts the guard. */
+  [data-motion]:not(:where(html[data-motion-review="play"] *)) .aj-c-keybox .aj-c-keybox__value:not([data-printed]){animation:none}
+}
+
+/* context: :is([data-surface="auth"],[data-surface="account"]) shows the signed-out screens, which do not write the date in. */
+:is([data-surface="auth"],[data-surface="account"]) .aj-c-keybox .aj-c-keybox__value{animation:none}
+
+/* context: [data-surface="auth"] is the approved plain-paper auth spread. */
+[data-surface="auth"] .aj-c-keybox .aj-c-keybox__value{font-size:var(--t-field);min-width:0;overflow-wrap:anywhere}
+
+@container (max-width:700px){
+ /* context: [data-surface="auth"] is the approved plain-paper auth spread. */
+ [data-surface="auth"] .aj-c-keybox .aj-c-keybox__value{font-size:var(--t-note)}
+}
+

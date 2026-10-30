@@ -1,0 +1,125 @@
+{
+  "name": "thumbs",
+  "layer": "components",
+  "version": "0.3.0",
+  "inventory": "v4 round 10",
+  "description": "Helpful and Not helpful on something the journal wrote: an answer in Ask, a note on Today, the Day page or a Reflections leaf. One at a time; the thumbs down asks \"What was wrong?\" (rateform) before it fills red. In Ask's tools it draws no box; in a note's foot it is a small row of its own.",
+  "variants": {
+    "form": {
+      "values": [
+        "tools",
+        "pair"
+      ],
+      "default": "tools",
+      "description": "tools: no box (display:contents), the thumbs and the form are items of the parent's tools row (Ask's answer, beside bookmark and copy), spaced and faded by it; the row must wrap. pair: a row of its own (inline-flex, --s1 apart) that takes the room its parent leaves, placed by its parent (a note's foot, after its source). In both the form (rateform, one line) sits after the thumbs down, up to 320px, dropping under below 180px. Written as data-form=\"pair\"; tools writes nothing."
+    }
+  },
+  "options": {
+    "rating": {
+      "values": [
+        "none",
+        "up",
+        "down"
+      ],
+      "default": "none",
+      "description": "Which thumb is filled (aria-pressed): up in --rate-up, down in --rate-down. One at a time."
+    },
+    "asking": {
+      "type": "boolean",
+      "default": false,
+      "description": "The thumbs-down form drawn open, its thumb expanded (aria-expanded=\"true\"), as the script leaves it when the thumb is pressed. For comps, which have no script."
+    }
+  },
+  "content": {
+    "id": {
+      "type": "text",
+      "required": true,
+      "description": "The rated thing's id, unique on the page: the form's field is <id>-why."
+    },
+    "labels": {
+      "type": "object",
+      "required": false,
+      "description": "The thumbs' names: { up: \"Helpful\", down: \"Not helpful\" }; these are the defaults."
+    }
+  },
+  "slots": {},
+  "places": {
+    "rate": "the thumbs-down form: floats --s2 under the row that holds the thumbs, from its start; from its end when the script finds it would leave the screen (data-align=\"end\"); above the row when the script finds no room below (data-side=\"up\")"
+  },
+  "tokens": {
+    "reads": [
+      "--s1",
+      "--s2"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: two quiet icon tools (button's tool form), unfilled",
+    "hover": "yes: the button's tool hover, in each thumb's own colour",
+    "focus-visible": "yes: each thumb takes the product's ring; the form's field its own",
+    "active": "n/a: the buttons carry their own press",
+    "disabled": "n/a: a thumb can always be pressed",
+    "selected": "yes: the set thumb filled (up --rate-up, down --rate-down)",
+    "loading": "n/a: a rating is at once",
+    "error": "n/a: nothing here can be refused",
+    "empty": "n/a: always two thumbs"
+  },
+  "events": {
+    "rate": "a thumb changed: bubbling, detail { rating: up|down|none, why? } (why: the thumbs-down form's words)"
+  },
+  "behaviour": {
+    "script": "thumbs.js, inside its root only: up toggles and clears down; a filled down pressed returns to none; an empty down opens the form, under the row or above it when it would run under the floor (the nearest data-floor above it, e.g. Ask's composer) or off the screen, focus in its field; its send fills down and clears up, its cancel closes it, focus back on the thumb; a press outside closes it.",
+    "hooks": {},
+    "state": {
+      "data-side": {
+        "values": [
+          "up"
+        ],
+        "setBy": "runtime",
+        "description": "The form opened above the row."
+      },
+      "data-align": {
+        "values": [
+          "end"
+        ],
+        "setBy": "runtime",
+        "description": "The form opened from the row's end, as it would leave the screen from its start."
+      }
+    }
+  },
+  "uses": {
+    "button": "0.x",
+    "rateform": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none: tools draws no box and the parent's row names the group (Ask's tools); pair a plain row",
+    "keyboard": "Tab to each thumb; Enter or Space presses; in the form Escape cancels and focus returns to the thumb",
+    "labels": "each thumb by its word (Helpful, Not helpful), pressed state with aria-pressed; the thumbs down's form with aria-expanded"
+  },
+  "responsive": {
+    "all": "the form is 272px, never wider than the screen less the gutters (rateform); it flips above the row or to its end where there is no room"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-29",
+      "kind": "added",
+      "change": "New (v4 round 10): Ask's thumbs and their form, out of bubble, so the notes can take them in place of That's not right."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 round 10: the pair's thumbs-down form is rateform's line form, in the row after the thumbs down; it fell behind the next entry in Today's list when it floated."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 round 10: Ask's thumbs-down form is the line too (the user: the same form everywhere), in the answer's tools row after the thumbs down; the floating, flipping and data-side/data-align placement go. It scrolls clear of the floor when it opens under it."
+    }
+  ],
+  "contexts": []
+}

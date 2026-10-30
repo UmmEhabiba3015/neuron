@@ -1,0 +1,14 @@
+/* state-message: a state the page is in, written where the content would be. Moved from lock.css.
+   Its grid column and margins are placement and stay there; its help line is the shared .auth-help. */
+
+/* PLACEMENT BY ROLE (decision 2026-10-12): a block in a state message (a notice) takes the page gutter. */
+.aj-s-state-message > [data-place~="block"]{margin:0 var(--gut) var(--s6)}
+
+/* PLACEMENT BY ROLE (decision 2026-10-12): a nested state message (span) takes the full grid. */
+.aj-s-state-message > [data-place~="span"]{grid-column:1 / -1}
+/* its copy (copy) sits --s6 and its help lines (help) --s4 above what follows */
+.aj-s-state-message > [data-place~="copy"]{margin:0 0 var(--s6)}
+.aj-s-state-message > [data-place~="help"]{margin:0 0 var(--s4)}
+
+/* Its action row (actions, a cluster): --s4 by --s7 apart, --s7 below. */
+.aj-s-state-message > [data-place~="actions"]{--aj-l-cluster-gap:var(--s4) var(--s7);margin-top:var(--s7)}

@@ -1,0 +1,53 @@
+{
+  "name": "empty",
+  "layer": "components",
+  "version": "0.1.0",
+  "inventory": "F3",
+  "description": "An empty state: one line of prose. No illustration, ever. No blank box.",
+  "variants": {},
+  "options": {},
+  "content": {
+    "text": {
+      "type": "text",
+      "required": true,
+      "description": "One sentence of final copy."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": ["--s8", "--gut", "--f-prose", "--t-body", "--lh-body", "--rule"],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: not interactive",
+    "focus-visible": "n/a: not focusable",
+    "active": "n/a: not interactive",
+    "disabled": "n/a: not interactive",
+    "selected": "n/a: not interactive",
+    "loading": "n/a: static text",
+    "error": "n/a: static text",
+    "empty": "n/a: it is the empty state"
+  },
+  "events": {},
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none: a paragraph",
+    "keyboard": "none",
+    "labels": "its text"
+  },
+  "responsive": {
+    "700": "loses its 34ch measure",
+    "1200": "loses its 34ch measure"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-11",
+      "kind": "internal",
+      "change": "Converted from lock.css F3 (.empty)."
+    }
+  ]
+}

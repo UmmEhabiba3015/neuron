@@ -1,0 +1,64 @@
+{
+  "name": "play",
+  "layer": "components",
+  "version": "0.1.0",
+  "inventory": "E4",
+  "description": "The play control of a recording: a --tap square with --r radius, keylined in --block, the recording's one tone. Turns to a pause glyph while playing (the recorder runtime swaps the glyph).",
+  "variants": {},
+  "options": {},
+  "content": {
+    "label": {
+      "type": "text",
+      "required": true,
+      "description": "The accessible name (aria-label), for example 'Play recording'."
+    }
+  },
+  "slots": {
+    "icon": {
+      "accepts": ["svg"],
+      "required": true,
+      "description": "The play or pause glyph."
+    }
+  },
+  "tokens": {
+    "reads": ["--tap", "--r", "--paper-2", "--w", "--block", "--paper", "--gc"],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "yes: fills --block, glyph --paper",
+    "focus-visible": "yes: the product's focus ring (base)",
+    "active": "yes: pressed 1px down, and scaled .97 under the shell's motion",
+    "disabled": "n/a: a recording can always be played",
+    "selected": "n/a: playing is shown by the glyph, not a state",
+    "loading": "n/a: playback starts at once; there is no buffering state",
+    "error": "n/a: the row says when there is no audio",
+    "empty": "n/a: a row with no audio says so in its text; the control is the same"
+  },
+  "events": {
+    "press": "play or pause"
+  },
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "button",
+    "keyboard": "Tab to it, Space or Enter",
+    "labels": "label is required"
+  },
+  "responsive": {},
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-10",
+      "kind": "internal",
+      "change": "Converted from lock.css E4 (.play)."
+    }
+  ],
+  "contexts": ["data-motion"],
+  "behaviour": {
+    "hooks": {
+      "data-prototype-recording-id": "The prototype's recording id on a memo's play control; the runtime writes it and reads it on a press."
+    }
+  }
+}

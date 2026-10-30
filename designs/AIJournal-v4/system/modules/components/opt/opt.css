@@ -1,0 +1,50 @@
+/* E6 the checkable option. out of memory, and settings toggles.
+   Moved from lock.css section E6. Its margin-top in the composer: by role (data-place="option"),
+   components/composer/. */
+.aj-c-opt{display:inline-flex;align-items:center;gap:var(--s4);
+     min-height:var(--tap);font-size:var(--t-quiet);
+     letter-spacing:.05em;/* token-exempt: the option's tracking, .05em; tokens.json lists the composer option at .04em: no recorded reason for the difference */
+     color:var(--rule-2);background:none;border:0;cursor:pointer;padding:0}
+.aj-c-opt .aj-c-opt__tick{width:14px;/* token-exempt: the tick box; no recorded reason */
+           height:14px;/* token-exempt: the tick box; no recorded reason */
+           flex:0 0 auto;border:var(--w) solid var(--rule-2);
+           border-radius:var(--r);background:var(--paper-2)}
+.aj-c-opt[aria-pressed="true"] .aj-c-opt__tick{background:var(--rule);border-color:var(--rule)}
+.aj-c-opt:hover{color:var(--rule)}
+
+/* A press moves the option 1px down: transform only, so it costs no layout. prefers-reduced-motion
+   is deliberately not consulted: this is a state, not a transition. */
+.aj-c-opt:active{transform:translateY(1px)}
+
+/* The shell's motion: the press ramp, and a press scales the option under it. */
+/* context: the motion belongs to the product shell (.app) */
+[data-motion] .aj-c-opt{transition:transform 280ms var(--gc);/* token-exempt: the shell's glide duration, 280ms (3.10 motion) */}
+/* context: the motion belongs to the product shell (.app) */
+[data-motion] .aj-c-opt:active{transform:scale(.97);/* token-exempt: the shell's press scale */transition-duration:160ms;/* token-exempt: the shell's press duration */}
+
+/* THE HOVER RAMP IS TRANSFORM ONLY, AND THAT IS A FIX RATHER THAN AN OMISSION (see the destination
+   row: colour transitions flashed the browser's default blue on a slow first paint). */
+@media (hover:hover) and (pointer:fine){
+  /* legacy-context: the motion belongs to the product shell (.app) */
+  [data-motion] .aj-c-opt{transition:transform 280ms var(--gc);/* token-exempt: the shell's glide duration, 280ms (3.10 motion) */}
+}
+
+/* Reduced motion: the option draws still. */
+@media (prefers-reduced-motion:reduce){
+  /* context: the motion belongs to the product shell (.app) */
+  [data-motion]:not(:where(html[data-motion-review="play"] *)) .aj-c-opt{transition:none}
+}
+
+/* The compact form in the entry memory menu (the user-requested compact memory control).
+   It has no placement of its own there. */
+/* the compact form (the entry memory menu sets it) */
+.aj-c-opt[data-form="compact"]{min-height:var(--tap);padding:0;gap:var(--s3);
+     font-size:var(--t-memory);
+     line-height:1.6;/* token-exempt: the user-requested compact memory control (--t-memory) */
+     align-items:flex-start;justify-content:flex-start;text-align:left}
+/* the compact form (the entry memory menu sets it) */
+.aj-c-opt[data-form="compact"]>.aj-c-opt__tick{width:12px;/* token-exempt: the user-requested compact memory control (--t-memory) */
+     height:12px;/* token-exempt: the user-requested compact memory control (--t-memory) */
+     margin-top:calc((1.6em - 12px) / 2)/* token-exempt: the user-requested compact memory control (--t-memory) */}
+/* the compact form (the entry memory menu sets it) */
+.aj-c-opt[data-form="compact"]>span:not(.aj-c-opt__tick){min-width:0;overflow-wrap:anywhere}

@@ -1,0 +1,102 @@
+{
+  "name": "card",
+  "layer": "components",
+  "version": "0.2.0",
+  "inventory": "F2",
+  "description": "A static card: a printed heading, one or more paragraphs in the product's voice, and an optional row of actions. Human-written, never generated; never colour-coded, never alarming. Today it carries the delete-everything confirmation inside the dialog.",
+  "variants": {},
+  "options": {
+    "level": {
+      "values": [
+        3,
+        2
+      ],
+      "default": 3,
+      "description": "Heading level. h3 under a page's section heading; h2 when the card carries the first heading on the page (revision 48)."
+    }
+  },
+  "content": {
+    "title": {
+      "type": "text",
+      "required": true,
+      "description": "The heading, final copy. Set in printed caps by the CSS."
+    },
+    "titleId": {
+      "type": "text",
+      "required": false,
+      "description": "id for the heading, so a dialog can point aria-labelledby at it."
+    },
+    "paragraphs": {
+      "type": "list",
+      "required": true,
+      "description": "The body, one string per paragraph, in order. An item may be { text, status: true }: an outcome line read out once (role=\"status\"), as in the failed-delete state. It looks exactly like the other paragraphs."
+    }
+  },
+  "slots": {
+    "actions": {
+      "accepts": [
+        "button"
+      ],
+      "required": false,
+      "description": "The row of actions at the foot of the card."
+    }
+  },
+  "tokens": {
+    "reads": [
+      "--s2",
+      "--s4",
+      "--s6",
+      "--paper-2",
+      "--w",
+      "--rule",
+      "--r",
+      "--f-label",
+      "--t-key",
+      "--f-prose",
+      "--t-note",
+      "--lh-note"
+    ],
+    "exposes": {
+      "--aj-c-card-measure": "Paragraph measure below a 700px container. Default 38ch.",
+      "--aj-c-card-measure-wide": "Paragraph measure from a 700px container up. Default none (the card fills its container); the dialog sets 38ch (revision 26)."
+    }
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: the card is static; its actions carry their own states",
+    "focus-visible": "n/a: the card is not focusable; its actions are",
+    "active": "n/a: static",
+    "disabled": "n/a: static",
+    "selected": "n/a: static",
+    "loading": "n/a: static",
+    "error": "yes: a status paragraph states the failure in words (paragraphs item with status: true), never in colour",
+    "empty": "n/a: a card without a title and a paragraph is not rendered"
+  },
+  "events": {},
+  "uses": {
+    "button": "0.x"
+  },
+  "assets": [],
+  "a11y": {
+    "role": "none of its own; the heading names it, and a dialog labels itself with titleId",
+    "keyboard": "none of its own; actions are links or buttons in tab order",
+    "labels": "title is required"
+  },
+  "responsive": {
+    "700": "paragraphs lose their 38ch measure and fill the card (--aj-c-card-measure-wide), revision 25"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-09",
+      "kind": "internal",
+      "change": "Converted from lock.css F2 .card."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-10",
+      "kind": "changed",
+      "change": "The actions slot takes button modules (the button module exists); fixtures use them."
+    }
+  ]
+}

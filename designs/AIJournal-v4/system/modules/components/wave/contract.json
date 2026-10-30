@@ -1,0 +1,82 @@
+{
+  "name": "wave",
+  "layer": "components",
+  "version": "0.3.0",
+  "inventory": "E5",
+  "description": "A recording's waveform: the memo's one fixed shape (the 14:05 phrase) at a fixed pitch, repeated along the row, aria-hidden. A wider row shows more of the phrase; the bars never widen. The duration beside it carries the information. Draws in once on arrival.",
+  "variants": {
+    "size": {
+      "values": [
+        "row",
+        "big"
+      ],
+      "default": "row",
+      "description": "row: --tap tall, in a recording row. big: the capture screen's waveform, 96px tall and the full width (was .wave.big); the same pitch, the bars scaled to its height."
+    }
+  },
+  "options": {},
+  "content": {},
+  "slots": {},
+  "tokens": {
+    "reads": [
+      "--tap",
+      "--block",
+      "--g-wave",
+      "--gc",
+      "--g-step"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: not interactive",
+    "focus-visible": "n/a: not focusable",
+    "active": "n/a: not interactive",
+    "disabled": "n/a: not interactive",
+    "selected": "n/a: not selectable",
+    "loading": "n/a: authored, never loads",
+    "error": "n/a: nothing can fail",
+    "empty": "n/a: a recording always has a drawing"
+  },
+  "events": {},
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none: aria-hidden; the duration beside it is the information",
+    "keyboard": "none",
+    "labels": "none"
+  },
+  "responsive": {
+    "1200": "the draw-in runs 520ms (legacy context .app; revision 49 keeps it under 45px a frame)"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-10",
+      "kind": "internal",
+      "change": "Converted from lock.css E5 (.wave) with its own copy of the draw keyframes."
+    },
+    {
+      "version": "0.1.1",
+      "date": "2026-10-14",
+      "kind": "fixed",
+      "change": "The default size (row) is no longer written as an attribute (only big has a rule)."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "Slot drawing: a waveform authored in several groups (02-timeline). Pages round 3."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 round 10: the drawing is the wave's own: the 14:05 phrase as a tile at the 1440 pitch (bars 1.77px every 6.19px), repeated as a mask on currentColor, so it never stretches. A span, not an svg; the viewBox prop and the path and drawing slots go."
+    }
+  ],
+  "contexts": [
+    "data-motion"
+  ]
+}

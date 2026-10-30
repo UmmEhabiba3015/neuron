@@ -1,0 +1,178 @@
+{
+  "name": "chat",
+  "layer": "sections",
+  "version": "0.3.0",
+  "description": "Ask's conversation (v4 C2): the head row (the drawers' pills, then New on today or Today on a past day; sticky at the top, its pills in the middle of its paper, the paper fading at its foot and its sides; on desktop level with the wordmark), the thread (the open day's sessions in time order, each with its line, its messages as bubbles), the chat composer at the foot. States: the day, an empty session (the composer's lead asks what to ask), loading (a whole page of skeleton resting on the composer).",
+  "variants": {
+    "state": {
+      "values": [
+        "day",
+        "loading"
+      ],
+      "default": "day",
+      "description": "day: the thread. loading: a day opening (data-state=\"loading\"): the section is the screen's height, the thread a skeleton of a whole day of sessions resting on the composer, cut off at the top under a --s9 fade, answer bones at the answer's real width, the standard shimmer; the composer waits, its placeholder \"Loading Sunday 9 August…\"."
+    }
+  },
+  "options": {
+    "todayHref": {
+      "type": "text",
+      "default": "",
+      "description": "Where Today goes (Ask on today). Without it the Today pill and Back to today are buttons the app answers (chat:today)."
+    }
+  },
+  "content": {
+    "day": {
+      "type": "object",
+      "required": true,
+      "description": "The open day: { date, today: boolean, long: \"Sunday 9 August\" }. today false is a past day: read only (data-day=\"past\"): Today in the head row and the composer's read-only slip."
+    },
+    "sessions": {
+      "type": "list",
+      "required": false,
+      "description": "The day's sessions, oldest first: { label: \"Session 1 · 08:10\" (\", open\" on today's last), name (the session's accessible name), messages: [bubble props] }. A message's voice places it. An empty session (New pressed, nothing asked yet) is a session with no messages, with the lead { kind: hello }."
+    },
+    "composer": {
+      "type": "object",
+      "required": false,
+      "description": "{ value (a question back in the box), fieldId }."
+    },
+    "lead": {
+      "type": "object",
+      "required": false,
+      "description": "The composer's lead: { kind: hello, asks } (an empty session: \"What would you like to ask?\" in the hand and questions to start from), { kind: instead, asks } (after a can't-answer: \"Your journal can answer these\"), { kind: failed } (\"Not sent. We could not reach the server. Your question is back in the box: send it again.\"). None on a past day or while loading."
+    },
+    "copy": {
+      "type": "object",
+      "required": false,
+      "description": "The words, defaults as approved: new, today, loading, readonly, backToday, note, label, hello, instead, failedWord, failed."
+    }
+  },
+  "slots": {
+    "tools": {
+      "accepts": [
+        "drawers"
+      ],
+      "required": false,
+      "description": "The head row's start: the drawers section (the History and Bookmarks pills and their dimmed layer)."
+    }
+  },
+  "places": {
+    "you": "your message: --s6 below; scrolls into view clear of the head and the composer",
+    "answer": "the answer: --s7 below; as you",
+    "foot": "the composer: the chat column's width, at the foot (it sticks there itself)",
+    "used": "the skeleton answer's \"entries used\" bone: --s3 under its lines"
+  },
+  "tokens": {
+    "reads": [
+      "--s4",
+      "--s5",
+      "--paper",
+      "--chat-w",
+      "--s7",
+      "--s6",
+      "--f-label",
+      "--t-quiet",
+      "--rule-2",
+      "--w",
+      "--rule",
+      "--s1",
+      "--f-hand",
+      "--t-hand-s",
+      "--s3",
+      "--lh-tight",
+      "--s2",
+      "--f-prose",
+      "--t-note",
+      "--s9",
+      "--paper-2",
+      "--chat-answer",
+      "--gc-c1",
+      "--g-wash",
+      "--g-frame",
+      "--t-mast",
+      "--tap"
+    ],
+    "exposes": {
+      "--aj-s-chat-min": "The section's least height, default 0px: the page gives it the screen less what is above it, so the composer starts at the foot.",
+      "--aj-s-chat-screen": "Its height while a day loads, default 100dvh: the page sets the screen less its own head.",
+      "--aj-s-chat-foot": "The composer's height and a little more, written by the script on the section, never by a parent: a jump lands clear of it."
+    }
+  },
+  "states": {
+    "default": "yes: the day's sessions and messages, the composer at the foot",
+    "hover": "yes: the lead's questions darken their edge; the bubbles and pills carry their own",
+    "focus-visible": "yes: the product's ring on the pills, the questions, the bubbles' tools and links, the composer",
+    "active": "n/a: the controls carry their own press",
+    "disabled": "yes: a past day, read only: Today in the head row, the read-only slip",
+    "selected": "n/a: nothing in the thread is chosen; a bookmark's arrival flashes once",
+    "loading": "yes: loading (the skeleton page); an answer being written (the bubble's own)",
+    "error": "yes: a can't-answer (the bubble's own) with the lead's questions; a failed question (unsent bubble, the words back in the box, the lead's note)",
+    "empty": "yes: an empty session: blank above the composer, whose lead asks what to ask"
+  },
+  "events": {
+    "new": "New pressed: the app starts a session (the one before it must hold an exchange) in a clear window: the day's sessions so far leave the thread, which holds only the new one (its line and the lead). They stay the day's: History opens the day whole, every session with its line, the open one last; Bookmarks lists them. An open session still empty (today opened whole from History) stays the new one: the window clears to it. Ask opening (the page, or coming back to Ask) starts a new session the same way, on today (a past day left open goes back to today first).",
+    "today": "Today or Back to today pressed, when they are buttons: the app opens today",
+    "ask": "a question sent (the composer's submit or Enter, or one of the lead's questions): bubbling, detail { text, suggested? }; the field is cleared"
+  },
+  "behaviour": {
+    "script": "chat.js, inside its root only: measures the composer and writes data-floor on every bubble and --aj-s-chat-foot (so a thumbs-down form and a jump stay clear of it); Enter in the field sends, Shift+Enter is a new line; announces new, today and ask; follows an answer being written in while the reader is at the end; lands a jump the app asks for (data-jump) as the Timeline lands a day (f-wash-and-frame): the message into view (centred) and focused, then, once the scroll ends (or at once if it is already in place; 1.4s at most), a wash in --rule at 14% passes through it in --g-wash and a frame is drawn round it in --g-frame, in the bubble's own shape (its corners and tail, 3px out, --rule, 2.5px), in a layer of its own (aj-s-chat__marks) in the thread, over the messages and under the head and the composer; the frame is held, following the layout, until the next jump or the message leaves the thread (a day opening, New). Under reduced motion (unless the review switch is on) the scroll is instant, the wash fades in place and the frame is there at once.",
+    "hooks": {
+      "thread": "The thread: the app writes a session's messages into it (from the bubble's render) and the chat follows them.",
+      "new": "The New pill.",
+      "today": "The Today pill on a past day.",
+      "ask": "A question the lead offers."
+    },
+    "state": {
+      "data-jump": {
+        "values": [
+          "<message id>"
+        ],
+        "setBy": "runtime",
+        "description": "Set by the app (a bookmark chosen in the drawers): the chat lands on that message and removes it."
+      }
+    }
+  },
+  "uses": {
+    "bubble": "0.x",
+    "button": "0.x",
+    "composer": "0.x",
+    "bone": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "region named \"Ask, Sunday 9 August\"; each session a region named \"Session 1, 08:10\"; the skeleton a status that says which day is loading",
+    "keyboard": "Tab through the head row, each message's links and tools, the composer; Enter sends",
+    "labels": "the pills by their words (visually hidden below 1200); the composer's field by its label"
+  },
+  "responsive": {
+    "1200": "the head row starts --s7 down (the title block's line); the column grows with the screen (--chat-w)"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-25",
+      "kind": "added",
+      "change": "New (v4 C2): from explore ask-readable a-mirror-bubble (revised), ask-states D (empty session, failure) and ask-cant-loading f-mix (the skeleton page)."
+    },
+    {
+      "version": "0.1.1",
+      "date": "2026-10-25",
+      "kind": "patch",
+      "change": "The script finds the composer's field when it needs it, so the app can replace the thread's and the composer's contents when a day opens (the Ask stand-in)."
+    },
+    {
+      "version": "0.1.2",
+      "date": "2026-10-25",
+      "kind": "patch",
+      "change": "The head is not sticky while the drawers in its tools slot are drawn open without the script (data-drawn, the comps), so their layer covers the screen."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-30",
+      "kind": "changed",
+      "change": "v4 round 10: the skeleton's bones are the bone component's (its line, block and shimmer); nothing moves."
+    }
+  ],
+  "contexts": []
+}

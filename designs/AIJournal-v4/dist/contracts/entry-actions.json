@@ -1,0 +1,188 @@
+{
+  "name": "entry-actions",
+  "layer": "components",
+  "version": "0.4.1",
+  "inventory": "entry-actions",
+  "description": "The entry action gutter at the right of each entry bar (approved revision): edit and delete as icon buttons and, only on an entry kept out of memory, the quiet memory dropdown (Out of memory and a chevron) whose menu holds the Use in memory checkbox. Memory is one way (decision 2026-10-28): an entry in memory says nothing, and letting one in can't be undone (it asks once). Its parts sit in the entry row's grid (the root is display:contents). Opacity alone reveals the tools on pointer devices; the dropdown is always shown; the text never moves. While an entry is being edited, its deletion confirmed or its use in memory confirmed, the gutter is replaced by the editor or the confirmation, its other two forms.",
+  "variants": {
+    "form": {
+      "values": [
+        "tools",
+        "editor",
+        "confirm"
+      ],
+      "default": "tools",
+      "description": "tools: the gutter (was .entry-actions). editor: the inline editing form (was .entry-editor). confirm: the delete confirmation (was .entry-confirm)."
+    }
+  },
+  "options": {
+    "excluded": {
+      "type": "boolean",
+      "default": false,
+      "description": "The entry is kept out of memory: the dropdown is drawn (data-excluded=\"true\"), always shown, reading \"Out of memory\". false (in memory): no dropdown."
+    },
+    "kind": {
+      "values": [
+        "written",
+        "recording"
+      ],
+      "default": "written",
+      "description": "recording: no edit tool (a voice memo is not edited as text)."
+    },
+    "fieldId": {
+      "type": "string",
+      "default": "",
+      "description": "The editor's field id: the label is for it."
+    }
+  },
+  "content": {
+    "memoryLabel": {
+      "type": "text",
+      "required": false,
+      "description": "The dropdown's line, \"Out of memory\" by default; drawn only when excluded."
+    },
+    "text": {
+      "type": "text",
+      "required": false,
+      "description": "editor: the entry's words; confirm: the question (delete, or using it in memory)."
+    },
+    "label": {
+      "type": "text",
+      "required": false,
+      "description": "The editor's label (Entry text), wrapping its field."
+    }
+  },
+  "slots": {
+    "children": {
+      "accepts": [
+        "button",
+        "opt",
+        "field"
+      ],
+      "required": false,
+      "description": "The editor's field and buttons, the confirmation's buttons."
+    },
+    "field": {
+      "accepts": [
+        "field (textarea)"
+      ],
+      "required": false,
+      "description": "The editor's field, inside its label."
+    }
+  },
+  "places": {
+    "span": "a state message in the editor: the full grid",
+    "fill": "the editor's field: its label's full width",
+    "actions": "the editor's and the confirmation's action row (a cluster): --s4 by --s7 apart, --s4 below"
+  },
+  "tokens": {
+    "reads": [
+      "--s3",
+      "--s2",
+      "--s6",
+      "--t-memory",
+      "--f-label",
+      "--rule",
+      "--rule-2",
+      "--t-print",
+      "--paper",
+      "--w",
+      "--t-note",
+      "--lh-body",
+      "--f-prose",
+      "--s4",
+      "--s7",
+      "--tap",
+      "--r",
+      "--gc-drawer-out"
+    ],
+    "exposes": {
+      "--aj-c-entry-actions-shown": "The tools' opacity (0 hidden, 1 shown) where hover reveals them; the row sets it. The memory dropdown is not faded.",
+      "--aj-c-entry-actions-events": "none while hidden, auto when shown; the row sets it with --aj-c-entry-actions-shown.",
+      "--aj-c-entry-actions-fade": "The reveal fade (120ms out by default; the row sets 160ms in, 0ms with focus inside).",
+      "--aj-c-entry-actions-tools-row": "The grid row the tools take in the row (1; the row sets 2 below 1000, under the text).",
+      "--aj-c-entry-actions-tools-gap": "The space above the tools when they drop under the text (0; the row sets --s2).",
+      "--aj-c-entry-actions-trigger-max": "The open memory trigger's max width (none; the row limits it beside the tools below 1000)."
+    }
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "yes: on pointer devices the tools fade in while the row is hovered (legacy context: the row); the memory dropdown stays",
+    "focus-visible": "yes: focus inside the row shows them at once; the product focus ring (base)",
+    "active": "n/a: its buttons have their own press",
+    "disabled": "n/a: an action that is unavailable is not shown",
+    "selected": "yes: the dropdown open (details[open]): the chevron turns",
+    "loading": "n/a: saving is reported by the row",
+    "error": "n/a: the editor's field reports it (aria-invalid)",
+    "empty": "n/a: always has its actions"
+  },
+  "events": {
+    "edit": "edit pressed",
+    "delete": "delete pressed",
+    "memory": "Use in memory pressed on an entry kept out of memory (the runtime asks once, then lets it in for good)"
+  },
+  "uses": {
+    "button": "0.x",
+    "opt": "0.x",
+    "field": "0.x",
+    "cluster": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "group \"Entry actions\"; the dropdown is a details/summary; the confirmation role=group",
+    "keyboard": "Tab through; Space or Enter opens the dropdown and presses; Escape closes it",
+    "labels": "icon buttons carry aria-label; the summary names the memory state"
+  },
+  "responsive": {
+    "1000": "below 1000px of container the tools drop under the text and stay visible (legacy context: the row)"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-11",
+      "kind": "internal",
+      "change": "Converted from lock.css entry action gutter (.entry-actions, .entry-tools, the memory dropdown, .entry-editor, .entry-confirm)."
+    },
+    {
+      "version": "0.1.1",
+      "date": "2026-10-14",
+      "kind": "fixed",
+      "change": "Its memory option carries the runtime's action (data-entry-action=\"memory\")."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "The editor's label and its field: label wraps the field (slot field), as the screens draw the editor. Pages round 4b."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-28",
+      "kind": "changed",
+      "change": "Memory is one way: no memory part on an entry in memory (no In memory line); one kept out carries a static Out of memory tag (mark) and the Use in memory option, which fades with the tools. The dropdown is gone."
+    },
+    {
+      "version": "0.4.0",
+      "date": "2026-10-28",
+      "kind": "changed",
+      "change": "The memory part on an entry kept out is the quiet dropdown again (Out of memory, chevron, the Use in memory checkbox in its menu), always shown, in place of the tag (the user: the tag was too strong). Still one way: an entry in memory has none."
+    },
+    {
+      "version": "0.4.1",
+      "date": "2026-10-28",
+      "kind": "changed",
+      "change": "The memory dropdown opens with motion (the user): the row grows, the checkbox fades in and settles 4px, the chevron turns; 200ms on --gc-drawer-out (after the note fold). Closing is instant. Reduced motion: the fade only (the review switch plays it)."
+    }
+  ],
+  "contexts": [
+    "data-motion"
+  ],
+  "behaviour": {
+    "hooks": {
+      "data-entry-action": "On each control: edit, delete or memory; the runtime finds the control by it.",
+      "data-excluded": "On its memory dropdown, drawn only when the entry is out of memory; the runtime removes it once the entry is let in.",
+      "editor-field": "The editor's text field; the runtime fills and reads it."
+    }
+  }
+}

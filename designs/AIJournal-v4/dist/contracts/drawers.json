@@ -1,0 +1,151 @@
+{
+  "name": "drawers",
+  "layer": "sections",
+  "version": "0.1.1",
+  "description": "Ask's History and Bookmarks (v4 C2): their pills (History; Bookmarks with the open day's count) and one dimmed modal layer holding both drawers, History from the left (exactly the title block and the rail on the desktop) and Bookmarks from the right, open together if wanted, each pill lit above the dim where no drawer covers it. History folds the days with chats: this week's past days one by one, weeks, months, years (weeks split at a month's end).",
+  "variants": {},
+  "options": {
+    "open": {
+      "type": "object",
+      "default": {},
+      "description": "{ history, bookmarks }: draws a drawer open without the script (the numbered comps): the layer open and dimmed, the drawer in place, its pill pressed. The live page opens them by script. The root then carries data-drawn, for the parent that holds it: the layer is absolute, so the chat lets go of its sticky head while a drawer is drawn open."
+    }
+  },
+  "content": {
+    "id": {
+      "type": "text",
+      "required": false,
+      "description": "The prefix of the drawers' ids, default \"ask-drawers\" (the pills name the drawer they open)."
+    },
+    "today": {
+      "type": "text",
+      "required": true,
+      "description": "Today, YYYY-MM-DD: the history folds around it."
+    },
+    "current": {
+      "type": "text",
+      "required": false,
+      "description": "The open day, YYYY-MM-DD: its row is marked (aria-current) in the destination's colours."
+    },
+    "days": {
+      "type": "list",
+      "required": true,
+      "description": "The days with chats: { date, lede: the day's first question, sessions: n }. A week without chats leaves no record (system/content/ask-history.mjs folds them)."
+    },
+    "bookmarks": {
+      "type": "object",
+      "required": false,
+      "description": "The open day's bookmarks: { day: \"Today, Sunday 9 August\", items: [{ id: the message's id, voice: you|answer, text, meta: \"Answer · session 1, 08:10\" }] }. None: \"No bookmarks on this day. Bookmark a message to find it here.\""
+    },
+    "count": {
+      "type": "number",
+      "required": false,
+      "description": "The Bookmarks pill's count, default the number of items."
+    },
+    "copy": {
+      "type": "object",
+      "required": false,
+      "description": "The words, defaults as approved: history, bookmarks, close, layer, today, week, earlier, none, part, aWeek, weeks, months, empty."
+    }
+  },
+  "slots": {},
+  "places": {
+    "lit": "a pill's lit copy: fixed, laid by the script exactly over its pill above the dim"
+  },
+  "tokens": {
+    "reads": [
+      "--s3",
+      "--g-drawer-out",
+      "--gc-drawer-out",
+      "--ink",
+      "--g-drawer-in",
+      "--s7",
+      "--s5",
+      "--s9",
+      "--paper",
+      "--w",
+      "--rule",
+      "--gc-drawer-in",
+      "--title-w",
+      "--rail",
+      "--s4",
+      "--s2",
+      "--f-prose",
+      "--t-mast",
+      "--lh-flat",
+      "--s6",
+      "--f-label",
+      "--t-col",
+      "--tap",
+      "--r",
+      "--block-2",
+      "--paper-2",
+      "--block",
+      "--lh-tight",
+      "--t-note",
+      "--t-quiet",
+      "--rule-2",
+      "--t-print",
+      "--f-hand",
+      "--t-hand-s"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: the two pills; the layer shut",
+    "hover": "yes: a history row or a bookmark takes a 7% --rule ground; the back link underlines; the pills carry their own",
+    "focus-visible": "yes: the product's ring; opening a drawer focuses its Close",
+    "active": "n/a: the pills carry their own press",
+    "disabled": "n/a: History and Bookmarks are always available",
+    "selected": "yes: the open day's row in the destination's colours (--block-2 ground, a 3px --block mark); an open drawer's pill pressed",
+    "loading": "n/a: the history and the bookmarks are known when the page draws",
+    "error": "n/a: nothing here can fail",
+    "empty": "yes: a day without bookmarks says how to make one; no chats at all says so"
+  },
+  "events": {
+    "day": "a day picked in History: bubbling, detail { date }; History closes, Bookmarks stays (the app opens the day, loading first, and updates the bookmarks)",
+    "jump": "a bookmark chosen: both drawers close, then bubbling, detail { id } (the app sets the chat's data-jump)"
+  },
+  "behaviour": {
+    "script": "drawers.js, inside its root only: the pills open their drawer in the one modal layer (opened over --g-drawer-in, closed over --g-drawer-out; at once under reduced motion); the lit copies follow the pills and hide where an open drawer covers them; Close, a lit pill pressed, or Escape (the latest) closes one, a press on the dim closes both; the layer closes when both have gone and focus returns to the pill. The history steps into a group's level and back. Announces day and jump.",
+    "hooks": {
+      "history": "The History pill (and its lit copy).",
+      "bookmarks": "The Bookmarks pill (and its lit copy): the app updates its count.",
+      "close": "A drawer's Close.",
+      "levels": "The history's levels.",
+      "day": "The open day's line in Bookmarks: the app writes it.",
+      "marks": "The open day's bookmarks: the app replaces them (from this render) when the day or a bookmark changes."
+    }
+  },
+  "uses": {
+    "button": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "the layer a modal dialog named \"History and bookmarks\"; each drawer a region named by its title; the pills say they open a dialog and which (aria-haspopup, aria-controls, aria-expanded)",
+    "keyboard": "Tab through a drawer; Escape closes the latest drawer; the lit pills are reachable while the layer is open",
+    "labels": "the pills by their words (visually hidden below 1200); the open day aria-current"
+  },
+  "responsive": {
+    "1200": "History is exactly the title block and the rail wide, its edge on the rail's rule; below, either drawer is min(400px, 88vw)"
+  },
+  "catalogue": {
+    "height": 640
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-25",
+      "kind": "added",
+      "change": "New (v4 C2): from explore ask-readable a-mirror-bubble (revised): History to the rail, Bookmarks as a pill with a right drawer, both together over one dim, lit pills, the drawer motion."
+    },
+    {
+      "version": "0.1.1",
+      "date": "2026-10-25",
+      "kind": "patch",
+      "change": "data-drawn on the root when option open draws a drawer (the comps), so the chat can let the layer cover the screen."
+    }
+  ],
+  "contexts": []
+}

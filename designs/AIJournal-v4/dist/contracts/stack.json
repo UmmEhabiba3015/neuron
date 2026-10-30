@@ -1,0 +1,97 @@
+{
+  "name": "stack",
+  "layer": "components",
+  "version": "0.2.1",
+  "inventory": "E8",
+  "description": "A full-screen column for a page with one job (/talk, the kept recording, the permission card): its contents centred, one above another.",
+  "variants": {},
+  "options": {},
+  "content": {},
+  "slots": {
+    "children": {
+      "accepts": [
+        "keybox",
+        "card",
+        "notice",
+        "recrow",
+        "button"
+      ],
+      "required": true,
+      "description": "What the page holds, in order."
+    },
+    "row": {
+      "accepts": [
+        "button"
+      ],
+      "required": false,
+      "description": "A row of controls at the foot, centred (03-talk: Back to today)."
+    }
+  },
+  "places": {
+    "block": "a card or notice: the full column, no margin",
+    "fill": "the recording row: the full width, rounded"
+  },
+  "tokens": {
+    "reads": [
+      "--s7",
+      "--s9",
+      "--gut",
+      "--s6",
+      "--r"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: not interactive",
+    "focus-visible": "n/a: not focusable",
+    "active": "n/a: not interactive",
+    "disabled": "n/a: not interactive",
+    "selected": "n/a: not interactive",
+    "loading": "n/a: a container shows its contents",
+    "error": "n/a: its contents report errors",
+    "empty": "n/a: never rendered empty"
+  },
+  "events": {},
+  "uses": {
+    "keybox": "0.x",
+    "card": "0.x",
+    "button": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "main, usually",
+    "keyboard": "none of its own",
+    "labels": "none"
+  },
+  "responsive": {
+    "1200": "the column narrows to 700px, centred (placement, in lock.css)"
+  },
+  "changelog": [
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "A row slot: the centred row of controls the screens write as aj-c-stack__row (pages round 2, 03-talk; a page cannot write the class itself)."
+    },
+    {
+      "version": "0.1.1",
+      "date": "2026-10-14",
+      "kind": "fixed",
+      "change": "Writes a main element, as every screen has it (a div before); found by pages round 2, 03-talk."
+    },
+    {
+      "version": "0.1.0",
+      "date": "2026-10-11",
+      "kind": "internal",
+      "change": "Converted from lock.css E8 (.stack)."
+    },
+    {
+      "version": "0.2.1",
+      "date": "2026-10-24",
+      "kind": "removed",
+      "change": "readout from what it accepts: the readout module is removed (no screen used it)."
+    }
+  ]
+}

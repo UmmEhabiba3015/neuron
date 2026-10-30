@@ -1,0 +1,40 @@
+/* bone. The skeleton's piece (v4 round 10; Ask's skeleton, chat 0.2.1, moved here so every loading page shares it):
+   --bone with one shimmer band fixed to the viewport, so every bone on the screen shares one sweep. Still under
+   reduced motion. Its size is set by its props (--aj-c-bone-w, --aj-c-bone-h); where it sits is its parent's. */
+@keyframes aj-c-bone-shimmer{from{background-position:-200vw 0}to{background-position:200vw 0}}
+
+.aj-c-bone,
+.aj-c-bone:is([data-form="text"],[data-form="spread"]) > i,
+.aj-c-bone[data-form="wave"] > [data-place~="fill"]{
+  background:var(--bone) linear-gradient(100deg,transparent 30%,var(--bone-shine) 50%,transparent 70%) 0 0/200vw 100% fixed no-repeat;/* token-exempt: the standard shimmer, one band fixed to the viewport so every bone shares one sweep */
+  animation:aj-c-bone-shimmer var(--g-shimmer) linear infinite}
+
+/* line: one bar, round ends */
+.aj-c-bone{display:block;height:var(--aj-c-bone-h,12px);/* token-exempt: a bone's line, 12px */border-radius:6px;/* token-exempt: a bone's round ends */
+  width:var(--aj-c-bone-w,100%)}
+/* block: a box (a button, a tool) */
+.aj-c-bone[data-form="block"]{border-radius:4px/* token-exempt: a box bone's corners */}
+/* round: a circle, as wide as it is tall */
+.aj-c-bone[data-form="round"]{height:var(--aj-c-bone-w,12px);/* token-exempt: a round bone's default size */border-radius:50%;flex:none}
+/* text: the prose's lines, one bar per line, centred in each line box */
+.aj-c-bone[data-form="text"]{display:flex;flex-direction:column;height:auto;background:none;animation:none;border-radius:0;
+  font-size:var(--t-body);line-height:var(--lh-body);
+  gap:calc(1lh - var(--aj-c-bone-h,12px));/* token-exempt: a line box less its bar */padding-block:calc((1lh - var(--aj-c-bone-h,12px)) / 2)/* token-exempt: a line box less its bar, halved */}
+.aj-c-bone[data-form="text"][data-size="inherit"]{font:inherit;letter-spacing:normal}
+.aj-c-bone[data-form="text"] > i{display:block;height:var(--aj-c-bone-h,12px);/* token-exempt: a bone's line, 12px */border-radius:calc(var(--aj-c-bone-h,12px) / 2);/* token-exempt: round ends, half its height */
+  width:var(--aj-c-bone-w,100%)}
+/* spread: bars of one width spread evenly across a --tap row */
+.aj-c-bone[data-form="spread"]{display:flex;align-items:center;justify-content:space-around;width:100%;height:var(--tap);background:none;animation:none;border-radius:0}
+.aj-c-bone[data-form="spread"] > i{display:block;flex:none;height:var(--aj-c-bone-h,12px);/* token-exempt: a bone's line, 12px */border-radius:calc(var(--aj-c-bone-h,12px) / 2);/* token-exempt: round ends, half its height */
+  width:var(--aj-c-bone-w,40px)/* token-exempt: a word's bone */}
+/* wave: the memo's waveform itself, in bone */
+.aj-c-bone[data-form="wave"]{flex:1 1 auto;min-width:0;height:auto;background:none;animation:none;border-radius:0}
+/* status: the announced line, visually hidden */
+.aj-c-bone[data-form="status"]{position:absolute;width:1px;/* token-exempt: visually hidden */height:1px;/* token-exempt: visually hidden */
+  overflow:hidden;clip-path:inset(50%);white-space:nowrap;background:none;animation:none}
+
+@media (prefers-reduced-motion:reduce){
+  .aj-c-bone:not(:where(html[data-motion-review="play"] *)),
+  .aj-c-bone:not(:where(html[data-motion-review="play"] *)) > i,
+  .aj-c-bone:not(:where(html[data-motion-review="play"] *)) > [data-place~="fill"]{animation:none;background-image:none}
+}

@@ -1,0 +1,10 @@
+/* D5 the footer line. Moved from lock.css section D.
+   --rule, not --rule-2, because it sits on the open graph ground where --rule-2 falls to 3.81:1.
+   See rule 2.3. */
+.aj-c-foot{padding:0 var(--gut) var(--s7);font-size:var(--t-quiet);letter-spacing:.04em;
+      color:var(--rule)}
+
+@container (min-width:1200px){
+  /* context: on a split page the footer sits in the record column and loses its side padding */
+  [data-layout="split"] > .aj-c-foot{padding-inline:0}
+}

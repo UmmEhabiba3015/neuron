@@ -1,0 +1,43 @@
+/* moodgraph: one week's mood (v4 C1, explore timeline-jump-arrival f-wash-and-frame, the mood panel).
+   The drawing scales with its container (its own 300 by 150 units); the points are --tap buttons over it, placed
+   in percent of the drawing. The colour is the ground's (the week's average mood) and the dots' (each day's);
+   the curve is always --rule. --rule-2 labels are allowed: the graph sits on its parent's flat ground, never on
+   the graph-paper ground. Its margin is its parent's. */
+.aj-c-moodgraph{position:relative}
+.aj-c-moodgraph .aj-c-moodgraph__drawing{display:block;width:100%;height:auto;overflow:visible}
+.aj-c-moodgraph .aj-c-moodgraph__rule{stroke:color-mix(in srgb,var(--rule) 18%,transparent);/* token-exempt: the scale's hairlines, the approved 18% of the rule */
+          stroke-width:var(--w)}
+.aj-c-moodgraph :is(.aj-c-moodgraph__scale,.aj-c-moodgraph__head){font:400 var(--t-key) var(--f-label);fill:var(--rule-2);
+          letter-spacing:.04em/* token-exempt: the scale's tracking, as approved */}
+.aj-c-moodgraph .aj-c-moodgraph__head[data-has]{fill:var(--rule)}
+.aj-c-moodgraph .aj-c-moodgraph__date{font:400 9px var(--f-label);/* token-exempt: the day numbers under the weekday letters, one step under --t-key, as approved */
+          fill:var(--rule-2)}
+.aj-c-moodgraph .aj-c-moodgraph__curve{fill:none;stroke:var(--rule);stroke-width:2;/* token-exempt: the curve, 2 drawing units as approved (it scales with the drawing) */stroke-linecap:round;stroke-linejoin:round}
+
+/* The area colour: the week's average mood (README), its --mood-<mood>-ground token. */
+.aj-c-moodgraph .aj-c-moodgraph__ground{stroke:none}
+.aj-c-moodgraph .aj-c-moodgraph__ground[data-mood="light"]{fill:var(--mood-light-ground)}
+.aj-c-moodgraph .aj-c-moodgraph__ground[data-mood="good"]{fill:var(--mood-good-ground)}
+.aj-c-moodgraph .aj-c-moodgraph__ground[data-mood="even"]{fill:var(--mood-even-ground)}
+.aj-c-moodgraph .aj-c-moodgraph__ground[data-mood="low"]{fill:var(--mood-low-ground)}
+.aj-c-moodgraph .aj-c-moodgraph__ground[data-mood="hard"]{fill:var(--mood-hard-ground)}
+
+/* Each day's dot in its own mood colour, edged in the card's ground; the day in view ringed --ink. */
+.aj-c-moodgraph .aj-c-moodgraph__dot{stroke:var(--paper-2);stroke-width:2/* token-exempt: the dot's edge, 2 drawing units as approved */}
+.aj-c-moodgraph .aj-c-moodgraph__dot[data-mood="light"]{fill:var(--mood-light)}
+.aj-c-moodgraph .aj-c-moodgraph__dot[data-mood="good"]{fill:var(--mood-good)}
+.aj-c-moodgraph .aj-c-moodgraph__dot[data-mood="even"]{fill:var(--mood-even)}
+.aj-c-moodgraph .aj-c-moodgraph__dot[data-mood="low"]{fill:var(--mood-low)}
+.aj-c-moodgraph .aj-c-moodgraph__dot[data-mood="hard"]{fill:var(--mood-hard)}
+.aj-c-moodgraph .aj-c-moodgraph__dot[data-current]{stroke:var(--ink)}
+
+/* The point: a --tap button centred on its dot. Hover rings the dot; hover and focus show the day and mood. */
+.aj-c-moodgraph .aj-c-moodgraph__point{position:absolute;left:var(--aj-c-moodgraph-x);top:var(--aj-c-moodgraph-y);
+          width:var(--tap);height:var(--tap);transform:translate(-50%,-50%);border:0;padding:0;background:transparent;
+          border-radius:50%;cursor:pointer}
+.aj-c-moodgraph .aj-c-moodgraph__point:hover::before{content:"";position:absolute;inset:12px;/* token-exempt: the ring sits on the 20px dot inside the 44px target, (44 - 20) / 2 */
+          border-radius:50%;box-shadow:0 0 0 2px var(--rule)/* token-exempt: the hover ring, as approved */}
+.aj-c-moodgraph .aj-c-moodgraph__point:is(:hover,:focus-visible)::after{content:attr(data-tip);position:absolute;left:50%;
+          bottom:calc(100% - var(--s2));transform:translateX(-50%);white-space:nowrap;padding:var(--s2) var(--s4);
+          background:var(--ink);color:var(--paper);border-radius:var(--r);font:400 var(--t-print)/var(--lh-tight) var(--f-label);
+          pointer-events:none;z-index:2/* token-exempt: the tip above the neighbouring points */}

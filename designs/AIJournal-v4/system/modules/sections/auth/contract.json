@@ -1,0 +1,113 @@
+{
+  "name": "auth",
+  "layer": "sections",
+  "version": "0.2.0",
+  "description": "The plain-paper open spread of sign in and create account: a canvas holding the account sheet, which lays two sides next to each other: the context (a large handwritten title, a line of copy and the three ways the journal is used) and the region holding the form. Below 700px of container the sides stack, the region first, and the ways are dropped.",
+  "variants": {},
+  "options": {
+    "titleId": {
+      "type": "string",
+      "default": "",
+      "description": "The title's id: the context section names itself by it (aria-labelledby)."
+    },
+    "labelledBy": {
+      "type": "string",
+      "default": "",
+      "description": "The id that names the region (the form's heading)."
+    }
+  },
+  "content": {
+    "title": {
+      "type": "text",
+      "required": true,
+      "description": "The context title: a line, or a list of lines (one <br> between them: the approved two-line title)."
+    },
+    "ways": {
+      "type": "list",
+      "required": true,
+      "description": "{ label, text } for Write, Look back, Record."
+    },
+    "copy": {
+      "type": "text",
+      "required": false,
+      "description": "The copy under the title."
+    }
+  },
+  "slots": {
+    "children": {
+      "accepts": [
+        "sheet",
+        "text"
+      ],
+      "required": true,
+      "description": "The region's content: the page puts the auth-form section here (a section never renders another section)."
+    }
+  },
+  "places": {
+    "form": "the region's form: a 500 column, centred",
+    "sheet": "its account sheet: the full width up to 1120, growing to fill the page"
+  },
+  "tokens": {
+    "reads": [
+      "--s6",
+      "--ctl",
+      "--s8",
+      "--s9",
+      "--rule",
+      "--t-hand-l",
+      "--f-prose",
+      "--t-note",
+      "--lh-body",
+      "--w",
+      "--f-label",
+      "--t-print",
+      "--t-mast",
+      "--paper",
+      "--s7"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: a section is not a control; its controls carry their own",
+    "focus-visible": "n/a: not focusable; its controls carry the ring",
+    "active": "n/a: not a control",
+    "disabled": "n/a: not a control",
+    "selected": "n/a: not selectable",
+    "loading": "n/a: static",
+    "error": "n/a: the form reports errors",
+    "empty": "n/a: always has both sides"
+  },
+  "events": {},
+  "uses": {
+    "sheet": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "two sections, each aria-labelledby its heading",
+    "keyboard": "none of its own",
+    "labels": "the headings"
+  },
+  "responsive": {
+    "700": "the sides stack, the region first; the ways are dropped",
+    "1000": "the sides' padding and the title tighten"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-12",
+      "kind": "internal",
+      "change": "Converted from lock.css (the plain-paper spread: canvas, context, ways, region; the auth sheet's grid)."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "fixed",
+      "change": "Writes main (as every screen has it), the context's wrapper around the title and copy, the ids and aria-labelledby; the title in lines; the old class auth-sheet on its sheet is gone. Pages auth round."
+    }
+  ],
+  "contexts": [
+    "data-surface"
+  ]
+}

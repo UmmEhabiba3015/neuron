@@ -1,0 +1,268 @@
+{
+  "name": "recorder",
+  "layer": "sections",
+  "version": "0.5.0",
+  "description": "The Talk screen's compact transport recorder (approved): a masthead with the wordmark and the date, a back row, the intro, and the recording sheet: a session line (state, date, the elapsed clock), the recording field with the waveform and its axis, and the controls (Start, Cancel and the microphone feedback before recording; Pause or Resume and Stop and keep while recording). Content decides its height. v4 C5: while paused the field is the player (the trace is the track) and Discard stands at the transport's far end, asking first; leaving keeps the memo as a draft.",
+  "variants": {},
+  "options": {
+    "phase": {
+      "values": [
+        "ready",
+        "recording",
+        "paused"
+      ],
+      "default": "ready",
+      "description": "Which controls show: the start controls (ready), or the transport while a memo is under way (recording, paused); the runtime swaps them with hidden."
+    },
+    "back": {
+      "type": "string",
+      "default": "#today",
+      "description": "Where the wordmark, the back link and Cancel go: Today (the talk page passes the prototype link, 00-prototype.html#today)."
+    },
+    "draft": {
+      "type": "boolean",
+      "default": false,
+      "description": "v4 C5: the memo is the voice memo draft, opened from Today (the mic or the Continue line): while paused the state line reads \"Paused · draft\" (data-draft)."
+    },
+    "playing": {
+      "type": "boolean",
+      "default": false,
+      "description": "v4 C5, paused only: playback is running (data-playback=\"playing\"): the play control shows pause."
+    },
+    "confirm": {
+      "type": "boolean",
+      "default": false,
+      "description": "v4 C5, paused only: Discard has been pressed: the question and its two buttons stand in the transport's place."
+    }
+  },
+  "content": {
+    "state": {
+      "type": "text",
+      "required": true,
+      "description": "\"Ready\", \"Paused\", \"Microphone blocked\"…"
+    },
+    "clock": {
+      "type": "text",
+      "required": true,
+      "description": "\"0:00\"."
+    },
+    "date": {
+      "type": "text",
+      "required": false,
+      "description": "v4 C5: the session line's day, \"Sun 9 Aug\", never a time (ruling: a memo is dated when it is kept)."
+    },
+    "length": {
+      "type": "text",
+      "required": false,
+      "description": "v4 C5: the memo's length so far, \"0:47\": the axis end and the player's length while paused, and the discard question."
+    },
+    "seconds": {
+      "type": "number",
+      "required": false,
+      "description": "v4 C5: the same length in seconds (the slider's maximum)."
+    },
+    "position": {
+      "type": "number",
+      "required": false,
+      "description": "v4 C5, paused only: the player's place in seconds (0 at rest); above 0 the veil and playhead show (data-playback=\"started\")."
+    }
+  },
+  "slots": {
+    "children": {
+      "accepts": [
+        "keybox",
+        "button"
+      ],
+      "required": false,
+      "description": "The masthead's date box and the controls' buttons."
+    },
+    "trace": {
+      "accepts": [
+        "svg path"
+      ],
+      "required": false,
+      "description": "The trace's bars: the memo's fixed decorative shape (system/content/wave-shape.mjs traceBars), each a group carrying data-level, flat until a memo is under way. Without it, a flat line. It never follows the sound."
+    }
+  },
+  "places": {
+    "grow": "the transport's main button: takes the room left below 620",
+    "discard": "Discard in the transport: first in the markup, so the row-reverse transport sets it at the far end; below 620 last, under the hint; shown only while paused"
+  },
+  "tokens": {
+    "reads": [
+      "--grid",
+      "--mod",
+      "--rule",
+      "--paper",
+      "--s7",
+      "--block",
+      "--paper-2",
+      "--r",
+      "--t-print",
+      "--f-label",
+      "--t-quiet",
+      "--t-note",
+      "--lh-note",
+      "--t-mast",
+      "--f-prose",
+      "--block-2",
+      "--tap",
+      "--w",
+      "--s2",
+      "--s4",
+      "--s5",
+      "--s6",
+      "--s8",
+      "--t-key",
+      "--lh-flat",
+      "--g-wave",
+      "--gc",
+      "--g-drawer-out",
+      "--gc-rise",
+      "--t-field"
+    ],
+    "exposes": {
+      "--aj-s-recorder-at": "The player's place, 0 to 1 (the veil's start and the playhead): the render sets it on the root from position and seconds, the runtime as it plays and seeks."
+    }
+  },
+  "states": {
+    "default": "yes: ready",
+    "hover": "n/a: a section is not a control; its controls carry their own",
+    "focus-visible": "n/a: not focusable; its controls carry the ring",
+    "active": "n/a: not a control",
+    "disabled": "n/a: not a control",
+    "selected": "n/a: not selectable",
+    "loading": "n/a: asking for the microphone is its own state line (copy), not a style",
+    "error": "yes: the microphone refused or missing: the state line says so and Try again shows",
+    "empty": "n/a: always drawn"
+  },
+  "events": {
+    "start": "Start recording",
+    "keep": "Stop and keep",
+    "pause": "Pause or Resume",
+    "back": "Cancel or back",
+    "play": "v4 C5: play or pause playback (paused only); Resume stops playback and records on from the end",
+    "skip": "v4 C5: back or forward 10 s (data-skip)",
+    "seek": "v4 C5: the track clicked, dragged or moved with its keys (arrows 5 s, Home, End; Space plays)",
+    "discard": "v4 C5: Discard pressed: the question shows",
+    "discard-yes": "v4 C5: Discard memo: back to Today with nothing kept",
+    "discard-no": "v4 C5: Go back: the question goes and focus returns to Discard"
+  },
+  "uses": {
+    "keybox": "0.x",
+    "button": "0.x",
+    "opt": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "main; the state line is role=status, the clock role=timer; v4 C5: while paused the track is role=slider (aria-valuenow, aria-valuetext \"0:19 of 0:47\"); the discard question is role=alertdialog",
+    "keyboard": "Tab through the controls; v4 C5: on the track, arrows move 5 s (mirrored right to left), Home and End go to the ends, Space plays; the question takes focus on Go back",
+    "labels": "the clock has an aria-label; the player's controls are labelled (Play back or Pause playback, Back 10 seconds, Forward 10 seconds)"
+  },
+  "responsive": {
+    "336": "the masthead and back row wrap; the transport buttons take the full width",
+    "620": "the session line reflows into two rows; the controls stack, buttons first; v4 C5: the back note stays centred on its link; Discard goes last, under the hint"
+  },
+  "changelog": [
+    {
+      "version": "0.1.1",
+      "date": "2026-10-14",
+      "kind": "fixed",
+      "change": "Writes what the Talk screens have: the prototype links (00-prototype.html#today), the microphone status id and the start button's aria-describedby, the hidden Try again button, and the microphone messages for the unavailable and waiting states (found by pages round 2, 03-talk)."
+    },
+    {
+      "version": "0.1.0",
+      "date": "2026-10-12",
+      "kind": "internal",
+      "change": "Converted from lock.css (the compact transport recorder)."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "Option back (the link to Today); the start and retry buttons are the button module again (aria-describedby and hidden through attrs). Pages auth round."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-20",
+      "kind": "changed",
+      "change": "RecommendedChanges-v4 B6: the trace is a fixed decorative shape (slot trace), not measured audio; phase recording. The rise to the shape on Start reads the motion scope (data-motion) and the wave tokens (--g-wave, --gc)."
+    },
+    {
+      "version": "0.4.0",
+      "date": "2026-10-28",
+      "kind": "added",
+      "change": "Keep this out of memory (the composer's option, opt) under the controls in every phase; the kept memo takes it."
+    },
+    {
+      "version": "0.5.0",
+      "date": "2026-10-29",
+      "kind": "added",
+      "change": "v4 C5 (explore drafts a-quiet-line): the player while paused (track, veil, playhead, play / pause, skips, position / length; options playing and position), Discard and its question (option confirm), option draft (\"Paused · draft\"), content date (the day only), length and seconds; copy: leaving keeps the memo as a draft, Stop and keep adds it to today, the paused hint; the back note centred at every width."
+    }
+  ],
+  "contexts": [
+    "data-platform",
+    "data-motion"
+  ],
+  "behaviour": {
+    "state": {
+      "data-recorder-phase": {
+        "values": [
+          "ready",
+          "recording",
+          "paused"
+        ],
+        "setBy": "runtime",
+        "description": "Where the capture is: ready to start, recording, paused."
+      },
+      "data-microphone": {
+        "values": [
+          "granted",
+          "denied",
+          "missing",
+          "pending"
+        ],
+        "setBy": "runtime",
+        "description": "The microphone's permission as the runtime last found it."
+      },
+      "data-playback": {
+        "values": [
+          "started",
+          "playing"
+        ],
+        "setBy": "runtime",
+        "description": "v4 C5, paused only: playback has moved off the start (started) or is running (playing); without it the trace is drawn as recorded."
+      },
+      "data-draft": {
+        "values": [
+          ""
+        ],
+        "setBy": "runtime",
+        "description": "v4 C5: the memo is the draft kept on the device."
+      }
+    },
+    "hooks": {
+      "data-recorder": "On each control: its action (start, pause, keep, back, retry; v4 C5: play, skip, discard, discard-yes, discard-no); the runtime reads it on a press.",
+      "data-session-state": "The session line's state text; the runtime writes it.",
+      "data-session-date": "The session line's day; the runtime writes it (the day only, never a time: v4 C5).",
+      "data-recording-hint": "The transport's hint line; the runtime writes it.",
+      "data-microphone-status": "The microphone status line; the runtime writes it.",
+      "data-live-wave": "The trace; on Start the runtime scales each bar to its data-level once (the fixed shape), and back to flat when the recorder reopens. It never follows the sound.",
+      "data-level": "Each trace bar's height in the memo's fixed shape (system/content/wave-shape.mjs), read by the runtime on Start.",
+      "data-clock": "The recording clock; the runtime writes it.",
+      "data-back-note": "The note under the back control; the runtime writes it.",
+      "data-axis-end": "The wave axis's end label; the runtime writes it.",
+      "start": "The start block (shown before a capture begins); the runtime shows and hides it.",
+      "transport": "The transport block (pause, resume, keep while recording); the runtime shows and hides it.",
+      "memory": "Keep this out of memory (opt, data-hook=\"memory\"): the runtime toggles aria-pressed and the kept memo is kept out of memory when it is pressed.",
+      "player": "v4 C5: the player's controls row (play, the skips, position / length).",
+      "track": "v4 C5: the track round the trace; while paused a slider the runtime moves (pointer and keys).",
+      "confirm": "v4 C5: the discard question; the runtime shows and hides it (hidden).",
+      "data-skip": "v4 C5: a skip control's seconds, -10 or 10.",
+      "data-position": "v4 C5: the player's position text; the runtime writes it.",
+      "data-length": "v4 C5: the memo's length, in the player and the question; the runtime writes it."
+    }
+  }
+}

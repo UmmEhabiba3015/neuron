@@ -1,0 +1,145 @@
+{
+  "name": "said",
+  "layer": "components",
+  "version": "0.4.1",
+  "inventory": "C4",
+  "description": "The product's note beside an entry: shut until opened (details/summary, no script). The label column says \"From your record\"; opening rolls the label from \"Read the note\" to \"Hide the note\", turns the chevron and lets the note down. The note ends in the citation pair.",
+  "variants": {},
+  "options": {
+    "open": {
+      "type": "boolean",
+      "default": false,
+      "description": "The static comps' open state (was .ccol.open): the note shown without its details."
+    },
+    "expanded": {
+      "type": "boolean",
+      "default": false,
+      "description": "The note in its shut form with its details already open (<details open>): 11-states' \"The note, opened\"."
+    }
+  },
+  "content": {
+    "ariaLabel": {
+      "type": "text",
+      "required": false,
+      "description": "The note's accessible name when it says more than the visible label. Defaults to the label. No page uses it since the Asked turn left the past day (2026-10-20)."
+    },
+    "label": {
+      "type": "text",
+      "required": true,
+      "description": "\"From your record\"."
+    },
+    "note": {
+      "type": "text",
+      "required": true,
+      "description": "The note, product copy."
+    }
+  },
+  "slots": {
+    "foot": {
+      "accepts": [
+        "button (cite)",
+        "thumbs (pair)"
+      ],
+      "required": false,
+      "description": "The note's source (button cite) and its thumbs (thumbs, form pair), always shown."
+    }
+  },
+  "tokens": {
+    "reads": [
+      "--paper",
+      "--tcol",
+      "--w",
+      "--rule-2",
+      "--s6",
+      "--s4",
+      "--t-col",
+      "--s1",
+      "--s2",
+      "--s5",
+      "--tap",
+      "--lh-tight",
+      "--t-print",
+      "--rule",
+      "--block",
+      "--grid",
+      "--f-prose",
+      "--t-note",
+      "--lh-note",
+      "--gc",
+      "--g-note",
+      "--g-note-lift"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: shut",
+    "hover": "yes: the summary turns --block",
+    "focus-visible": "yes: the product focus ring on the summary (base)",
+    "active": "yes: the summary presses 1px down",
+    "disabled": "n/a: a note can always be opened",
+    "selected": "yes: open (details[open]): the label rolls, the chevron turns, the note shows",
+    "loading": "n/a: written with the page",
+    "error": "n/a: static text",
+    "empty": "n/a: a note always has text"
+  },
+  "events": {
+    "toggle": "opened or shut (the details element's own)"
+  },
+  "uses": {
+    "button": "0.x",
+    "thumbs": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "complementary (aside) named \"From your record\"",
+    "keyboard": "Tab to the summary, Space or Enter toggles",
+    "labels": "aria-label on the aside; the summary text"
+  },
+  "responsive": {
+    "700": "the note loses its 32ch measure",
+    "1200": "the note and summary lose their measure"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-11",
+      "kind": "internal",
+      "change": "Converted from lock.css C4 (.said and its parts)."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "Content ariaLabel: the note's accessible name when it says more than its visible label (the page modules render 06-conversation's \"Asked\" note)."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "Option expanded: the note's details rendered open (11-states' note-open view)."
+    },
+    {
+      "version": "0.3.1",
+      "date": "2026-10-20",
+      "kind": "patch",
+      "change": "RecommendedChanges-v4 B2: the past day no longer has the Asked turn; ariaLabel stays, unused by the pages."
+    },
+    {
+      "version": "0.4.0",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 round 10: the foot is the source and the thumbs (Ask's mechanic) in place of That's not right."
+    },
+    {
+      "version": "0.4.1",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 round 10: with the thumbs, the foot's source keeps to the thumbs' row when the thumbs-down form (now a line in the foot) drops under the thumbs on a narrow note."
+    }
+  ],
+  "contexts": [
+    "data-motion",
+    "data-platform"
+  ]
+}

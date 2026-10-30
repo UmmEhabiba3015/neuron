@@ -1,0 +1,113 @@
+{
+  "name": "rateform",
+  "layer": "components",
+  "version": "0.3.0",
+  "inventory": "v4 C2",
+  "description": "The thumbs-down form (Ask's answers and the journal's notes): one row as tall as the thumb's box, the field with Send at its end inside one --rule border; \"What was wrong?\" is its placeholder and its name. It sits in the row that holds the thumbs, after the thumbs down (the thumbs place it); sending it fills the thumb red.",
+  "variants": {},
+  "options": {},
+  "content": {
+    "id": {
+      "type": "text",
+      "required": true,
+      "description": "The field's id, unique on the page (the answer's id with -why): the question labels it."
+    },
+    "question": {
+      "type": "text",
+      "required": false,
+      "description": "The placeholder and the form's accessible name, \"What was wrong?\"."
+    },
+    "send": {
+      "type": "text",
+      "required": false,
+      "description": "\"Send\" (a quiet button at the line's end, the form's submit)."
+    },
+    "value": {
+      "type": "text",
+      "required": false,
+      "description": "Words already typed (the catalogue's long and non-Latin fixtures); the product opens it empty."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": [
+      "--tap",
+      "--paper",
+      "--w",
+      "--rule",
+      "--r",
+      "--gc",
+      "--block",
+      "--w-focus",
+      "--s3",
+      "--s4",
+      "--f-prose",
+      "--ink",
+      "--rule-2"
+    ]
+  },
+  "states": {
+    "default": "yes: open, the empty field with its placeholder, Send",
+    "hover": "n/a: the buttons carry their own hover",
+    "focus-visible": "yes: the box's own border, 2px in --block, drawn inward (--w-focus); Send its own",
+    "active": "n/a: the buttons carry their own press",
+    "disabled": "n/a: Send is always available; an empty reason is still a thumbs down",
+    "selected": "n/a: nothing in it is chosen",
+    "loading": "n/a: the thumb fills at once; nothing waits",
+    "error": "n/a: nothing here can be refused",
+    "empty": "yes: the placeholder in --rule-2"
+  },
+  "events": {
+    "send": "the form submitted (Send, or Enter): bubbling, detail { why } (the words, trimmed). Its parent fills the thumb and closes it.",
+    "cancel": "Escape: bubbling. Its parent closes it and returns focus to the thumb."
+  },
+  "behaviour": {
+    "script": "rateform.js, inside its root only: the submit is the form's own (it never navigates) and dispatches send; Escape dispatches cancel. Showing, hiding, placing and clearing it are its parent's.",
+    "hooks": {
+      "input": "The field: its parent focuses it on opening and clears it on closing."
+    }
+  },
+  "uses": {
+    "button": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "form, named by its question",
+    "keyboard": "Tab to the field and Send; Enter sends, Escape cancels (the thumb again closes it too)",
+    "labels": "the question is the field's accessible name and its placeholder"
+  },
+  "responsive": {
+    "all": "as wide as its parent gives it (the thumbs: up to 320px, at least 180px); 44px tall at every width"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-25",
+      "kind": "added",
+      "change": "New (v4 C2): from explore ask-readable a-mirror-bubble, the compact thumbs-down form."
+    },
+    {
+      "version": "0.1.1",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 round 10: the field's focus is its own border at 2px in --block, drawn inward, not a ring outside it."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-29",
+      "kind": "added",
+      "change": "v4 round 10: form line, a note's thumbs-down form: one row as tall as the thumb's box, after the thumbs down, so it never falls behind the next entry in a list."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 round 10: one line everywhere (the user): Ask's answers take the note's line form; the card (the hand's question, two-line field, Cancel, the floating shadow and --aj-c-rateform-origin) is retired, and the placeholder and cancel content with it. Enter sends."
+    }
+  ],
+  "contexts": [],
+  "places": {
+    "send": "Send at the line's end: no box, the row's height, --s4 each side, inside the form's border"
+  }
+}
