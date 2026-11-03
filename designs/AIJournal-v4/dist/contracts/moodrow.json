@@ -1,0 +1,136 @@
+{
+  "name": "moodrow",
+  "layer": "components",
+  "version": "0.2.0",
+  "inventory": "C5",
+  "description": "The mood row: five word chips, the last row of the form. The ruled form (the writing companion) sets the label in the time column and tints the chosen word in its mood colour.",
+  "variants": {
+    "form": {
+      "values": [
+        "plain",
+        "ruled"
+      ],
+      "default": "plain",
+      "description": "plain: a handwritten heading over five keyline chips. ruled: the label in the ruled time column, the five words in a grid, the chosen one underlined in its mood tone over its tinted surface (was .moodrow.ruled-mood)."
+    }
+  },
+  "options": {
+    "selected": {
+      "values": [
+        "light",
+        "good",
+        "even",
+        "low",
+        "hard",
+        "none"
+      ],
+      "default": "none",
+      "description": "The mood saved for the day (aria-pressed=\"true\")."
+    }
+  },
+  "content": {
+    "label": {
+      "type": "text",
+      "required": true,
+      "description": "\"Today felt\" or \"Day felt\"."
+    }
+  },
+  "slots": {
+    "after": {
+      "accepts": [
+        "state-message (line)"
+      ],
+      "required": false,
+      "description": "A line under the chips (18: the mood that did not change)."
+    }
+  },
+  "places": {
+    "span": "a state message under the mood: the full grid, --s4 above"
+  },
+  "tokens": {
+    "reads": [
+      "--s6",
+      "--f-hand",
+      "--t-hand-s",
+      "--rule",
+      "--s5",
+      "--s3",
+      "--tap",
+      "--s1",
+      "--f-label",
+      "--t-print",
+      "--paper",
+      "--w",
+      "--rule-2",
+      "--r",
+      "--block-2",
+      "--block",
+      "--gc",
+      "--tcol",
+      "--s4",
+      "--s2",
+      "--mood-light",
+      "--mood-light-surface",
+      "--mood-good",
+      "--mood-good-surface",
+      "--mood-even",
+      "--mood-even-surface",
+      "--mood-low",
+      "--mood-low-surface",
+      "--mood-hard",
+      "--mood-hard-surface",
+      "--mood-fade-in",
+      "--mood-fade-out"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "yes: plain: --block-2 ground; ruled: the word takes its mood tone and surface (pointer devices)",
+    "focus-visible": "yes: ruled: as pressed; both: the product focus ring (base)",
+    "active": "yes: plain: 1px down and .97 under the shell motion; ruled: tone and surface at once",
+    "disabled": "n/a: a mood can always be chosen",
+    "selected": "yes: the saved mood, aria-pressed=\"true\": plain filled --rule; ruled underlined in its tone",
+    "loading": "n/a: the choice is saved in the background",
+    "error": "n/a: the state message under the row says so (legacy .state-message)",
+    "empty": "yes: no mood chosen, all five unpressed"
+  },
+  "events": {
+    "change": "the person chose a mood; its value"
+  },
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "group (aria-label \"How was this day?\") of toggle buttons with aria-pressed",
+    "keyboard": "Tab to each word, Space or Enter",
+    "labels": "the group label is required"
+  },
+  "responsive": {
+    "324": "ruled: below 324px of container the words wrap to three columns"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-11",
+      "kind": "internal",
+      "change": "Converted from lock.css C5 (.moodrow)."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "Slot after: a line under the chips (18-entry-system-states: mood-failed). Pages round 4b."
+    }
+  ],
+  "contexts": [
+    "data-motion",
+    "data-platform"
+  ],
+  "behaviour": {
+    "hooks": {
+      "data-mood": "On each mood control: its word (light, good, even, low, hard); the runtime reads it on a press.",
+      "chips": "The group of mood controls; the runtime finds the controls in it."
+    }
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "name": "panel",
+  "layer": "components",
+  "version": "0.3.0",
+  "inventory": "G1",
+  "description": "A panel that slides over the page, pushes history, and closes with Back: keep-this, mood edit, install, the crisis resource. On desktop split pages it sits in the second column.",
+  "variants": {},
+  "options": {},
+  "content": {
+    "title": {
+      "type": "text",
+      "required": true,
+      "description": "The panel heading (h2), final copy."
+    }
+  },
+  "slots": {
+    "children": {
+      "accepts": [
+        "card",
+        "button",
+        "sheet"
+      ],
+      "required": true,
+      "description": "The panel's content."
+    }
+  },
+  "places": {
+    "block": "an object in the panel: the page gutter; between the rules on a split page",
+    "actions": "its action row (a cluster): --s4 by --s7 apart, --s7 below"
+  },
+  "tokens": {
+    "reads": [
+      "--rail",
+      "--paper",
+      "--w",
+      "--rule",
+      "--s6",
+      "--gut",
+      "--s7",
+      "--elev",
+      "--f-prose",
+      "--t-field",
+      "--s5",
+      "--page-w",
+      "--title-w",
+      "--s9",
+      "--s4"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: not interactive",
+    "focus-visible": "n/a: not focusable",
+    "active": "n/a: not interactive",
+    "disabled": "n/a: not interactive",
+    "selected": "n/a: not interactive",
+    "loading": "n/a: a container shows its contents",
+    "error": "n/a: its contents report errors",
+    "empty": "n/a: a panel always has content"
+  },
+  "events": {},
+  "uses": {
+    "card": "0.x",
+    "button": "0.x",
+    "cluster": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "region (or dialog where it is modal), named by its heading",
+    "keyboard": "Back closes it",
+    "labels": "its h2"
+  },
+  "responsive": {
+    "700": "centred over the page column",
+    "1200": "beside the title block; in a split page, the sticky second column (legacy context .page.split)"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-11",
+      "kind": "internal",
+      "change": "Converted from lock.css G1 (.panel)."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "Slot foot: the closing row (04-ask's source panel). Pages round 3."
+    },
+    {
+      "version": "0.2.1",
+      "date": "2026-10-25",
+      "kind": "internal",
+      "change": "The Aside fixture shows a text, not an excerpt: excerpt retired with Ask's source panel (v4 C2)."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-26",
+      "kind": "removed",
+      "change": "The tag option (aside) and the foot slot: Ask's source panel used them until v4 C2; nothing does now. keybox and text leave uses with the Aside fixture."
+    }
+  ],
+  "contexts": [
+    "data-layout"
+  ]
+}

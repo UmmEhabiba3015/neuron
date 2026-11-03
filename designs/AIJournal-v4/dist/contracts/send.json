@@ -1,0 +1,76 @@
+{
+  "name": "send",
+  "layer": "components",
+  "version": "0.2.0",
+  "inventory": "E10",
+  "description": "The commit control: the composer's filled control while the field holds content. A word, 'Save', not a glyph. Same height and fill as the microphone it replaces.",
+  "variants": {},
+  "options": {},
+  "content": {
+    "label": {
+      "type": "text",
+      "required": true,
+      "description": "Final copy, 'Save'. Set in printed caps by the CSS."
+    },
+    "aria": {
+      "type": "text",
+      "required": false,
+      "description": "The control's accessible name, default \"Save entry\". false leaves the visible label to name it (11-states' draft view, as drawn)."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": [
+      "--ctl",
+      "--s6",
+      "--r",
+      "--rule",
+      "--paper",
+      "--f-label",
+      "--t-print",
+      "--block",
+      "--gc"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "yes: fills --block",
+    "focus-visible": "yes: the product's focus ring (base)",
+    "active": "yes: pressed 1px down, and scaled .97 under the shell's motion",
+    "disabled": "n/a: it only exists while there is something to save",
+    "selected": "n/a: it has no on or off",
+    "loading": "n/a: saving is not shown on the control",
+    "error": "n/a: the composer's notice says when saving failed",
+    "empty": "n/a: it only exists while the field holds content"
+  },
+  "events": {
+    "press": "save the entry"
+  },
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "button",
+    "keyboard": "Tab to it, Space or Enter",
+    "labels": "aria-label 'Save entry' beside the visible word"
+  },
+  "responsive": {},
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-10",
+      "kind": "internal",
+      "change": "Converted from lock.css E10 (.send)."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "Content aria: the accessible name is optional (11-states' draft has none)."
+    }
+  ],
+  "contexts": [
+    "data-motion"
+  ]
+}

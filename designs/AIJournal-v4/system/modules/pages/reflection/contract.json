@@ -1,0 +1,153 @@
+{
+  "name": "reflection",
+  "layer": "pages",
+  "version": "1.3.0",
+  "description": "Reflections, a destination (v4 C3): the week read back as a booklet, one leaf at a time (the week, a leaf per note, the signed leaf), with Earlier weeks on a line by month below it. A note's foot opens Timeline on the days behind it (N entries) and carries its thumbs (Ask's mechanic). States: list, week (an earlier week, pushed), first (the first reflection: no trend, a Next week leaf), empty (the week so far, one leaf), rated (a note's thumbs down pressed, its form open; the booklet opens on its leaf). One render for every platform; desktop puts the masthead in the title block beside the page.",
+  "variants": {
+    "platform": {
+      "values": [
+        "mobile",
+        "tablet",
+        "desktop"
+      ],
+      "default": "mobile",
+      "description": "The device the page is drawn for. Desktop's rule: the masthead is the title block (mast form title) beside the page (shell layout sidebar), and the page is headed pushed. Mobile and tablet: the masthead row inside the page.",
+      "noRule": {
+        "mobile": "a page has no CSS: the platform chooses which modules it composes and how",
+        "tablet": "a page has no CSS: the platform chooses which modules it composes and how",
+        "desktop": "a page has no CSS: the platform chooses which modules it composes and how"
+      }
+    },
+    "state": {
+      "values": [
+        "list",
+        "week",
+        "first",
+        "empty",
+        "rated"
+      ],
+      "default": "list",
+      "description": "The page's states (journal-website.html #reflections, #reflection, #reflections-first, #reflections-empty, #reflections-rated). Static screens open the booklet on leaf 1 (1 and 2 at the container's 1200); rated opens on its note's leaf.",
+      "noRule": {
+        "list": "a page has no CSS: a state chooses the content and modules it composes",
+        "week": "a page has no CSS: a state chooses the content and modules it composes",
+        "first": "a page has no CSS: a state chooses the content and modules it composes",
+        "empty": "a page has no CSS: a state chooses the content and modules it composes",
+        "rated": "a page has no CSS: a state chooses the content and modules it composes"
+      }
+    },
+    "context": {
+      "values": [
+        "screen",
+        "walkthrough"
+      ],
+      "default": "screen",
+      "description": "Where the page is drawn. screen: the numbered screens (the static header). walkthrough: the prototypes and the website; below desktop a page with the header section draws it in its navbar form and puts its blocks in the page's reader (layout page, option reader). Pages without the header section draw the same in both.",
+      "noRule": {
+        "screen": "a page has no CSS: the context chooses how it composes its modules",
+        "walkthrough": "a page has no CSS: the context chooses how it composes its modules"
+      }
+    }
+  },
+  "options": {},
+  "content": {
+    "data": {
+      "type": "data",
+      "description": "data.mjs: the newest week and the week before it as the booklet's leaves (kicker, date, line or big number, picture, words, source), read from 02-timeline's record (moods, what was written and recorded, recordings' lengths; out-of-memory entries are never used); the signed, Next week and week-so-far leaves; the rated note; Earlier weeks (eight weeks, newest first, under their months)."
+    }
+  },
+  "slots": {},
+  "places": {},
+  "tokens": {
+    "reads": [],
+    "exposes": {},
+    "sets": []
+  },
+  "states": {
+    "default": "yes: list, the newest week's booklet and Earlier weeks",
+    "hover": "n/a: a page; its controls carry their own",
+    "focus-visible": "n/a: a page; its controls carry their own",
+    "active": "n/a: a page; its controls carry their own",
+    "disabled": "n/a: a page; its controls carry their own",
+    "selected": "n/a: a page; its destination is filled in the navigation (the leaf in view is the booklet's)",
+    "loading": "yes: reflections-loading, the latest week's booklet leaf for leaf (six pages: the week's headline lines, each note's big figures, its picture in its own grid in bone, its words and foot in bones; the end leaf real), each leaf named \"loading\", and Earlier weeks' spine with a month and three weeks in bones; \"Loading your reflections.\" announced",
+    "error": "n/a: the reflection has no error state in journal-website.html",
+    "empty": "yes: empty, the week so far (one leaf)"
+  },
+  "events": {},
+  "uses": {
+    "shell": "0.x",
+    "rail": "0.x",
+    "page": "0.x",
+    "mast": "0.x",
+    "header": "0.x",
+    "dest": "0.x",
+    "back": "0.x",
+    "keybox": "0.x",
+    "booklet": "0.x",
+    "leafpic": "0.x",
+    "weekline": "0.x",
+    "button": "0.x",
+    "thumbs": "0.x",
+    "bone": "0.x",
+    "srow": "0.x",
+    "said": "0.x",
+    "dayrow": "0.x",
+    "recrow": "0.x",
+    "sheet": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none of its own: the masthead (header), the booklet (a group named for its week) and Earlier weeks (a section) are its landmarks",
+    "keyboard": "its links and buttons, in reading order; the booklet's arrows and the Left and Right keys turn the leaves",
+    "labels": "each leaf: '2 of 6: What you kept' (the booklet's); each picture says what it shows"
+  },
+  "responsive": {
+    "1200": "desktop: the masthead becomes the title block beside the page; the booklet opens at a spread (the booklet's container rule)"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-14",
+      "kind": "internal",
+      "change": "The first page module (pages round 0): 05-reflection on the three platforms, at parity with the screens."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-15",
+      "kind": "added",
+      "change": "Variant context (screen, walkthrough): the walkthroughs render the page directly (pages round 5)."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-20",
+      "kind": "changed",
+      "change": "v4 B7: Reflections becomes a destination next to Today. The cadence notice is gone (each reflection is labelled by its week); the page is the record of weekly reflections (list, week, first, empty, rated). Every note carries its citation and That's not right."
+    },
+    {
+      "version": "1.0.0",
+      "date": "2026-10-28",
+      "kind": "changed",
+      "change": "v4 C3: the week's reflection is a booklet (section booklet; components leaf, leafpic) with Earlier weeks on a line by month (weekline), replacing the record of note rows (sheet, shead, said, srowlink, empty and foot are no longer used here). No week numbers. A note's foot is N entries (Timeline on its days) and That's not right; the trend cites Earlier weeks. Marked opens on its leaf."
+    },
+    {
+      "version": "1.1.0",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 round 10: each note's foot is its entries and the thumbs (Ask's mechanic), in place of That's not right; the marked state (struck through, Undo) is replaced by rated (#reflections-rated: What came up with its thumbs-down form open)."
+    },
+    {
+      "version": "1.2.0",
+      "date": "2026-10-30",
+      "kind": "added",
+      "change": "v4 round 10: loading is a skeleton (bone, system/content/skeleton.mjs) in the page's real frame, a new state and route."
+    },
+    {
+      "version": "1.3.0",
+      "date": "2026-10-30",
+      "kind": "changed",
+      "change": "v4 round 10 fixes 5: the skeleton follows the booklet: the latest week's leaves one for one (forms, pictures in their own grids, feet), the end leaf real, six pages."
+    }
+  ]
+}

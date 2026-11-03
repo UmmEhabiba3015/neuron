@@ -1,0 +1,14 @@
+{
+  "file": "03-talk.html",
+  "title": "Voice memo · Compact Transport",
+  "comment": "Journal v3 design of record: 03-talk.html. Product scope is V3-REVISION.md; visual and motion rules remain in lock.css.",
+  "written": true,
+  "devices": [
+    { "page": "talk", "state": "ready" },
+    { "page": "talk", "state": "kept" },
+    { "page": "talk", "state": "transcribing" },
+    { "page": "talk", "state": "microphone-before" },
+    { "page": "talk", "state": "microphone-denied" },
+    { "page": "talk", "state": "microphone-missing", "caption": { "title": "Voice memo · Compact Transport", "text": "Journal v3 design of record. Product behavior and state transitions are specified in V3-REVISION.md." } }
+  ]
+}

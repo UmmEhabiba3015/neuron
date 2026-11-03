@@ -1,0 +1,40 @@
+{
+  "file": "04-ask.html",
+  "title": "Ask · the chat",
+  "comment": "Journal v3 design of record: 04-ask.html. Product scope is V3-REVISION.md; visual and motion rules remain in lock.css.",
+  "written": true,
+  "devices": [
+    {
+      "page": "ask",
+      "state": "today"
+    },
+    {
+      "page": "ask",
+      "state": "past",
+      "caption": {
+        "title": "Ask · the chat",
+        "text": "Journal v4 design of record (C2): Ask answers from your own entries. The page’s states are in its catalogue entry; DESIGN.md has the decisions."
+      }
+    }
+  ],
+  "platforms": {
+    "desktop-web": [
+      {
+        "page": "ask",
+        "state": "today"
+      },
+      {
+        "page": "ask",
+        "state": "past"
+      },
+      {
+        "page": "ask",
+        "state": "drawers",
+        "caption": {
+          "title": "Ask · the chat",
+          "text": "Journal v4 design of record (C2): Ask answers from your own entries. The page’s states are in its catalogue entry; DESIGN.md has the decisions."
+        }
+      }
+    ]
+  }
+}

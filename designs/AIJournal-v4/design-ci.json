@@ -1,0 +1,553 @@
+{
+  "serve": "node tools/serve-preview.mjs --port={port}",
+  "port": 8100,
+  "build": "node scripts/build.mjs",
+  "routes": [
+    "journal-website.html",
+    "motion-index.html",
+    "design%20system/index.html"
+  ],
+  "tests": "node scripts/verify-portability.mjs && node scripts/verify-website-preview.mjs && node scripts/verify-v3-runtime.mjs && node scripts/verify-revision-states.mjs && node scripts/verify-navbar.mjs && node scripts/verify-writing-companion.mjs && node scripts/verify-compact-merge.mjs && node scripts/verify-cleanup.mjs",
+  "quickTests": "node scripts/verify-portability.mjs",
+  "screens": {
+    "note": "The migration target: every numbered screen and export must stay identical to the base (0%) until the migration is done.",
+    "mustMatch": true,
+    "widths": [
+      390,
+      1440
+    ],
+    "routes": [
+      "desktop-web/00-prototype.html",
+      "desktop-web/01-today.html",
+      "desktop-web/02-timeline.html",
+      "desktop-web/03-talk.html",
+      "desktop-web/04-ask.html",
+      "desktop-web/05-reflection.html",
+      "desktop-web/06-conversation.html",
+      "desktop-web/07-you.html",
+      "desktop-web/10-settings-privacy.html",
+      "desktop-web/11-states.html",
+      "desktop-web/13-login.html",
+      "desktop-web/14-register.html",
+      "desktop-web/15-auth-states.html",
+      "desktop-web/16-flow-states.html",
+      "desktop-web/17-account-data.html",
+      "desktop-web/18-entry-system-states.html",
+      "mobile-app/01-today.html",
+      "mobile-web/00-prototype.html",
+      "mobile-web/01-today.html",
+      "mobile-web/02-timeline.html",
+      "mobile-web/03-talk.html",
+      "mobile-web/04-ask.html",
+      "mobile-web/05-reflection.html",
+      "mobile-web/06-conversation.html",
+      "mobile-web/07-you.html",
+      "mobile-web/10-settings-privacy.html",
+      "mobile-web/11-states.html",
+      "mobile-web/13-login.html",
+      "mobile-web/14-register.html",
+      "mobile-web/15-auth-states.html",
+      "mobile-web/16-flow-states.html",
+      "mobile-web/17-account-data.html",
+      "mobile-web/18-entry-system-states.html",
+      "tablet-web/00-prototype.html",
+      "tablet-web/01-today.html",
+      "tablet-web/02-timeline.html",
+      "tablet-web/03-talk.html",
+      "tablet-web/04-ask.html",
+      "tablet-web/05-reflection.html",
+      "tablet-web/06-conversation.html",
+      "tablet-web/07-you.html",
+      "tablet-web/10-settings-privacy.html",
+      "tablet-web/11-states.html",
+      "tablet-web/13-login.html",
+      "tablet-web/14-register.html",
+      "tablet-web/15-auth-states.html",
+      "tablet-web/16-flow-states.html",
+      "tablet-web/17-account-data.html",
+      "tablet-web/18-entry-system-states.html",
+      "journal-website.html",
+      "motion-index.html",
+      "design%20system/index.html",
+      "design%20system/components/tests/runtime.html"
+    ]
+  },
+  "comps": {
+    "note": "tools/pages/comps.mjs: how a comp (system/comps/) is written as a screen file on each web platform.",
+    "platforms": {
+      "mobile-web": "mobile",
+      "tablet-web": "tablet",
+      "desktop-web": "desktop"
+    },
+    "stageProps": {
+      "chromeLabel": "journal.app"
+    },
+    "title": "Journal / {title} / {dir}",
+    "stylesheets": [
+      "../lock.css"
+    ],
+    "bodyStart": "<p class=\"aj-l-stage__caption motion-review-status\"><b>Motion preview is on.</b><br>This handover plays its animations even when Windows animation effects are disabled. Your device settings are unchanged.</p>"
+  },
+  "convert": {
+    "note": "tools/convert/: the converting kit (legacy classes and lock.css to modules) and where it reads markup.",
+    "screenDirs": [
+      "mobile-web",
+      "tablet-web",
+      "desktop-web",
+      "mobile-app"
+    ],
+    "scriptDirs": [
+      "scripts"
+    ],
+    "skip": "^scripts/verify-",
+    "readerDirs": [
+      "scripts",
+      "tools/ci",
+      "design system"
+    ],
+    "sheetDirs": [
+      "design system"
+    ]
+  },
+  "temp": {
+    "leftovers": [
+      "journal-",
+      "journal recording studies ",
+      "journal overview studies ",
+      "Journal delivery ",
+      "aij-"
+    ]
+  },
+  "pageParity": {
+    "note": "tools/ci/page-parity.mjs: a page module's comp against its screen file, markup normalised. Attribute differences the modules write on purpose, which the computed-style round check proves change nothing:",
+    "tolerate": [
+      {
+        "attr": "data-platform",
+        "on": "aj-l-stage__chrome",
+        "why": "the stage writes the platform on its chrome on every platform (modules read it as a context); the hand-written mobile screens left it off"
+      },
+      {
+        "attr": "data-date",
+        "value": "printed",
+        "on": "aj-c-keybox",
+        "why": "the keybox writes its date variant always; the generic state pages' hand-written keyboxes left the printed default off. Nothing styles printed (only hand: the handwriting), so it changes nothing"
+      },
+      {
+        "attr": "data-hook",
+        "value": "date",
+        "on": "aj-c-keybox__value",
+        "why": "the keybox marks its value as the date hook always; the generic state pages' hand-written keyboxes left it off. Only the runtime reads it, scoped to the recorder and the kept recording; nothing styles it"
+      },
+      {
+        "attr": "data-platform",
+        "on": "aj-l-stage__caption",
+        "why": "the stage writes it on its caption on every platform. Not neutral: a tablet or desktop caption takes its stage's width (834, 1440), as stage.css intends, where the hand-written screens left a 390 column under a wider stage. Accepted 2026-10-14 (reference comps only; the website hides captions)"
+      }
+    ]
+  },
+  "styleDiff": {
+    "note": "tools/ci/style-diff.mjs: the computed style and box of every element, base against branch, per round. The website preview also at 1920, where its gutter changes.",
+    "widths": [
+      390,
+      834,
+      1440
+    ],
+    "extra": {
+      "journal-website.html": [
+        1920
+      ]
+    },
+    "ignore": [
+      {
+        "match": "00-prototype\\.html|journal-website\\.html",
+        "elements": ".screen:not(:target):not(.site-current)",
+        "note": "The prototypes' screens not on show: the base builds the quiet navbar's reader when a screen is shown, the modules render it at build time (behaviour round 3, the header); each navbar screen is compared shown."
+      }
+    ],
+    "interactionsNote": "Behaviour the screens can't show (behaviour round 2): each scenario's steps run in both builds and the whole page is compared at every snapshot. Targets by text, ARIA or the URL, never by class.",
+    "interactions": [
+      {
+        "name": "entry tools",
+        "route": "desktop-web/00-prototype.html#today",
+        "ignore": ".screen:not(:target)",
+        "width": 1440,
+        "steps": [
+          {
+            "wait": "document.querySelector('#today [aria-label=\"Edit entry\"]')"
+          },
+          {
+            "snapshot": "at rest"
+          },
+          {
+            "hover": "[...document.querySelectorAll('#today p')].find(p => p.textContent.trim().startsWith('The flat people said'))"
+          },
+          {
+            "snapshot": "hovering an entry"
+          },
+          {
+            "hover": "[...document.querySelectorAll('#today p')].find(p => p.textContent.trim().startsWith('Priya rang'))"
+          },
+          {
+            "snapshot": "hovering an entry kept out of memory"
+          },
+          {
+            "click": "document.querySelector('#today details[data-excluded] summary')"
+          },
+          {
+            "snapshot": "its memory menu open"
+          },
+          {
+            "click": "document.querySelector('#today [data-excluded] [data-entry-action=\"memory\"]')"
+          },
+          {
+            "snapshot": "use in memory asked"
+          },
+          {
+            "click": "[...document.querySelectorAll('#today [data-form=\"confirm\"] .aj-c-button')].find(b => b.textContent.trim() === 'Use in memory')"
+          },
+          {
+            "snapshot": "let into memory"
+          },
+          {
+            "run": "const f = document.querySelector('#today textarea[aria-label=\"Add to today\"]'); f.focus(); f.value = 'A new entry from the composer.'; f.dispatchEvent(new Event('input', { bubbles: true }));"
+          },
+          {
+            "click": "document.querySelector('#today [aria-label=\"Save entry\"]')"
+          },
+          {
+            "wait": "[...document.querySelectorAll('#today p')].some(p => p.textContent.trim() === 'A new entry from the composer.')"
+          },
+          {
+            "snapshot": "a new entry"
+          },
+          {
+            "hover": "[...document.querySelectorAll('#today p')].find(p => p.textContent.trim() === 'A new entry from the composer.')"
+          },
+          {
+            "snapshot": "hovering the new entry"
+          },
+          {
+            "click": "[...document.querySelectorAll('#today [aria-label=\"Edit entry\"]')].filter(e => e.getClientRects().length).pop()"
+          },
+          {
+            "snapshot": "editing the new entry"
+          }
+        ]
+      },
+      {
+        "name": "memo playback",
+        "route": "desktop-web/00-prototype.html#today",
+        "ignore": ".screen:not(:target), .aj-c-recrow__progress",
+        "ignoreNote": "Screens not on show are left out (a container query cannot match in a hidden screen, v4 D1), and so is the progress clip's rect: its transform is the playback position, the same data as --aj-c-recrow-progress.",
+        "width": 1440,
+        "ignoreProps": [
+          "--aj-c-recrow-progress"
+        ],
+        "ignorePropsNote": "The playback position (--aj-c-recrow-progress) is the clock at the moment of the snapshot: data, different on every run. The playing and played states themselves are still compared.",
+        "shapeNote": "Since v4 B6 the memo's waveform is a fixed decorative shape, the same on every run, so its bars and boxes are compared like any other element.",
+        "steps": [
+          {
+            "wait": "document.querySelector('#today [aria-label=\"Record voice memo\"]')"
+          },
+          {
+            "click": "document.querySelector('#today [aria-label=\"Record voice memo\"]')"
+          },
+          {
+            "wait": "[...document.querySelectorAll('#talk button')].some(b => b.textContent.trim() === 'Start recording' && !b.disabled)"
+          },
+          {
+            "click": "[...document.querySelectorAll('#talk button')].find(b => b.textContent.trim() === 'Start recording')"
+          },
+          {
+            "pause": 14000,
+            "note": "a 14-second memo: a snapshot of the whole page takes a few seconds, and the memo must still be playing when it reaches the row and when Stop is clicked (8 seconds raced the end: base against base differed)"
+          },
+          {
+            "click": "[...document.querySelectorAll('#talk button')].find(b => b.textContent.trim() === 'Stop and keep')"
+          },
+          {
+            "wait": "location.hash === '#today' && document.querySelector('#today [aria-label=\"Play voice memo\"]')"
+          },
+          {
+            "hover": "document.querySelector('#today h1')",
+            "note": "the pointer off the rows: it was where Stop and keep sat"
+          },
+          {
+            "pause": 600
+          },
+          {
+            "run": "document.activeElement && document.activeElement !== document.body && document.activeElement.blur();",
+            "note": "the kept row takes focus after keeping at a moment that varies run to run (base against base differed); focus off makes the snapshot the row itself"
+          },
+          {
+            "snapshot": "a kept memo"
+          },
+          {
+            "run": "window.__play = HTMLMediaElement.prototype.play; HTMLMediaElement.prototype.play = function () { this.playbackRate = 0.1; return window.__play.call(this); };",
+            "note": "the first playback at a tenth of its speed: the playing snapshot and the Stop click can't race its end (a slow run's snapshot outlasted the 14-second memo). The page is unchanged; only the test's audio is slowed"
+          },
+          {
+            "click": "document.querySelector('#today [aria-label=\"Play voice memo\"]')"
+          },
+          {
+            "wait": "document.querySelector('#today [aria-label=\"Stop voice memo playback\"]')"
+          },
+          {
+            "snapshot": "playing"
+          },
+          {
+            "run": "document.querySelector('#today [aria-label=\"Stop voice memo playback\"]')?.click();"
+          },
+          {
+            "wait": "document.querySelector('#today [aria-label=\"Play voice memo\"]')"
+          },
+          {
+            "snapshot": "stopped"
+          },
+          {
+            "run": "HTMLMediaElement.prototype.play = window.__play;",
+            "note": "normal speed again: the last part plays to the end"
+          },
+          {
+            "click": "document.querySelector('#today [aria-label=\"Play voice memo\"]')"
+          },
+          {
+            "wait": "document.querySelector('#today [aria-label=\"Stop voice memo playback\"]')"
+          },
+          {
+            "wait": "document.querySelector('#today [aria-label=\"Play voice memo\"]')"
+          },
+          {
+            "pause": 300
+          },
+          {
+            "snapshot": "played to the end"
+          }
+        ]
+      },
+      {
+        "name": "quiet navbar",
+        "route": "journal-website.html#today",
+        "width": 390,
+        "ignore": ".screen:not(:target):not(.site-current)",
+        "steps": [
+          {
+            "wait": "document.querySelector('#today [role=\"region\"][aria-label$=\" content\"]')"
+          },
+          {
+            "pause": 300
+          },
+          {
+            "snapshot": "expanded at the journal's end"
+          },
+          {
+            "run": "const r = document.querySelector('#today [role=\"region\"][aria-label$=\" content\"]'); r.scrollTop = Math.max(0, r.scrollTop - 400);"
+          },
+          {
+            "pause": 500
+          },
+          {
+            "snapshot": "compact, reading back"
+          },
+          {
+            "run": "const r = document.querySelector('#today [role=\"region\"][aria-label$=\" content\"]'); r.scrollTop = r.scrollHeight;"
+          },
+          {
+            "pause": 500
+          },
+          {
+            "snapshot": "expanded again at the end"
+          },
+          {
+            "run": "location.hash = 'timeline';"
+          },
+          {
+            "wait": "document.querySelector('#timeline [role=\"region\"][aria-label$=\" content\"]')"
+          },
+          {
+            "pause": 300
+          },
+          {
+            "run": "document.querySelector('#timeline [role=\"region\"][aria-label$=\" content\"]').scrollTop = 400;"
+          },
+          {
+            "pause": 500
+          },
+          {
+            "snapshot": "timeline, compact"
+          }
+        ]
+      },
+      {
+        "name": "writing companion",
+        "route": "journal-website.html#today",
+        "width": 390,
+        "ignore": ".screen:not(:target):not(.site-current)",
+        "steps": [
+          {
+            "wait": "document.querySelector('#today textarea[aria-label=\"Add to today\"]')"
+          },
+          {
+            "snapshot": "the overview in the composer"
+          },
+          {
+            "click": "[...document.querySelectorAll('#today button')].find(b => b.textContent.trim() === 'Good' && b.getClientRects().length)"
+          },
+          {
+            "snapshot": "a mood chosen"
+          },
+          {
+            "run": "const f = document.querySelector('#today textarea[aria-label=\"Add to today\"]'); f.focus(); f.value = 'A new line for the companion.'; f.dispatchEvent(new Event('input', { bubbles: true }));"
+          },
+          {
+            "snapshot": "writing"
+          }
+        ]
+      }
+    ]
+  },
+  "modules": "system/modules",
+  "catalogue": "dist/catalogue",
+  "system": {
+    "prefix": "aj",
+    "dist": "dist",
+    "tokens": "system/tokens.json",
+    "base": "system/base.css",
+    "fonts": "assets/fonts/manifest.json",
+    "context": "font-family:var(--f-label);color:var(--ink);background:var(--paper)",
+    "designDoc": "DESIGN.md",
+    "assetsDoc": "ASSETS.md",
+    "inject": [
+      {
+        "file": "lock.css",
+        "tokens": true,
+        "base": true,
+        "modules": true,
+        "review": "review.css"
+      }
+    ],
+    "legacy": [
+      "lock.css"
+    ],
+    "readers": [
+      "scripts",
+      "design system/components"
+    ],
+    "guideSource": "design system/index.source.html",
+    "runtime": [
+      "scripts/prototype-runtime.js",
+      "scripts/journal-navbar.js",
+      "scripts/journal-timeline.js",
+      "scripts/journal-recorder-runtime.js",
+      "scripts/journal-live-audio.js"
+    ],
+    "runtimeHooks": "fail",
+    "runtimeOwn": {
+      "note": "The app runtime's own markup, not any module's: the hook check lets the runtime read and write these (behaviour round 2).",
+      "classes": {
+        "screen": "a prototype screen (the prototype builder's container per route)",
+        "site-current": "the screen on show (the prototype router)",
+        "prototype-feedback": "the prototype's one-line feedback (an app message, not a module)",
+        "motion-review-status": "the review page's motion status (review.css furniture)",
+        "prototype-list": "the prototype's list of preview entries (review.css: its spacing and rules)",
+        "in-journal": "the preview list inside the journal (review.css)",
+        "prototype-download": "the prototype's download link for a kept recording (only the prototype offers it)",
+        "prototype-input": "the prototype's live text field in a composer (the tests select it; no CSS reads it)"
+      },
+      "attributes": {
+        "data-motion-review": "the motion review switch on <html> (the reduced-motion bypass for review pages)",
+        "data-font-profile": "the portable font profile on <html> (scripts/portable-fonts.mjs)"
+      }
+    },
+    "inventory": {
+      "note": "direction-lock.md section 6: closed at 37, of which A1-A4 (stage, app, rail, mast) are the shell and became layout primitives on 2026-10-10. The 36 components below are the closed list the checks enforce; the layout primitives are listed separately. Layout primitives L1 flow and L2 cluster (2026-10-12) arrange children for the sections and pages. text (2026-10-12): the shared text styles (prose, lede, copy, help, label) as one component. moodgraph (2026-10-23, v4 C1): the week's mood graph. seg (B2, the Timeline zoom) removed 2026-10-23 (v4 C1): Timeline has one view. readout (E7), progress (F4), actions (E9) and the flow primitive (L1) removed 2026-10-24: no screen used them. bubble and rateform (2026-10-25, v4 C2): Ask's message and its thumbs-down form. excerpt (the answer's quoted words) removed 2026-10-25 with Ask's search and answer (v4 C2); 33 components. leafpic, leaf and weekline (2026-10-28, v4 C3): the Reflections booklet's pictures, its leaves and the earlier weeks; 36 components. glance (D2) stays 2026-10-29 (v4 C4): the overview no longer uses it; the native app's static Today (mobile-app/01-today) still does. pending (2026-10-29, v4 C5): the quiet line of an unsent entry or memo and of the voice memo draft; 37 components. thumbs (2026-10-29, v4 round 10): the thumbs pair and its form out of bubble, for Ask and the notes; 38 components; bone (2026-10-30, v4 round 10): the skeleton bone and its shimmer, shared by every loading page: 39 components.",
+      "components": [
+        "dest",
+        "back",
+        "sheet",
+        "srow",
+        "recrow",
+        "said",
+        "moodrow",
+        "keybox",
+        "glance",
+        "mark",
+        "foot",
+        "shead",
+        "composer",
+        "button",
+        "field",
+        "play",
+        "wave",
+        "srowlink",
+        "stack",
+        "send",
+        "notice",
+        "card",
+        "empty",
+        "panel",
+        "dialog",
+        "dayrow",
+        "cal",
+        "opt",
+        "entry-actions",
+        "text",
+        "moodgraph",
+        "bubble",
+        "rateform",
+        "leafpic",
+        "leaf",
+        "weekline",
+        "pending",
+        "thumbs",
+        "bone"
+      ],
+      "layout": [
+        "stage",
+        "shell",
+        "page",
+        "rail",
+        "mast",
+        "cluster"
+      ]
+    },
+    "blastRadius": "report",
+    "generated": [
+      "dist/",
+      "ASSETS.md",
+      "journal-website.html",
+      "journal-prototype.html",
+      "journal-prototype-tablet.html",
+      "journal-prototype-desktop.html",
+      "mobile-web/00-prototype.html",
+      "tablet-web/00-prototype.html",
+      "desktop-web/00-prototype.html",
+      "motion-index.html",
+      "design system/index.html",
+      "design system/components/journal-components.bundle.css",
+      "design system/components/tests/runtime.html"
+    ],
+    "markupSources": [
+      "design system/components/tests/runtime.source.html"
+    ],
+    "contexts": {
+      "data-platform": "the stage: mobile, tablet, desktop, ios",
+      "data-surface": "the shell: notebook, auth (the sign-in spread), account (the signed-out screens)",
+      "data-motion": "the shell: arrive (the product shell, the arrival motion scope)",
+      "data-site": "the website preview root",
+      "data-form": "the mast: title (the desktop title block). Read only with the value title.",
+      "data-layout": "the page: split (the record and its index side by side); the shell: sidebar (a title block as its first column)",
+      "data-clip": "the shell: presentation only, a states pack showing many states of one screen",
+      "data-date": "the keybox: hand while the masthead's date is written by hand, printed once it is (the glance waits for it)",
+      "data-pos": "the booklet: now on the leaf (or the two of a spread) in view, past and next on the rest; a leaf's pictures play as it comes into view"
+    }
+  },
+  "affected": {
+    "note": "Files that never render, besides docs and explore/: a change to them alone captures no screens.",
+    "inert": [
+      "^scripts/verify-",
+      "^verification/",
+      "^reset-email.txt$"
+    ]
+  }
+}

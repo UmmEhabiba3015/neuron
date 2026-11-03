@@ -1,0 +1,160 @@
+{
+  "name": "leaf",
+  "layer": "components",
+  "version": "0.2.1",
+  "inventory": "v4 C3",
+  "description": "A leaf of the Reflections booklet: its kicker with the leaf's date on the same line, then the week's line or a note's big number, its picture, the note's words at the foot of the leaf, the note's foot (its entries and its thumbs) and the leaf's number. The last leaf is signed \"Your journal\". Its paper, edge and padding are exposed, so the booklet's desktop spread can draw two leaves on one paper.",
+  "variants": {
+    "form": {
+      "values": [
+        "week",
+        "note",
+        "end"
+      ],
+      "default": "week",
+      "description": "week: the kicker (\"This week\") and the dates, the week's line (30px prose, a heading), the picture at the foot; also the \"Next week\" leaf (no picture) and the week so far (its words under the picture). note: the kicker and the leaf's date, one big number (56px prose) with its unit in labels (13px), the picture, the note's words at the foot (--t-field, 1.5, --rule), the foot. end: \"Your journal\" in the hand (--t-hand-l) and a link to the earlier weeks, centred."
+    }
+  },
+  "options": {},
+  "content": {
+    "number": {
+      "type": "text",
+      "required": true,
+      "description": "The leaf's number, at its foot (\"2\"). Seen, not read: the booklet names each leaf \"2 of 6: What you kept\"."
+    },
+    "kicker": {
+      "type": "text",
+      "required": false,
+      "description": "week and note: \"This week\", \"This week so far\", \"Next week\", \"What you kept\", \"What came up\", \"Your recordings\", \"Over the weeks\", \"The day off\"."
+    },
+    "date": {
+      "type": "text",
+      "required": false,
+      "description": "The leaf's date, top right on the kicker's line: a note's day (\"6 Aug\"), or the week's dates (\"3 to 9 Aug\") on the week and trend leaves."
+    },
+    "line": {
+      "type": "text",
+      "required": false,
+      "description": "week: the week's line (\"Five days here, and sleep on your mind.\"), a heading."
+    },
+    "big": {
+      "type": "list",
+      "required": false,
+      "description": "note: the big number, one or more { n: \"3\", unit: \"written\" } (\"3 written 3 recorded\", \"11:47 Wednesday\")."
+    },
+    "words": {
+      "type": "text",
+      "required": false,
+      "description": "note: the note's words; week: the week so far's second line."
+    },
+    "sign": {
+      "type": "text",
+      "required": false,
+      "description": "end: \"Your journal\"."
+    },
+    "back": {
+      "type": "object",
+      "required": false,
+      "description": "end: { label: \"Earlier weeks\", href: \"#earlier\" }. None when there are no earlier weeks."
+    }
+  },
+  "slots": {
+    "picture": {
+      "accepts": [
+        "leafpic"
+      ],
+      "required": false,
+      "description": "week and note: the leaf's picture."
+    },
+    "foot": {
+      "accepts": [
+        "button (cite: \"4 entries\")",
+        "thumbs (pair)"
+      ],
+      "required": false,
+      "description": "note: the note's entries in Timeline (button cite) and its thumbs (thumbs, form pair), always shown."
+    }
+  },
+  "places": {
+    "pic": "the picture: --s7 under the number; on the week form, at the foot of the leaf's free space (margin-top auto)"
+  },
+  "tokens": {
+    "reads": [
+      "--leaf-h",
+      "--s9",
+      "--s8",
+      "--s6",
+      "--ink",
+      "--paper-2",
+      "--w",
+      "--rule",
+      "--s5",
+      "--f-label",
+      "--t-col",
+      "--lh-tight",
+      "--rule-2",
+      "--t-quiet",
+      "--f-prose",
+      "--s3",
+      "--s7",
+      "--t-field",
+      "--f-hand",
+      "--t-hand-l",
+      "--tap",
+      "--block"
+    ],
+    "exposes": {
+      "--aj-c-leaf-paper": "The leaf's ground: --paper-2 with a shade into the spine (ink 7% over 22px). The booklet's desktop spread sets none and draws one paper under both leaves.",
+      "--aj-c-leaf-edge": "The leaf's edge: 1px --rule. The spread sets 0.",
+      "--aj-c-leaf-pad": "The leaf's padding: --s9 --s8 --s6. The spread sets --s9 --s9 --s6."
+    }
+  },
+  "states": {
+    "default": "yes: a leaf as drawn, in its form",
+    "hover": "n/a: the leaf is not pressed; its links and buttons carry their own hover",
+    "focus-visible": "n/a: the leaf is not a control; its links and buttons carry the product's ring",
+    "active": "n/a: the booklet turns on a tap of the leaf's outer thirds; nothing on the leaf presses",
+    "disabled": "n/a: nothing on the leaf is disabled",
+    "selected": "n/a: the leaf in view is the booklet's (data-pos), not a selection",
+    "loading": "n/a: drawn with the page",
+    "error": "n/a: a leaf has nothing that can fail",
+    "empty": "n/a: the week so far is the week form with its words; a booklet always has a leaf"
+  },
+  "events": {},
+  "uses": {
+    "leafpic": "0.x",
+    "button": "0.x",
+    "thumbs": "0.x"
+  },
+  "assets": [],
+  "a11y": {
+    "role": "a section; the booklet names it (\"2 of 6: What you kept\") and makes the leaves out of view inert",
+    "keyboard": "Tab through its links and buttons",
+    "labels": "the number is aria-hidden; the week's line is a heading (h2)"
+  },
+  "responsive": {
+    "all": "the leaf's height is --leaf-h at least; its width is the booklet's"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-28",
+      "kind": "added",
+      "change": "New (v4 C3): a leaf of explore booklet-feel f-mix (shared/booklet.css and cards.css), its date top right and its foot \"N entries\" (the user's rulings, 2026-10-28)."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-29",
+      "kind": "removed",
+      "change": "v4 round 10: That's not right and the marked option (strike-through, announced line, Undo) retired; a note's foot is its entries and the thumbs (Ask's mechanic)."
+    },
+    {
+      "version": "0.2.1",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 round 10: with the thumbs, the foot's source keeps to the thumbs' row when the thumbs-down form (now a line in the foot) drops under the thumbs on a narrow note."
+    }
+  ],
+  "contexts": [],
+  "behaviour": {}
+}

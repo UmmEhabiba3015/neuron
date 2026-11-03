@@ -1,0 +1,78 @@
+/* C5 the mood row. Words, five of them, the last row of the form.
+   Moved from lock.css sections C5, B-motion and "Writing companion merge". The ruled form is the
+   writing companion's: the label in the ruled time column, the chosen word tinted in its mood tone.
+   Its padding belongs to the module; no placement is set on the root. */
+.aj-c-moodrow__chips button:active{transform:translateY(1px)}
+.aj-c-moodrow{padding:var(--s6)}
+/* The weight is declared (revision 48): without it the browser's heading default leaked and the
+   hand-set question drew in synthesised bold. */
+.aj-c-moodrow h2{font-family:var(--f-hand);font-size:var(--t-hand-s);
+            line-height:1.1;/* token-exempt: the handwritten heading's line height; no recorded reason */
+            font-weight:400;
+            color:var(--rule);margin-bottom:var(--s5)}
+.aj-c-moodrow__chips{display:flex;gap:var(--s3)}
+.aj-c-moodrow__chips button{flex:1 1 0;min-height:var(--tap);padding:0 var(--s1);
+              font-family:var(--f-label);font-size:var(--t-print);
+              letter-spacing:.04em;/* token-exempt: the quiet tracking, .04em (tokens.json, --t-quiet) */
+              color:var(--rule);background:var(--paper);
+              border:var(--w) solid var(--rule-2);border-radius:var(--r);cursor:pointer}
+.aj-c-moodrow__chips button:hover{background:var(--block-2);border-color:var(--block);color:var(--block)}
+.aj-c-moodrow__chips button[aria-pressed="true"]{background:var(--rule);border-color:var(--rule);
+                                   color:var(--paper)}
+/* context: [data-motion] is the shell; the glide belongs to the shell's motion */
+[data-motion] .aj-c-moodrow__chips button{transition:transform 280ms var(--gc)/* token-exempt: the shell's glide duration, 280ms (3.10 motion) */}
+/* context: [data-motion] is the shell; the press belongs to the shell's motion */
+[data-motion] .aj-c-moodrow__chips button:active{transform:scale(.97)/* token-exempt: the shell's press scale */;
+                                         transition-duration:160ms/* token-exempt: the shell's press duration */}
+@media (hover:hover) and (pointer:fine){
+  /* context: [data-motion] is the shell; the glide belongs to the shell's motion */
+  [data-motion] .aj-c-moodrow__chips button{transition:transform 280ms var(--gc)/* token-exempt: the shell's glide duration, 280ms (3.10 motion) */}
+}
+@media (prefers-reduced-motion:reduce){
+  /* context: [data-motion] is the shell; reduced motion ends the transition */
+  [data-motion]:not(:where(html[data-motion-review="play"] *)) .aj-c-moodrow__chips button{transition:none}
+}
+
+/* Ruled form: matches the exact ruled column used by entry times and record notes. */
+.aj-c-moodrow[data-form="ruled"]{padding:0;display:flex;align-items:stretch;gap:0}
+.aj-c-moodrow[data-form="ruled"]>.aj-c-moodrow__head{flex:0 0 var(--tcol);border-right:var(--w) solid var(--rule-2);display:flex;align-items:center;padding:var(--s4)}
+/* context: [data-motion] and .sheet are the shell's; the long printed label stays within the fixed gutter
+   (the same declarations the srow and dayrow time columns carry) */
+[data-motion]:not([data-platform="ios"] > *) .aj-c-moodrow__head{min-width:0;overflow-wrap:anywhere;text-align:left;padding-left:var(--s4);padding-right:var(--s4)}
+.aj-c-moodrow[data-form="ruled"] h2{font:400 12px/1.4 var(--f-label)/* token-exempt: the approved writing companion mood layout */;margin:0;color:var(--rule);overflow-wrap:anywhere}
+.aj-c-moodrow[data-form="ruled"]>.aj-c-moodrow__body{flex:1;min-width:0;padding:var(--s4)}
+.aj-c-moodrow[data-form="ruled"] .aj-c-moodrow__chips{display:grid;grid-template-columns:repeat(5,minmax(var(--tap),1fr));gap:0;min-width:0;direction:ltr}
+.aj-c-moodrow[data-form="ruled"] .aj-c-moodrow__chips button{position:relative;isolation:isolate;min-width:var(--tap);min-height:var(--tap);background:transparent;border:0;border-radius:var(--r);
+  font-size:12px;/* token-exempt: the approved writing companion mood layout */
+  letter-spacing:0;/* token-exempt: the approved writing companion mood layout */
+  padding:var(--s2);color:var(--rule);font-weight:400;overflow-wrap:anywhere;touch-action:manipulation;
+  transform:none;/* stops the plain press scale in the ruled form */
+  text-decoration-thickness:1px;/* token-exempt: the approved writing companion mood layout */
+  text-underline-offset:6px;/* token-exempt: the approved writing companion mood layout */
+  transition:color var(--mood-fade-out) ease-out}
+.aj-c-moodrow[data-form="ruled"] .aj-c-moodrow__chips button::before{content:'';position:absolute;inset:0;z-index:-1;/* token-exempt: the tint sits behind the word, below its text; no recorded reason */ border-radius:inherit;background:var(--aj-c-moodrow-surface);opacity:0;transition:opacity var(--mood-fade-out) ease-out;pointer-events:none}
+.aj-c-moodrow:where([data-form="ruled"]) [data-mood="light"]{--aj-c-moodrow-tone:var(--mood-light);--aj-c-moodrow-surface:var(--mood-light-surface)}
+.aj-c-moodrow:where([data-form="ruled"]) [data-mood="good"]{--aj-c-moodrow-tone:var(--mood-good);--aj-c-moodrow-surface:var(--mood-good-surface)}
+.aj-c-moodrow:where([data-form="ruled"]) [data-mood="even"]{--aj-c-moodrow-tone:var(--mood-even);--aj-c-moodrow-surface:var(--mood-even-surface)}
+.aj-c-moodrow:where([data-form="ruled"]) [data-mood="low"]{--aj-c-moodrow-tone:var(--mood-low);--aj-c-moodrow-surface:var(--mood-low-surface)}
+.aj-c-moodrow:where([data-form="ruled"]) [data-mood="hard"]{--aj-c-moodrow-tone:var(--mood-hard);--aj-c-moodrow-surface:var(--mood-hard-surface)}
+.aj-c-moodrow[data-form="ruled"] .aj-c-moodrow__chips button[aria-pressed="true"]{color:var(--aj-c-moodrow-tone);background:transparent;text-decoration:underline;transition-duration:var(--mood-fade-in)}
+.aj-c-moodrow[data-form="ruled"] .aj-c-moodrow__chips button[aria-pressed="true"]::before{opacity:1;transition-duration:var(--mood-fade-in)}
+@media (hover:hover) and (pointer:fine){
+ .aj-c-moodrow[data-form="ruled"] .aj-c-moodrow__chips button:hover{color:var(--aj-c-moodrow-tone);background:transparent;transition-duration:var(--mood-fade-in)}
+ .aj-c-moodrow[data-form="ruled"] .aj-c-moodrow__chips button:hover::before{opacity:1;transition-duration:var(--mood-fade-in)}
+}
+.aj-c-moodrow[data-form="ruled"] .aj-c-moodrow__chips button:active,.aj-c-moodrow[data-form="ruled"] .aj-c-moodrow__chips button:focus-visible{color:var(--aj-c-moodrow-tone);background:transparent;transition:none}
+.aj-c-moodrow[data-form="ruled"] .aj-c-moodrow__chips button:active::before,.aj-c-moodrow[data-form="ruled"] .aj-c-moodrow__chips button:focus-visible::before{opacity:1;transition:none}
+/* Three then two choices when five 44px targets cannot fit beside the gutter. */
+@container (max-width:324px){
+  .aj-c-moodrow[data-form="ruled"] .aj-c-moodrow__chips{grid-template-columns:repeat(3,minmax(var(--tap),1fr))}
+}
+@media (prefers-reduced-motion:reduce){
+/* context: the motion-review switch lives on html, outside the module */
+ html:not([data-motion-review="play"]) .aj-c-moodrow[data-form="ruled"] .aj-c-moodrow__chips button,
+ html:not([data-motion-review="play"]) .aj-c-moodrow[data-form="ruled"] .aj-c-moodrow__chips button::before{transition:none}
+}
+
+/* PLACEMENT BY ROLE (decision 2026-10-12): a state message under the mood (span) takes the full grid, --s4 below. */
+.aj-c-moodrow .aj-c-moodrow__body > [data-place~="span"]{grid-column:1 / -1;margin-top:var(--s4)}

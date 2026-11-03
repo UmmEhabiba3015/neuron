@@ -1,0 +1,191 @@
+{
+  "name": "find",
+  "layer": "sections",
+  "version": "0.2.2",
+  "description": "Ask's search row (row: the field it is given filling it), and the Timeline's search (pill, v4 C1): the bar with the magnifier, the field, its clear control and the switch (keyword or by meaning), the found line under it; sticky as the list's running head, it floats as a pill once the list scrolls under it.",
+  "variants": {
+    "form": {
+      "values": [
+        "row",
+        "pill"
+      ],
+      "default": "row",
+      "description": "row: Ask's search row (it retires with C2). pill (v4 C1, explore timeline-jump-arrival f-wash-and-frame): the Timeline's search, written by the section itself. Sticky as the list's running head (top --aj-s-find-top, from the container's 1200 one line below the page top, level with the side card); stuck, it narrows from both sides on the desktop and rounds to half its height everywhere, lifted with its glow, its found line a small tag under it."
+    }
+  },
+  "options": {
+    "mode": {
+      "values": [
+        "keyword",
+        "meaning"
+      ],
+      "default": "keyword",
+      "description": "The search the switch has chosen: keyword (the words typed, placeholder \"Search your journal\") or meaning (in any words, placeholder \"What was it about?\", the switch on). The pill only."
+    },
+    "status": {
+      "values": [
+        "idle",
+        "searching",
+        "failed"
+      ],
+      "default": "idle",
+      "description": "idle: the found line says how many days (or nothing). searching: the found line says so. failed: the found line says the search did not run, with Try again. The app sets it at run time; a page renders it for a state. The pill only."
+    },
+    "stuck": {
+      "type": "boolean",
+      "default": false,
+      "description": "Draw it floating (a comp state; at run time find.js decides from the scroll). The pill only."
+    },
+    "flow": {
+      "type": "boolean",
+      "default": false,
+      "description": "The pill only: in the flow instead of sticky (data-flow). The page sets it where it scrolls under a pinned header that no script measures (Timeline's numbered comps below desktop)."
+    }
+  },
+  "content": {
+    "query": {
+      "type": "text",
+      "required": false,
+      "description": "The words in the field; the clear control shows only when there are some."
+    },
+    "found": {
+      "type": "text",
+      "required": false,
+      "description": "The found line: \"3 days with “sleep”.\", \"3 days about “sleep”, in any words.\", \"Searching your journal.\", or the failure line. Written by the page from its data; at run time the app writes it (hook found)."
+    },
+    "copy": {
+      "type": "object",
+      "required": false,
+      "description": "{ label, hint, meaningHint, meaning, clear, retry }: the field's name, its two placeholders, the switch's word, the clear control's name, the retry's word. The approved copy is the default."
+    }
+  },
+  "slots": {
+    "children": {
+      "accepts": [
+        "field"
+      ],
+      "required": false,
+      "description": "The row form's search field. The pill writes its own."
+    }
+  },
+  "tokens": {
+    "reads": [
+      "--s5",
+      "--ctl",
+      "--s4",
+      "--w",
+      "--s2",
+      "--rule",
+      "--r",
+      "--paper-2",
+      "--block",
+      "--s3",
+      "--s6",
+      "--tap",
+      "--t-quiet",
+      "--f-label",
+      "--elev-pill",
+      "--elev-glow",
+      "--s7",
+      "--elev-glow-s",
+      "--g-panel",
+      "--gc-c1",
+      "--s9",
+      "--w-focus"
+    ]
+  },
+  "states": {
+    "default": "yes: the bar at rest, empty, the placeholder showing",
+    "hover": "n/a: a section is not a control; its controls carry their own",
+    "focus-visible": "yes: the product focus ring round the whole bar while the field has focus",
+    "active": "n/a: not a control",
+    "disabled": "n/a: the search is always available",
+    "selected": "yes: by meaning (the switch on, its placeholder); and stuck (floating over the list as a pill)",
+    "loading": "yes: searching (the found line says so)",
+    "error": "yes: failed (the found line says the search did not run, with Try again)",
+    "empty": "yes: nothing typed: no clear control, the found line empty. No matches is the record's state, not the search's"
+  },
+  "events": {
+    "search": "the words, the mode or a retry asked for a search (bubbling; detail: { query, mode }): the app runs it, sets data-status and fills the found line"
+  },
+  "uses": {
+    "field": "0.x",
+    "button": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "search (the pill); the row has none, the field carries its label",
+    "keyboard": "Tab to the field, the clear control (when shown), the switch, and Try again (when shown); Space on the switch",
+    "labels": "the field: \"Search your journal\"; the clear control: \"Clear search\"; the switch: its word, \"By meaning\", role switch; the found line is a polite live region"
+  },
+  "responsive": {
+    "1200": "the pill pins one line below the page top (--s9 less --s4), level with the side card; stuck, it narrows to 480px, 44px tall, its controls 36px",
+    "all": "below 1200, stuck, it keeps its width and height and only rounds"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-12",
+      "kind": "internal",
+      "change": "Converted from lock.css (Ask's search row, .crow.find)."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-23",
+      "kind": "added",
+      "change": "The pill form (v4 C1): the Timeline's search, sticky as the list's running head; find.js; the states searching and failed; data-module on both forms. The found line's widths round to whole pixels (Try again starts on one), Try again never breaks, and a failure that takes two lines grows the block."
+    },
+    {
+      "version": "0.2.1",
+      "date": "2026-10-25",
+      "kind": "changed",
+      "change": "--aj-s-find-top removed (nothing set it: below 1200 the pill sticks in the reader, which starts under the header). Option flow: in the flow instead of sticky, for a page that scrolls under a pinned header with no script (Timeline's numbered comps)."
+    },
+    {
+      "version": "0.2.2",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 round 10: the bar's focus is its own border at 2px in --block, drawn inward, not a ring outside it."
+    }
+  ],
+  "places": {
+    "mode": "the switch, after the divider; from 1200, stuck, the section sets its height to 36px (--aj-c-button-switch-h)",
+    "retry": "Try again in the found line, shown only while the search failed"
+  },
+  "behaviour": {
+    "script": "find.js, the pill only, inside its root: shows the clear control while the field holds words and clears it; the switch flips aria-checked, data-mode and the placeholder; any of these, and Try again, dispatch search. Watches the scroll (its own scroller, or the page) and sets data-stuck while the pill floats at its sticky top.",
+    "state": {
+      "data-mode": {
+        "values": [
+          "keyword",
+          "meaning"
+        ],
+        "setBy": "script",
+        "description": "The switch's choice. Rendered from mode."
+      },
+      "data-status": {
+        "values": [
+          "idle",
+          "searching",
+          "failed"
+        ],
+        "setBy": "runtime",
+        "description": "The search the app is running: idle (done, or none), searching, failed. Rendered from status."
+      },
+      "data-stuck": {
+        "values": [
+          "true"
+        ],
+        "setBy": "script",
+        "description": "Floating over the list: the page has scrolled past the pill's resting place. Rendered from stuck for a comp."
+      }
+    },
+    "hooks": {
+      "found": "the found line's text: the app writes the count, \"Searching your journal.\" or the failure line",
+      "data-hint-keyword": "on the root: the keyword placeholder, which find.js puts back when the switch turns off",
+      "data-hint-meaning": "on the root: the by-meaning placeholder, which find.js puts in when the switch turns on"
+    }
+  },
+  "contexts": []
+}

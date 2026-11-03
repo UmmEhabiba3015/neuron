@@ -1,0 +1,40 @@
+/* Runtime-only rules. Visual values continue to come from ../../lock.css. In @layer legacy
+   with lock.css, so these rules keep their precedence over it. */
+@layer legacy{
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+[data-journal-component] [hidden],
+[data-journal-component][hidden] { display: none !important; }
+
+.aj-c-composer input.aj-c-field {
+  min-width: 0;
+  width: 100%;
+  appearance: none;
+}
+
+.aj-c-composer input.aj-c-field::placeholder {
+  color: var(--rule-2);
+  opacity: 1;
+}
+
+.aj-c-composer [data-journal-status] {
+  min-height: 1lh;
+  margin-top: var(--s3);
+  font-family: var(--f-prose);
+  font-size: var(--t-note);
+  line-height: var(--lh-note);
+  color: var(--rule);
+}
+
+[data-journal-component="dialog"][aria-hidden="true"] { display: none; }
+}

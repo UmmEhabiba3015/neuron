@@ -1,0 +1,232 @@
+{
+  "name": "today",
+  "layer": "pages",
+  "version": "0.8.0",
+  "description": "Today: the day's record as it is written (entries, recordings, the product's notes), its mood and the writing companion at its foot (the composer with the recent overview). One render for every platform; desktop puts the masthead and the destinations in the title block beside the page.",
+  "variants": {
+    "platform": {
+      "values": [
+        "mobile",
+        "tablet",
+        "desktop"
+      ],
+      "default": "mobile",
+      "description": "The device the page is drawn for. Desktop: the masthead and the destinations are the title block (mast form title) beside the page (shell layout sidebar). Mobile and tablet: the header section (masthead row and destinations) inside the page. A recording's waveform is the wave's own (v4 round 10).",
+      "noRule": {
+        "mobile": "a page has no CSS: the platform chooses which modules it composes and how",
+        "tablet": "a page has no CSS: the platform chooses which modules it composes and how",
+        "desktop": "a page has no CSS: the platform chooses which modules it composes and how"
+      }
+    },
+    "state": {
+      "values": [
+        "default",
+        "entry-edit",
+        "entry-edit-empty",
+        "entry-delete-confirm",
+        "entry-delete-failed",
+        "recording-delete-confirm",
+        "recording-delete-failed",
+        "composer-options",
+        "support-resource",
+        "entry-options",
+        "recording-options",
+        "entry-memory",
+        "entry-memory-return",
+        "recording-memory",
+        "recording-memory-return",
+        "entry-saved",
+        "entry-edit-failed",
+        "entry-deleted",
+        "recording-deleted",
+        "without-note",
+        "loading",
+        "fetch-failed",
+        "mood-failed",
+        "empty",
+        "first",
+        "audio-no-transcript",
+        "note-open",
+        "draft",
+        "entry-unsent",
+        "entry-unsent-stopped",
+        "memo-draft",
+        "memo-draft-typed",
+        "empty-today-memo-draft"
+      ],
+      "default": "default",
+      "description": "The page's states (journal-website.html #today and its states). Round 1 builds the settled day; the state packs' Today states arrive in round 4.",
+      "noRule": {
+        "default": "a page has no CSS: a state chooses the content and modules it composes",
+        "composer-options": "a page has no CSS: a state chooses the content and modules it composes",
+        "support-resource": "a page has no CSS: a state chooses the content and modules it composes",
+        "entry-options": "a page has no CSS: a state chooses the content and modules it composes",
+        "recording-options": "a page has no CSS: a state chooses the content and modules it composes",
+        "entry-memory": "a page has no CSS: a state chooses the content and modules it composes",
+        "entry-memory-return": "a page has no CSS: a state chooses the content and modules it composes",
+        "recording-memory": "a page has no CSS: a state chooses the content and modules it composes",
+        "recording-memory-return": "a page has no CSS: a state chooses the content and modules it composes",
+        "entry-saved": "a page has no CSS: a state chooses the content and modules it composes",
+        "entry-edit": "a page has no CSS: a state chooses the content and modules it composes",
+        "entry-edit-empty": "a page has no CSS: a state chooses the content and modules it composes",
+        "entry-delete-confirm": "a page has no CSS: a state chooses the content and modules it composes",
+        "entry-delete-failed": "a page has no CSS: a state chooses the content and modules it composes",
+        "recording-delete-confirm": "a page has no CSS: a state chooses the content and modules it composes",
+        "recording-delete-failed": "a page has no CSS: a state chooses the content and modules it composes",
+        "entry-edit-failed": "a page has no CSS: a state chooses what it composes",
+        "entry-deleted": "a page has no CSS: a state chooses what it composes",
+        "recording-deleted": "a page has no CSS: a state chooses what it composes",
+        "without-note": "a page has no CSS: a state chooses what it composes",
+        "loading": "a page has no CSS: a state chooses what it composes",
+        "fetch-failed": "a page has no CSS: a state chooses what it composes",
+        "mood-failed": "a page has no CSS: a state chooses what it composes",
+        "empty": "a page has no CSS: a state chooses what it composes",
+        "first": "a page has no CSS: a state chooses what it composes",
+        "audio-no-transcript": "a page has no CSS: a state chooses what it composes",
+        "note-open": "a page has no CSS: a state chooses what it composes",
+        "draft": "a page has no CSS: a state chooses what it composes",
+        "entry-unsent": "a page has no CSS: a state chooses what it composes",
+        "entry-unsent-stopped": "a page has no CSS: a state chooses what it composes",
+        "memo-draft": "a page has no CSS: a state chooses what it composes",
+        "memo-draft-typed": "a page has no CSS: a state chooses what it composes",
+        "empty-today-memo-draft": "a page has no CSS: a state chooses what it composes"
+      }
+    },
+    "context": {
+      "values": [
+        "screen",
+        "walkthrough"
+      ],
+      "default": "screen",
+      "description": "Where the page is drawn. screen: the numbered screens (the static header). walkthrough: the prototypes and the website; below desktop a page with the header section draws it in its navbar form and puts its blocks in the page's reader (layout page, option reader). Pages without the header section draw the same in both.",
+      "noRule": {
+        "screen": "a page has no CSS: the context chooses how it composes its modules",
+        "walkthrough": "a page has no CSS: the context chooses how it composes its modules"
+      }
+    }
+  },
+  "options": {},
+  "content": {
+    "data": {
+      "type": "data",
+      "description": "data.mjs: the day, its record, notes, mood, overview and composer copy (01-today). Real copy: a page is not stress-tested (its components are)."
+    }
+  },
+  "slots": {},
+  "places": {},
+  "tokens": {
+    "reads": [],
+    "exposes": {},
+    "sets": []
+  },
+  "states": {
+    "default": "yes: the settled day as written",
+    "hover": "n/a: a page; its controls carry their own",
+    "focus-visible": "n/a: a page; its controls carry their own",
+    "active": "n/a: a page; its controls carry their own",
+    "disabled": "n/a: a page; its controls carry their own",
+    "selected": "n/a: a page; its controls carry their own",
+    "loading": "yes: today-loading, the day's skeleton in the real sheet (the record's rows in bones, the folded notes real, the memo band with its waveform in bone, the mood row's five words); the composer stays usable, its overview line a bone; \"Opening your journal.\" announced",
+    "error": "n/a: Today's failure states arrive with the state packs (round 4)",
+    "empty": "n/a: the empty day arrives with the state packs (round 4)"
+  },
+  "events": {},
+  "uses": {
+    "shell": "0.x",
+    "rail": "0.x",
+    "page": "0.x",
+    "mast": "0.x",
+    "header": "0.x",
+    "keybox": "0.x",
+    "dest": "0.x",
+    "sheet": "0.x",
+    "srow": "0.x",
+    "text": "0.x",
+    "entry-actions": "0.x",
+    "button": "0.x",
+    "field": "0.x",
+    "cluster": "0.x",
+    "mark": "0.x",
+    "said": "0.x",
+    "recrow": "0.x",
+    "play": "0.x",
+    "wave": "0.x",
+    "moodrow": "0.x",
+    "composer": "0.x",
+    "overview": "0.x",
+    "opt": "0.x",
+    "auth-form": "0.x",
+    "panel": "0.x",
+    "srowlink": "0.x",
+    "state-message": "0.x",
+    "notice": "0.x",
+    "send": "0.x",
+    "shead": "0.x",
+    "dayrow": "0.x",
+    "empty": "0.x",
+    "pending": "0.x",
+    "thumbs": "0.x",
+    "bone": "0.x",
+    "leafpic": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none of its own: the masthead (header), destinations (nav), the record (main) and its notes (aside) are its landmarks",
+    "keyboard": "its links, buttons and the composer, in reading order",
+    "labels": "Destinations; each note: From your record; the overview: its link names the whole line, the week and where it leads"
+  },
+  "responsive": {
+    "1200": "desktop: the masthead and destinations become the title block beside the page"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-14",
+      "kind": "internal",
+      "change": "Pages round 1: 01-today (the settled day) on the three platforms, at parity with the screens."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-15",
+      "kind": "added",
+      "change": "Variant context (screen, walkthrough): the walkthroughs render the page directly (pages round 5)."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-20",
+      "kind": "changed",
+      "change": "RecommendedChanges-v4 B3: the return state (the last entry echoed after a long absence) is removed."
+    },
+    {
+      "version": "0.4.0",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 C4: the overview is the latest weekly reflection's line (read from the reflection's data), linking to the booklet on its first leaf (overview 0.2.0); no glance."
+    },
+    {
+      "version": "0.5.0",
+      "date": "2026-10-29",
+      "kind": "added",
+      "change": "v4 C4: Empty Today carries the week's overview in the companion form; state first (11-states, #today-first): a new account's first day, Thu 6 Aug, nothing written, the first-week line (\"Your first reflection comes on Sunday.\") opening the week so far. Registration lands on it."
+    },
+    {
+      "version": "0.6.0",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 C5: states entry-unsent and entry-unsent-stopped (a written entry and a voice memo in the list with the pending line, 18-entry-system-states) replace save-failed and recording-upload-failed (dropped with their routes); views memo-draft, memo-draft-typed and empty-today-memo-draft (the composer's draft line, 11-states). The composer no longer draws a failed save."
+    },
+    {
+      "version": "0.7.0",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 round 10: a note's foot is its source and the thumbs (Ask's mechanic), in place of That's not right. A recording's waveform is the wave's own (the memo's phrase at a fixed pitch); today's waves.mjs retired."
+    },
+    {
+      "version": "0.8.0",
+      "date": "2026-10-30",
+      "kind": "changed",
+      "change": "v4 round 10: loading is a skeleton (bone, system/content/skeleton.mjs) in the page's real frame, in place of the one-line state message."
+    }
+  ]
+}

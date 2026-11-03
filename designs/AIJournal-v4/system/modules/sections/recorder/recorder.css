@@ -1,0 +1,166 @@
+/* recorder. Every selector starts from .aj-s-recorder; values come from tokens.
+   The Talk screen's approved compact transport recorder: measured audio; content determines height.
+   Moved from lock.css (Approved Compact Transport recorder). Its flex and min-width on the root are
+   the shell's, by role (data-place="main"); it places the transport's buttons by role (below). The masthead's wordmark belongs to the mast module. */
+.aj-s-recorder{background-image:repeating-linear-gradient(to right,var(--grid) 0 var(--w),transparent var(--w) var(--mod)),repeating-linear-gradient(to bottom,var(--grid) 0 var(--w),transparent var(--w) var(--mod));
+  padding:clamp(20px,3vw,56px) /* token-exempt: the approved compact recorder's fluid margins (lock.css section comment) */ clamp(14px,3vw,56px) /* token-exempt: the approved compact recorder's fluid margins (lock.css section comment) */ var(--s8)}
+.aj-s-recorder__mast{display:flex;align-items:center;justify-content:space-between;gap:var(--s7);padding-bottom:var(--s8);border-bottom:var(--w) solid var(--rule)}
+.aj-s-recorder__main{padding-top:var(--s8);min-width:0}
+.aj-s-recorder__main .aj-s-recorder__printed{font:400 var(--t-note)/var(--lh-note) var(--f-label);color:var(--rule)}
+.aj-s-recorder__main .aj-s-recorder__back{display:flex;justify-content:space-between;align-items:center;gap:var(--s6);margin-bottom:var(--s7)}
+.aj-s-recorder__main .aj-s-recorder__back>.aj-s-recorder__printed{font-size:var(--t-quiet);text-align:right}
+.aj-s-recorder__backlink{display:inline-flex;align-items:center;gap:var(--s4);min-height:var(--tap);color:var(--rule);font:400 var(--t-print)/1.4 var(--f-label);
+  letter-spacing:.07em /* token-exempt: the printed-caps tracking, .07em (tokens.json, --t-print) */;text-transform:uppercase;text-decoration:none}
+.aj-s-recorder__main .aj-s-recorder__intro{margin-bottom:var(--s7)}
+.aj-s-recorder__main h1{font:400 var(--t-mast)/1.16 var(--f-prose);
+  letter-spacing:-.015em /* token-exempt: the display heading's tightening, as the masthead (no recorded reason) */;color:var(--rule)}
+.aj-s-recorder__main .aj-s-recorder__intro>.aj-s-recorder__printed{margin-top:var(--s5)}
+.aj-s-recorder__main .aj-s-recorder__sheet{border:var(--w) solid var(--rule);border-radius:var(--r);background:var(--paper-2);min-width:0}
+.aj-s-recorder__main .aj-s-recorder__session{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:var(--s7);padding:var(--s6) var(--s8);border-bottom:var(--w) solid var(--rule)}
+.aj-s-recorder__main .aj-s-recorder__state{display:flex;align-items:center;gap:var(--s5);min-width:0;overflow-wrap:anywhere;font:400 var(--t-print)/1.4 var(--f-label);
+  letter-spacing:.07em /* token-exempt: the printed-caps tracking, .07em (tokens.json, --t-print) */;text-transform:uppercase;color:var(--block)}
+.aj-s-recorder__main .aj-s-recorder__state:before{content:'';
+  width:8px /* token-exempt: the state dot; no recorded reason */;
+  height:8px /* token-exempt: the state dot; no recorded reason */;
+  flex-shrink:0;border-radius:50%;background:var(--block)}
+.aj-s-recorder__main .aj-s-recorder__date{font-size:var(--t-quiet);text-align:right}
+.aj-s-recorder__main .aj-s-recorder__clock{display:flex;flex-direction:column;align-items:flex-end;gap:var(--s2)}
+.aj-s-recorder__main .aj-s-recorder__time{font:400 28px /* token-exempt: the elapsed clock's size; no recorded reason */ /1 var(--f-prose);color:var(--block);font-variant-numeric:tabular-nums;
+  letter-spacing:-.015em /* token-exempt: the display heading's tightening, as the masthead (no recorded reason) */}
+.aj-s-recorder__main .aj-s-recorder__clock .aj-s-recorder__printed{font-size:var(--t-quiet);color:var(--block)}
+.aj-s-recorder__main .aj-s-recorder__field{padding:var(--s6) var(--s8);background:var(--block-2);color:var(--block)}
+.aj-s-recorder__main .aj-s-recorder__wave{min-width:0;width:100%}
+.aj-s-recorder__trace{display:block;width:100%;
+  height:80px /* token-exempt: the approved compact recorder (lock.css section comment); no recorded reason */;overflow:visible;color:var(--block)}
+.aj-s-recorder__trace g{transform-box:fill-box;transform-origin:center}
+.aj-s-recorder__main .aj-s-recorder__axis{display:flex;justify-content:space-between;padding-top:var(--s5);border-top:var(--w) solid var(--block);font:400 var(--t-key)/1.4 var(--f-label);
+  letter-spacing:.08em /* token-exempt: the approved compact recorder (lock.css section comment); no recorded reason */;text-transform:uppercase}
+.aj-s-recorder__main .aj-s-recorder__transport,.aj-s-recorder__main .aj-s-recorder__start{display:flex;flex-wrap:wrap;flex-direction:row-reverse;align-items:center;justify-content:space-between;gap:var(--s6);padding:var(--s6) var(--s8)}
+.aj-s-recorder__main .aj-s-recorder__transport>.aj-s-recorder__printed,.aj-s-recorder__main .aj-s-recorder__start>.aj-s-recorder__printed{font-size:var(--t-quiet)}
+/* Keep this out of memory: under the controls in every phase, at their inset (decision 2026-10-28). */
+.aj-s-recorder__main .aj-s-recorder__memory{padding:0 var(--s8) var(--s6)}
+.aj-s-recorder__main .aj-s-recorder__buttons{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s5);margin-right:auto}
+.aj-s-recorder__main .aj-s-recorder__group{margin-right:auto;min-width:0}
+.aj-s-recorder__main .aj-s-recorder__feedback{
+  max-width:36em /* token-exempt: the approved compact recorder (lock.css section comment); no recorded reason */}
+.aj-s-recorder__main .aj-s-recorder__feedback:has(>[data-microphone-status]:not([hidden])){margin-top:var(--s4)}
+.aj-s-recorder__main .aj-s-recorder__feedback .aj-s-recorder__printed{font-size:var(--t-quiet);overflow-wrap:anywhere}
+
+@container (max-width:620px){
+  .aj-s-recorder{padding:var(--s7) var(--s6) var(--s8)}
+  .aj-s-recorder__mast{gap:var(--s6);padding-bottom:var(--s7)}
+  .aj-s-recorder__main{padding-top:var(--s7)}
+  .aj-s-recorder__main h1{font-size:29px /* token-exempt: the approved compact recorder's size (the same 29px as the masthead's wordmark), as it was in lock.css */}
+  /* v4 C5: the back note stays centred on "← Today" at every width (it was set to the top of the 44px link here, above its words). */
+  .aj-s-recorder__main .aj-s-recorder__back{margin-bottom:var(--s6)}
+  .aj-s-recorder__main .aj-s-recorder__back>.aj-s-recorder__printed{max-width:17em /* token-exempt: the approved compact recorder (lock.css section comment); no recorded reason */}
+  .aj-s-recorder__main .aj-s-recorder__session{grid-template-columns:minmax(0,1fr) auto;gap:var(--s2) var(--s6);padding:12px /* token-exempt: the approved compact recorder (lock.css section comment); no recorded reason */ var(--s6)}
+  .aj-s-recorder__main .aj-s-recorder__state{grid-column:1;grid-row:1}
+  .aj-s-recorder__main .aj-s-recorder__date{grid-column:1;grid-row:2;text-align:left;font-size:var(--t-key)}
+  .aj-s-recorder__main .aj-s-recorder__clock{grid-column:2;grid-row:1/3}
+  .aj-s-recorder__main .aj-s-recorder__field{padding:var(--s6)}
+  .aj-s-recorder__main .aj-s-recorder__transport,.aj-s-recorder__main .aj-s-recorder__start{flex-direction:column;align-items:stretch;padding:var(--s6);gap:var(--s5)}
+  .aj-s-recorder__main .aj-s-recorder__buttons{width:100%;margin:0;order:0}
+  .aj-s-recorder__main .aj-s-recorder__transport>.aj-s-recorder__printed,.aj-s-recorder__main .aj-s-recorder__start>.aj-s-recorder__printed{order:1}
+  .aj-s-recorder__main .aj-s-recorder__group{width:100%;margin:0;order:0}
+  .aj-s-recorder__main .aj-s-recorder__memory{padding:0 var(--s6) var(--s6)}
+}
+@container (max-width:336px){
+  .aj-s-recorder__mast{flex-wrap:wrap}
+  .aj-s-recorder__main .aj-s-recorder__back{flex-wrap:wrap}
+  .aj-s-recorder__main .aj-s-recorder__back>.aj-s-recorder__printed{text-align:left;max-width:none}
+}
+
+/* context: .device is the stage; below desktop the recorder's masthead stays at the top */
+[data-platform]:not([data-platform="desktop"]) .aj-s-recorder__mast{position:sticky;top:0;z-index:3;/* token-exempt: the pinned masthead stacks above the page that scrolls under it (mobile/tablet) */background:var(--paper);padding-top:var(--s7);margin-top:calc(-1 * var(--s7))}
+
+/* PLACEMENT BY ROLE (decision 2026-10-12). Below 620 the transport's main button (grow) takes the room left;
+   below 336 every button takes the full width. */
+@container (max-width:620px){
+  .aj-s-recorder__buttons > [data-place~="grow"]{flex:1}
+}
+@container (max-width:336px){
+  .aj-s-recorder__buttons > *{width:100%}
+}
+
+/* The recorder's wordmark: the masthead's wordmark (layout/mast) as a link back to Today, 44px tall
+   (Approved Compact Transport recorder); 29px below 620, the size of its h1. Its date box's value is 22px there. */
+.aj-s-recorder__wordmark{font-family:var(--f-prose);font-size:var(--t-mast);line-height:var(--lh-flat);font-weight:400;color:var(--rule);letter-spacing:-.015em;margin-bottom:var(--s5);
+  display:flex;align-items:center;min-height:44px;/* token-exempt: the approved compact recorder's tap target, as it was in lock.css */text-decoration:none}
+@container (min-width:700px){
+  .aj-s-recorder__wordmark{margin-bottom:0}
+}
+@container (max-width:620px){
+  .aj-s-recorder__wordmark{font-size:29px/* token-exempt: the approved compact recorder's size (the same 29px as its h1), as it was in lock.css */}
+  .aj-s-recorder__mast{--aj-c-keybox-value-size:22px/* token-exempt: the compact recorder's date size */}
+}
+
+/* The trace's bars are drawn by the recorder's script, never animated by CSS. */
+.aj-s-recorder__trace g{animation:none}
+/* THE TRACE IS A FIXED DECORATIVE SHAPE (v4 B6, decision 2026-10-20): it never follows the sound.
+   When a memo starts, its bars rise once from the flat line to the shape, at the wave's own duration
+   and curve (every wave in the product arrives on --g-wave); they hold still after, recording or
+   paused, and reopening the recorder returns them to flat at once (phase ready has no transition).
+   The rise is vertical, so the width-derived desktop wave duration does not apply: the tallest bar
+   travels .91 x 80px = 73px, and 1.724 x 73 x 16.667 / 360 = 5.8px a frame, far inside the 45px
+   ceiling at every width. */
+/* context: [data-motion] is the motion scope; arrival motion runs only inside the app. */
+[data-motion] .aj-s-recorder[data-recorder-phase="recording"] .aj-s-recorder__trace g{transition:transform var(--g-wave) var(--gc)}
+@media (prefers-reduced-motion:reduce){
+  /* context: [data-motion] is the motion scope; the review switch lifts the guard. */
+  [data-motion]:not(:where(html[data-motion-review="play"] *)) .aj-s-recorder__trace g{transition:none}
+}
+
+/* THE PLAYER (v4 C5, explore drafts a-quiet-line; rulings 11 to 13). While paused the recording field is the player:
+   the trace is the track (click or drag, arrow keys), a veil of the field's own ground over what is not played yet
+   (so the unplayed bars read at .32, as explored), a 2px playhead at the place; under it play / pause, back and
+   forward 10 s, and position / length. Before playback begins the trace is drawn as recorded: no veil, no playhead.
+   Recording, none of it shows. The place is the root's --aj-s-recorder-at (0 to 1), the runtime's to set. */
+.aj-s-recorder__track{position:relative}
+.aj-s-recorder[data-recorder-phase="paused"] .aj-s-recorder__track{touch-action:none;cursor:pointer}
+.aj-s-recorder__veil{position:absolute;inset-block:0;inset-inline:calc(var(--aj-s-recorder-at,0) * 100%) 0;pointer-events:none;opacity:0;
+  background:color-mix(in srgb,var(--block-2) 68%,transparent);/* token-exempt: the unplayed bars at .32 (explore drafts a): 68% of the field's ground over them */
+  transition:opacity var(--g-drawer-out) var(--gc-rise)}
+.aj-s-recorder__head{position:absolute;
+  inset-block:-4px;/* token-exempt: the playhead stands 4px past the trace (explore drafts a) */
+  inset-inline-start:calc(var(--aj-s-recorder-at,0) * 100%);
+  width:2px;/* token-exempt: the playhead, 2px */
+  margin-inline-start:-1px;/* token-exempt: centres the 2px playhead on its place */
+  background:var(--block);opacity:0;pointer-events:none}
+.aj-s-recorder[data-recorder-phase="paused"][data-playback] .aj-s-recorder__veil,
+.aj-s-recorder[data-recorder-phase="paused"][data-playback] .aj-s-recorder__head{opacity:1}
+.aj-s-recorder__player{display:none;align-items:center;gap:var(--s4);margin-top:var(--s6)}
+.aj-s-recorder[data-recorder-phase="paused"] .aj-s-recorder__player{display:flex}
+.aj-s-recorder__ctl{display:inline-grid;place-items:center;flex:0 0 auto;padding:0;
+  width:36px;/* token-exempt: the player's controls, 36px (explore drafts a): smaller than the transport, which stays the way out */
+  height:36px;/* token-exempt: the player's controls, 36px (explore drafts a) */
+  border:var(--w) solid var(--block);border-radius:var(--r);background:transparent;color:var(--block);cursor:pointer;
+  font:400 var(--t-key)/1 var(--f-label);touch-action:manipulation}
+.aj-s-recorder__ctl:active{transform:translateY(1px)}
+.aj-s-recorder__ctl svg{
+  width:20px;/* token-exempt: the transport's glyph size (button transport form) */
+  height:20px;/* token-exempt: the transport's glyph size (button transport form) */}
+.aj-s-recorder__play{background:var(--block);color:var(--paper-2)}
+.aj-s-recorder__play svg{
+  width:16px;/* token-exempt: the filled play and pause glyphs read larger; 16px (explore drafts a) */
+  height:16px;/* token-exempt: the filled play and pause glyphs read larger; 16px (explore drafts a) */}
+@media (hover:hover) and (pointer:fine){
+  .aj-s-recorder__skip:hover{background:color-mix(in srgb,var(--block) 10%,transparent)/* token-exempt: the keyline control's hover wash (explore drafts a) */}
+}
+.aj-s-recorder__pos{margin-inline-start:auto;font:400 var(--t-key)/1 var(--f-label);font-variant-numeric:tabular-nums;color:var(--block);
+  letter-spacing:.06em/* token-exempt: the label tracking of the uppercase labels, .06em */}
+/* Right to left the memo runs from the right: the trace mirrors, the veil and playhead follow the inline direction,
+   and the skips' arrows turn the other way (their "10" does not mirror). */
+.aj-s-recorder__trace:dir(rtl){scale:-1 1}
+.aj-s-recorder__skip:dir(rtl) svg g{transform-box:view-box;transform-origin:center;scale:-1 1}
+
+/* DISCARD (v4 C5, ruling 12): a quiet button set apart at the transport's far end, shown only while paused; on a phone
+   last, under the hint. It asks first: the question and its two buttons take the transport's place (Discard memo
+   quiet, Go back solid). */
+.aj-s-recorder:not([data-recorder-phase="paused"]) .aj-s-recorder__transport > [data-place~="discard"]{display:none}
+.aj-s-recorder__confirm:not([hidden]){display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s5) var(--s7);width:100%}
+.aj-s-recorder__main .aj-s-recorder__transport:has(> .aj-s-recorder__confirm:not([hidden])) > :not(.aj-s-recorder__confirm){display:none}
+.aj-s-recorder__question{margin:0;font:400 var(--t-field)/1.4 var(--f-prose);color:var(--rule)}
+@container (max-width:620px){
+  .aj-s-recorder__main .aj-s-recorder__transport > [data-place~="discard"]{order:2;align-self:flex-start}
+}

@@ -1,0 +1,97 @@
+{
+  "name": "glance",
+  "layer": "components",
+  "version": "0.3.0",
+  "inventory": "D2",
+  "description": "One line of the current reflection, between two rules. Pro only. The line is the product speaking, so it types itself in on arrival (the printed-line motion); the user's own words never do.",
+  "variants": {},
+  "options": {
+    "tag": {
+      "values": [
+        "p",
+        "h1"
+      ],
+      "default": "p",
+      "description": "h1 when the glance line names the page (Ask on desktop, revision 48): the question itself, set without the printed-line span, so it does not draw in."
+    },
+    "restated": {
+      "type": "boolean",
+      "default": false,
+      "description": "The user's own question restated in the glance's slot (04-ask): plain, without the typed line (their words, not the product speaking)."
+    }
+  },
+  "content": {
+    "line": {
+      "type": "text",
+      "required": true,
+      "description": "The one line, written by the product about the user's record; it must be true of the record on the same screen (AGENTS.md, content against content)."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": [
+      "--s4",
+      "--w",
+      "--rule",
+      "--f-prose",
+      "--t-glance",
+      "--lh-glance",
+      "--g-type",
+      "--g-date"
+    ],
+    "exposes": {
+      "--aj-c-glance-motion": "The line's draw-in: none where a parent shows the line still (the overview in the writing companion); the printed-line motion otherwise."
+    }
+  },
+  "states": {
+    "default": "yes: as rendered, the line types in over --g-type, after the date when the page has a handwritten date",
+    "hover": "n/a: not interactive",
+    "focus-visible": "n/a: not focusable",
+    "active": "n/a: not interactive",
+    "disabled": "n/a: not interactive",
+    "selected": "n/a: not interactive",
+    "loading": "n/a: absent until there is a reflection",
+    "error": "n/a: absent rather than wrong",
+    "empty": "n/a: no line, no glance"
+  },
+  "events": {},
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none: a paragraph",
+    "keyboard": "none",
+    "labels": "none; the motion is clip-path only, the text is in the DOM from the start"
+  },
+  "responsive": {},
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-10",
+      "kind": "internal",
+      "change": "Converted from lock.css D2 (.glance, .gline) with its own copy of the printed-line keyframes."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-10",
+      "kind": "added",
+      "change": "Option tag: the h1 form desktop Ask uses (render function and fixture only; the screens already had it)."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-13",
+      "kind": "internal",
+      "change": "Exposes --aj-c-glance-motion; the overview's legacy context goes (the overview places its glance by role)."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "Option restated: the question as the user asked it, without the typed line (04-ask). Pages round 3."
+    }
+  ],
+  "contexts": [
+    "data-date",
+    "data-motion"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "file": "02-timeline.html",
+  "title": "Timeline · list and calendar",
+  "comment": "Journal v3 design of record: 02-timeline.html. Product scope is V3-REVISION.md; visual and motion rules remain in lock.css.",
+  "written": true,
+  "devices": [
+    {
+      "page": "timeline",
+      "state": "list"
+    },
+    {
+      "page": "timeline",
+      "state": "calendar",
+      "caption": {
+        "title": "Timeline · list and calendar",
+        "text": "Journal v3 design of record. Product behavior and state transitions are specified in V3-REVISION.md."
+      }
+    }
+  ],
+  "platforms": {
+    "desktop-web": [
+      {
+        "page": "timeline",
+        "state": "list",
+        "caption": {
+          "title": "Timeline · list and calendar",
+          "text": "Journal v3 design of record. Product behavior and state transitions are specified in V3-REVISION.md."
+        }
+      }
+    ]
+  }
+}

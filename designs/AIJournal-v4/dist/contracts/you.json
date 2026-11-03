@@ -1,0 +1,127 @@
+{
+  "name": "you",
+  "layer": "pages",
+  "version": "0.4.0",
+  "description": "You: the settings page, four rows in three groups, each a link to its own screen, with the destinations and the foot line. One render for every platform; desktop puts the masthead and the destinations in the title block beside the page.",
+  "variants": {
+    "platform": {
+      "values": [
+        "mobile",
+        "tablet",
+        "desktop"
+      ],
+      "default": "mobile",
+      "description": "The device the page is drawn for. Desktop's rule: the masthead (wordmark, keybox) and the destinations are the title block (mast form title) beside the page (shell layout sidebar). Mobile and tablet: the header section (masthead row and destinations) inside the page.",
+      "noRule": {
+        "mobile": "a page has no CSS: the platform chooses which modules it composes and how",
+        "tablet": "a page has no CSS: the platform chooses which modules it composes and how",
+        "desktop": "a page has no CSS: the platform chooses which modules it composes and how"
+      }
+    },
+    "state": {
+      "values": [
+        "default",
+        "loading"
+      ],
+      "default": "default",
+      "description": "The page's states (journal-website.html #you). The settings page has one.",
+      "noRule": {
+        "default": "a page has no CSS: a state chooses the content and modules it composes",
+        "loading": "a page has no CSS: a state chooses what it composes"
+      }
+    },
+    "context": {
+      "values": [
+        "screen",
+        "walkthrough"
+      ],
+      "default": "screen",
+      "description": "Where the page is drawn. screen: the numbered screens (the static header). walkthrough: the prototypes and the website; below desktop a page with the header section draws it in its navbar form and puts its blocks in the page's reader (layout page, option reader). Pages without the header section draw the same in both.",
+      "noRule": {
+        "screen": "a page has no CSS: the context chooses how it composes its modules",
+        "walkthrough": "a page has no CSS: the context chooses how it composes its modules"
+      }
+    }
+  },
+  "options": {},
+  "content": {
+    "data": {
+      "type": "data",
+      "description": "data.mjs: the masthead, the destinations, the settings groups and rows, and the foot line (07-you). Real copy: a page is not stress-tested (its components are)."
+    }
+  },
+  "slots": {},
+  "places": {},
+  "tokens": {
+    "reads": [],
+    "exposes": {},
+    "sets": []
+  },
+  "states": {
+    "default": "yes: the settings rows as written",
+    "hover": "n/a: a page; its controls carry their own",
+    "focus-visible": "n/a: a page; its controls carry their own",
+    "active": "n/a: a page; its controls carry their own",
+    "disabled": "n/a: a page; its controls carry their own",
+    "selected": "n/a: a page; its controls carry their own",
+    "loading": "yes: you-loading, the labels and headings real, the keeping date, each row's line and value in bone, no row a link yet; \"Loading your settings.\" announced; no foot",
+    "error": "n/a: the page's failure states arrive with the state packs",
+    "empty": "n/a: the settings page is never empty"
+  },
+  "events": {},
+  "uses": {
+    "shell": "0.x",
+    "rail": "0.x",
+    "page": "0.x",
+    "mast": "0.x",
+    "header": "0.x",
+    "keybox": "0.x",
+    "dest": "0.x",
+    "sheet": "0.x",
+    "shead": "0.x",
+    "srowlink": "0.x",
+    "foot": "0.x",
+    "bone": "0.x",
+    "srow": "0.x",
+    "said": "0.x",
+    "dayrow": "0.x",
+    "recrow": "0.x",
+    "leafpic": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none of its own: the masthead (header), destinations (nav) and the settings (main) are its landmarks",
+    "keyboard": "its links, in reading order",
+    "labels": "Destinations"
+  },
+  "responsive": {
+    "1200": "desktop: the masthead and destinations become the title block beside the page"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-14",
+      "kind": "internal",
+      "change": "Pages round 2: 07-you (the settings page) on the three platforms, at parity with the screens."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-15",
+      "kind": "added",
+      "change": "Variant context (screen, walkthrough): the walkthroughs render the page directly (pages round 5)."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-30",
+      "kind": "changed",
+      "change": "v4 round 10: loading is a skeleton (bone, system/content/skeleton.mjs) in the page's real frame, in place of the one-line state message."
+    },
+    {
+      "version": "0.4.0",
+      "date": "2026-10-30",
+      "kind": "changed",
+      "change": "v4 round 10 fixes 5: the keeping date and each row's line in bone too, as What it sees."
+    }
+  ]
+}

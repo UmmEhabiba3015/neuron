@@ -1,0 +1,126 @@
+{
+  "name": "moodgraph",
+  "layer": "components",
+  "version": "0.2.0",
+  "inventory": "v4 C1",
+  "description": "One week's mood on the Timeline: a monotone curve through the days written, carried in from the last day written before the week and out to the first after, with the ground under it in the colour of the week's average mood (the area rule, README). One day written is a straight line; nothing written is the empty graph. Each point is a button to its day.",
+  "variants": {},
+  "options": {},
+  "content": {
+    "week": {
+      "type": "text",
+      "required": true,
+      "description": "The week's Monday, YYYY-MM-DD."
+    },
+    "label": {
+      "type": "text",
+      "required": true,
+      "description": "The week's name in the drawing's accessible name: \"3 to 9 Aug\"."
+    },
+    "days": {
+      "type": "list",
+      "required": true,
+      "description": "Seven days, Monday first: { date: YYYY-MM-DD, mood?: light|good|even|low|hard, has?: something written, future?: after today (no date number), name: \"Sunday 9 August\", short: \"Sun 9 Aug\" }. A day with a mood is a point."
+    },
+    "before": {
+      "type": "object",
+      "required": false,
+      "description": "{ date, mood } of the last day written before the week: the curve comes in from it. None: the curve runs in level from the edge."
+    },
+    "after": {
+      "type": "object",
+      "required": false,
+      "description": "{ date, mood } of the first day written after the week: the curve goes out to it. None: level to the edge."
+    },
+    "current": {
+      "type": "text",
+      "required": false,
+      "description": "The date of the day in view in the list: its dot is ringed --ink."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": [
+      "--rule",
+      "--w",
+      "--t-key",
+      "--f-label",
+      "--rule-2",
+      "--mood-light-ground",
+      "--mood-good-ground",
+      "--mood-even-ground",
+      "--mood-low-ground",
+      "--mood-hard-ground",
+      "--paper-2",
+      "--mood-light",
+      "--mood-good",
+      "--mood-even",
+      "--mood-low",
+      "--mood-hard",
+      "--ink",
+      "--tap",
+      "--s2",
+      "--s4",
+      "--paper",
+      "--r",
+      "--t-print",
+      "--lh-tight"
+    ],
+    "exposes": {
+      "--aj-c-moodgraph-x": "A point's centre across the drawing, in percent: written by the render on each point, never by a parent.",
+      "--aj-c-moodgraph-y": "A point's centre down the drawing, in percent: written by the render on each point, never by a parent."
+    }
+  },
+  "states": {
+    "default": "yes: the curve, the ground in the week's average mood, the dots",
+    "hover": "yes: a point rings its dot and shows its day and mood above it",
+    "focus-visible": "yes: the product focus ring on a point, and its day and mood above it",
+    "active": "n/a: a point jumps away at once",
+    "disabled": "n/a: a day without a mood is not a point",
+    "selected": "yes: the day in view (current) ringed --ink",
+    "loading": "n/a: drawn from known days",
+    "error": "n/a: nothing here can fail",
+    "empty": "yes: nothing written this week: the scale and the days, no curve and no ground"
+  },
+  "events": {
+    "pick": "a point was pressed (bubbling; detail: { date }): the page scrolls to that day and draws the arrival"
+  },
+  "behaviour": {
+    "script": "moodgraph.js, inside its root only: a press on a point dispatches pick with its date; when its parent sets data-current, the ring moves to that day's dot (none when the day is not in this week). Nothing else; which week shows is the parent's.",
+    "state": {
+      "data-current": {
+        "values": [
+          "YYYY-MM-DD"
+        ],
+        "setBy": "runtime",
+        "description": "The day in view, set by the parent (the Timeline's card) as the list scrolls: its dot is ringed --ink. Rendered from current."
+      }
+    }
+  },
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "img on the drawing, named with the week, every day written and its mood, and the average (\"Mood, 3 to 9 Aug: Monday 3 August, Even; …. On average Even\"); a button per point",
+    "keyboard": "Tab to each point, Enter or Space to go to its day",
+    "labels": "each point: \"Sunday 9 August, Even. Go to this day\""
+  },
+  "responsive": {
+    "all": "the drawing scales with its container (its own 300 by 150 units); the points stay --tap at every width"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-23",
+      "kind": "added",
+      "change": "New (v4 C1): from explore timeline-jump-arrival f-wash-and-frame, the mood panel (timeline-mood-gaps E, revised)."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-23",
+      "kind": "added",
+      "change": "Follows data-current: the ring moves with the day in view (v4 C1 round 2); each dot carries its date."
+    }
+  ],
+  "contexts": []
+}

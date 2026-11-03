@@ -1,0 +1,172 @@
+{
+  "name": "timeline",
+  "layer": "pages",
+  "version": "0.6.0",
+  "description": "Timeline: the journal by day, newest first (day rows, recordings, the month headings), with the date and mood card (its mood panel and calendar) and the search as the list's running head (v4 C1). Below 1200 the card sits above the search; on desktop it is the sticky column right of the list.",
+  "variants": {
+    "platform": {
+      "values": [
+        "mobile",
+        "tablet",
+        "desktop"
+      ],
+      "default": "mobile",
+      "description": "Mobile and tablet: the header section (the masthead row with the date box, the destinations); the card, the search and the list in one column. Desktop: the title block (wordmark, date box, destinations); the split page, the search and the list in the record's column and the card the sticky column right of it (aside column).",
+      "noRule": {
+        "mobile": "a page has no CSS: the platform chooses which modules it composes and how",
+        "tablet": "a page has no CSS: the platform chooses which modules it composes and how",
+        "desktop": "a page has no CSS: the platform chooses which modules it composes and how"
+      }
+    },
+    "state": {
+      "values": [
+        "list",
+        "mood",
+        "calendar",
+        "mood-one-day",
+        "mood-empty-week",
+        "found",
+        "no-matches",
+        "searching",
+        "search-failed",
+        "earlier",
+        "end",
+        "thin-week",
+        "loading"
+      ],
+      "default": "list",
+      "description": "v4 C1: list (both card parts closed); the card's mood (panel open), calendar (open), mood-one-day (a week with one day: a straight line), mood-empty-week (nothing written this week); the search's found (the matching days, words marked), no-matches, searching, search-failed. The old design's earlier and end (#timeline-earlier, #timeline-end: another foot line), thin-week (11-states: a few days), loading (#timeline-loading: the list replaced by a state message).",
+      "noRule": {
+        "list": "a page has no CSS: a state chooses what it composes",
+        "mood": "a page has no CSS: a state chooses what it composes",
+        "calendar": "a page has no CSS: a state chooses what it composes",
+        "mood-one-day": "a page has no CSS: a state chooses what it composes",
+        "mood-empty-week": "a page has no CSS: a state chooses what it composes",
+        "found": "a page has no CSS: a state chooses what it composes",
+        "no-matches": "a page has no CSS: a state chooses what it composes",
+        "searching": "a page has no CSS: a state chooses what it composes",
+        "search-failed": "a page has no CSS: a state chooses what it composes",
+        "earlier": "a page has no CSS: a state chooses what it composes",
+        "end": "a page has no CSS: a state chooses what it composes",
+        "thin-week": "a page has no CSS: a state chooses what it composes",
+        "loading": "a page has no CSS: a state chooses what it composes"
+      }
+    },
+    "context": {
+      "values": [
+        "screen",
+        "walkthrough"
+      ],
+      "default": "screen",
+      "description": "Where the page is drawn. screen: the numbered screens (the static header). walkthrough: the prototypes and the website; below desktop a page with the header section draws it in its navbar form and puts its blocks in the page's reader (layout page, option reader). Pages without the header section draw the same in both.",
+      "noRule": {
+        "screen": "a page has no CSS: the context chooses how it composes its modules",
+        "walkthrough": "a page has no CSS: the context chooses how it composes its modules"
+      }
+    }
+  },
+  "options": {},
+  "content": {
+    "data": {
+      "type": "data",
+      "description": "data.mjs: the days newest first and each day's mood (02-timeline; the days from 12 July are the approved design's); states.mjs: what each state changes. The card's weeks and months are derived with system/content/journal-days.mjs. Real copy: a page is not stress-tested."
+    }
+  },
+  "slots": {},
+  "places": {},
+  "tokens": {
+    "reads": [],
+    "exposes": {},
+    "sets": []
+  },
+  "states": {
+    "default": "yes: the list, both card parts closed",
+    "hover": "n/a: a page; its controls carry their own",
+    "focus-visible": "n/a: a page; its controls carry their own",
+    "active": "n/a: a page; its controls carry their own",
+    "disabled": "n/a: a page; its controls carry their own",
+    "selected": "yes: mood (the card's panel open)",
+    "loading": "yes: timeline-loading, the list's skeleton (four days and a memo, as the record draws them) under the real find bar and card; \"Loading your days.\" announced; no foot",
+    "error": "yes: search-failed",
+    "empty": "yes: mood-empty-week; no-matches; earlier and end change the foot line; thin-week is a few days"
+  },
+  "events": {},
+  "uses": {
+    "shell": "0.x",
+    "rail": "0.x",
+    "page": "0.x",
+    "mast": "0.x",
+    "header": "0.x",
+    "keybox": "0.x",
+    "dest": "0.x",
+    "daycard": "0.x",
+    "find": "0.x",
+    "record": "0.x",
+    "foot": "0.x",
+    "sheet": "0.x",
+    "state-message": "0.x",
+    "notice": "0.x",
+    "cluster": "0.x",
+    "button": "0.x",
+    "bone": "0.x",
+    "dayrow": "0.x",
+    "recrow": "0.x",
+    "srow": "0.x",
+    "said": "0.x",
+    "leafpic": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none of its own: the masthead, destinations, the card (a labelled section), the search (search), the record (main's list)",
+    "keyboard": "the card's date, mood toggle, strip dots, week arrows, graph points and calendar; the search's field, clear and switch; the rows' controls",
+    "labels": "Destinations; Where you are (the card); Search your journal"
+  },
+  "responsive": {
+    "1200": "desktop: the title block, the split page (the record's column and the card as its sticky side column)"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-14",
+      "kind": "internal",
+      "change": "Pages round 3: 02-timeline (list and calendar) on the three platforms, at parity with the screens."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "internal",
+      "change": "Pages round 4b: the states earlier and end (the list with the foot line changed) and thin-week (a few days; 11-states), at parity with the packs. Loading is not built: it needs a state-message paragraph the text module cannot write."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-15",
+      "kind": "added",
+      "change": "Variant context (screen, walkthrough): the walkthroughs render the page directly (pages round 5)."
+    },
+    {
+      "version": "0.4.0",
+      "date": "2026-10-23",
+      "kind": "changed",
+      "change": "v4 C1: the List/Calendar zoom and the calendar index go; the masthead carries the date box on every platform; the date and mood card (daycard), the search (find pill) and the list (record, with the jump's arrival) compose the page, the card the sticky side column on desktop. Each day carries its mood; the days from 12 July are added from the approved design. New states mood, calendar (now the card's), mood-one-day, mood-empty-week, found, no-matches, searching, search-failed; earlier, end, thin-week and loading kept. No arrival state: a rendered jump would scroll the page's host; the arrival is the live jump's."
+    },
+    {
+      "version": "0.4.1",
+      "date": "2026-10-25",
+      "kind": "changed",
+      "change": "The search is in the flow on the numbered comps below desktop (find's flow: the page scrolls under the pinned header there, which no script measures); it sticks in the reader and on desktop."
+    },
+    {
+      "version": "0.5.0",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 round 10: a recording's waveform is the wave's own (the memo's phrase at a fixed pitch); waves.mjs retired."
+    },
+    {
+      "version": "0.6.0",
+      "date": "2026-10-30",
+      "kind": "changed",
+      "change": "v4 round 10: loading is a skeleton (bone, system/content/skeleton.mjs) in the page's real frame, in place of the one-line state message."
+    }
+  ]
+}

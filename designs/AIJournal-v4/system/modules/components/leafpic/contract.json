@@ -1,0 +1,120 @@
+{
+  "name": "leafpic",
+  "layer": "components",
+  "version": "0.2.0",
+  "inventory": "v4 C3",
+  "description": "A Reflections leaf's picture, drawn in ink on paper: the week's moods as seven dots, what each day kept (a pen and a microphone), the week's recordings as bars, or this week's days beside the weeks before as columns. The picture is said aloud as one sentence (role img); a mood colour is only support, the word is in the title and the caption.",
+  "variants": {
+    "kind": {
+      "values": [
+        "week",
+        "kept",
+        "recordings",
+        "weeks"
+      ],
+      "default": "week",
+      "description": "week: the day letters over seven dots (26px at most), a kept day filled in its mood, an empty day a 1.5px ring at 28% --rule; a day can be before joining (dashed), still ahead (dotted) or today (a ring round it). kept: a column per day, a pen square over a microphone square (26px, --r), filled --rule where kept, a dashed ring where not. recordings: a bar per recording (its day, the bar, its length), the longest in full --rule, the rest at 40%. weeks: four columns, the weeks before and then this one in full --rule, each labelled by its date."
+    }
+  },
+  "options": {
+    "loading": {
+      "type": "boolean",
+      "default": false,
+      "description": "The picture's skeleton (v4 round 10): the same grid, the day letters real, each mark in bone (a dot, a kept square, a recording's bar at a set share, a week's column), the lengths, labels and caption in bone; aria-hidden, no say."
+    }
+  },
+  "content": {
+    "say": {
+      "type": "text",
+      "required": true,
+      "description": "The picture in one sentence, its accessible name: \"Monday even, Wednesday low, Thursday low, Saturday good, Sunday even.\""
+    },
+    "caption": {
+      "type": "text",
+      "required": false,
+      "description": "A line under the picture, in labels: the week's \"Mon even · Wed low · Thu low · Sat good · Sun even\", the sleep days \"Wed, Thu, Sat, Sun\". Seen, not read (the say carries it)."
+    },
+    "days": {
+      "type": "list",
+      "required": false,
+      "description": "week and kept: the seven days, Monday first. week: { dow: \"M\", mood?: light|good|even|low|hard (a kept day), day?: before|ahead, today?: true, title?: \"Mon 3: Even\" }. kept: { dow, written: bool, recorded: bool, title?: \"Mon 3\" }."
+    },
+    "recs": {
+      "type": "list",
+      "required": false,
+      "description": "recordings: the week's recordings in order, { day: \"Wed\", len: \"11:47\" }. The bars are drawn to the longest, which is drawn in full --rule."
+    },
+    "weeks": {
+      "type": "list",
+      "required": false,
+      "description": "weeks: the columns, oldest first, { label: \"13 Jul\" | \"This week\", n: days here (of 7), current?: true }."
+    }
+  },
+  "slots": {},
+  "places": {},
+  "tokens": {
+    "reads": [
+      "--s4",
+      "--f-label",
+      "--t-quiet",
+      "--rule-2",
+      "--s3",
+      "--t-col",
+      "--rule",
+      "--mood-light",
+      "--mood-good",
+      "--mood-even",
+      "--mood-low",
+      "--mood-hard",
+      "--paper-2",
+      "--w",
+      "--r",
+      "--s5",
+      "--gc"
+    ],
+    "exposes": {
+      "--aj-c-leafpic-share": "A bar's share of the longest recording, or a column's of seven days, written on it by the render (recs, weeks)."
+    }
+  },
+  "states": {
+    "default": "yes: the picture as drawn",
+    "hover": "n/a: nothing in it is pressed; a dot or a square names its day and mood in its title",
+    "focus-visible": "n/a: not focusable; it is read as one image",
+    "active": "n/a: nothing to press",
+    "disabled": "n/a: nothing to press",
+    "selected": "n/a: nothing to choose",
+    "loading": "yes: loading, the picture's own grid with its marks in bone (Reflections' skeleton)",
+    "error": "n/a: drawn with the page",
+    "empty": "n/a: a week with a reflection has a kept day; the week so far draws the days still to come as dotted rings (week, day ahead)"
+  },
+  "events": {},
+  "uses": {
+    "bone": "0.x"
+  },
+  "assets": [],
+  "a11y": {
+    "role": "img (a figure), named by say; the drawing and the caption are aria-hidden",
+    "keyboard": "none",
+    "labels": "say is required"
+  },
+  "responsive": {
+    "all": "the week and kept pictures keep seven columns at most 290px wide; the dots shrink with a narrow column (26px at most), the squares stay 26px"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-28",
+      "kind": "added",
+      "change": "New (v4 C3): the four pictures of explore booklet-feel f-mix (shared/cards.css)."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-30",
+      "kind": "added",
+      "change": "v4 round 10 fixes 5: loading draws the picture in bone in its own grid, for Reflections' skeleton."
+    }
+  ],
+  "contexts": [
+    "data-pos"
+  ]
+}

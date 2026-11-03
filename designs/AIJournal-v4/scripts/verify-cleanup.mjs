@@ -1,0 +1,67 @@
+// Regression checks for shared payloads, lazy views and preserved row identity.
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import assert from 'node:assert/strict';
+import {pathToFileURL} from 'node:url';
+import {startBrowser,pause,removeTemporaryDirectory} from '../tools/lib/browser-harness.mjs';
+import {elementRange,ancestorsAt,hasClass,openTag} from '../tools/lib/html-structure.mjs';
+const root=new URL('../',import.meta.url);
+fs.mkdirSync(new URL('verification/',root),{recursive:true});
+const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(new URL(file,root))).digest('hex');
+const mutable=['lock.css'];
+const before=mutable.map(hash);
+await import('./portable-fonts.mjs');
+assert.deepEqual(mutable.map(hash),before,'Importing the font generator must not rewrite files');
+const sample='<div class="page" data-note="a > b"><!-- <div> --><style>.x::before{content:"<div>"}</style><div class="entry">text</div></div>';
+assert.equal(elementRange(sample,0).html,sample);
+assert(hasClass(ancestorsAt(sample,sample.search(new RegExp(openTag('div','entry')))).at(-1),'page'));
+const html=fs.readFileSync(new URL('journal-website.html',root),'utf8');
+assert.equal((html.match(/@font-face\{/g)||[]).length,6,'Fonts must be embedded once');
+const variants=JSON.parse(html.match(/const variants=(\{[\s\S]*?\});\s*const host=/)[1]);
+for(const source of Object.values(variants)){
+ assert.equal((source.match(new RegExp(openTag('section','screen'),'g'))||[]).length,113);
+ assert(!/<style\b|<script\b/.test(source),'Layouts must carry markup only');
+}
+const temp=fs.mkdtempSync(path.join(os.tmpdir(),'journal-cleanup-'));
+const standalone=path.join(temp,'journal-website.html');fs.writeFileSync(standalone,html);
+let session;const results=[];
+try{
+ session=await startBrowser({temp});
+ const {evaluate,viewport,navigate}=session;
+ const wait=async expression=>{for(let i=0;i<80;i++){try{if(await evaluate(expression))return;}catch{}await pause(100);}throw Error('Timed out: '+expression);};
+ const check=async(expression,label)=>{assert(await evaluate(expression),label);results.push(label);};
+ await viewport(390,900);await navigate(pathToFileURL(standalone).href+'#today');
+ await wait("!!document.querySelector('#today .prototype-input')");
+ await evaluate("(()=>{window.__hidden=document.querySelector('#empty-today');window.__fixture=document.querySelector('#today [data-entry-key]');window.__key=window.__fixture.dataset.entryKey;document.querySelector('#today .aj-c-composer [data-hook~=memory]').click();const f=document.querySelector('#today .prototype-input');f.value='Entry before navigation';f.dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('#today .aj-c-composer .aj-c-send').click();window.__row=document.querySelector('#today .prototype-list [data-entry-key]');})()");
+ await check("!window.__hidden.querySelector('.prototype-list')",'Saving does not rebuild hidden journal views');
+ await check("!!window.__row.querySelector('[data-excluded]')",'An entry written kept out of memory carries its tag');
+ await evaluate("window.__row.querySelector('[data-entry-action=memory]').click();[...window.__row.querySelectorAll('.aj-c-entry-actions[data-form=confirm] .aj-c-button')].find(b=>b.textContent.trim()==='Use in memory').click()");
+ await check("window.__row===document.querySelector('#today .prototype-list [data-entry-key]')&&!window.__row.querySelector('[data-excluded]')",'Memory changes preserve the existing entry node');
+ await evaluate("(()=>{const f=document.querySelector('#today .prototype-input');f.value='A later entry';f.dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('#today .aj-c-composer .aj-c-send').click()})()");
+ await check("window.__row===document.querySelector('#today .prototype-list [data-entry-key]')&&window.__fixture===document.querySelector('#today [data-entry-key]')",'Appending entries preserves earlier rows');
+ await evaluate("location.hash='empty-today'");await wait("document.querySelector('#empty-today .prototype-list')?.children.length===2");
+ await check("!document.querySelector('#empty-today .prototype-list').firstElementChild.querySelector('[data-excluded]')",'A hidden journal synchronizes entries and memory when visited');
+ await evaluate("location.hash='today'");await pause(80);
+ await check("window.__row===document.querySelector('#today .prototype-list [data-entry-key]')",'Returning to a journal keeps its existing rows');
+ await viewport(1440,900);await wait("active==='desktop'&&!changing");
+ await check("document.querySelector('#today .prototype-list').children.length===2&&!document.querySelector('#today .prototype-list [data-excluded]')",'Responsive profile changes retain entries and memory');
+ await evaluate("(()=>{const f=document.querySelector('#today .prototype-input');f.value='';f.dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('#today .aj-c-composer .aj-c-composer__mic').click()})()");
+ await wait("document.querySelector('#talk .aj-s-recorder').dataset.microphone==='granted'");
+ await evaluate("document.querySelector('#talk .aj-s-recorder [data-hook~=memory]').click()");
+ await evaluate("document.querySelector('#talk [data-recorder=start]').click()");await pause(1400);
+ await evaluate("document.querySelector('#talk [data-recorder=keep]').click()");
+ await wait("location.hash==='#today'&&!!document.querySelector('#today .prototype-list .aj-c-recrow')");
+ await evaluate("window.__memo=document.querySelector('#today .prototype-list .aj-c-recrow');window.__wave=window.__memo.querySelector('.aj-c-recrow__wave');window.__memo.querySelector('.aj-c-play').click()");await pause(120);
+ await check("!!window.__memo.querySelector('[data-excluded]')",'A memo kept with Keep this out of memory carries its tag');
+ await evaluate("window.__memo.querySelector('[data-entry-action=memory]').click();[...window.__memo.querySelectorAll('.aj-c-entry-actions[data-form=confirm] .aj-c-button')].find(b=>b.textContent.trim()==='Use in memory').click()");
+ await check("window.__memo===document.querySelector('#today .prototype-list .aj-c-recrow')&&window.__wave===window.__memo.querySelector('.aj-c-recrow__wave')&&window.__memo.querySelector('.aj-c-play').getAttribute('aria-label')==='Stop voice memo playback'&&!window.__memo.querySelector('[data-excluded]')",'Memory changes preserve the memo waveform and active playback');
+ await evaluate("location.hash='recording-kept'");await pause(100);
+ await check("!!document.querySelector('#recording-kept .aj-c-recrow')&&!document.querySelector('#recording-kept [data-excluded]')",'The recording-kept review route updates its replacement row');
+ await evaluate("location.hash='today'");await pause(100);
+ await check("!!document.querySelector('#today .prototype-list .aj-c-recrow')&&!document.querySelector('#today .prototype-list .aj-c-recrow [data-excluded]')",'Memo changes synchronize back from the review route');
+ assert.equal(session.errors.length,0);assert.equal(session.requests.length,0);
+ fs.writeFileSync(new URL('verification/cleanup-checks.json',root),JSON.stringify({checks:results,fontImportReadOnly:true,sharedFonts:true,layoutStates:109,htmlTraversal:true},null,2)+'\n');
+ console.log('PASS: font import, shared payload, HTML traversal and '+results.length+' view synchronization/playback checks.');
+}finally{await session?.close();removeTemporaryDirectory(temp);}

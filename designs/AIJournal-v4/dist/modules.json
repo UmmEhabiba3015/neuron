@@ -1,0 +1,1465 @@
+[
+  {
+    "name": "cluster",
+    "layer": "layout",
+    "version": "0.1.0",
+    "inventory": "L2",
+    "class": "aj-l-cluster",
+    "uses": [],
+    "consumers": [
+      "entry-actions",
+      "panel",
+      "auth-form",
+      "state-message",
+      "day",
+      "settings",
+      "timeline",
+      "today"
+    ],
+    "contract": "contracts/cluster.json",
+    "catalogue": "catalogue/cluster.html"
+  },
+  {
+    "name": "mast",
+    "layer": "layout",
+    "version": "0.1.2",
+    "inventory": "A4",
+    "class": "aj-l-mast",
+    "uses": [],
+    "consumers": [
+      "header",
+      "ask",
+      "day",
+      "error",
+      "forgot",
+      "login",
+      "reflection",
+      "register",
+      "reset",
+      "settings",
+      "talk",
+      "timeline",
+      "today",
+      "you"
+    ],
+    "contract": "contracts/mast.json",
+    "catalogue": "catalogue/mast.html"
+  },
+  {
+    "name": "page",
+    "layer": "layout",
+    "version": "0.4.1",
+    "inventory": "A2",
+    "class": "aj-l-page",
+    "uses": [],
+    "consumers": [
+      "composer",
+      "ask",
+      "day",
+      "error",
+      "forgot",
+      "login",
+      "reflection",
+      "register",
+      "reset",
+      "settings",
+      "talk",
+      "timeline",
+      "today",
+      "you"
+    ],
+    "contract": "contracts/page.json",
+    "catalogue": "catalogue/page.html"
+  },
+  {
+    "name": "rail",
+    "layer": "layout",
+    "version": "0.1.0",
+    "inventory": "A3",
+    "class": "aj-l-rail",
+    "uses": [],
+    "consumers": [
+      "ask",
+      "day",
+      "error",
+      "forgot",
+      "login",
+      "reflection",
+      "register",
+      "reset",
+      "settings",
+      "talk",
+      "timeline",
+      "today",
+      "you"
+    ],
+    "contract": "contracts/rail.json",
+    "catalogue": "catalogue/rail.html"
+  },
+  {
+    "name": "shell",
+    "layer": "layout",
+    "version": "0.1.1",
+    "inventory": "A2",
+    "class": "aj-l-shell",
+    "uses": [],
+    "consumers": [
+      "ask",
+      "day",
+      "error",
+      "forgot",
+      "login",
+      "reflection",
+      "register",
+      "reset",
+      "settings",
+      "talk",
+      "timeline",
+      "today",
+      "you"
+    ],
+    "contract": "contracts/shell.json",
+    "catalogue": "catalogue/shell.html"
+  },
+  {
+    "name": "stage",
+    "layer": "layout",
+    "version": "0.1.0",
+    "inventory": "A1",
+    "class": "aj-l-stage",
+    "uses": [],
+    "consumers": [],
+    "contract": "contracts/stage.json",
+    "catalogue": "catalogue/stage.html"
+  },
+  {
+    "name": "back",
+    "layer": "components",
+    "version": "0.1.0",
+    "inventory": "B3",
+    "class": "aj-c-back",
+    "uses": [],
+    "consumers": [
+      "day",
+      "reflection",
+      "settings",
+      "talk"
+    ],
+    "contract": "contracts/back.json",
+    "catalogue": "catalogue/back.html"
+  },
+  {
+    "name": "bone",
+    "layer": "components",
+    "version": "0.2.0",
+    "inventory": "v4 round 10",
+    "class": "aj-c-bone",
+    "uses": [
+      "wave"
+    ],
+    "consumers": [
+      "leafpic",
+      "chat",
+      "day",
+      "reflection",
+      "settings",
+      "timeline",
+      "today",
+      "you"
+    ],
+    "contract": "contracts/bone.json",
+    "catalogue": "catalogue/bone.html"
+  },
+  {
+    "name": "bubble",
+    "layer": "components",
+    "version": "0.3.0",
+    "inventory": "v4 C2",
+    "class": "aj-c-bubble",
+    "uses": [
+      "button",
+      "thumbs"
+    ],
+    "consumers": [
+      "chat"
+    ],
+    "contract": "contracts/bubble.json",
+    "catalogue": "catalogue/bubble.html"
+  },
+  {
+    "name": "button",
+    "layer": "components",
+    "version": "0.5.0",
+    "inventory": "E2",
+    "class": "aj-c-button",
+    "uses": [],
+    "consumers": [
+      "bubble",
+      "card",
+      "composer",
+      "dialog",
+      "entry-actions",
+      "leaf",
+      "notice",
+      "panel",
+      "pending",
+      "rateform",
+      "said",
+      "srow",
+      "stack",
+      "thumbs",
+      "auth-form",
+      "booklet",
+      "chat",
+      "drawers",
+      "find",
+      "record",
+      "recorder",
+      "state-message",
+      "day",
+      "reflection",
+      "settings",
+      "talk",
+      "timeline",
+      "today"
+    ],
+    "contract": "contracts/button.json",
+    "catalogue": "catalogue/button.html"
+  },
+  {
+    "name": "cal",
+    "layer": "components",
+    "version": "0.4.0",
+    "inventory": "H2",
+    "class": "aj-c-cal",
+    "uses": [],
+    "consumers": [
+      "daycard"
+    ],
+    "contract": "contracts/cal.json",
+    "catalogue": "catalogue/cal.html"
+  },
+  {
+    "name": "card",
+    "layer": "components",
+    "version": "0.2.0",
+    "inventory": "F2",
+    "class": "aj-c-card",
+    "uses": [
+      "button"
+    ],
+    "consumers": [
+      "dialog",
+      "panel",
+      "stack",
+      "settings"
+    ],
+    "contract": "contracts/card.json",
+    "catalogue": "catalogue/card.html"
+  },
+  {
+    "name": "composer",
+    "layer": "components",
+    "version": "0.4.1",
+    "inventory": "E1",
+    "class": "aj-c-composer",
+    "uses": [
+      "field",
+      "send",
+      "opt",
+      "button",
+      "text",
+      "page",
+      "pending"
+    ],
+    "consumers": [
+      "chat",
+      "today"
+    ],
+    "contract": "contracts/composer.json",
+    "catalogue": "catalogue/composer.html"
+  },
+  {
+    "name": "dayrow",
+    "layer": "components",
+    "version": "0.3.0",
+    "inventory": "H1",
+    "class": "aj-c-dayrow",
+    "uses": [],
+    "consumers": [
+      "record",
+      "day",
+      "reflection",
+      "settings",
+      "timeline",
+      "today",
+      "you"
+    ],
+    "contract": "contracts/dayrow.json",
+    "catalogue": "catalogue/dayrow.html"
+  },
+  {
+    "name": "dest",
+    "layer": "components",
+    "version": "0.4.0",
+    "inventory": "B1",
+    "class": "aj-c-dest",
+    "uses": [],
+    "consumers": [
+      "header",
+      "ask",
+      "day",
+      "error",
+      "reflection",
+      "settings",
+      "talk",
+      "timeline",
+      "today",
+      "you"
+    ],
+    "contract": "contracts/dest.json",
+    "catalogue": "catalogue/dest.html"
+  },
+  {
+    "name": "dialog",
+    "layer": "components",
+    "version": "0.1.0",
+    "inventory": "G2",
+    "class": "aj-c-dialog",
+    "uses": [
+      "card",
+      "button"
+    ],
+    "consumers": [
+      "settings"
+    ],
+    "contract": "contracts/dialog.json",
+    "catalogue": "catalogue/dialog.html"
+  },
+  {
+    "name": "empty",
+    "layer": "components",
+    "version": "0.1.0",
+    "inventory": "F3",
+    "class": "aj-c-empty",
+    "uses": [],
+    "consumers": [
+      "today"
+    ],
+    "contract": "contracts/empty.json",
+    "catalogue": "catalogue/empty.html"
+  },
+  {
+    "name": "entry-actions",
+    "layer": "components",
+    "version": "0.4.1",
+    "inventory": "entry-actions",
+    "class": "aj-c-entry-actions",
+    "uses": [
+      "button",
+      "opt",
+      "field",
+      "cluster"
+    ],
+    "consumers": [
+      "recrow",
+      "srow",
+      "record",
+      "day",
+      "talk",
+      "today"
+    ],
+    "contract": "contracts/entry-actions.json",
+    "catalogue": "catalogue/entry-actions.html"
+  },
+  {
+    "name": "field",
+    "layer": "components",
+    "version": "0.6.0",
+    "inventory": "E3",
+    "class": "aj-c-field",
+    "uses": [],
+    "consumers": [
+      "composer",
+      "entry-actions",
+      "auth-form",
+      "find",
+      "today"
+    ],
+    "contract": "contracts/field.json",
+    "catalogue": "catalogue/field.html"
+  },
+  {
+    "name": "foot",
+    "layer": "components",
+    "version": "0.1.0",
+    "inventory": "D5",
+    "class": "aj-c-foot",
+    "uses": [],
+    "consumers": [
+      "day",
+      "settings",
+      "timeline",
+      "you"
+    ],
+    "contract": "contracts/foot.json",
+    "catalogue": "catalogue/foot.html"
+  },
+  {
+    "name": "glance",
+    "layer": "components",
+    "version": "0.3.0",
+    "inventory": "D2",
+    "class": "aj-c-glance",
+    "uses": [],
+    "consumers": [],
+    "contract": "contracts/glance.json",
+    "catalogue": "catalogue/glance.html"
+  },
+  {
+    "name": "keybox",
+    "layer": "components",
+    "version": "0.2.0",
+    "inventory": "D1",
+    "class": "aj-c-keybox",
+    "uses": [],
+    "consumers": [
+      "stack",
+      "header",
+      "recorder",
+      "ask",
+      "day",
+      "error",
+      "forgot",
+      "login",
+      "reflection",
+      "register",
+      "reset",
+      "settings",
+      "talk",
+      "timeline",
+      "today",
+      "you"
+    ],
+    "contract": "contracts/keybox.json",
+    "catalogue": "catalogue/keybox.html"
+  },
+  {
+    "name": "leaf",
+    "layer": "components",
+    "version": "0.2.1",
+    "inventory": "v4 C3",
+    "class": "aj-c-leaf",
+    "uses": [
+      "leafpic",
+      "button",
+      "thumbs"
+    ],
+    "consumers": [
+      "booklet"
+    ],
+    "contract": "contracts/leaf.json",
+    "catalogue": "catalogue/leaf.html"
+  },
+  {
+    "name": "leafpic",
+    "layer": "components",
+    "version": "0.2.0",
+    "inventory": "v4 C3",
+    "class": "aj-c-leafpic",
+    "uses": [
+      "bone"
+    ],
+    "consumers": [
+      "leaf",
+      "booklet",
+      "day",
+      "reflection",
+      "settings",
+      "timeline",
+      "today",
+      "you"
+    ],
+    "contract": "contracts/leafpic.json",
+    "catalogue": "catalogue/leafpic.html"
+  },
+  {
+    "name": "mark",
+    "layer": "components",
+    "version": "0.1.0",
+    "inventory": "D4",
+    "class": "aj-c-mark",
+    "uses": [],
+    "consumers": [
+      "recrow",
+      "srow",
+      "record",
+      "today"
+    ],
+    "contract": "contracts/mark.json",
+    "catalogue": "catalogue/mark.html"
+  },
+  {
+    "name": "moodgraph",
+    "layer": "components",
+    "version": "0.2.0",
+    "inventory": "v4 C1",
+    "class": "aj-c-moodgraph",
+    "uses": [],
+    "consumers": [
+      "daycard"
+    ],
+    "contract": "contracts/moodgraph.json",
+    "catalogue": "catalogue/moodgraph.html"
+  },
+  {
+    "name": "moodrow",
+    "layer": "components",
+    "version": "0.2.0",
+    "inventory": "C5",
+    "class": "aj-c-moodrow",
+    "uses": [],
+    "consumers": [
+      "day",
+      "today"
+    ],
+    "contract": "contracts/moodrow.json",
+    "catalogue": "catalogue/moodrow.html"
+  },
+  {
+    "name": "notice",
+    "layer": "components",
+    "version": "0.2.1",
+    "inventory": "F1",
+    "class": "aj-c-notice",
+    "uses": [
+      "button"
+    ],
+    "consumers": [
+      "auth-form",
+      "day",
+      "settings",
+      "talk",
+      "timeline",
+      "today"
+    ],
+    "contract": "contracts/notice.json",
+    "catalogue": "catalogue/notice.html"
+  },
+  {
+    "name": "opt",
+    "layer": "components",
+    "version": "0.1.1",
+    "inventory": "E6",
+    "class": "aj-c-opt",
+    "uses": [],
+    "consumers": [
+      "composer",
+      "entry-actions",
+      "recorder",
+      "today"
+    ],
+    "contract": "contracts/opt.json",
+    "catalogue": "catalogue/opt.html"
+  },
+  {
+    "name": "panel",
+    "layer": "components",
+    "version": "0.3.0",
+    "inventory": "G1",
+    "class": "aj-c-panel",
+    "uses": [
+      "card",
+      "button",
+      "cluster"
+    ],
+    "consumers": [
+      "today"
+    ],
+    "contract": "contracts/panel.json",
+    "catalogue": "catalogue/panel.html"
+  },
+  {
+    "name": "pending",
+    "layer": "components",
+    "version": "0.1.1",
+    "inventory": "v4 C5",
+    "class": "aj-c-pending",
+    "uses": [
+      "button"
+    ],
+    "consumers": [
+      "composer",
+      "today"
+    ],
+    "contract": "contracts/pending.json",
+    "catalogue": "catalogue/pending.html"
+  },
+  {
+    "name": "play",
+    "layer": "components",
+    "version": "0.1.0",
+    "inventory": "E4",
+    "class": "aj-c-play",
+    "uses": [],
+    "consumers": [
+      "recrow",
+      "record",
+      "day",
+      "talk",
+      "today"
+    ],
+    "contract": "contracts/play.json",
+    "catalogue": "catalogue/play.html"
+  },
+  {
+    "name": "rateform",
+    "layer": "components",
+    "version": "0.3.0",
+    "inventory": "v4 C2",
+    "class": "aj-c-rateform",
+    "uses": [
+      "button"
+    ],
+    "consumers": [
+      "thumbs"
+    ],
+    "contract": "contracts/rateform.json",
+    "catalogue": "catalogue/rateform.html"
+  },
+  {
+    "name": "recrow",
+    "layer": "components",
+    "version": "0.6.1",
+    "inventory": "C3",
+    "class": "aj-c-recrow",
+    "uses": [
+      "play",
+      "wave",
+      "entry-actions",
+      "mark",
+      "text"
+    ],
+    "consumers": [
+      "record",
+      "day",
+      "reflection",
+      "settings",
+      "talk",
+      "timeline",
+      "today",
+      "you"
+    ],
+    "contract": "contracts/recrow.json",
+    "catalogue": "catalogue/recrow.html"
+  },
+  {
+    "name": "said",
+    "layer": "components",
+    "version": "0.4.1",
+    "inventory": "C4",
+    "class": "aj-c-said",
+    "uses": [
+      "button",
+      "thumbs"
+    ],
+    "consumers": [
+      "sheet",
+      "day",
+      "reflection",
+      "settings",
+      "timeline",
+      "today",
+      "you"
+    ],
+    "contract": "contracts/said.json",
+    "catalogue": "catalogue/said.html"
+  },
+  {
+    "name": "send",
+    "layer": "components",
+    "version": "0.2.0",
+    "inventory": "E10",
+    "class": "aj-c-send",
+    "uses": [],
+    "consumers": [
+      "composer",
+      "today"
+    ],
+    "contract": "contracts/send.json",
+    "catalogue": "catalogue/send.html"
+  },
+  {
+    "name": "shead",
+    "layer": "components",
+    "version": "0.1.0",
+    "inventory": "D6",
+    "class": "aj-c-shead",
+    "uses": [],
+    "consumers": [
+      "sheet",
+      "srow",
+      "record",
+      "settings",
+      "today",
+      "you"
+    ],
+    "contract": "contracts/shead.json",
+    "catalogue": "catalogue/shead.html"
+  },
+  {
+    "name": "sheet",
+    "layer": "components",
+    "version": "0.1.1",
+    "inventory": "C1",
+    "class": "aj-c-sheet",
+    "uses": [
+      "srow",
+      "said",
+      "shead",
+      "srowlink"
+    ],
+    "consumers": [
+      "auth",
+      "record",
+      "day",
+      "error",
+      "reflection",
+      "settings",
+      "talk",
+      "timeline",
+      "today",
+      "you"
+    ],
+    "contract": "contracts/sheet.json",
+    "catalogue": "catalogue/sheet.html"
+  },
+  {
+    "name": "srow",
+    "layer": "components",
+    "version": "0.2.2",
+    "inventory": "C2",
+    "class": "aj-c-srow",
+    "uses": [
+      "entry-actions",
+      "mark",
+      "shead",
+      "button"
+    ],
+    "consumers": [
+      "sheet",
+      "record",
+      "day",
+      "reflection",
+      "settings",
+      "timeline",
+      "today",
+      "you"
+    ],
+    "contract": "contracts/srow.json",
+    "catalogue": "catalogue/srow.html"
+  },
+  {
+    "name": "srowlink",
+    "layer": "components",
+    "version": "0.1.1",
+    "inventory": "E6",
+    "class": "aj-c-srowlink",
+    "uses": [],
+    "consumers": [
+      "sheet",
+      "auth-form",
+      "settings",
+      "today",
+      "you"
+    ],
+    "contract": "contracts/srowlink.json",
+    "catalogue": "catalogue/srowlink.html"
+  },
+  {
+    "name": "stack",
+    "layer": "components",
+    "version": "0.2.1",
+    "inventory": "E8",
+    "class": "aj-c-stack",
+    "uses": [
+      "keybox",
+      "card",
+      "button"
+    ],
+    "consumers": [
+      "talk"
+    ],
+    "contract": "contracts/stack.json",
+    "catalogue": "catalogue/stack.html"
+  },
+  {
+    "name": "text",
+    "layer": "components",
+    "version": "0.1.0",
+    "inventory": null,
+    "class": "aj-c-text",
+    "uses": [],
+    "consumers": [
+      "composer",
+      "recrow",
+      "auth-form",
+      "record",
+      "state-message",
+      "day",
+      "settings",
+      "today"
+    ],
+    "contract": "contracts/text.json",
+    "catalogue": "catalogue/text.html"
+  },
+  {
+    "name": "thumbs",
+    "layer": "components",
+    "version": "0.3.0",
+    "inventory": "v4 round 10",
+    "class": "aj-c-thumbs",
+    "uses": [
+      "button",
+      "rateform"
+    ],
+    "consumers": [
+      "bubble",
+      "leaf",
+      "said",
+      "booklet",
+      "day",
+      "reflection",
+      "today"
+    ],
+    "contract": "contracts/thumbs.json",
+    "catalogue": "catalogue/thumbs.html"
+  },
+  {
+    "name": "wave",
+    "layer": "components",
+    "version": "0.3.0",
+    "inventory": "E5",
+    "class": "aj-c-wave",
+    "uses": [],
+    "consumers": [
+      "bone",
+      "recrow",
+      "record",
+      "day",
+      "talk",
+      "today"
+    ],
+    "contract": "contracts/wave.json",
+    "catalogue": "catalogue/wave.html"
+  },
+  {
+    "name": "weekline",
+    "layer": "components",
+    "version": "0.1.0",
+    "inventory": "v4 C3",
+    "class": "aj-c-weekline",
+    "uses": [],
+    "consumers": [
+      "reflection"
+    ],
+    "contract": "contracts/weekline.json",
+    "catalogue": "catalogue/weekline.html"
+  },
+  {
+    "name": "auth",
+    "layer": "sections",
+    "version": "0.2.0",
+    "inventory": null,
+    "class": "aj-s-auth",
+    "uses": [
+      "sheet"
+    ],
+    "consumers": [
+      "forgot",
+      "login",
+      "register",
+      "reset"
+    ],
+    "contract": "contracts/auth.json",
+    "catalogue": "catalogue/auth.html"
+  },
+  {
+    "name": "auth-form",
+    "layer": "sections",
+    "version": "0.5.0",
+    "inventory": null,
+    "class": "aj-s-auth-form",
+    "uses": [
+      "field",
+      "button",
+      "srowlink",
+      "notice",
+      "cluster",
+      "text"
+    ],
+    "consumers": [
+      "day",
+      "error",
+      "forgot",
+      "login",
+      "register",
+      "reset",
+      "settings",
+      "talk",
+      "today"
+    ],
+    "contract": "contracts/auth-form.json",
+    "catalogue": "catalogue/auth-form.html"
+  },
+  {
+    "name": "booklet",
+    "layer": "sections",
+    "version": "0.2.0",
+    "inventory": null,
+    "class": "aj-s-booklet",
+    "uses": [
+      "leaf",
+      "leafpic",
+      "button",
+      "thumbs"
+    ],
+    "consumers": [
+      "reflection"
+    ],
+    "contract": "contracts/booklet.json",
+    "catalogue": "catalogue/booklet.html"
+  },
+  {
+    "name": "chat",
+    "layer": "sections",
+    "version": "0.3.0",
+    "inventory": null,
+    "class": "aj-s-chat",
+    "uses": [
+      "bubble",
+      "button",
+      "composer",
+      "bone"
+    ],
+    "consumers": [
+      "ask"
+    ],
+    "contract": "contracts/chat.json",
+    "catalogue": "catalogue/chat.html"
+  },
+  {
+    "name": "daycard",
+    "layer": "sections",
+    "version": "0.1.0",
+    "inventory": null,
+    "class": "aj-s-daycard",
+    "uses": [
+      "moodgraph",
+      "cal"
+    ],
+    "consumers": [
+      "timeline"
+    ],
+    "contract": "contracts/daycard.json",
+    "catalogue": "catalogue/daycard.html"
+  },
+  {
+    "name": "drawers",
+    "layer": "sections",
+    "version": "0.1.1",
+    "inventory": null,
+    "class": "aj-s-drawers",
+    "uses": [
+      "button"
+    ],
+    "consumers": [
+      "ask"
+    ],
+    "contract": "contracts/drawers.json",
+    "catalogue": "catalogue/drawers.html"
+  },
+  {
+    "name": "find",
+    "layer": "sections",
+    "version": "0.2.2",
+    "inventory": null,
+    "class": "aj-s-find",
+    "uses": [
+      "field",
+      "button"
+    ],
+    "consumers": [
+      "timeline"
+    ],
+    "contract": "contracts/find.json",
+    "catalogue": "catalogue/find.html"
+  },
+  {
+    "name": "header",
+    "layer": "sections",
+    "version": "0.2.4",
+    "inventory": null,
+    "class": "aj-s-header",
+    "uses": [
+      "mast",
+      "dest",
+      "keybox"
+    ],
+    "consumers": [
+      "ask",
+      "day",
+      "error",
+      "reflection",
+      "settings",
+      "talk",
+      "timeline",
+      "today",
+      "you"
+    ],
+    "contract": "contracts/header.json",
+    "catalogue": "catalogue/header.html"
+  },
+  {
+    "name": "overview",
+    "layer": "sections",
+    "version": "0.2.0",
+    "inventory": null,
+    "class": "aj-s-overview",
+    "uses": [],
+    "consumers": [
+      "today"
+    ],
+    "contract": "contracts/overview.json",
+    "catalogue": "catalogue/overview.html"
+  },
+  {
+    "name": "record",
+    "layer": "sections",
+    "version": "0.3.0",
+    "inventory": null,
+    "class": "aj-s-record",
+    "uses": [
+      "sheet",
+      "shead",
+      "dayrow",
+      "recrow",
+      "text",
+      "mark",
+      "play",
+      "wave",
+      "entry-actions",
+      "button",
+      "srow"
+    ],
+    "consumers": [
+      "timeline"
+    ],
+    "contract": "contracts/record.json",
+    "catalogue": "catalogue/record.html"
+  },
+  {
+    "name": "recorder",
+    "layer": "sections",
+    "version": "0.5.0",
+    "inventory": null,
+    "class": "aj-s-recorder",
+    "uses": [
+      "keybox",
+      "button",
+      "opt"
+    ],
+    "consumers": [
+      "talk"
+    ],
+    "contract": "contracts/recorder.json",
+    "catalogue": "catalogue/recorder.html"
+  },
+  {
+    "name": "state-message",
+    "layer": "sections",
+    "version": "0.2.0",
+    "inventory": null,
+    "class": "aj-s-state-message",
+    "uses": [
+      "button",
+      "cluster",
+      "text"
+    ],
+    "consumers": [
+      "day",
+      "settings",
+      "timeline",
+      "today"
+    ],
+    "contract": "contracts/state-message.json",
+    "catalogue": "catalogue/state-message.html"
+  },
+  {
+    "name": "ask",
+    "layer": "pages",
+    "version": "1.0.2",
+    "inventory": null,
+    "class": "aj-p-ask",
+    "uses": [
+      "shell",
+      "rail",
+      "page",
+      "mast",
+      "header",
+      "keybox",
+      "dest",
+      "chat",
+      "drawers"
+    ],
+    "consumers": [],
+    "contract": "contracts/ask.json",
+    "catalogue": "catalogue/ask.html"
+  },
+  {
+    "name": "day",
+    "layer": "pages",
+    "version": "0.5.0",
+    "inventory": null,
+    "class": "aj-p-day",
+    "uses": [
+      "shell",
+      "rail",
+      "page",
+      "mast",
+      "back",
+      "keybox",
+      "sheet",
+      "srow",
+      "text",
+      "entry-actions",
+      "button",
+      "said",
+      "moodrow",
+      "foot",
+      "header",
+      "dest",
+      "auth-form",
+      "notice",
+      "state-message",
+      "cluster",
+      "recrow",
+      "play",
+      "wave",
+      "thumbs",
+      "bone",
+      "dayrow",
+      "leafpic"
+    ],
+    "consumers": [],
+    "contract": "contracts/day.json",
+    "catalogue": "catalogue/day.html"
+  },
+  {
+    "name": "error",
+    "layer": "pages",
+    "version": "0.2.0",
+    "inventory": null,
+    "class": "aj-p-error",
+    "uses": [
+      "shell",
+      "rail",
+      "page",
+      "mast",
+      "header",
+      "keybox",
+      "dest",
+      "sheet",
+      "auth-form"
+    ],
+    "consumers": [],
+    "contract": "contracts/error.json",
+    "catalogue": "catalogue/error.html"
+  },
+  {
+    "name": "forgot",
+    "layer": "pages",
+    "version": "0.4.0",
+    "inventory": null,
+    "class": "aj-p-forgot",
+    "uses": [
+      "shell",
+      "rail",
+      "page",
+      "mast",
+      "keybox",
+      "auth",
+      "auth-form"
+    ],
+    "consumers": [],
+    "contract": "contracts/forgot.json",
+    "catalogue": "catalogue/forgot.html"
+  },
+  {
+    "name": "login",
+    "layer": "pages",
+    "version": "0.4.1",
+    "inventory": null,
+    "class": "aj-p-login",
+    "uses": [
+      "shell",
+      "rail",
+      "page",
+      "mast",
+      "keybox",
+      "auth",
+      "auth-form"
+    ],
+    "consumers": [],
+    "contract": "contracts/login.json",
+    "catalogue": "catalogue/login.html"
+  },
+  {
+    "name": "reflection",
+    "layer": "pages",
+    "version": "1.3.0",
+    "inventory": null,
+    "class": "aj-p-reflection",
+    "uses": [
+      "shell",
+      "rail",
+      "page",
+      "mast",
+      "header",
+      "dest",
+      "back",
+      "keybox",
+      "booklet",
+      "leafpic",
+      "weekline",
+      "button",
+      "thumbs",
+      "bone",
+      "srow",
+      "said",
+      "dayrow",
+      "recrow",
+      "sheet"
+    ],
+    "consumers": [],
+    "contract": "contracts/reflection.json",
+    "catalogue": "catalogue/reflection.html"
+  },
+  {
+    "name": "register",
+    "layer": "pages",
+    "version": "0.3.0",
+    "inventory": null,
+    "class": "aj-p-register",
+    "uses": [
+      "shell",
+      "rail",
+      "page",
+      "mast",
+      "keybox",
+      "auth",
+      "auth-form"
+    ],
+    "consumers": [],
+    "contract": "contracts/register.json",
+    "catalogue": "catalogue/register.html"
+  },
+  {
+    "name": "reset",
+    "layer": "pages",
+    "version": "0.3.0",
+    "inventory": null,
+    "class": "aj-p-reset",
+    "uses": [
+      "shell",
+      "rail",
+      "page",
+      "mast",
+      "keybox",
+      "auth",
+      "auth-form"
+    ],
+    "consumers": [],
+    "contract": "contracts/reset.json",
+    "catalogue": "catalogue/reset.html"
+  },
+  {
+    "name": "settings",
+    "layer": "pages",
+    "version": "0.4.0",
+    "inventory": null,
+    "class": "aj-p-settings",
+    "uses": [
+      "shell",
+      "rail",
+      "page",
+      "mast",
+      "back",
+      "sheet",
+      "shead",
+      "srowlink",
+      "notice",
+      "foot",
+      "header",
+      "keybox",
+      "dest",
+      "auth-form",
+      "dialog",
+      "card",
+      "button",
+      "cluster",
+      "state-message",
+      "text",
+      "bone",
+      "srow",
+      "said",
+      "dayrow",
+      "recrow",
+      "leafpic"
+    ],
+    "consumers": [],
+    "contract": "contracts/settings.json",
+    "catalogue": "catalogue/settings.html"
+  },
+  {
+    "name": "talk",
+    "layer": "pages",
+    "version": "0.5.1",
+    "inventory": null,
+    "class": "aj-p-talk",
+    "uses": [
+      "shell",
+      "rail",
+      "page",
+      "mast",
+      "back",
+      "recorder",
+      "stack",
+      "keybox",
+      "recrow",
+      "play",
+      "wave",
+      "entry-actions",
+      "button",
+      "notice",
+      "header",
+      "dest",
+      "sheet",
+      "auth-form"
+    ],
+    "consumers": [],
+    "contract": "contracts/talk.json",
+    "catalogue": "catalogue/talk.html"
+  },
+  {
+    "name": "timeline",
+    "layer": "pages",
+    "version": "0.6.0",
+    "inventory": null,
+    "class": "aj-p-timeline",
+    "uses": [
+      "shell",
+      "rail",
+      "page",
+      "mast",
+      "header",
+      "keybox",
+      "dest",
+      "daycard",
+      "find",
+      "record",
+      "foot",
+      "sheet",
+      "state-message",
+      "notice",
+      "cluster",
+      "button",
+      "bone",
+      "dayrow",
+      "recrow",
+      "srow",
+      "said",
+      "leafpic"
+    ],
+    "consumers": [],
+    "contract": "contracts/timeline.json",
+    "catalogue": "catalogue/timeline.html"
+  },
+  {
+    "name": "today",
+    "layer": "pages",
+    "version": "0.8.0",
+    "inventory": null,
+    "class": "aj-p-today",
+    "uses": [
+      "shell",
+      "rail",
+      "page",
+      "mast",
+      "header",
+      "keybox",
+      "dest",
+      "sheet",
+      "srow",
+      "text",
+      "entry-actions",
+      "button",
+      "field",
+      "cluster",
+      "mark",
+      "said",
+      "recrow",
+      "play",
+      "wave",
+      "moodrow",
+      "composer",
+      "overview",
+      "opt",
+      "auth-form",
+      "panel",
+      "srowlink",
+      "state-message",
+      "notice",
+      "send",
+      "shead",
+      "dayrow",
+      "empty",
+      "pending",
+      "thumbs",
+      "bone",
+      "leafpic"
+    ],
+    "consumers": [],
+    "contract": "contracts/today.json",
+    "catalogue": "catalogue/today.html"
+  },
+  {
+    "name": "you",
+    "layer": "pages",
+    "version": "0.4.0",
+    "inventory": null,
+    "class": "aj-p-you",
+    "uses": [
+      "shell",
+      "rail",
+      "page",
+      "mast",
+      "header",
+      "keybox",
+      "dest",
+      "sheet",
+      "shead",
+      "srowlink",
+      "foot",
+      "bone",
+      "srow",
+      "said",
+      "dayrow",
+      "recrow",
+      "leafpic"
+    ],
+    "consumers": [],
+    "contract": "contracts/you.json",
+    "catalogue": "catalogue/you.html"
+  }
+]

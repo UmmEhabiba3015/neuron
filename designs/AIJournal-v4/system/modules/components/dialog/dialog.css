@@ -1,0 +1,18 @@
+/* dialog. Every selector starts from .aj-c-dialog; values come from tokens.
+   G2: exactly one exists in the product, delete everything. In the comps it covers the app
+   (position:absolute); production uses the top layer (<dialog>), a build obligation for the
+   developers (README). It sets the card's measure (revision 26): the card is a grid item
+   sized to its own content, so it keeps the mobile 38ch at every width, for a functional
+   reason: Export instead and Delete everything must stay near each other. */
+.aj-c-dialog{--aj-c-card-measure-wide:38ch;
+        position:absolute;inset:0;display:grid;place-items:center;padding:var(--s6);
+        /* token-exempt: the scrim is --ink at 55%, derived; not a ninth colour (direction-lock §2) */
+        background:color-mix(in srgb,var(--ink) 55%,transparent)}
+/* REVISION 24. The scrim covers everything, but the card centres on the PAGE, not on the app:
+   the rail's width added back as left padding. */
+@container (min-width:700px){
+  .aj-c-dialog{padding-left:calc(var(--s6) + var(--rail))}
+}
+
+/* PLACEMENT BY ROLE (decision 2026-10-12): the dialog's card takes the page gutter. */
+.aj-c-dialog > [data-place~="block"]{margin:0 var(--gut) var(--s6)}

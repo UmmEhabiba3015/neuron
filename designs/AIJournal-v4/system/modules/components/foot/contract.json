@@ -1,0 +1,53 @@
+{
+  "name": "foot",
+  "layer": "components",
+  "version": "0.1.0",
+  "inventory": "D5",
+  "description": "The footer line at the foot of a page: a quiet fact about the record (\"Since March 2026\", \"Mood can be changed here, and only here.\").",
+  "variants": {},
+  "options": {},
+  "content": {
+    "text": {
+      "type": "text",
+      "required": true,
+      "description": "One line, final copy."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": ["--gut", "--s7", "--t-quiet", "--rule"],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: text",
+    "focus-visible": "n/a: text",
+    "active": "n/a: text",
+    "disabled": "n/a: text",
+    "selected": "n/a: text",
+    "loading": "yes: a status line while earlier entries load (\"Fetching earlier entries.\"), worded, never a spinner",
+    "error": "n/a: text",
+    "empty": "n/a: text is required"
+  },
+  "events": {},
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none: a paragraph",
+    "keyboard": "none",
+    "labels": "none"
+  },
+  "responsive": {
+    "1200": "on a split page it loses its side padding (legacy context .page.split)"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-10",
+      "kind": "internal",
+      "change": "Converted from lock.css D5 (.foot)."
+    }
+  ],
+  "contexts": ["data-layout"]
+}

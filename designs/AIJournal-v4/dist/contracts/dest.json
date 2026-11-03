@@ -1,0 +1,143 @@
+{
+  "name": "dest",
+  "layer": "components",
+  "version": "0.4.0",
+  "inventory": "B1",
+  "description": "The five destinations: Today, Reflections, Timeline, Ask, You. Always five, always in that order: Reflections next to Today (v4 B7), You set apart from the journal four (revision 28). A compact header row on the web, a column in the desktop title block; never a bottom bar on mobile web. The native app's tab bar keeps its own four until app development starts.",
+  "variants": {
+    "form": {
+      "values": [
+        "row",
+        "tab"
+      ],
+      "default": "row",
+      "description": "tab is the native app's tab bar (was .dest.tab): equal cells across the foot of the screen above the home indicator, You divided by a rule (revision 47)."
+    },
+    "slot": {
+      "values": [
+        false,
+        true
+      ],
+      "default": false,
+      "description": "true: an empty, aria-hidden date slot (aj-c-dest__slot) before the last link, where a parent (the header's compact state) draws the date; hidden unless the parent asks (--aj-c-dest-slot).",
+      "noRule": {
+        "true": "its rules read the part (aj-c-dest__slot), which is rendered only with the variant, not the attribute"
+      }
+    }
+  },
+  "options": {
+    "current": {
+      "values": [
+        "today",
+        "reflections",
+        "timeline",
+        "ask",
+        "you",
+        "none"
+      ],
+      "default": "today",
+      "description": "The destination the page belongs to; it carries aria-current=\"page\" and is filled --block. none on a pushed page that sits under no destination."
+    }
+  },
+  "content": {
+    "links": {
+      "type": "list",
+      "required": true,
+      "description": "Exactly five { label, href, key } in the order Today, Reflections, Timeline, Ask, You (system/content/destinations.mjs); the native tab bar passes its four. Labels are final copy; the CSS sets them in printed caps."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": [
+      "--s3",
+      "--gut",
+      "--s6",
+      "--tap",
+      "--t-print",
+      "--rule",
+      "--paper-2",
+      "--w",
+      "--rule-2",
+      "--r",
+      "--block",
+      "--paper",
+      "--s7",
+      "--gc",
+      "--tabh",
+      "--safe-b",
+      "--s2"
+    ],
+    "exposes": {
+      "--aj-c-dest-pad-x": "A parent's link padding (inline), over the --s6 / --s7 default.",
+      "--aj-c-dest-size": "A parent's link font size, over --t-print.",
+      "--aj-c-dest-leading": "A parent's link line-height (default: inherited).",
+      "--aj-c-dest-align": "A parent's link text-align (default: inherited).",
+      "--aj-c-dest-transition": "A parent's link transition list, over the shell's transform glide (none stops it).",
+      "--aj-c-dest-last-margin": "The last link's left margin, over auto.",
+      "--aj-c-dest-ground": "The ground of an unselected link that is not the last, over --paper-2.",
+      "--aj-c-dest-line": "The keyline colour of an unselected link that is not the last, over --rule-2 (and --rule on hover).",
+      "--aj-c-dest-hover-decoration": "The text-decoration of a hovered unselected link that is not the last, over none.",
+      "--aj-c-dest-hover-offset": "The underline offset of that hover, over auto.",
+      "--aj-c-dest-slot": "The display of the date slot (variant slot), over none.",
+      "--aj-c-dest-slot-column": "The date slot's grid-column when the parent lays the row out as a grid.",
+      "--aj-c-dest-slot-row": "The date slot's grid-row when the parent lays the row out as a grid.",
+      "--aj-c-dest-wrap": "A parent's link white-space (default: inherited)."
+    }
+  },
+  "states": {
+    "default": "yes: as rendered, the current destination filled",
+    "hover": "yes: an unselected destination's keyline darkens to --rule (pointer devices only; transform-only ramp, no colour transition)",
+    "focus-visible": "yes: the product's one focus ring (base)",
+    "active": "yes: pressed 1px down, and scaled .97 under the shell's motion",
+    "disabled": "n/a: a destination is never disabled",
+    "selected": "yes: the current destination, aria-current=\"page\", filled --block on --paper",
+    "loading": "n/a: navigation, drawn before content",
+    "error": "n/a: navigation",
+    "empty": "n/a: always five",
+    "leads back": "yes: a script (scripts/journal-reflection.js) puts the back chevron (aj-c-dest__back, 12px, --s2 after it) first in Reflections on Timeline opened from a leaf's N entries and points it at that leaf's screen; it is taken away when Timeline is left. The row keeps its height."
+  },
+  "events": {},
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "nav landmark labelled \"Destinations\"",
+    "keyboard": "links in reading order; the current one is announced by aria-current",
+    "labels": "aria-label=\"Destinations\" on the nav"
+  },
+  "responsive": {
+    "700": "each destination takes its own width (padding --s7) instead of dividing the row",
+    "1200": "in the title block: a column, You separated by --s7 (legacy context .title)"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-10",
+      "kind": "internal",
+      "change": "Converted from lock.css B1 (.dest, .dest.tab) and its contexts (title block, native tab bar, quiet navbar)."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-13",
+      "kind": "internal",
+      "change": "Behaviour round 3: the variant slot (the date slot) and the exposed properties the header sets for the quiet navbar; its legacy .quiet-navbar and .journal-header contexts are gone."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-20",
+      "kind": "added",
+      "change": "v4 B7: Reflections is a destination, next to Today (five links; current reflections). The pages share one list (system/content/destinations.mjs). The native tab bar is unchanged."
+    },
+    {
+      "version": "0.4.0",
+      "date": "2026-10-28",
+      "kind": "added",
+      "change": "v4 C3: a destination that leads back wears the back chevron (aj-c-dest__back), added and removed by a script: Timeline's Reflections, when Timeline was opened from a leaf's N entries, replacing the back line in Timeline's masthead, which moved the navbar (explore/2026-10-28-timeline-back-position, e-reflections-tab)."
+    }
+  ],
+  "contexts": [
+    "data-form",
+    "data-motion",
+    "data-platform"
+  ]
+}

@@ -1,0 +1,36 @@
+/* pending (v4 C5, explore drafts a-quiet-line). Every selector starts from .aj-c-pending; values come from tokens.
+   One line of quiet print: nothing around it changes shape. Its space above is its parent's (a row's or the
+   composer's span place, --s4). */
+/* One line that never breaks apart: the arrow, the words (wrapping within themselves when long) and Try again at the end. */
+.aj-c-pending{display:flex;align-items:center;gap:var(--s4);
+  font:400 var(--t-quiet)/1.4 var(--f-label);color:var(--rule-2)}
+.aj-c-pending__text{flex:0 1 auto;min-width:0}
+/* The arrow sits on the words' first line, however many they take. */
+.aj-c-pending svg{flex:0 0 auto;align-self:flex-start;margin-top:calc((1lh - 14px) / 2);/* token-exempt: centres the 14px glyph on the first line */
+  width:14px;/* token-exempt: the line's glyph, 14px (explore drafts a) */
+  height:14px;/* token-exempt: the line's glyph, 14px (explore drafts a) */}
+/* Try again keeps its 44px target without making the line 44px tall: it overhangs the line equally above and below. */
+.aj-c-pending > [data-place~="action"]{margin-block:calc((var(--tap) - 1lh) / -2);flex:0 0 auto;white-space:nowrap}
+/* Retries have stopped (offline for a while): the same line in the full rule ink; the words say why. */
+.aj-c-pending[data-sub="stopped"]{color:var(--rule)}
+/* the lift: rest 1px down, top 2px up (explore drafts a) */
+@keyframes aj-c-pending-lift{0%,100%{translate:0 1px}50%{translate:0 -2px}}
+/* Sending (after Try again): the arrow lifts and settles until it is uploaded. A status, so it runs wherever the line
+   is drawn, like the skeleton's shimmer. */
+.aj-c-pending[data-sub="sending"] svg{animation:aj-c-pending-lift var(--g-lift) var(--gc) infinite}
+/* Reduced motion: still; "Uploading…" carries it. The review switch plays it. */
+@media (prefers-reduced-motion:reduce){
+  .aj-c-pending[data-sub]:not(:where(html[data-motion-review="play"] *)) svg{animation:none}
+}
+
+/* The draft form: the whole line is a button (the voice memo draft under the composer's field). The mic and the words
+   in --rule, the length in --block (audio that exists), Continue with the journal's dotted link mark. */
+.aj-c-pending[data-form="draft"]{position:relative;width:100%;padding:0;border:0;background:none;cursor:pointer;
+  flex-wrap:nowrap;color:var(--rule);text-align:start}
+/* Its 44px target, without a 44px line: the hit area reaches past the line equally above and below. */
+.aj-c-pending[data-form="draft"]::before{content:'';position:absolute;inset:calc((100% - var(--tap)) / 2) 0}
+.aj-c-pending__length{color:var(--block);font-variant-numeric:tabular-nums}
+.aj-c-pending__go{text-decoration:underline dotted;text-underline-offset:3px;/* token-exempt: the quiet button's underline offset (button E2) */}
+@media (hover:hover) and (pointer:fine){
+  .aj-c-pending[data-form="draft"]:hover .aj-c-pending__go{color:var(--block);text-decoration-style:solid}
+}

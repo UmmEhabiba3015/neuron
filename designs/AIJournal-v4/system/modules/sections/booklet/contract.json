@@ -1,0 +1,147 @@
+{
+  "name": "booklet",
+  "layer": "sections",
+  "version": "0.2.0",
+  "description": "The week's reflection as a small booklet, one leaf at a time below desktop and open at a spread of two from the container's 1200: its leaves (the leaf component, rendered here from the page's data so a static screen opens on the right one), their paper and lift, the stitches across the fold, the ribbon, and the pager under it (arrows and \"Page 2 of 6\"). Its script turns the leaves: arrows, a swipe, a tap on a leaf's outer thirds on a phone, the Left and Right keys; leaves out of view are inert.",
+  "variants": {},
+  "options": {
+    "at": {
+      "type": "number",
+      "default": 0,
+      "description": "The leaf it opens on, 0-based: 0 on every static screen (leaves 1 and 2 on desktop, where the spread pairs a left leaf with the right one after it); the rated state opens on the rated note's leaf. Written as data-pos on each leaf (now, past, next), inert on the rest, and data-at on the root; live, the script takes over."
+    }
+  },
+  "content": {
+    "label": {
+      "type": "text",
+      "required": true,
+      "description": "The booklet's name: \"Reflection, 3 to 9 Aug\" (aria-label, with aria-roledescription \"booklet\")."
+    },
+    "leaves": {
+      "type": "list",
+      "required": true,
+      "description": "The leaves in order, each the leaf's props plus its slots and an id: { id?: \"sleep\", name?, form, kicker, date, line, big, words, back, picture, foot }. The booklet numbers them (number), names each \"2 of 6: What you kept\" (the end leaf \"6 of 6: the end\"; a leaf's name, when given, in place of its kicker: a skeleton leaf, whose kicker is a bone, is \"1 of 2: loading\"), sides them (data-side l, r), places them (role leaf) and gives each with an id the element id \"leaf-<id>\", which Timeline's way back names in the hash."
+    },
+    "labels": {
+      "type": "object",
+      "required": false,
+      "description": "The pager's words: { prev: \"Previous page\", next: \"Next page\", page: \"Page {a} of {n}\", pages: \"Pages {a} and {b} of {n}\", name: \"booklet\" }; these are the defaults."
+    },
+    "id": {
+      "type": "text",
+      "required": false,
+      "description": "The root's id (default \"booklet\")."
+    }
+  },
+  "slots": {},
+  "places": {
+    "leaf": "a leaf: below desktop all in one grid cell, the one in view on top (z by distance), turned leaves rotated over the spine (rotateY -96deg from the left edge, --g-turn on --gc) and faded, leaves to come hidden under it; from 1200 two columns of one paper (the leaf's paper, edge and padding exposed properties set to bare and --s9 --s9 --s6), the spread in view fading in"
+  },
+  "tokens": {
+    "reads": [
+      "--leaf-w",
+      "--elev-paper",
+      "--g-turn",
+      "--gc",
+      "--rule-2",
+      "--rule",
+      "--s6",
+      "--s8",
+      "--tap",
+      "--w",
+      "--r",
+      "--paper-2",
+      "--paper",
+      "--f-label",
+      "--t-quiet",
+      "--ink",
+      "--s9"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: open on its first leaf (the first spread on desktop), the back arrow disabled",
+    "hover": "yes: an arrow's ground lightens to --paper (pointer devices)",
+    "focus-visible": "yes: the arrows take the product's ring",
+    "active": "yes: a leaf turning over the spine (the transition), or the spread fading in",
+    "disabled": "yes: the back arrow on the first leaf, the next arrow on the last (opacity .3)",
+    "selected": "yes: the leaf in view, data-pos now (at): the rated state opens on its note's leaf",
+    "loading": "n/a: drawn with the page",
+    "error": "n/a: drawn with the page",
+    "empty": "yes: one leaf (the week so far): no pager, nothing to turn"
+  },
+  "events": {
+    "turn": "the leaf in view changed (booklet:turn): bubbling, detail { at, span }"
+  },
+  "behaviour": {
+    "script": "booklet.js, inside its root only: set(i) writes data-pos (past, now, next) and --k (distance from now) on each leaf, inert on the leaves out of view, the count's words and the arrows' disabled; span 2 from the container's 1200 (the CSS says so through --aj-s-booklet-span) (the spread starts on an even leaf), 1 below. Moves on the arrows, the Left and Right keys (on the booklet), a touch swipe over 50px, and a tap on a leaf's outer thirds below a 700px container (--aj-s-booklet-tap) (not on a link or button). Opens on data-at; a hash naming a leaf (#leaf-sleep, Timeline's way back) opens at that note's leaf. Under reduced motion the leaf changes at once (the CSS's guard; the motion-review switch lifts it in previews).",
+    "hooks": {
+      "count": "The pager's words (aria-live polite): one leaf's (\"Page 2 of 6\") and the spread's (\"Pages 1 and 2 of 6\"), the CSS showing the one in force, so a static screen reads right before any script runs.",
+      "prev": "The back arrow.",
+      "next": "The next arrow.",
+      "data-page": "On the root: the count for one leaf, \"Page {a} of {n}\" (labels.page), read by the script.",
+      "data-pages": "On the root: the count for a spread, \"Pages {a} and {b} of {n}\" (labels.pages)."
+    },
+    "state": {
+      "data-pos": {
+        "values": [
+          "past",
+          "now",
+          "next"
+        ],
+        "setBy": "runtime",
+        "description": "On each leaf: turned, in view, still to come. Rendered for the opening leaf; the context data-pos the leaf's pictures read."
+      },
+      "data-at": {
+        "values": [
+          "<n>"
+        ],
+        "setBy": "runtime",
+        "description": "On the root: the first leaf in view."
+      }
+    }
+  },
+  "uses": {
+    "leaf": "0.x",
+    "leafpic": "0.x",
+    "button": "0.x",
+    "thumbs": "0.x"
+  },
+  "assets": [],
+  "a11y": {
+    "role": "a group with aria-roledescription \"booklet\" named by label; each leaf a section named \"2 of 6: What you kept\"; the leaves out of view inert",
+    "keyboard": "Tab to the arrows; Left and Right turn the leaves while focus is in the booklet",
+    "labels": "the arrows \"Previous page\" and \"Next page\"; the count announced politely"
+  },
+  "responsive": {
+    "700": "below 700px a tap on a leaf's outer thirds turns it",
+    "1200": "from the container's 1200: open at a spread, two leaves on one paper with the fold shaded between them (ink 8% over ±30px), the stitches on the centre line, the ribbon 70px from the right, the pager stepping two leaves; below, one leaf at most --leaf-w wide, the stitches 9px in from the spine edge, the ribbon 46px from the right"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-28",
+      "kind": "added",
+      "change": "New (v4 C3): the booklet of explore paper-story-cards d-booklet with booklet-feel f-mix (A's border and shadow, B's stitches)."
+    },
+    {
+      "version": "0.1.1",
+      "date": "2026-10-28",
+      "kind": "fixed",
+      "change": "The count holds the words for one leaf and for the spread, and the container rule shows the one in force: a static desktop screen read \"Page 1 of 6\" on a spread of leaves 1 and 2."
+    },
+    {
+      "version": "0.1.1",
+      "date": "2026-10-29",
+      "kind": "internal",
+      "change": "v4 round 10: its fixtures' note feet take the thumbs in place of That's not right."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-30",
+      "kind": "added",
+      "change": "v4 round 10: a leaf may carry a name for its label in place of the kicker (the skeleton's leaves, whose kicker is a bone)."
+    }
+  ],
+  "contexts": []
+}

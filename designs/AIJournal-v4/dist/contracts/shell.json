@@ -1,0 +1,123 @@
+{
+  "name": "shell",
+  "layer": "layout",
+  "version": "0.1.1",
+  "inventory": "A2",
+  "description": "The product shell (.app): the unruled paper ground every screen sits on, the container every responsive rule queries, and the positioning context for the rail. It holds the rail, the page and, at desktop, the title block.",
+  "variants": {
+    "surface": {
+      "values": [
+        "notebook",
+        "auth",
+        "account"
+      ],
+      "default": "notebook",
+      "description": "auth is the approved plain-paper sign-in spread (was .app.auth-paper): full window height, set in --rule. account is the signed-out screens without the spread (was .auth-surface without .auth-paper). Modules read the surface as a context (data-surface).",
+      "noRule": {
+        "account": "a context other modules read (data-surface=\"account\"); the shell itself draws it as notebook"
+      }
+    },
+    "motion": {
+      "values": [
+        "none",
+        "arrive"
+      ],
+      "default": "none",
+      "description": "The product shell's motion scope (was .app): arrival motion runs only inside a shell that carries it, never in the guide or the catalogue. Modules read it as a context (data-motion). The restate value (a second state of one screen) was dropped on 2026-10-13: nothing set it.",
+      "noRule": {
+        "arrive": "a context other modules read; the shell draws nothing of its own for it"
+      }
+    },
+    "layout": {
+      "values": [
+        "single",
+        "sidebar"
+      ],
+      "default": "single",
+      "description": "sidebar is the desktop shell with a title block as its first column (was .device.d .app:has(>.title)): a grid of --title-w and the page. Set it on every shell that has a title block child."
+    }
+  },
+  "options": {
+    "clip": {
+      "type": "boolean",
+      "default": false,
+      "description": "Presentation only (revision 6): the states packs show many states of one screen without a full viewport each. No shipped screen uses it."
+    }
+  },
+  "content": {},
+  "slots": {
+    "children": {
+      "accepts": [
+        "rail",
+        "page",
+        "mast (form title)"
+      ],
+      "required": true,
+      "description": "The rail, then the title block at desktop, then the page."
+    }
+  },
+  "places": {
+    "main": "the compact recorder: takes the shell's room",
+    "tabbar": "the native tab bar on iOS: runs under the binding rail"
+  },
+  "tokens": {
+    "reads": [
+      "--paper",
+      "--ink",
+      "--rail",
+      "--rule",
+      "--title-w"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: a surface, not interactive",
+    "focus-visible": "n/a: a surface, not interactive",
+    "active": "n/a: a surface, not interactive",
+    "disabled": "n/a: a surface, not interactive",
+    "selected": "n/a: a surface, not interactive",
+    "loading": "n/a: a surface; loading belongs to what it holds",
+    "error": "n/a: a surface; errors belong to what it holds",
+    "empty": "n/a: a shell always holds a page"
+  },
+  "events": {},
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none: a generic container; the page holds the landmarks",
+    "keyboard": "none",
+    "labels": "none"
+  },
+  "responsive": {
+    "container": "The shell is the inline-size container. Its own box never changes with width (the sidebar grid follows its layout, which pages set only from 1200); everything inside queries it at 700 (tablet) and 1200 (desktop).",
+    "overflow": "overflow:clip, never hidden: hidden would make it a scroll container and take the sticky composer's scrollport away.",
+    "motion": "The C3 motion tokens are scoped to the shell (tokens.json $scope .aj-l-shell)."
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-10",
+      "kind": "internal",
+      "change": "Converted from lock.css A2 (.app) and the shell rules of the website preview and the design-system guide."
+    },
+    {
+      "version": "0.1.0",
+      "date": "2026-10-13",
+      "kind": "internal",
+      "change": "The motion variant's restate value is gone, with the six rules that read it: nothing set it. The C3 motion tokens are scoped to .aj-l-shell (were .app), so a rendered shell carries them."
+    },
+    {
+      "version": "0.1.1",
+      "date": "2026-10-20",
+      "kind": "internal",
+      "change": "The sidebar grid is keyed on data-layout=\"sidebar\" alone, no longer on the stage's desktop platform (v4 D1): pages ask for it only from 1200, and the shell cannot query its own width."
+    }
+  ],
+  "contexts": [
+    "data-platform",
+    "data-site",
+    "data-surface"
+  ]
+}

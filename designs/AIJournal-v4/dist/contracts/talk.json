@@ -1,0 +1,164 @@
+{
+  "name": "talk",
+  "layer": "pages",
+  "version": "0.5.1",
+  "description": "Talk: the voice memo. The compact transport recorder (ready), the kept recording with its row and the way back (kept, transcribing), and three microphone drawings kept for the comp (before, denied, missing). One render for every platform; for the kept recording desktop puts the back link in the title block beside the page.",
+  "variants": {
+    "platform": {
+      "values": [
+        "mobile",
+        "tablet",
+        "desktop"
+      ],
+      "default": "mobile",
+      "description": "The device the page is drawn for. Desktop's rule for the kept recording: the back link is the title block (mast form title) beside the page (shell layout sidebar), and the page is headed untitled. Mobile and tablet: the masthead row, with the back link, inside the page. The recorder section is the same on every platform. The kept recording's waveform is the wave's own (v4 round 10).",
+      "noRule": {
+        "mobile": "a page has no CSS: the platform chooses which modules it composes and how",
+        "tablet": "a page has no CSS: the platform chooses which modules it composes and how",
+        "desktop": "a page has no CSS: the platform chooses which modules it composes and how"
+      }
+    },
+    "state": {
+      "values": [
+        "ready",
+        "kept",
+        "transcribing",
+        "microphone-before",
+        "microphone-denied",
+        "microphone-missing",
+        "flow-mic-permission",
+        "flow-mic-denied",
+        "flow-mic-missing",
+        "recording",
+        "paused",
+        "kept-notice",
+        "paused-draft",
+        "discard-confirm"
+      ],
+      "default": "ready",
+      "description": "The page's states, named as the prototype's routes (journal-website.html): ready (talk: the compact recorder), kept (recording-kept), transcribing. The microphone states (microphone-before, -denied, -missing and the flow pack's flow-mic-permission, -denied, -missing) are reference drawings only (DESIGN.md 2026-10-14): the website redirects them to the live recorder, so they are kept as states for the comps and are not routes of the product. paused is the recorder paused (16-flow-states, s-recording-paused); kept-notice is a generic state page (system/content/state-page.mjs, s-recording-kept).",
+      "noRule": {
+        "ready": "a page has no CSS: a state chooses the content and modules it composes",
+        "kept": "a page has no CSS: a state chooses the content and modules it composes",
+        "transcribing": "a page has no CSS: a state chooses the content and modules it composes",
+        "microphone-before": "a page has no CSS: a state chooses the content and modules it composes",
+        "microphone-denied": "a page has no CSS: a state chooses the content and modules it composes",
+        "microphone-missing": "a page has no CSS: a state chooses the content and modules it composes",
+        "flow-mic-permission": "a page has no CSS: a state chooses the content and modules it composes",
+        "flow-mic-denied": "a page has no CSS: a state chooses the content and modules it composes",
+        "flow-mic-missing": "a page has no CSS: a state chooses the content and modules it composes",
+        "recording": "a page has no CSS: a state chooses the content and modules it composes",
+        "paused": "a page has no CSS: a state chooses the content and modules it composes",
+        "kept-notice": "a page has no CSS: a state chooses the content and modules it composes",
+        "paused-draft": "a page has no CSS: a state chooses what it composes",
+        "discard-confirm": "a page has no CSS: a state chooses what it composes"
+      }
+    },
+    "context": {
+      "values": [
+        "screen",
+        "walkthrough"
+      ],
+      "default": "screen",
+      "description": "Where the page is drawn. screen: the numbered screens (the static header). walkthrough: the prototypes and the website; below desktop a page with the header section draws it in its navbar form and puts its blocks in the page's reader (layout page, option reader). Pages without the header section draw the same in both.",
+      "noRule": {
+        "screen": "a page has no CSS: the context chooses how it composes its modules",
+        "walkthrough": "a page has no CSS: the context chooses how it composes its modules"
+      }
+    }
+  },
+  "options": {},
+  "content": {
+    "data": {
+      "type": "data",
+      "description": "data.mjs: the recorder's state lines, the back link, the kept recording and the transcribing notice (03-talk). Real copy: a page is not stress-tested (its components are)."
+    }
+  },
+  "slots": {},
+  "places": {},
+  "tokens": {
+    "reads": [],
+    "exposes": {},
+    "sets": []
+  },
+  "states": {
+    "default": "yes: the recorder, ready to start",
+    "hover": "n/a: a page; its controls carry their own",
+    "focus-visible": "n/a: a page; its controls carry their own",
+    "active": "n/a: a page; its controls carry their own",
+    "disabled": "n/a: a page; its controls carry their own",
+    "selected": "n/a: a page; its controls carry their own",
+    "loading": "n/a: transcribing is a state of the page (variant state), not a style",
+    "error": "n/a: the microphone refused or missing are reference states of the page (variant state), not a style",
+    "empty": "n/a: always drawn"
+  },
+  "events": {},
+  "uses": {
+    "shell": "0.x",
+    "rail": "0.x",
+    "page": "0.x",
+    "mast": "0.x",
+    "back": "0.x",
+    "recorder": "0.x",
+    "stack": "0.x",
+    "keybox": "0.x",
+    "recrow": "0.x",
+    "play": "0.x",
+    "wave": "0.x",
+    "entry-actions": "0.x",
+    "button": "0.x",
+    "notice": "0.x",
+    "header": "0.x",
+    "dest": "0.x",
+    "sheet": "0.x",
+    "auth-form": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none of its own: the recorder is main, the kept recording's stack is main",
+    "keyboard": "its links and buttons, in reading order",
+    "labels": "Voice memo actions; play: Play this recording, 1 minute 12 seconds"
+  },
+  "responsive": {
+    "1200": "desktop: the back link becomes the title block beside the page (kept, transcribing)"
+  },
+  "changelog": [
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "internal",
+      "change": "Pages round 4b: the flow pack's states (16-flow-states): flow-mic-permission, flow-mic-denied, flow-mic-missing (reference drawings), paused, and kept-notice (a generic state page)."
+    },
+    {
+      "version": "0.1.0",
+      "date": "2026-10-14",
+      "kind": "internal",
+      "change": "Pages round 2: 03-talk (ready, kept, transcribing and the three microphone reference states) on the three platforms, at parity with the screens."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-15",
+      "kind": "added",
+      "change": "Variant context (screen, walkthrough): the walkthroughs render the page directly (pages round 5)."
+    },
+    {
+      "version": "0.4.0",
+      "date": "2026-10-20",
+      "kind": "changed",
+      "change": "RecommendedChanges-v4 B6: state recording (16-flow-states s-recording); the recorder's trace and the kept row draw the memo's fixed shape."
+    },
+    {
+      "version": "0.5.0",
+      "date": "2026-10-29",
+      "kind": "added",
+      "change": "v4 C5: paused passes the memo's length (the player, Discard); states paused-draft (#s-recording-draft) and discard-confirm (#s-recording-discard), 16-flow-states."
+    },
+    {
+      "version": "0.5.1",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 round 10: a recording's waveform is the wave's own (the memo's phrase at a fixed pitch); waves.mjs retired."
+    }
+  ]
+}

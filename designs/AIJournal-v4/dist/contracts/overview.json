@@ -1,0 +1,127 @@
+{
+  "name": "overview",
+  "layer": "sections",
+  "version": "0.2.0",
+  "description": "The overview at the top of the writing companion on Today (v4 C4): one row, ruled off below, no title. The latest weekly reflection's line in the glance's face and size, never wrapping, and a chevron after it; the line and the chevron are the link to that reflection. A line longer than its row fades into the chevron. It must not look like the person's own writing.",
+  "variants": {},
+  "options": {
+    "first": {
+      "type": "boolean",
+      "default": false,
+      "description": "A new account before its first reflection: the line is Today's first-week line and the link opens the week so far; the accessible name says \"Your first week\" and \"See the week so far.\""
+    }
+  },
+  "content": {
+    "line": {
+      "type": "text",
+      "required": true,
+      "description": "The latest weekly reflection's line (\"Five days here, and sleep on your mind.\"), or Today's first-week line (\"Your first reflection comes on Sunday.\"). One sentence, about 50 characters at most: a phone's row holds about 50 at 13.5px (390), so a longer line fades. An empty line renders nothing."
+    },
+    "dates": {
+      "type": "text",
+      "required": false,
+      "description": "The reflection's week, \"3 to 9 Aug\", for the accessible name (\"This week, 3 to 9 Aug: …\")."
+    },
+    "href": {
+      "type": "text",
+      "required": true,
+      "description": "The reflection: the booklet on its first leaf (#reflections), or the week so far for a new account (#reflections-empty)."
+    },
+    "reflection": {
+      "type": "text",
+      "required": false,
+      "description": "The reflection's id (its week's Monday, \"2026-08-03\"), for the seen record: the chevron nudges the first time this id is shown. Without it, no nudge."
+    },
+    "labels": {
+      "type": "object",
+      "required": false,
+      "description": "The accessible name's words: { week: \"This week\", first: \"Your first week\", opens: \"Opens the reflection.\", soFar: \"See the week so far.\" }; these are the defaults."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": [
+      "--g-lean-x",
+      "--s5",
+      "--w",
+      "--rule-2",
+      "--rule",
+      "--t-glance",
+      "--lh-glance",
+      "--f-prose",
+      "--s4",
+      "--s2",
+      "--g-lean-back",
+      "--gc-rise",
+      "--tap",
+      "--g-lean",
+      "--g-nudge",
+      "--gc",
+      "--g-nudge-wait",
+      "--ink"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: the line with a faint dotted underline and the chevron after its last word; a long line fades into the chevron",
+    "hover": "yes: (fine pointer) the chevron leans --g-lean-x toward where it leads and the underline turns solid; reduced motion darkens the chevron to --ink instead",
+    "focus-visible": "yes: the product's ring, with the hover's lean and solid underline",
+    "active": "yes: a new reflection's first showing nudges the chevron once (data-new, set by the script from the seen record)",
+    "disabled": "n/a: shown only when there is a line to open",
+    "selected": "n/a: not selectable",
+    "loading": "n/a: written with the page",
+    "error": "n/a: absent rather than wrong",
+    "empty": "n/a: no line, no overview (renders nothing; the composer is then the plain form)"
+  },
+  "events": {},
+  "behaviour": {
+    "script": "overview.js, inside its root only: marks data-over when the line runs over its row (a ResizeObserver on the line, again on document.fonts.ready), so the CSS fades it in place of the ellipsis; sets data-new the first time a reflection's id is shown (the seen record: one value, the last id shown; the account's in the product, the browser's storage here; the motion-review switch ignores it).",
+    "hooks": {},
+    "state": {
+      "data-over": {
+        "values": [
+          ""
+        ],
+        "setBy": "runtime",
+        "description": "The line runs over its row: the fade into the chevron replaces the ellipsis."
+      },
+      "data-new": {
+        "values": [
+          ""
+        ],
+        "setBy": "runtime",
+        "description": "This reflection's first showing: the chevron nudges once."
+      }
+    }
+  },
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "a link (the line and the chevron); the row is not a landmark",
+    "keyboard": "Tab to the link; Enter opens the reflection",
+    "labels": "aria-label carries the whole line with the week and where it leads (\"This week, 3 to 9 Aug: Five days here, and sleep on your mind. Opens the reflection.\"), so a faded line is never lost; title shows the line on hover"
+  },
+  "responsive": {},
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-12",
+      "kind": "internal",
+      "change": "Converted from lock.css (the recent overview)."
+    },
+    {
+      "version": "0.1.0",
+      "date": "2026-10-13",
+      "kind": "internal",
+      "change": "Places its glance by role (line), taking over lock.css's .journal-overview rules and the glance's legacy context."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-29",
+      "kind": "breaking",
+      "change": "v4 C4 (explore overview-single-line c-fade-chevron): no label or glance; the latest weekly reflection's line and a chevron, together the link to it (content line, dates, href, reflection, labels; option first); a long line fades into the chevron (overview.js marks data-over; an ellipsis without the script); the chevron leans on hover and focus and nudges once per new reflection (the seen record); 44px tap height on touch; right to left; an empty line renders nothing. The 620px viewport queries go (nothing left to stack)."
+    }
+  ],
+  "places": {}
+}

@@ -1,0 +1,187 @@
+{
+  "name": "button",
+  "layer": "components",
+  "version": "0.5.0",
+  "inventory": "E2",
+  "description": "The product's buttons: three grades and no fourth (solid, keyline, quiet), plus the citation pair (cite, wrong), which always appear together. A link or a button element; both render identically. v4 C2 adds Ask's round pills (form pill) and the message tools (form icon with a tool).",
+  "variants": {
+    "grade": {
+      "values": [
+        "solid",
+        "keyline",
+        "quiet",
+        "cite"
+      ],
+      "default": "solid",
+      "description": "solid: the one committing action of a view. keyline: a secondary action. quiet: a dotted-underlined word, for the least weight. cite: the source under something the journal wrote, 'March 2026', '4 entries' (was .cite, which is not .btn: the base button box does not apply to it). Its rating is the thumbs component (wrong, 'That's not right', retired in v4 round 10)."
+    },
+    "form": {
+      "values": [
+        "text",
+        "icon",
+        "toggle",
+        "note",
+        "transport",
+        "switch",
+        "pill"
+      ],
+      "default": "text",
+      "description": "text: a word. icon: a --tap square holding a glyph, the entry tools' edit and delete (was .entry-icon). toggle: the show/hide control inside a password field (was .password-toggle). note: the quiet 'Forgot your password?' line under a field, aligned to its start (was .forgot). transport: every button of the compact recorder (was .compact-recorder .btn): its own gap and 20px glyph, and a grey disabled state. switch: an on/off setting written as a word with a track and knob after it (Timeline search's \"By meaning\"); a button element with role=\"switch\" and aria-checked, never a link; the grade does not apply (no box, no fill, no border of its own). pill (v4 C2, Ask's head and drawers): a round button, an optional icon then the word, and an optional count badge; history, bookmarks, new, today, close. The grade does not apply (no data-grade is written). Below the container's 1200 a pill with an icon shows only its icon (the word stays for screen readers): round, --tap square, or the icon and the count. A pill without an icon keeps its word at every width. The icon form also carries Ask's message tools (option tool)."
+    }
+  },
+  "options": {
+    "disabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "The one disabled control in the product, the microphone exception: Start in the compact recorder's transport while the microphone is blocked or missing. A button element only; everywhere else an unavailable action is not shown."
+    },
+    "checked": {
+      "type": "boolean",
+      "default": false,
+      "description": "The switch form only: on (aria-checked=\"true\"). Its parent flips it on press; the button has no script."
+    },
+    "tool": {
+      "values": [
+        "bookmark",
+        "copy",
+        "up",
+        "down"
+      ],
+      "default": null,
+      "description": "The icon form only, v4 C2: one of a message's tools (data-tool), a button element; down also writes aria-expanded=\"false\" (the disclosure of its form, which its parent opens), the glyph in the icon slot (system/content/icons.mjs BOOKMARK, COPY, THUMB_UP, THUMB_DOWN). A --tap square, --rule-2 at rest; 36px with a fine pointer. Hover: --rule on an 8% --rule ground; up: a 70% mix of --rate-up with --rule on a 13% --rate-up ground; down: the same in --rate-down at 11%. Pressed (aria-pressed=\"true\"): bookmark --rule, up --rate-up, down --rate-down, the glyph filled. down while its form is open (aria-expanded=\"true\") keeps its hover look. A parent hides the tools at rest through --aj-c-button-rest; a pressed or expanded tool, or one with keyboard focus, is always shown. copy: its parent writes data-copied=\"<the word>\" on it for a moment, and the tool shows the word in a small tag above it (--ink ground, --paper words, 11px labels); the button has no script."
+    },
+    "pressed": {
+      "type": "boolean",
+      "default": false,
+      "description": "The tool option bookmark, up or down: set (aria-pressed=\"true\"). These three always write aria-pressed (\"false\" when not set); copy never does."
+    },
+    "count": {
+      "type": "number",
+      "default": null,
+      "description": "The pill form only: a count badge after the word (the day's bookmarks). 0 draws the empty badge (data-zero): no fill, --rule-2, a 40% --rule ring."
+    },
+    "expanded": {
+      "type": "boolean",
+      "default": null,
+      "description": "The pill form only: the pill opens a drawer; written as aria-expanded (\"true\" or \"false\") when given, omitted otherwise. true draws it pressed: --rule ground, --paper words, the count inverted."
+    }
+  },
+  "content": {
+    "label": {
+      "type": "text",
+      "required": true,
+      "description": "Final copy. For the icon and toggle forms it is the accessible name (aria-label) and the glyph carries no text. For the switch form it is the visible word (\"By meaning\") and the accessible name. The pill form: the visible word and the accessible name (visually hidden below 1200 when the pill has an icon). The tool option: the accessible name (Bookmark, Copy, Helpful, Not helpful)."
+    },
+    "href": {
+      "type": "text",
+      "required": false,
+      "description": "Renders an a element when given, a button element otherwise."
+    }
+  },
+  "slots": {
+    "icon": {
+      "accepts": [
+        "svg"
+      ],
+      "required": false,
+      "description": "The glyph of the icon and toggle forms (the entry tools' pencil and bin, the password eye and its slash). The pill form's optional glyph before the word (HISTORY, BOOKMARK_SOLID, PLUS); the tools' glyphs."
+    }
+  },
+  "tokens": {
+    "reads": [
+      "--s3",
+      "--tap",
+      "--s6",
+      "--r",
+      "--f-label",
+      "--t-print",
+      "--rule",
+      "--paper",
+      "--w",
+      "--block",
+      "--paper-2",
+      "--rule-2",
+      "--t-quiet",
+      "--t-body",
+      "--gc",
+      "--grid",
+      "--lh-body",
+      "--action-delete",
+      "--s4",
+      "--s5",
+      "--s1",
+      "--ink",
+      "--rate-up",
+      "--rate-down"
+    ],
+    "exposes": {
+      "--aj-c-button-switch-h": "The switch form's height, default --tap: the parent sets it to stretch the switch to its own line (the Timeline search pill sets it while it morphs).",
+      "--aj-c-button-rest": "The tool option: the tool's opacity at rest, default 1. A message sets it to 0 with a fine pointer and back to 1 on its hover or focus, so its tools fade in (180ms on --gc); a pressed, expanded or focused tool ignores it."
+    }
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "yes: solid fills --block; keyline's border darkens to --rule; quiet and cite turn --block; pill: --rule ground, --paper words, the count inverted (--paper ground, --rule figure); tool: as the tool option says",
+    "focus-visible": "yes: the product's focus ring (base)",
+    "active": "yes: pressed 1px down, and scaled .97 under the shell's motion",
+    "disabled": "yes: only in the compact recorder's transport, --grid ground and grey, not-allowed cursor",
+    "selected": "yes: the toggle form with aria-pressed=\"true\" (the password is shown); the switch form with aria-checked=\"true\" (the track filled --rule, the knob --paper, moved to the end); the pill with expanded true (its drawer is open): as hover; a tool with pressed true: filled in its colour",
+    "loading": "n/a: a button never shows its own progress",
+    "error": "n/a: errors are written beside the field, not on the button",
+    "empty": "n/a: always labelled"
+  },
+  "events": {
+    "press": "the person pressed it"
+  },
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "button, or link when it navigates",
+    "keyboard": "Tab to it, Enter (and Space on a button element) to press; Space or Enter flips a switch",
+    "labels": "the icon and toggle forms need aria-label; the toggle carries aria-pressed; the switch carries role=\"switch\" and aria-checked"
+  },
+  "responsive": {},
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-10",
+      "kind": "internal",
+      "change": "Converted from lock.css E2 (.btn and its grades, .cite, .wrong) with the entry-tools icon, the password toggle and the forgot line as forms."
+    },
+    {
+      "version": "0.1.1",
+      "date": "2026-10-12",
+      "kind": "patch",
+      "change": "The disabled option renders the disabled attribute (the microphone exception), so the recorder can draw its blocked Start."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "The toggle draws its own eye (with its slash part) when given no icon: the password field's show/hide (13-login)."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-23",
+      "kind": "added",
+      "change": "The switch form (v4 C1, the Timeline search's By meaning): a word, then a 30x18 track with a 12px knob (no script: the parent flips it); checked fills the track and moves the knob 12px, 160ms on --gc; reduced motion drops the travel."
+    },
+    {
+      "version": "0.4.0",
+      "date": "2026-10-25",
+      "kind": "added",
+      "change": "v4 C2: the pill form (Ask's head and drawer pills: icon, word, count badge, icon-only below 1200, expanded) and the tool option of the icon form (Ask's message tools: bookmark, copy, up, down; their hover and pressed colours, the rest opacity a message sets, the copied tag)."
+    },
+    {
+      "version": "0.5.0",
+      "date": "2026-10-29",
+      "kind": "removed",
+      "change": "v4 round 10: grade wrong (That's not right) retired; what the journal wrote is rated with the thumbs component, as in Ask."
+    }
+  ],
+  "contexts": [
+    "data-motion",
+    "data-surface"
+  ]
+}

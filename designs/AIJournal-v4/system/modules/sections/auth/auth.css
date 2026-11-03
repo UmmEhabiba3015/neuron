@@ -1,0 +1,57 @@
+/* auth: the plain-paper open spread of sign in and create account. Moved from lock.css (OCTOBER
+   APPROVED AUTH). The canvas's grow and min-width are the page's, by role (data-place="grow").
+   The account sheet's two-column grid between the context and the region is the sheet module's
+   (legacy context [data-surface="auth"] there). Every rule needs [data-surface="auth"]: the spread exists only in the
+   plain-paper auth shell, and the selectors keep its specificity. */
+/* context: [data-surface="auth"] is the plain-paper auth shell */
+[data-surface="auth"] .aj-s-auth{display:flex;align-items:stretch;justify-content:center;padding:var(--s6) 0 calc(var(--s6) + var(--ctl) + var(--s8))}
+/* context: [data-surface="auth"] is the plain-paper auth shell */
+[data-surface="auth"] .aj-s-auth__context{padding:var(--s9);min-width:0;border-right:var(--w) solid var(--rule);display:flex;flex-direction:column;justify-content:center;gap:var(--s9)}
+/* context: [data-surface="auth"] is the plain-paper auth shell */
+[data-surface="auth"] .aj-s-auth__title{font:400 calc(var(--t-mast) * 1.2)/1.12 var(--f-prose);margin:0 0 var(--s8);
+  max-width:390px;/* token-exempt: the context title's measure; no recorded reason */
+  text-wrap:balance}
+/* context: [data-surface="auth"] is the plain-paper auth shell */
+[data-surface="auth"] .aj-s-auth__copy{font:400 var(--t-note)/var(--lh-body) var(--f-prose);
+  max-width:350px;/* token-exempt: the context copy's measure; no recorded reason */
+  margin:0}
+/* context: [data-surface="auth"] is the plain-paper auth shell */
+[data-surface="auth"] .aj-s-auth__ways{border-top:var(--w) solid var(--rule)}
+/* context: [data-surface="auth"] is the plain-paper auth shell */
+[data-surface="auth"] .aj-s-auth__way{padding:var(--s6) 0;display:grid;
+  grid-template-columns:80px 1fr;/* token-exempt: the ways' label column; no recorded reason */
+  gap:var(--s6);border-bottom:var(--w) solid var(--rule);font:400 var(--t-note)/var(--lh-body) var(--f-prose)}
+/* context: [data-surface="auth"] is the plain-paper auth shell */
+[data-surface="auth"] .aj-s-auth__way p{margin:0}
+/* context: [data-surface="auth"] is the plain-paper auth shell */
+[data-surface="auth"] .aj-s-auth__label{font:600 var(--t-print)/1.7 var(--f-label)}
+/* context: [data-surface="auth"] is the plain-paper auth shell */
+[data-surface="auth"] .aj-s-auth__region{min-width:0;padding:var(--s9);display:flex;align-items:center;background:var(--paper)}
+
+@container (max-width:1000px){
+ /* context: [data-surface="auth"] is the plain-paper auth shell */
+ [data-surface="auth"] .aj-s-auth__context,[data-surface="auth"] .aj-s-auth__region{padding:var(--s8)}
+ /* context: [data-surface="auth"] is the plain-paper auth shell */
+ [data-surface="auth"] .aj-s-auth__title{font-size:var(--t-mast)}
+}
+@container (max-width:700px){
+ /* context: [data-surface="auth"] is the plain-paper auth shell */
+ [data-surface="auth"] .aj-s-auth{padding-bottom:calc(var(--s6) + var(--ctl) + var(--s7))}
+ /* context: [data-surface="auth"] is the plain-paper auth shell */
+ [data-surface="auth"] .aj-s-auth__region{grid-row:1;padding:var(--s7)}
+ /* context: [data-surface="auth"] is the plain-paper auth shell */
+ [data-surface="auth"] .aj-s-auth__context{border-right:0;padding:var(--s8) var(--s7);gap:var(--s7)}
+ /* lock.css also gave the stacked context a top rule, border-top:var(--w) solid var(--rule). It
+    never showed: the account sheet's sections are unruled (the sheet module, which beat it from a
+    higher layer). Left out, so the approved screens stay as they are. */
+ /* context: [data-surface="auth"] is the plain-paper auth shell */
+ [data-surface="auth"] .aj-s-auth__title{font-size:var(--t-hand-l);margin-bottom:var(--s6)}
+ /* context: [data-surface="auth"] is the plain-paper auth shell */
+ [data-surface="auth"] .aj-s-auth__ways{display:none}
+}
+
+/* PLACEMENT BY ROLE (decision 2026-10-12): the region's form (form) is a 500 column, centred. */
+.aj-s-auth__region > [data-place~="form"]{width:100%;max-width:500px;/* token-exempt: the approved auth spread's form column, 500 (October approved auth) */margin-inline:auto}
+
+/* The spread's account sheet (sheet): the full width up to 1120, growing to fill the page (was .auth-paper .auth-sheet). */
+.aj-s-auth > [data-place~="sheet"]{width:100%;max-width:1120px;/* token-exempt: the approved auth spread's width, 1120 (October approved auth) */min-width:0;margin:0;flex:1}

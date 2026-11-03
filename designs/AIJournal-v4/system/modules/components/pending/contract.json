@@ -1,0 +1,115 @@
+{
+  "name": "pending",
+  "layer": "components",
+  "version": "0.1.1",
+  "inventory": "v4 C5",
+  "description": "v4 C5 (explore drafts a-quiet-line): one line of the system's quiet print for something not done yet, where it is; nothing around it changes shape. Status form: under an unsent entry or voice memo's words and tools (a row's span place), a 14px upload arrow, the words and Try again (the quiet button) at its end, role status. Draft form: under the composer's field, the voice memo draft as one whole-line button (mic, \"Voice memo draft\", its length in --block, \"Continue\" with the dotted mark) that opens the recorder on the draft.",
+  "variants": {
+    "form": {
+      "values": [
+        "status",
+        "draft"
+      ],
+      "default": "status",
+      "description": "status: an unsent entry or memo's line (a div, role status; no attribute). draft: the voice memo draft line, a button element (data-form=\"draft\")."
+    },
+    "sub": {
+      "values": [
+        "retrying",
+        "stopped",
+        "sending"
+      ],
+      "default": "retrying",
+      "description": "The status form only. retrying: retrying on its own, in --rule-2, with Try again (no attribute). stopped: retries have given up (offline for a while), the same line in --rule, with Try again. sending: after Try again, no button, the arrow lifts and settles (--g-lift on --gc, looping; reduced motion: still)."
+    }
+  },
+  "options": {},
+  "content": {
+    "text": {
+      "type": "text",
+      "required": true,
+      "description": "status: \"Not uploaded yet. Trying again.\", \"Not uploaded. We can't reach the server; it tries again when you're back online.\", \"Uploading…\". draft: \"Voice memo draft\"."
+    },
+    "action": {
+      "type": "text",
+      "required": false,
+      "description": "status: Try again's label (\"Try again\"); without it, or while sending, no button. draft: the word at the line's end, \"Continue\"."
+    },
+    "length": {
+      "type": "text",
+      "required": false,
+      "description": "draft: the memo's length, \"0:47\", in --block with tabular figures."
+    },
+    "label": {
+      "type": "text",
+      "required": false,
+      "description": "draft: the button's accessible name, \"Continue your voice memo draft, 0:47\"."
+    }
+  },
+  "slots": {},
+  "places": {
+    "action": "status: Try again, overhanging the line above and below so it keeps its 44px target in a line of text height; never wraps its label"
+  },
+  "tokens": {
+    "reads": [
+      "--s4",
+      "--t-quiet",
+      "--f-label",
+      "--rule-2",
+      "--tap",
+      "--rule",
+      "--g-lift",
+      "--gc",
+      "--block"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: retrying, with Try again",
+    "hover": "yes: draft: on a fine pointer Continue turns --block and its underline solid; status: Try again's own",
+    "focus-visible": "yes: draft: the product focus ring (base) round the line; status: Try again's own",
+    "active": "n/a: the draft line and Try again press as buttons (base and the button module)",
+    "disabled": "n/a: neither can be refused; sending has no button instead",
+    "selected": "n/a: nothing in it is selected",
+    "loading": "yes: sending: \"Uploading…\", no button, the arrow lifts and settles",
+    "error": "yes: stopped: the line in --rule, the words say the server can't be reached",
+    "empty": "n/a: not drawn when nothing is pending"
+  },
+  "events": {
+    "retry": "Try again pressed (status): the row sends, the line shows sending, then goes when it is uploaded",
+    "continue": "The draft line pressed: the recorder opens on the draft, paused"
+  },
+  "uses": {
+    "button": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "status form: role=status (its words are announced when they change); draft form: button",
+    "keyboard": "status: Tab to Try again; draft: Tab to the line, Space or Enter",
+    "labels": "draft: label names the button (\"Continue your voice memo draft, 0:47\"); the 14px glyphs are aria-hidden"
+  },
+  "responsive": {},
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-29",
+      "kind": "added",
+      "change": "v4 C5 (explore drafts a-quiet-line): the unsent line (retrying, stopped, sending) and the memo draft line."
+    },
+    {
+      "version": "0.1.1",
+      "date": "2026-10-29",
+      "kind": "added",
+      "change": "Hooks words and length for the prototype runtime (C5 round 2). Fixed: the reduced-motion guard now outweighs the sending rule (it lost on specificity, so the lift ran under reduced motion)."
+    }
+  ],
+  "contexts": [],
+  "behaviour": {
+    "hooks": {
+      "retry": "status: Try again (data-hook=\"retry\"); the runtime sends the row again on a press.",
+      "words": "The line's words (data-hook=\"words\"); the runtime writes \"Uploading…\" when Try again is pressed.",
+      "length": "draft: the memo's length (data-hook=\"length\"); the runtime writes it."
+    }
+  }
+}

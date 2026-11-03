@@ -1,0 +1,114 @@
+/* daycard: the Timeline's date and mood card (v4 C1, explore timeline-jump-arrival f-wash-and-frame; DESIGN.md
+   2026-10-23, the date and mood card). Two rows on the card's flat ground: the date (16px, --rule-2) above the
+   mood ("Mood" in the hand, --t-hand-s, --rule), which is the visual priority. The mood panel opens under them by
+   its height; the calendar unrolls from the date over what is under the card, the card's own width. --rule-2 is
+   allowed: the card brings its own ground, never the graph paper. Its margin and column are its parent's. */
+.aj-s-daycard{position:relative;border:var(--w) solid var(--rule);border-radius:var(--r);background:var(--paper-2)}
+.aj-s-daycard__row{display:flex;align-items:center;gap:var(--s4);min-height:var(--ctl);padding:var(--s2) var(--s5)}
+.aj-s-daycard__row[data-row="date"]{position:relative;min-height:0;padding-block:var(--s1)}
+.aj-s-daycard__row[data-row="mood"]{border-top:var(--w) solid var(--rule);padding-block:var(--s4)}
+
+/* The date: smaller and lighter than the mood, an arrow beside it that says it opens. */
+.aj-s-daycard__date{display:inline-flex;align-items:center;gap:var(--s3);
+  min-height:40px;/* token-exempt: the date row's button, 40px; approved design */
+  padding:0;border:0;background:transparent;color:var(--rule-2);cursor:pointer;text-align:left}
+.aj-s-daycard__value{font:400 var(--t-field)/var(--lh-flat) var(--f-hand);white-space:nowrap}
+.aj-s-daycard__date:hover{color:var(--rule)}
+.aj-s-daycard__date:hover .aj-s-daycard__value{text-decoration:underline;
+  text-decoration-thickness:1px;/* token-exempt: the hand's underline, a hairline; approved design */
+  text-underline-offset:6px/* token-exempt: clear of the hand's descenders; approved design */}
+
+/* The mood toggle: its name in the hand with the arrow after it, the week's name under it. */
+.aj-s-daycard__toggle{display:inline-flex;flex-direction:column;align-items:flex-start;min-height:var(--tap);padding:0;
+  border:0;background:transparent;color:var(--rule);cursor:pointer;text-align:left}
+.aj-s-daycard__name{display:inline-flex;align-items:center;gap:var(--s3);font:400 var(--t-hand-s)/var(--lh-flat) var(--f-hand)}
+.aj-s-daycard__week{display:block;margin-top:var(--s2);
+  font:400 12px/var(--lh-tight) var(--f-label);/* token-exempt: the week's name, 12px; approved design */
+  color:var(--rule)}
+.aj-s-daycard__toggle:hover .aj-s-daycard__name{text-decoration:underline;
+  text-decoration-thickness:1px;/* token-exempt: the hand's underline, a hairline; approved design */
+  text-underline-offset:5px/* token-exempt: clear of the hand's descenders; approved design */}
+
+/* The arrows of both toggles: a 20px round that tints on hover, turning over as its part opens. */
+.aj-s-daycard__arrow{display:grid;place-items:center;
+  width:20px;/* token-exempt: the arrow's round, 20px; approved design */
+  height:20px;/* token-exempt: the arrow's round, 20px; approved design */
+  border-radius:50%}
+.aj-s-daycard__arrow svg{width:12px;/* token-exempt: the arrow's glyph, 12px; approved design */
+  height:12px;/* token-exempt: the arrow's glyph, 12px; approved design */
+  transition:transform var(--g-panel) var(--gc-c1)}
+.aj-s-daycard :is(.aj-s-daycard__date,.aj-s-daycard__toggle):hover .aj-s-daycard__arrow{
+  background:color-mix(in srgb,var(--rule) 10%,transparent)/* token-exempt: the arrow's hover tint, a 10% mix of --rule; approved design */}
+.aj-s-daycard :is(.aj-s-daycard__date,.aj-s-daycard__toggle)[aria-expanded="true"] .aj-s-daycard__arrow svg{transform:rotate(180deg)}
+
+/* The strip: the week's seven days, a dot each in its mood colour, a button to that day; an empty day is a
+   ring, a day still to come nothing. Hidden while the panel is open (the graph says it). */
+.aj-s-daycard__strips{margin-left:auto}
+.aj-s-daycard__strip{display:flex}
+.aj-s-daycard__strip[hidden],.aj-s-daycard[data-mood-open] .aj-s-daycard__strips{display:none}
+.aj-s-daycard__dot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;/* token-exempt: the dot over its letter; approved design */
+  width:26px;/* token-exempt: one day of the strip, 26px; approved design */
+  min-height:var(--tap);padding:0;border:0;background:transparent;border-radius:var(--r);cursor:pointer}
+span.aj-s-daycard__dot{cursor:default}
+.aj-s-daycard__dot i{width:10px;/* token-exempt: the strip's dot, 10px; approved design */
+  height:10px;/* token-exempt: the strip's dot, 10px; approved design */
+  border-radius:50%}
+.aj-s-daycard__dot[data-mood="light"] i{background:var(--mood-light)}
+.aj-s-daycard__dot[data-mood="good"] i{background:var(--mood-good)}
+.aj-s-daycard__dot[data-mood="even"] i{background:var(--mood-even)}
+.aj-s-daycard__dot[data-mood="low"] i{background:var(--mood-low)}
+.aj-s-daycard__dot[data-mood="hard"] i{background:var(--mood-hard)}
+.aj-s-daycard__dot[data-empty] i{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--rule) 40%,transparent)/* token-exempt: an empty day's ring, a 40% mix of --rule; approved design */}
+.aj-s-daycard__dot[data-future] i{box-shadow:none}
+.aj-s-daycard__dot span{font:400 9px/1 var(--f-label);/* token-exempt: the strip's letters, 9px; approved design */
+  color:var(--rule-2)}
+button.aj-s-daycard__dot:hover{background:color-mix(in srgb,var(--rule) 8%,transparent)/* token-exempt: the hover wash, an 8% mix of --rule; approved design */}
+
+/* The week arrows: shown only while the panel is open; earlier and later skip weeks with nothing written. */
+.aj-s-daycard__arrows{display:none;grid-template-columns:repeat(2,36px);/* token-exempt: the week arrows, 36px each; approved design */
+  margin-left:auto}
+.aj-s-daycard[data-mood-open] .aj-s-daycard__arrows{display:grid}
+.aj-s-daycard__step{display:inline-flex;align-items:center;justify-content:center;min-height:var(--tap);padding:0;border:0;
+  background:transparent;color:var(--rule);cursor:pointer}
+.aj-s-daycard__step svg{width:14px;/* token-exempt: the arrow glyph, 14px; approved design */
+  height:14px/* token-exempt: the arrow glyph, 14px; approved design */}
+.aj-s-daycard__step:disabled{color:color-mix(in srgb,var(--rule) 30%,transparent);/* token-exempt: an arrow with no week that way, a 30% mix of --rule; approved design */
+  cursor:default}
+
+/* The mood panel: it opens by its height (grid rows) on the C1 curve, its contents fading in a beat after
+   it starts and out first as it closes. Inert while closed (daycard.js). */
+.aj-s-daycard__panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows var(--g-panel) var(--gc-c1)}
+.aj-s-daycard[data-mood-open] .aj-s-daycard__panel{grid-template-rows:1fr}
+.aj-s-daycard__fold{min-height:0;overflow:hidden;opacity:0;
+  transition:opacity 220ms var(--gc-c1)/* token-exempt: the panel's contents fade out first, 220ms; approved design */}
+.aj-s-daycard[data-mood-open] .aj-s-daycard__fold{opacity:1;
+  transition:opacity 320ms var(--gc-c1) 100ms/* token-exempt: the contents fade in a beat after the panel starts, 320ms after 100ms; approved design */}
+.aj-s-daycard__graphs{padding:0 var(--s5) var(--s5)}
+
+/* The calendar: a sheet below the date, the card's width, over whatever is under the card. It unrolls from the
+   date by its height on the C1 curve over the calendar's 520ms (it travels about 1.55 times the panel's distance),
+   its contents fading in a beat later; closing rolls it back up and fades them first. */
+.aj-s-daycard__cal{position:absolute;
+  z-index:6;/* token-exempt: the calendar sheet over the card's rows and the list */
+  top:calc(100% - var(--w));left:calc(-1 * var(--w));width:calc(100% + 2 * var(--w));
+  display:grid;grid-template-rows:0fr;visibility:hidden;
+  background:var(--paper-2);border:var(--w) solid var(--rule);border-radius:var(--r);box-shadow:var(--elev-sheet);
+  transition:grid-template-rows var(--g-cal) var(--gc-c1),visibility 0s var(--g-cal)}
+.aj-s-daycard[data-cal-open] .aj-s-daycard__cal{grid-template-rows:1fr;visibility:visible;
+  transition:grid-template-rows var(--g-cal) var(--gc-c1),visibility 0s}
+.aj-s-daycard__cal:focus{outline:none}
+.aj-s-daycard__unroll{min-height:0;overflow:hidden;opacity:0;
+  transition:opacity 270ms var(--gc-c1)/* token-exempt: the calendar's contents fade out first, 270ms; approved design */}
+.aj-s-daycard[data-cal-open] .aj-s-daycard__unroll{opacity:1;
+  transition:opacity 400ms var(--gc-c1) 120ms/* token-exempt: the contents fade in a beat after the sheet starts, 400ms after 120ms; approved design */}
+
+.aj-s-daycard__graph[hidden]{display:none}
+
+@media (prefers-reduced-motion:reduce){
+  .aj-s-daycard[data-module]:not(:where(html[data-motion-review="play"] *)) :is(.aj-s-daycard__panel,.aj-s-daycard__fold,.aj-s-daycard__cal,.aj-s-daycard__unroll,.aj-s-daycard__arrow svg){transition:none}
+}
+
+@container (min-width:1200px){
+  /* context: on a split page the card is the sticky column right of the list (b-side-column), level with the pill */
+  [data-layout="split"] > .aj-s-daycard{position:sticky;top:var(--s9)}
+}

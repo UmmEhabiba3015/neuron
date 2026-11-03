@@ -1,0 +1,15 @@
+/* D4 an item mark. Private, Imported, Saved on this device.
+   Moved from lock.css section D. Never colour alone. Always a keyline and a word.
+   The placement it had there belongs to its parents and stays in the legacy layer until those
+   parents are modules: margin-top:var(--s4) after .prose or .lede, and hidden inside an entry
+   row that carries .entry-actions (the memory dropdown already says it), which that row does by
+   setting the exposed --aj-c-mark-display to none: the row cannot override display itself,
+   because the module's layer outranks legacy CSS. */
+.aj-c-mark{display:var(--aj-c-mark-display,inline-flex);align-items:center;gap:var(--s3);
+      padding:var(--s1) var(--s3);border:var(--w) solid var(--rule-2);
+      border-radius:var(--r);background:var(--paper);
+      font-size:var(--t-key);letter-spacing:.14em;text-transform:uppercase;
+      color:var(--rule-2);line-height:1.6}
+.aj-c-mark__glyph{width:11px;/* token-exempt: the glyph is drawn at 11px, below every sizing token */
+        height:11px;/* token-exempt: the glyph is drawn at 11px, below every sizing token */
+        flex:0 0 auto}

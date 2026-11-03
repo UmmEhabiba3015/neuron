@@ -1,0 +1,29 @@
+{
+  "file": "05-reflection.html",
+  "title": "Reflections · the record of weeks",
+  "comment": "Journal v3 design of record: 05-reflection.html. Product scope is V3-REVISION.md; visual and motion rules remain in lock.css.",
+  "written": true,
+  "devices": [
+    {
+      "page": "reflection",
+      "state": "list"
+    },
+    {
+      "page": "reflection",
+      "state": "week"
+    },
+    {
+      "page": "reflection",
+      "state": "first"
+    },
+    {
+      "page": "reflection",
+      "state": "empty"
+    },
+    {
+      "page": "reflection",
+      "state": "rated",
+      "caption": { "title": "Reflections · the record of weeks", "text": "Journal v3 design of record. Product behavior and state transitions are specified in V3-REVISION.md." }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "file": "01-today.html",
+  "title": "Today · settled day",
+  "comment": "Journal v3 design of record: 01-today.html. Product scope is V3-REVISION.md; visual and motion rules remain in lock.css.",
+  "written": true,
+  "devices": [
+    {
+      "page": "today",
+      "state": "default",
+      "caption": {
+        "title": "Today · settled day",
+        "text": "Journal v3 design of record. Product behavior and state transitions are specified in V3-REVISION.md."
+      }
+    }
+  ]
+}

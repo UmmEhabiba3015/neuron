@@ -1,0 +1,37 @@
+/* E10 send, the commit control (REVISION 13). A WORD, not a glyph.
+   It was an arrow down onto a baseline, and the first person to look at it read
+   it as download, which is the one thing it must not mean. An icon that has to
+   be decoded is worse than a word that cannot be, and this product already
+   speaks in printed labels: Upgrade, Export, Not now. Save belongs with those.
+   It also gives the control a real accessible name instead of one bolted on
+   with aria-label, and it survives a user who has never seen the icon before.
+   Moved from lock.css. Its flex (0 0 auto) is its own (pages round 1). */
+.aj-c-send{min-height:var(--ctl);padding:0 var(--s6);border-radius:var(--r);
+      background:var(--rule);border:0;color:var(--paper);cursor:pointer;
+      display:inline-flex;align-items:center;justify-content:center;
+      font-family:var(--f-label);font-size:var(--t-print);letter-spacing:.07em;/* token-exempt: the printed-caps tracking, .07em (tokens.json, --t-print) */
+      text-transform:uppercase;text-decoration:none;white-space:nowrap}
+
+.aj-c-send:hover{background:var(--block)}
+
+.aj-c-send:active{transform:translateY(1px)}
+
+/* The shell's motion: the press ramp, and a press scales the control under it. */
+/* context: the motion belongs to the product shell (.app) */
+[data-motion] .aj-c-send{transition:transform 280ms var(--gc);/* token-exempt: the shell's glide duration, 280ms (3.10 motion) */}
+/* context: the motion belongs to the product shell (.app) */
+[data-motion] .aj-c-send:active{transform:scale(.97);/* token-exempt: the shell's press scale */transition-duration:160ms;/* token-exempt: the shell's press duration */}
+
+@media (hover:hover) and (pointer:fine){
+  /* context: the motion belongs to the product shell (.app) */
+  [data-motion] .aj-c-send{transition:transform 280ms var(--gc);/* token-exempt: the shell's glide duration, 280ms (3.10 motion) */}
+}
+
+/* Reduced motion: the control draws still. */
+@media (prefers-reduced-motion:reduce){
+  /* context: the motion belongs to the product shell (.app) */
+  [data-motion]:not(:where(html[data-motion-review="play"] *)) .aj-c-send{transition:none}
+}
+
+/* Its own size (moved from lock.css, 2026-10-12): intrinsic to the control, not where a parent puts it. A fixed-size control: it never grows or shrinks in a row. */
+.aj-c-send{flex:0 0 auto}

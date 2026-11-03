@@ -1,0 +1,59 @@
+{
+  "name": "shead",
+  "layer": "components",
+  "version": "0.1.0",
+  "inventory": "D6",
+  "description": "A section heading inside the form: printed caps on the page ground, between the ruled rows. An h2, or an h3 under a card or panel heading.",
+  "variants": {},
+  "options": {
+    "level": {
+      "values": [
+        2,
+        3
+      ],
+      "default": 2,
+      "description": "h2 under the page heading; h3 where it sits inside a section that already has an h2."
+    }
+  },
+  "content": {
+    "text": {
+      "type": "text",
+      "required": true,
+      "description": "Final copy, set in printed caps by the CSS."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": ["--s5", "--s6", "--paper", "--t-key", "--rule"],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: not interactive",
+    "focus-visible": "n/a: not focusable",
+    "active": "n/a: not interactive",
+    "disabled": "n/a: not interactive",
+    "selected": "n/a: not interactive",
+    "loading": "n/a: static text",
+    "error": "n/a: static text",
+    "empty": "n/a: a heading always has text"
+  },
+  "events": {},
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "heading",
+    "keyboard": "none",
+    "labels": "its text"
+  },
+  "responsive": {},
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-11",
+      "kind": "internal",
+      "change": "Converted from lock.css D6 (.shead) and its auth context."
+    }
+  ]
+}

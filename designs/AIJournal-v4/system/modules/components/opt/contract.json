@@ -1,0 +1,71 @@
+{
+  "name": "opt",
+  "layer": "components",
+  "version": "0.1.1",
+  "inventory": "E6",
+  "description": "A checkable option: a small keyline tick and a label, pressed or not (aria-pressed). The composer's \"keep out of memory\" and the entry memory menu's choices.",
+  "variants": {
+    "form": {
+      "values": ["plain", "compact"],
+      "default": "plain",
+      "description": "compact: the user-requested compact memory control in the entry memory menu (was .entry-memory-menu > .opt): --t-memory, a 12px tick, start-aligned."
+    }
+  },
+  "options": {
+    "pressed": {
+      "type": "boolean",
+      "default": false,
+      "description": "aria-pressed=\"true\": the tick is filled --rule."
+    }
+  },
+  "content": {
+    "label": {
+      "type": "text",
+      "required": true,
+      "description": "Final copy."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": ["--s4", "--s3", "--tap", "--t-quiet", "--rule-2", "--w", "--r", "--paper-2", "--rule", "--gc", "--t-memory"],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "yes: the label turns --rule",
+    "focus-visible": "yes: the product focus ring (base)",
+    "active": "yes: pressed 1px down, and scaled .97 under the shell's motion",
+    "disabled": "n/a: not interactive",
+    "selected": "yes: aria-pressed=\"true\", the tick filled --rule",
+    "loading": "n/a: the choice is saved in the background",
+    "error": "n/a: the surrounding view reports it",
+    "empty": "n/a: always labelled"
+  },
+  "events": {
+    "change": "pressed or released"
+  },
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "button with aria-pressed",
+    "keyboard": "Tab to it, Space or Enter",
+    "labels": "its label"
+  },
+  "responsive": {},
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-11",
+      "kind": "internal",
+      "change": "Converted from lock.css E6 (.opt, .tick), with its compact form in the entry memory menu."
+    },
+    {
+      "version": "0.1.1",
+      "date": "2026-10-14",
+      "kind": "fixed",
+      "change": "The compact form's label is its own span, which opt.css styles (min-width, wrapping)."
+    }
+  ],
+  "contexts": ["data-motion"]
+}

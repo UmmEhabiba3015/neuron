@@ -1,0 +1,13 @@
+{
+  "file": "07-you.html",
+  "title": "You · four settings rows",
+  "comment": "Journal v3 design of record: 07-you.html. Product scope is V3-REVISION.md; visual and motion rules remain in lock.css.",
+  "written": true,
+  "devices": [
+    {
+      "page": "you",
+      "state": "default",
+      "caption": { "title": "You · four settings rows", "text": "Journal v3 design of record. Product behavior and state transitions are specified in V3-REVISION.md." }
+    }
+  ]
+}

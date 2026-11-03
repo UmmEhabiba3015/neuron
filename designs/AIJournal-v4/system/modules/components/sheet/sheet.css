@@ -1,0 +1,36 @@
+/* C1 the sheet. one rectangle, hairline-ruled into rows.
+   Moved from lock.css section C. Its margin: its parents place it by role (data-place); it places a state
+   message and the account content by role. */
+.aj-c-sheet{border:var(--w) solid var(--rule);
+       border-radius:var(--r);background:var(--paper-2);overflow:hidden}
+/* legacy-context: the auth preview draws its own dotted rule above it (lock.css .auth-preview), which beat this rule by order before the module layer */
+.aj-c-sheet > * + *:where(:not(.auth-preview)){border-top:var(--w) solid var(--rule)}
+/* context: the auth spread's account sheet lays its two sides next to each other */
+[data-surface="auth"] .aj-c-sheet:where([data-form="account"]){display:grid;grid-template-columns:.85fr 1.15fr;background:var(--paper-2)}
+/* context: the auth spread's sheet holds its two sections side by side, unruled */
+[data-surface="auth"] .aj-c-sheet:where([data-form="account"])>section{border-top:0}
+@container (max-width:700px){
+  /* context: below 700px of container the auth spread's sides stack */
+  [data-surface="auth"] .aj-c-sheet:where([data-form="account"]){grid-template-columns:1fr}
+}
+
+@container (min-width:1200px){
+  /* A row reached from the index should not land flush against the top of the
+     window. --s9 is the page's own gutter, so the row arrives inset by the
+     same measure the page is. */
+  /* context: .page.split is the page's split layout */
+  [data-layout="split"] .aj-c-sheet > [id]{scroll-margin-top:var(--s9)}
+}
+/* legacy-context: the pinned header (a section) covers the top of the page: a row reached by its id lands below it */
+:has(>[data-module="header"]) .aj-c-sheet>[id]{scroll-margin-top:calc(var(--s7) + var(--t-mast) + var(--s5) + var(--ctl) + var(--s5) + var(--tap) + 2 * var(--s6))}
+
+/* PLACEMENT BY ROLE (decision 2026-10-12). A state message (span) takes the sheet's full grid; in the account
+   sheet the content (form) is a 440 column, centred; the website preview gives it the full column at
+   tablet and desktop. */
+.aj-c-sheet > [data-place~="span"]{grid-column:1 / -1;padding:var(--s6)}
+/* the explanatory copy (copy) sits --s6 above what follows */
+.aj-c-sheet > [data-place~="copy"]{margin:0 0 var(--s6)}
+/* context: .auth-sheet marks the account sheet (its legacy class) */
+.aj-c-sheet:where([data-form="account"]) > [data-place~="form"]{max-width:440px;/* token-exempt: the account content's column, 440 (authentication extension, September 2026) */margin-inline:auto}
+/* context: #journal is the website preview's root; .device the stage; .auth-sheet the account sheet */
+:where([data-site]) :is([data-platform="tablet"],[data-platform="desktop"]) .aj-c-sheet:where([data-form="account"]) > [data-place~="form"]{max-width:none;margin-inline:0}

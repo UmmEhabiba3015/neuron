@@ -1,0 +1,66 @@
+{
+  "name": "back",
+  "layer": "components",
+  "version": "0.1.0",
+  "inventory": "B3",
+  "description": "Page back: a chevron and the name of the page it returns to, in printed caps. Pushed pages only; never on a destination.",
+  "variants": {},
+  "options": {},
+  "content": {
+    "label": {
+      "type": "text",
+      "required": true,
+      "description": "The page it returns to (\"You\", \"Today\"), final copy."
+    },
+    "href": {
+      "type": "text",
+      "required": true,
+      "description": "Where it goes. In the product it is history back to that page."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": ["--s3", "--tap", "--t-print", "--rule", "--block"],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "yes: the text and chevron turn --block",
+    "focus-visible": "yes: the product's focus ring (base)",
+    "active": "yes: pressed 1px down",
+    "disabled": "n/a: a pushed page always has somewhere to go back to",
+    "selected": "n/a: not a choice",
+    "loading": "n/a: a link",
+    "error": "n/a: a link",
+    "empty": "n/a: label is required"
+  },
+  "events": {},
+  "uses": {},
+  "assets": [
+    {
+      "file": "inline SVG chevron (24x24 viewBox, stroke currentColor)",
+      "use": "the back chevron",
+      "source": "authored in the project",
+      "licence": "project"
+    }
+  ],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "link",
+    "keyboard": "a link in tab order",
+    "labels": "the visible label names it; the chevron is aria-hidden"
+  },
+  "responsive": {
+    "700": "on its own full-width line in the masthead (revision 21, legacy placement)",
+    "1200": "in the title block, start-aligned with --s6 below (legacy context .title)"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-10",
+      "kind": "internal",
+      "change": "Converted from lock.css B3 (.back) and its masthead and title-block contexts."
+    }
+  ],
+  "contexts": ["data-form"]
+}

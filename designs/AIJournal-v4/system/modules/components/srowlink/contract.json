@@ -1,0 +1,74 @@
+{
+  "name": "srowlink",
+  "layer": "components",
+  "version": "0.1.1",
+  "inventory": "E6",
+  "description": "A settings row: label, value, and one sentence of explanation. Carries its own flat fill, because the value is --rule-2 and the row often sits on the open graph ground. Top-aligned, so the value sits with the label. (The checkable option, .opt, shares inventory row E6 but is the composer's and the entry memory menu's; it is converted with the composer.)",
+  "variants": {},
+  "options": {},
+  "content": {
+    "label": {
+      "type": "text",
+      "required": true,
+      "description": "The setting's name, final copy."
+    },
+    "value": {
+      "type": "text",
+      "required": false,
+      "description": "Its current value, final copy."
+    },
+    "why": {
+      "type": "text",
+      "required": false,
+      "description": "One sentence of explanation."
+    },
+    "href": {
+      "type": "text",
+      "required": false,
+      "description": "Where the row leads. Without it the row is read only (a div, the same look)."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": ["--s6", "--tap", "--ink", "--paper-2", "--f-prose", "--t-field", "--t-quiet", "--rule-2", "--lh-body", "--t-note", "--lh-note", "--rule", "--s2"],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: no hover treatment",
+    "focus-visible": "yes: the product's focus ring (base)",
+    "active": "n/a: no pressed treatment",
+    "disabled": "n/a: a setting that cannot change is not a link",
+    "selected": "n/a: not a choice",
+    "loading": "n/a: a link",
+    "error": "n/a: a link",
+    "empty": "n/a: label is required"
+  },
+  "events": {},
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "link",
+    "keyboard": "Tab to it, Enter",
+    "labels": "the label text names it"
+  },
+  "responsive": {
+    "700": "the explanation loses its 38ch measure; the value keeps its width",
+    "1200": "the explanation loses its 38ch measure"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-10",
+      "kind": "internal",
+      "change": "Converted from lock.css E6 (.srowlink, .lab, .val, .why)."
+    },
+    {
+      "version": "0.1.1",
+      "date": "2026-10-14",
+      "kind": "fixed",
+      "change": "A row with no href is written as a div, as the privacy screens have it (it was always an a)."
+    }
+  ]
+}

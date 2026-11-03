@@ -1,0 +1,155 @@
+{
+  "name": "field",
+  "layer": "components",
+  "version": "0.6.0",
+  "inventory": "E3",
+  "description": "A text field. Single line by default; a textarea in the auth forms and the entry editor, a select in the auth forms. Never autofocused. In the no-script comps a div stands in for it, its hint shown as a placeholder.",
+  "variants": {
+    "form": {
+      "values": [
+        "plain",
+        "account",
+        "editor",
+        "bare"
+      ],
+      "default": "plain",
+      "description": "account: a field in the account forms (was .auth-field): a textarea or select is a block with the form's padding, and a refused value (invalid) shows --w-alert in --action-delete. editor: the entry editor's textarea (was .entry-editor): a block, three --ctl tall, --s6 padding, resized vertically. bare (v4 C1): the input inside the Timeline's search pill, which draws the box, the focus ring and the magnifier itself: no border, no ground, no ring of its own; it fills its row's height, --s4 either side, its placeholder --rule-2."
+    }
+  },
+  "options": {
+    "invalid": {
+      "type": "boolean",
+      "default": false,
+      "description": "The value was refused (aria-invalid=\"true\"). In the auth forms the border becomes --w-alert in --action-delete."
+    },
+    "placeholder": {
+      "type": "boolean",
+      "default": false,
+      "description": "The comps' stand-in shows its hint in --rule-2 (was .field.placeholder). Real fields use the placeholder attribute instead."
+    },
+    "tag": {
+      "values": [
+        "input",
+        "textarea",
+        "select",
+        "div"
+      ],
+      "default": "input",
+      "description": "div only in the no-script comps."
+    }
+  },
+  "content": {
+    "value": {
+      "type": "text",
+      "required": false,
+      "description": "The person's own words, or the hint when placeholder is on."
+    },
+    "label": {
+      "type": "text",
+      "required": true,
+      "description": "The accessible name: a visible label in the forms, aria-label in the composer."
+    },
+    "options": {
+      "type": "list",
+      "required": false,
+      "description": "A select's options: { value, label, selected }."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": [
+      "--ctl",
+      "--s6",
+      "--paper-2",
+      "--w",
+      "--rule-2",
+      "--r",
+      "--f-prose",
+      "--t-field",
+      "--ink",
+      "--s5",
+      "--lh-body",
+      "--tap",
+      "--w-alert",
+      "--action-delete",
+      "--s4",
+      "--lh-tight",
+      "--block",
+      "--w-focus"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: no hover treatment",
+    "focus-visible": "yes: the box's own border, 2px in --block, drawn inward (--w-focus: a 1px outline just inside the 1px border); nothing outside the box is covered; a refused value keeps its 2px --action-delete",
+    "active": "n/a: a field is not pressed",
+    "disabled": "n/a: fields are never disabled; an unavailable action is not shown",
+    "selected": "n/a: not a choice",
+    "loading": "n/a: a field is never waiting",
+    "error": "yes: aria-invalid=\"true\" in the auth forms takes the alert border, --w-alert in --action-delete; the message is written under the field (the auth help line)",
+    "empty": "yes: the placeholder hint"
+  },
+  "events": {
+    "input": "the person typed; the value"
+  },
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "textbox, or the native select",
+    "keyboard": "native",
+    "labels": "label is required"
+  },
+  "responsive": {},
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-10",
+      "kind": "internal",
+      "change": "Converted from lock.css E3 (.field) and its auth-form, password and entry-editor contexts."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-11",
+      "kind": "changed",
+      "change": "The error state is drawn in colour as well as weight: --w-alert in --action-delete (was a 2px border in the field colour)."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-11",
+      "kind": "internal",
+      "change": "Fixture Composer, the composer field the guide samples."
+    },
+    {
+      "version": "0.3.1",
+      "date": "2026-10-14",
+      "kind": "fixed",
+      "change": "The placeholder flag is written bare (data-placeholder), as the screens and the generators that read it have it."
+    },
+    {
+      "version": "0.3.2",
+      "date": "2026-10-14",
+      "kind": "fixed",
+      "change": "An input writes aria-label and value only when given: an auth field is named by its label element (13-login)."
+    },
+    {
+      "version": "0.4.0",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "Content options for a select ([{ value, label, selected }]: 17's timezone list); a select names itself by aria-label only when given. Pages round 4b."
+    },
+    {
+      "version": "0.5.0",
+      "date": "2026-10-23",
+      "kind": "added",
+      "change": "The bare form (v4 C1): the Timeline search pill's input."
+    },
+    {
+      "version": "0.6.0",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 round 10: focus is the field's own border at 2px in --block, drawn inward, not a ring outside it (it covered Forgot your password on sign in); a refused value keeps its red. The live composer's textarea (no form) centres its line in the box (padding-block from --ctl and 1lh)."
+    }
+  ]
+}

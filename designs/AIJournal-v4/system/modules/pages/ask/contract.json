@@ -1,0 +1,137 @@
+{
+  "name": "ask",
+  "layer": "pages",
+  "version": "1.0.2",
+  "description": "Ask (v4 C2): a chatbot over the person's own entries. The masthead with the open day's date box, then the chat: the head row (the History and Bookmarks pills, New or Today), the day's sessions as bubbles, the composer at its foot. Search left Ask for the Timeline (C1).",
+  "variants": {
+    "platform": {
+      "values": [
+        "mobile",
+        "tablet",
+        "desktop"
+      ],
+      "default": "mobile",
+      "description": "Mobile and tablet: the header section (the masthead row with the date box, the destinations), the chat below it. Desktop: the title block (wordmark, the date box, destinations), the chat in the page's column.",
+      "noRule": {
+        "mobile": "a page has no CSS: the platform chooses which modules it composes and how",
+        "tablet": "a page has no CSS: the platform chooses which modules it composes and how",
+        "desktop": "a page has no CSS: the platform chooses which modules it composes and how"
+      }
+    },
+    "state": {
+      "values": [
+        "today",
+        "past",
+        "history",
+        "bookmarks",
+        "drawers",
+        "rate",
+        "writing",
+        "empty",
+        "cant",
+        "failed",
+        "loading"
+      ],
+      "default": "today",
+      "description": "today: today's sessions, the last open. past: a past day (6 August), read only, Today in the head row. history, bookmarks, drawers: History, Bookmarks or both drawn open. rate: the thumbs-down form open. writing: an answer being written in. empty: New pressed, nothing asked. cant: an answer the journal cannot give. failed: a question that did not send. loading: Ask opening (18 #ask-loading), the skeleton page.",
+      "noRule": {
+        "today": "a page has no CSS: a state chooses what it composes",
+        "past": "a page has no CSS: a state chooses what it composes",
+        "history": "a page has no CSS: a state chooses what it composes",
+        "bookmarks": "a page has no CSS: a state chooses what it composes",
+        "drawers": "a page has no CSS: a state chooses what it composes",
+        "rate": "a page has no CSS: a state chooses what it composes",
+        "writing": "a page has no CSS: a state chooses what it composes",
+        "empty": "a page has no CSS: a state chooses what it composes",
+        "cant": "a page has no CSS: a state chooses what it composes",
+        "failed": "a page has no CSS: a state chooses what it composes",
+        "loading": "a page has no CSS: a state chooses what it composes"
+      }
+    },
+    "context": {
+      "values": [
+        "screen",
+        "walkthrough"
+      ],
+      "default": "screen",
+      "description": "Where the page is drawn. screen: the numbered screens (the static header). walkthrough: the prototypes and the website; below desktop a page with the header section draws it in its navbar form and puts its blocks in the page's reader (layout page, option reader). Pages without the header section draw the same in both.",
+      "noRule": {
+        "screen": "a page has no CSS: the context chooses how it composes its modules",
+        "walkthrough": "a page has no CSS: the context chooses how it composes its modules"
+      }
+    }
+  },
+  "options": {},
+  "content": {
+    "data": {
+      "type": "data",
+      "description": "data.mjs: the page's words and where its links go; the journal is system/content/ask-journal.mjs (shared with the chat and drawers catalogues). states.mjs: what each state shows. Real copy: a page is not stress-tested."
+    }
+  },
+  "slots": {},
+  "places": {},
+  "tokens": {
+    "reads": [],
+    "exposes": {},
+    "sets": []
+  },
+  "states": {
+    "default": "yes: today",
+    "hover": "n/a: a page; its controls carry their own",
+    "focus-visible": "n/a: a page; its controls carry their own",
+    "active": "n/a: a page; its controls carry their own",
+    "disabled": "n/a: a page; a past day is read only (past)",
+    "selected": "n/a: a page; the drawers mark the open day",
+    "loading": "yes: loading (Ask opening) and writing (an answer arriving)",
+    "error": "yes: cant (not in the journal) and failed (not sent)",
+    "empty": "yes: empty (a new session, nothing asked)"
+  },
+  "events": {},
+  "uses": {
+    "shell": "0.x",
+    "rail": "0.x",
+    "page": "0.x",
+    "mast": "0.x",
+    "header": "0.x",
+    "keybox": "0.x",
+    "dest": "0.x",
+    "chat": "0.x",
+    "drawers": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none of its own: the masthead, the chat (a region named \"Ask, <the day>\"), the drawers' dialog",
+    "keyboard": "the pills, the bubbles' tools and references, the composer (Enter sends, Shift+Enter a new line); Escape closes a drawer",
+    "labels": "the composer: Ask your journal; each session by its time"
+  },
+  "responsive": {
+    "1200": "desktop: the title block; History opens to the rail; the pills show their words"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-14",
+      "kind": "internal",
+      "change": "Pages round 3: 04-ask (search, answer, source) on the three platforms, at parity with the screens."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "internal",
+      "change": "Pages round 4b: the states search-empty, thinking and dismissed (generic state pages; 16-flow-states) and no-matches (11-states), at parity with the packs. Loading is not built: it needs a state-message paragraph the text module cannot write."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-15",
+      "kind": "added",
+      "change": "Variant context (screen, walkthrough): the walkthroughs render the page directly (pages round 5)."
+    },
+    {
+      "version": "1.0.0",
+      "date": "2026-10-25",
+      "kind": "changed",
+      "change": "v4 C2: Ask is a chatbot (explore ask-readable a-mirror-bubble, as revised; states from ask-states D and ask-cant-loading f-mix). The search, the answer, the source and their states (no-matches, search-empty, thinking, dismissed) are gone: search is the Timeline's (C1). States today, past, history, bookmarks, drawers, rate, writing, empty, cant, failed, loading."
+    }
+  ]
+}

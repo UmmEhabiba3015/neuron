@@ -1,0 +1,115 @@
+{
+  "name": "bone",
+  "layer": "components",
+  "version": "0.2.0",
+  "description": "The skeleton's piece: the shape of something still to come (a line of words, a box, a dot, a memo's waveform), in --bone with one shimmer band shared by every bone on the screen. Every loading page draws its skeleton from it, inside its real frame.",
+  "variants": {
+    "form": {
+      "values": [
+        "line",
+        "block",
+        "round",
+        "text",
+        "spread",
+        "wave",
+        "status"
+      ],
+      "default": "line",
+      "description": "line: one bar, 12px tall (height to change it), round ends. block: a box (a play button, a tool), width by height, 4px corners. round: a circle, width across (a day's mood dot). text: prose lines at the prose line height, a 12px bar centred in each (lines: their widths), so the skeleton is as tall as the words. spread: count bars of width each (40px) and height (12px), spread evenly across a --tap row: a mood row's five words, or a week's seven day dots (as tall as wide, they are round). wave: the memo's waveform itself (the wave module) in bone. status: the skeleton's announced line, visually hidden, role status. Written as data-form; line writes nothing."
+    },
+    "size": {
+      "values": [
+        "body",
+        "inherit"
+      ],
+      "default": "body",
+      "description": "text only: body sets the prose's type (--t-body at --lh-body); inherit takes the parent's (a Reflections leaf's 30px headline, its words at --t-field), so the lines sit in the real line boxes. height sets the bars' thickness (12px)."
+    }
+  },
+  "options": {},
+  "content": {
+    "width": {
+      "type": "text",
+      "required": false,
+      "description": "A CSS length or percentage (\"150px\", \"62%\"); 100% by default. For round, its diameter."
+    },
+    "height": {
+      "type": "text",
+      "required": false,
+      "description": "A CSS length; 12px by default (line), the box's height (block)."
+    },
+    "lines": {
+      "type": "list",
+      "required": false,
+      "description": "text: each line's width as a fraction of the row, e.g. [1, 0.62]."
+    },
+    "text": {
+      "type": "text",
+      "required": false,
+      "description": "status: the announced words, e.g. \"Opening your journal.\"."
+    },
+    "count": {
+      "type": "number",
+      "required": false,
+      "description": "spread: how many bars (5 by default)."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": [
+      "--bone",
+      "--bone-shine",
+      "--g-shimmer",
+      "--t-body",
+      "--lh-body",
+      "--tap"
+    ],
+    "exposes": {
+      "--aj-c-bone-w": "its width, written by the width prop (inline): a length or percentage; a round bone's diameter",
+      "--aj-c-bone-h": "its height, written by the height prop (inline): 12px by default"
+    }
+  },
+  "states": {
+    "default": "yes: the bone at rest, the shimmer passing",
+    "hover": "n/a: not interactive",
+    "focus-visible": "n/a: not focusable",
+    "active": "n/a: not interactive",
+    "disabled": "n/a: not interactive",
+    "selected": "n/a: not selectable",
+    "loading": "yes: it is the loading state; still (no shimmer) under reduced motion, the review switch respected",
+    "error": "n/a: nothing can fail",
+    "empty": "n/a: a bone stands for content still to come"
+  },
+  "events": {},
+  "uses": {
+    "wave": "0.x"
+  },
+  "assets": [],
+  "a11y": {
+    "role": "none: aria-hidden; form status is role status, visually hidden",
+    "keyboard": "none",
+    "labels": "status: the words given"
+  },
+  "responsive": {
+    "all": "its width by prop (a percentage follows its parent); the shimmer band is the viewport's width"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-30",
+      "kind": "added",
+      "change": "v4 round 10: the skeleton bone, out of Ask's skeleton (chat 0.2.1): one bone, its shimmer and its reduced guard, for every loading page."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-30",
+      "kind": "added",
+      "change": "v4 round 10 fixes 5: size inherit for text (the parent's type), and height thickens a text bone's bars (a headline's lines)."
+    }
+  ],
+  "inventory": "v4 round 10",
+  "legacyClasses": [],
+  "places": {
+    "fill": "the wave in form wave: painted in bone with the shimmer"
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "name": "sheet",
+  "layer": "components",
+  "version": "0.1.1",
+  "inventory": "C1",
+  "description": "The form of a screen: one rectangle, hairline-ruled into rows, one per screen. Its children are the record's rows (written, recorded, the note, the day, the mood), section heads, settings rows, or the auth content; every child after the first is ruled off above.",
+  "variants": {
+    "form": {
+      "values": [
+        "plain",
+        "account"
+      ],
+      "default": "plain",
+      "description": "account is the account sheet of the signed-out and account screens (was .auth-sheet): on the auth spread its two-column grid and unruled sections; its content column (form) is 440, centred."
+    }
+  },
+  "options": {
+    "tag": {
+      "values": [
+        "main",
+        "div"
+      ],
+      "default": "main",
+      "description": "main where the sheet is the screen's main content; div where it sits inside another region (the auth spread, the guide)."
+    }
+  },
+  "content": {},
+  "slots": {
+    "children": {
+      "accepts": [
+        "srow",
+        "recrow",
+        "said",
+        "dayrow",
+        "moodrow",
+        "shead",
+        "srowlink",
+        "text"
+      ],
+      "required": true,
+      "description": "The rows, one after another; the sheet rules them off."
+    }
+  },
+  "places": {
+    "span": "a state message: the full grid, the sheet's padding",
+    "form": "the account content: a 440 column, centred (the full column in the website preview at tablet and desktop)",
+    "copy": "the explanatory copy: --s6 above what follows"
+  },
+  "tokens": {
+    "reads": [
+      "--w",
+      "--rule",
+      "--r",
+      "--paper-2",
+      "--s9",
+      "--s7",
+      "--t-mast",
+      "--s5",
+      "--ctl",
+      "--tap",
+      "--s6"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: the sheet is not a control; its rows carry their own",
+    "focus-visible": "n/a: not focusable; its rows' controls carry the ring",
+    "active": "n/a: not a control",
+    "disabled": "n/a: not a control",
+    "selected": "n/a: not selectable",
+    "loading": "n/a: a loading state is a state message among its rows",
+    "error": "n/a: an error is a state message among its rows",
+    "empty": "n/a: an empty day shows the empty line inside it, not an empty sheet"
+  },
+  "events": {},
+  "uses": {
+    "srow": "0.x",
+    "said": "0.x",
+    "shead": "0.x",
+    "srowlink": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "main (tag main) or none",
+    "keyboard": "none of its own",
+    "labels": "its section heads name its parts"
+  },
+  "responsive": {
+    "700": "the auth spread's sides stack (legacy context .auth-paper)",
+    "1200": "on a split page, a row reached from the index lands inset by the page's gutter (legacy context .page.split)"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-11",
+      "kind": "internal",
+      "change": "Converted from lock.css C1 (.sheet, its row rules, and the auth spread's and pinned header's contexts)."
+    },
+    {
+      "version": "0.1.1",
+      "date": "2026-10-12",
+      "kind": "patch",
+      "change": "Carries the auth spread's two-column grid and its 700px stacking (legacy context .auth-paper), moved from lock.css with the auth section."
+    }
+  ],
+  "contexts": [
+    "data-layout",
+    "data-platform",
+    "data-site",
+    "data-surface"
+  ]
+}

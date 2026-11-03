@@ -1,0 +1,57 @@
+/* H2 the calendar (v4 C1): the calendar inside Timeline's date and mood card. It sits on the card's
+   ground, so no fill, keyline or radius; a month and year wheel beside one month's days, the days marked
+   by mood. Opening and closing it is the card's. --rule-2 text is allowed: the wheel never sits on the
+   graph ground (the card brings its own). The grid form (the zoom's calendar and the desktop index) went
+   with the List/Calendar switch. */
+.aj-c-cal{display:grid;grid-template-columns:76px minmax(0,1fr);/* token-exempt: the month column is 76px at every width; the wheel's own drawing from the approved design */
+     gap:var(--s4);align-items:stretch;padding:var(--s4) var(--s4) var(--s4) 0}
+.aj-c-cal .aj-c-cal__wheel{position:relative;
+     border-right:var(--w) solid color-mix(in srgb,var(--rule) 18%,transparent)/* token-exempt: the wheel's divider, an 18% mix of --rule; approved design */}
+.aj-c-cal .aj-c-cal__wheel::before{content:"";position:absolute;left:var(--s3);right:var(--s3);
+     top:50%;height:40px;/* token-exempt: the selection band is one month option (40px) tall; approved design */
+     margin-top:-20px;/* token-exempt: half the band, to centre it; approved design */
+     border-block:var(--w) solid color-mix(in srgb,var(--rule) 35%,transparent);/* token-exempt: the band's hairlines, a 35% mix of --rule; approved design */
+     pointer-events:none}
+.aj-c-cal .aj-c-cal__months{position:absolute;inset:0;overflow-y:auto;scroll-snap-type:y mandatory;
+     scrollbar-width:none;mask-image:linear-gradient(transparent,#000 28%,#000 72%,transparent)/* token-exempt: the fade at the wheel's ends; the mask stops are the approved design */}
+.aj-c-cal .aj-c-cal__months::-webkit-scrollbar{display:none}
+.aj-c-cal .aj-c-cal__month{display:flex;flex-direction:column;align-items:center;justify-content:center;
+     width:100%;min-height:40px;/* token-exempt: one month option is 40px tall, the band's height; approved design */
+     border:0;background:transparent;scroll-snap-align:center;cursor:pointer;
+     font:400 13px/1.1 var(--f-label);/* token-exempt: the month's own size, 13px; approved design */
+     color:var(--rule-2)}
+.aj-c-cal .aj-c-cal__month small{display:block;font-size:9px;/* token-exempt: the year under the month, 9px; approved design */
+     letter-spacing:.08em;/* token-exempt: the year's tracking; approved design */}
+.aj-c-cal .aj-c-cal__month:hover{color:var(--ink)}
+.aj-c-cal .aj-c-cal__month[aria-selected="true"]{color:var(--ink);font-weight:600}
+.aj-c-cal .aj-c-cal__page{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0;text-align:center}
+.aj-c-cal .aj-c-cal__page[hidden]{display:none}
+.aj-c-cal .aj-c-cal__dow{font:400 9px/22px var(--f-label);/* token-exempt: the weekday heads are 9px on a 22px line; approved design */
+     letter-spacing:.06em;/* token-exempt: the weekday heads' tracking; approved design */
+     color:var(--rule-2)}
+.aj-c-cal .aj-c-cal__day{display:grid;place-items:center;
+     min-height:34px;/* token-exempt: a day row is 34px; approved design */
+     font:400 12px/1 var(--f-label);/* token-exempt: a day is 12px, small enough for seven columns beside the wheel; approved design */
+     color:var(--ink)}
+.aj-c-cal .aj-c-cal__day[data-out]{visibility:hidden}
+.aj-c-cal .aj-c-cal__day:not(a){color:var(--rule-2)}
+.aj-c-cal a.aj-c-cal__day{position:relative;border:0;background:transparent;font-weight:600;
+     text-decoration:none;color:var(--ink);border-radius:var(--r)}
+.aj-c-cal a.aj-c-cal__day::after{content:"";position:absolute;left:50%;bottom:4px;/* token-exempt: the mood dot sits 4px above the day's foot; approved design */
+     width:5px;/* token-exempt: the mood dot is 5px; approved design */
+     height:5px;/* token-exempt: the mood dot is 5px; approved design */
+     margin-left:-2.5px;/* token-exempt: half the dot, to centre it; approved design */
+     border-radius:50%}
+.aj-c-cal a.aj-c-cal__day[data-mood="light"]::after{background:var(--mood-light)}
+.aj-c-cal a.aj-c-cal__day[data-mood="good"]::after{background:var(--mood-good)}
+.aj-c-cal a.aj-c-cal__day[data-mood="even"]::after{background:var(--mood-even)}
+.aj-c-cal a.aj-c-cal__day[data-mood="low"]::after{background:var(--mood-low)}
+.aj-c-cal a.aj-c-cal__day[data-mood="hard"]::after{background:var(--mood-hard)}
+.aj-c-cal a.aj-c-cal__day:hover{background:color-mix(in srgb,var(--rule) 8%,transparent)/* token-exempt: the hover wash, an 8% mix of --rule; approved design */}
+.aj-c-cal a.aj-c-cal__day:active{transform:translateY(1px)}
+.aj-c-cal a.aj-c-cal__day[data-current]{width:32px;/* token-exempt: the ring around the day in view is 32px, inside the 34px row; approved design */
+     height:32px;/* token-exempt: the ring is 32px, inside the 34px row; approved design */
+     min-height:0;justify-self:center;align-self:center;
+     border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--ink)/* token-exempt: the ring's weight, 1.5px; approved design */}
+.aj-c-cal .aj-c-cal__note{grid-column:1/-1;margin:var(--s2) 0 0;text-align:center;
+     font:400 var(--t-quiet)/1.4 var(--f-label);color:var(--rule-2)}

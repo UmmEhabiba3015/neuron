@@ -1,0 +1,21 @@
+// Timeline on each platform and state (02-timeline; v4 C1).
+export default [
+  { name: 'Mobile', note: '02-timeline, mobile-web: the card closed above the search, the list.', props: { platform: 'mobile', state: 'list' } },
+  { name: 'Tablet', note: '02-timeline, tablet-web.', props: { platform: 'tablet', state: 'list' } },
+  { name: 'Desktop', note: '02-timeline, desktop-web: the split page, the card the sticky column right of the list.', props: { platform: 'desktop', state: 'list' } },
+  { name: 'Mood open', state: 'selected', note: 'The mood panel open: this week\'s graph, the arrows instead of the strip.', props: { platform: 'mobile', state: 'mood' } },
+  { name: 'Calendar open', note: 'The calendar unrolled from the date over the search and the list.', props: { platform: 'mobile', state: 'calendar' } },
+  { name: 'Calendar open, desktop', note: 'The calendar unrolled in the side column.', props: { platform: 'desktop', state: 'calendar' } },
+  { name: 'Mood, one day', note: 'An earlier week with one day written (27 Jul to 2 Aug): a straight line.', props: { platform: 'mobile', state: 'mood-one-day' } },
+  { name: 'Mood, empty week', state: 'empty', note: 'Nothing written this week: the empty strip and graph; history still steps back.', props: { platform: 'tablet', state: 'mood-empty-week' } },
+  { name: 'Search results', note: 'Keyword "Priya": the two days that match, the word marked; the 9 August row carries the date.', props: { platform: 'mobile', state: 'found' } },
+  { name: 'No matches', note: 'A keyword search that matched nothing: the explanation in place of the rows.', props: { platform: 'mobile', state: 'no-matches' } },
+  { name: 'Searching', state: 'loading', note: 'The search running: the found line says so, the list unchanged.', props: { platform: 'desktop', state: 'searching' } },
+  { name: 'Search failed', state: 'error', note: 'The search did not run: the failure line and Try again, the list unchanged.', props: { platform: 'mobile', state: 'search-failed' } },
+  { name: 'Earlier days', note: '#timeline-earlier, mobile: the foot line "Fetching earlier entries."', props: { platform: 'mobile', state: 'earlier' } },
+  { name: 'The beginning', note: '#timeline-end, tablet: the foot line "There is nothing earlier in this journal."', props: { platform: 'tablet', state: 'end' } },
+  { name: 'Thin week', note: '11-states, mobile: four items, the card\'s first week.', props: { platform: 'mobile', state: 'thin-week' } },
+  { name: 'Thin week, desktop', note: '11-states, desktop.', props: { platform: 'desktop', state: 'thin-week' } },
+  { name: 'Loading', note: '18-entry-system-states: #timeline-loading.', props: { platform: 'mobile', state: 'loading' } },
+  { name: 'Walkthrough', note: 'context walkthrough, mobile: the navbar header, the card, search and list in the reader.', props: { platform: 'mobile', state: 'list', context: 'walkthrough' } },
+];

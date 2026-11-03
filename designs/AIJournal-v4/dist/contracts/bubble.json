@@ -1,0 +1,217 @@
+{
+  "name": "bubble",
+  "layer": "components",
+  "version": "0.3.0",
+  "inventory": "v4 C2",
+  "description": "A message in Ask: yours, a bubble on the right with its tail at the lower right, or the answer, a wider bubble on the left with its tail at the lower left. The answer's dates are its references (each opens that day), \"n entries used\" lists the entries under it, and its tools sit inside it; yours sit under it. With a mouse the tools fade in on hover or focus.",
+  "variants": {
+    "voice": {
+      "values": [
+        "you",
+        "answer"
+      ],
+      "default": "you",
+      "description": "you: the person's message, --ink on --paper-2, up to min(80%, --chat-you), right-aligned, the tools under it (bookmark, copy). answer: the journal's, --rule on --paper-2, up to min(94%, --chat-answer), the tools inside it (bookmark, copy, thumbs up, thumbs down) with the thumbs-down form."
+    }
+  },
+  "options": {
+    "status": {
+      "values": [
+        "done",
+        "reading",
+        "writing"
+      ],
+      "default": "done",
+      "description": "The answer only. reading: before the first word, a reading line (three dots and \"Reading your journal\") in place of the words. writing: the words so far, each arriving softly (260ms); \"entries used\", the tools and the next line wait until done. Written as data-status; done writes nothing."
+    },
+    "cant": {
+      "type": "boolean",
+      "default": false,
+      "description": "The answer only: the journal could not answer from the entries (data-cant). The bubble left unfilled (--paper, not --paper-2), its edge dashed --w-dash in --rule-2; the flag \"Not in your journal\" with its icon over the words; the next line (a way to search the Timeline); bookmark and copy only, no thumbs."
+    },
+    "unsent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Yours only: the question did not send (data-unsent). The bubble dimmed to 55% with a dashed edge, \"Not sent\" under it, no tools; the words go back into the composer."
+    },
+    "bookmarked": {
+      "type": "boolean",
+      "default": false,
+      "description": "The bookmark tool is set."
+    },
+    "rating": {
+      "values": [
+        "none",
+        "up",
+        "down"
+      ],
+      "default": "none",
+      "description": "The answer only: which thumb is filled. One at a time."
+    },
+    "asking": {
+      "type": "boolean",
+      "default": false,
+      "description": "The answer only: the thumbs-down form drawn open, below the tools, its thumb expanded (aria-expanded=\"true\"), as the script leaves it when the thumb is pressed. For the page's comps, which have no script; live, the bubble opens it itself."
+    }
+  },
+  "content": {
+    "id": {
+      "type": "text",
+      "required": true,
+      "description": "The message's id on the page: bookmarks jump to it (the root takes it, with tabindex=\"-1\" so focus can land there)."
+    },
+    "paras": {
+      "type": "list",
+      "required": true,
+      "description": "The words, a string per paragraph. In an answer, {n} marks where reference n (1-based) is used."
+    },
+    "refs": {
+      "type": "list",
+      "required": false,
+      "description": "The answer's references: { short: \"6 Aug\", long: \"Thursday 6 August, 22:10\", text: the entry's words, href: that day's Day page }. Each {n} draws (short) as a link; \"entries used\" lists them all."
+    },
+    "used": {
+      "type": "text",
+      "required": false,
+      "description": "The answer: the summary over the references, \"2 entries used\". Without refs nothing is drawn."
+    },
+    "flag": {
+      "type": "text",
+      "required": false,
+      "description": "cant: \"Not in your journal\"."
+    },
+    "next": {
+      "type": "object",
+      "required": false,
+      "description": "cant: { label: \"Search Timeline for “wedding”\", href } under the words."
+    },
+    "unsentLabel": {
+      "type": "text",
+      "required": false,
+      "description": "unsent: \"Not sent\"."
+    },
+    "reading": {
+      "type": "text",
+      "required": false,
+      "description": "reading: \"Reading your journal\"."
+    },
+    "labels": {
+      "type": "object",
+      "required": false,
+      "description": "The tools' words: { you: \"Your message\", answer: \"Answer\" (the group's name), bookmark: \"Bookmark\", copy: \"Copy\", copied: \"Copied\", up: \"Helpful\", down: \"Not helpful\" }; these are the defaults."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": [
+      "--w",
+      "--rule",
+      "--paper-2",
+      "--chat-you",
+      "--s5",
+      "--s6",
+      "--ink",
+      "--f-prose",
+      "--t-body",
+      "--chat-answer",
+      "--s2",
+      "--lh-body",
+      "--s4",
+      "--s3",
+      "--tap",
+      "--f-label",
+      "--w-quote",
+      "--paper",
+      "--t-note",
+      "--s1",
+      "--t-quiet",
+      "--lh-tight",
+      "--block",
+      "--w-dash",
+      "--rule-2",
+      "--t-print",
+      "--gc"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: the bubble, its words, its tools (shown with touch; at rest with a mouse they are hidden until hover or focus)",
+    "hover": "yes: with a mouse, the tools fade in (180ms); a reference or an entry used darkens to --block",
+    "focus-visible": "yes: focus inside shows the tools; a reference, a tool, the summary and an entry used take the product's ring",
+    "active": "n/a: the tools and links carry their own press",
+    "disabled": "yes: yours unsent: dimmed and dashed, \"Not sent\", no tools",
+    "selected": "yes: a set bookmark or thumb stays shown, filled (bookmark --rule, up --rate-up, down --rate-down)",
+    "loading": "yes: the answer reading (the reading line) and writing (the words arriving, the rest waiting)",
+    "error": "yes: the answer cant: dashed and unfilled, flagged \"Not in your journal\", the next line, no thumbs",
+    "empty": "n/a: a message always has words; an empty session is the composer's lead"
+  },
+  "events": {
+    "bookmark": "the bookmark tool pressed: bubbling, detail { id, on }",
+    "copy": "the copy tool pressed (the words are on the clipboard; the tool says Copied for a moment): bubbling, detail { id }",
+    "rate": "a thumb changed: bubbling, detail { id, rating: up|down|none, why? } (why: the thumbs-down form's words)"
+  },
+  "behaviour": {
+    "script": "bubble.js, inside its root only: bookmark and copy; the thumbs are the thumbs component (thumbs.js: one at a time, the thumbs-down form), and the bubble re-announces their thumbs:rate as bubble:rate with its id. Nothing else: what a bookmark or a rating means is the app's.",
+    "hooks": {
+      "text": "The message's words: copy reads them; the chat writes an answer into them as it arrives."
+    },
+    "state": {
+      "data-status": {
+        "values": [
+          "reading",
+          "writing"
+        ],
+        "setBy": "runtime",
+        "description": "The answer as it arrives, set by the chat; removed when done."
+      },
+      "data-floor": {
+        "values": [
+          "<px>"
+        ],
+        "setBy": "runtime",
+        "description": "How much of the bottom of the screen is covered (the composer's height, in px), set by the chat: the thumbs read it, and the thumbs-down form opens upward rather than run under it. None: the screen's bottom."
+      }
+    }
+  },
+  "uses": {
+    "button": "0.x",
+    "thumbs": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none (a div, focusable by script for a bookmark's jump); the tools a group named \"Your message\" or \"Answer\"; the reading line a status",
+    "keyboard": "Tab through the references, \"entries used\" and its entries, then the tools; the thumbs-down form traps nothing (Escape closes it)",
+    "labels": "each tool by its word (Bookmark, Copy, Helpful, Not helpful), pressed state with aria-pressed; the thumbs down's form with aria-expanded"
+  },
+  "responsive": {
+    "all": "the bubbles grow with the column: yours to min(80%, --chat-you), the answer to min(94%, --chat-answer)"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-25",
+      "kind": "added",
+      "change": "New (v4 C2): from explore ask-readable a-mirror-bubble (the mirror bubble, revised), ask-states D (unsent) and ask-cant-loading f-mix (can't answer, A's dashed outline)."
+    },
+    {
+      "version": "0.1.1",
+      "date": "2026-10-25",
+      "kind": "patch",
+      "change": "A reference is set off from the word before it by a space, as approved (\"at night (6 Aug)\")."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-25",
+      "kind": "added",
+      "change": "Option asking: the thumbs-down form drawn open without the script, for the Ask page's comps (its rate state)."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 round 10: the thumbs and their form are the thumbs component (moved out unchanged, so the notes can share them); the bubble keeps bookmark and copy and re-announces the rating as bubble:rate."
+    }
+  ],
+  "contexts": []
+}

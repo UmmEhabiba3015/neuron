@@ -1,0 +1,67 @@
+/* leaf. A leaf of the Reflections booklet (v4 C3, explore booklet-feel f-mix, shared/booklet.css and cards.css).
+   Its paper, edge and padding are exposed: below desktop each leaf is its own paper; the booklet's desktop spread
+   lays two bare leaves on one paper. Where a leaf sits, and how it turns, is the booklet's. */
+
+.aj-c-leaf{box-sizing:border-box;position:relative;display:flex;flex-direction:column;min-width:0;min-height:var(--leaf-h);
+  padding:var(--aj-c-leaf-pad,var(--s9) var(--s8) var(--s6));
+  background:var(--aj-c-leaf-paper,linear-gradient(90deg,color-mix(in srgb,var(--ink) 7%,transparent),transparent 22px),var(--paper-2));/* token-exempt: the shade into the spine, ink 7% over 22px */
+  border:var(--aj-c-leaf-edge,var(--w) solid var(--rule))}
+
+/* the kicker on the left, the leaf's date on the right, centred on the same line */
+.aj-c-leaf__head{display:flex;align-items:center;justify-content:space-between;gap:var(--s5)}
+.aj-c-leaf__kicker{margin:0;font-family:var(--f-label);font-weight:600;font-size:var(--t-col);line-height:var(--lh-tight);
+  letter-spacing:.14em;/* token-exempt: the kicker's wide tracking, approved */
+  text-transform:uppercase;color:var(--rule-2)}
+.aj-c-leaf__date{margin:0;flex:none;font-family:var(--f-label);font-weight:400;font-size:var(--t-quiet);line-height:var(--lh-tight);color:var(--rule-2);white-space:nowrap}
+
+/* the week's line */
+.aj-c-leaf__line{margin:var(--s6) 0 var(--s8);font-family:var(--f-prose);font-weight:400;
+  font-size:30px;/* token-exempt: the week's line, 30px, approved */
+  line-height:1.15;/* token-exempt: the week's line's leading */
+  letter-spacing:-.015em;/* token-exempt: the masthead's tracking at display size */
+  color:var(--rule);text-wrap:balance}
+
+/* a note's big number, its unit in labels */
+.aj-c-leaf[data-form="note"] .aj-c-leaf__big{margin:var(--s6) 0 0;font-family:var(--f-prose);font-weight:400;
+  font-size:56px;/* token-exempt: the big number, 56px, approved */
+  line-height:1;/* token-exempt: a figure set solid */
+  letter-spacing:-.03em;/* token-exempt: the big number's tracking */
+  color:var(--rule)}
+.aj-c-leaf__big small{margin:0 var(--s6) 0 var(--s3);font-family:var(--f-label);font-weight:400;
+  font-size:13px;/* token-exempt: the number's unit, 13px, approved */
+  line-height:1.2;/* token-exempt: the unit's leading */
+  letter-spacing:.02em;/* token-exempt: the unit's tracking */
+  color:var(--rule-2)}
+.aj-c-leaf__big small:last-child{margin-right:0}
+
+/* the picture under the number; on the week, at the foot of the leaf's free space */
+.aj-c-leaf > [data-place~="pic"]{margin-top:var(--s7)}
+.aj-c-leaf[data-form="week"] > [data-place~="pic"]{margin-top:auto}
+
+/* the note's words at the foot of the leaf, then its foot and the leaf's number */
+.aj-c-leaf__words{margin:auto 0 0;padding-top:var(--s7);font-family:var(--f-prose);font-weight:400;font-size:var(--t-field);
+  line-height:1.5;/* token-exempt: the note's words, 1.5, approved */
+  color:var(--rule)}
+.aj-c-leaf__foot{position:relative;display:flex;align-items:center;flex-wrap:wrap;gap:0 var(--s6);margin:var(--s3) 0 0;
+  font-family:var(--f-label);font-weight:400;font-size:var(--t-quiet);line-height:var(--lh-tight);color:var(--rule-2)}
+/* with the thumbs: the source (a --tap link) keeps to the thumbs' row when the thumbs-down form drops under the
+   thumbs on a narrow leaf (v4 round 10) */
+.aj-c-leaf__foot:has(> [data-module="thumbs"]){align-items:flex-start}
+.aj-c-leaf__no{margin:var(--s7) 0 0;text-align:center;font-family:var(--f-label);font-weight:400;font-size:var(--t-quiet);line-height:1;/* token-exempt: a single figure set solid */
+  color:var(--rule-2)}
+
+/* the last leaf: signed, with the way to the earlier weeks */
+.aj-c-leaf[data-form="end"]{align-items:center;justify-content:center;text-align:center}
+.aj-c-leaf__sign{margin:auto 0 var(--s5);font-family:var(--f-hand);font-weight:400;font-size:var(--t-hand-l);
+  line-height:1.1;/* token-exempt: the hand's leading */
+  color:var(--rule)}
+.aj-c-leaf__back{display:inline-flex;align-items:center;min-height:var(--tap);margin-bottom:auto;
+  font-family:var(--f-label);font-weight:400;font-size:var(--t-quiet);line-height:1;/* token-exempt: a one-line link set solid */
+  color:var(--rule);text-decoration:underline;text-decoration-thickness:var(--w);
+  text-underline-offset:3px;/* token-exempt: the product's underline offset */}
+/* a leaf of only its line (Next week): the number still at the foot */
+.aj-c-leaf__line + .aj-c-leaf__no{margin-top:auto}
+.aj-c-leaf[data-form="end"] .aj-c-leaf__no{margin-top:0;align-self:stretch}
+@media (hover:hover) and (pointer:fine){
+  .aj-c-leaf__back:hover{color:var(--block)}
+}

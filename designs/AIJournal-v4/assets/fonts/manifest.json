@@ -1,0 +1,72 @@
+{
+  "source": "Google Fonts CSS API; official WOFF2 subsets",
+  "upstreamLicenseCommit": "7085eb89a950e85db5b166b7a58d414544b4140c",
+  "faces": [
+    {
+      "family": "Caveat",
+      "alias": "Journal Portable Hand",
+      "weight": "400",
+      "unicode": "U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF",
+      "file": "caveat-latin-ext.woff2",
+      "url": "https://fonts.gstatic.com/s/caveat/v23/WnznHAc5bAfYB2QRah7pcpNvOx-pjfJ9eIupYSxP.woff2",
+      "license": "caveat-OFL.txt",
+      "sha256": "b887f256176087e22d2374d634ba7d1e9def523bc02babe2eca3efa25b32ecd7",
+      "bytes": 18600
+    },
+    {
+      "family": "Caveat",
+      "alias": "Journal Portable Hand",
+      "weight": "400",
+      "unicode": "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD",
+      "file": "caveat-latin.woff2",
+      "url": "https://fonts.gstatic.com/s/caveat/v23/WnznHAc5bAfYB2QRah7pcpNvOx-pjfJ9eIWpYQ.woff2",
+      "license": "caveat-OFL.txt",
+      "sha256": "d0b7b931b8980049327e8f8f9ac264617c8200b8422d62e886473d3d9527bad3",
+      "bytes": 48836
+    },
+    {
+      "family": "Lora",
+      "alias": "Journal Portable Prose",
+      "weight": "400",
+      "unicode": "U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF",
+      "file": "lora-latin-ext.woff2",
+      "url": "https://fonts.gstatic.com/s/lora/v37/0QI6MX1D_JOuGQbT0gvTJPa787weuxJPkq1umA.woff2",
+      "license": "lora-OFL.txt",
+      "sha256": "525551030c504c0eb42d71b48ce10027e4431bd405d6cd04c468a535ce8d961b",
+      "bytes": 12016
+    },
+    {
+      "family": "Lora",
+      "alias": "Journal Portable Prose",
+      "weight": "400",
+      "unicode": "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD",
+      "file": "lora-latin.woff2",
+      "url": "https://fonts.gstatic.com/s/lora/v37/0QI6MX1D_JOuGQbT0gvTJPa787weuxJBkq0.woff2",
+      "license": "lora-OFL.txt",
+      "sha256": "ac079950fd9885261c0f73d9e87233f31b5427333ce0eb20e26c119458493c40",
+      "bytes": 21148
+    },
+    {
+      "family": "Source Sans 3",
+      "alias": "Journal Portable Labels",
+      "weight": "400 600",
+      "unicode": "U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF",
+      "file": "source-sans-3-latin-ext.woff2",
+      "url": "https://fonts.gstatic.com/s/sourcesans3/v20/nwpStKy2OAdR1K-IwhWudF-R3wEaZfrc.woff2",
+      "license": "sourcesans3-OFL.txt",
+      "sha256": "a85a7459bdb3cdc1136751e151a506bae653fc29ada3ca86237477df6f1b59e6",
+      "bytes": 60088
+    },
+    {
+      "family": "Source Sans 3",
+      "alias": "Journal Portable Labels",
+      "weight": "400 600",
+      "unicode": "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD",
+      "file": "source-sans-3-latin.woff2",
+      "url": "https://fonts.gstatic.com/s/sourcesans3/v20/nwpStKy2OAdR1K-IwhWudF-R3w8aZQ.woff2",
+      "license": "sourcesans3-OFL.txt",
+      "sha256": "19143dca075972bc84e3fd9eab7416dd40cc565dccb2435a044bdfabe060c7d5",
+      "bytes": 28872
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "name": "cal",
+  "layer": "components",
+  "version": "0.4.0",
+  "inventory": "H2",
+  "description": "The calendar inside Timeline's date and mood card (v4 C1): a month and year wheel beside one month's days, Monday first, the days marked by mood. A day written is a link; a day with nothing is a plain number, no tap target.",
+  "variants": {},
+  "options": {},
+  "content": {
+    "month": {
+      "type": "text",
+      "required": false,
+      "description": "The wheel's listbox name (\"Month and year\")."
+    },
+    "months": {
+      "type": "list",
+      "required": true,
+      "description": "Every month the wheel offers, oldest first, from the first month written to this month (never a future one): { value: \"2026-08\", short: \"Aug\", year: \"2026\", name: \"August 2026\", days, empty? }. days: { n, href?, mood?, current?, out?, label? } per cell, Monday first: href and mood (light|good|even|low|hard) on a day written, current on the day in view, out for a cell outside the month, label naming the day (\"Sunday 9 August, Good. Go to this day\"). empty: the note \"Nothing written this month.\" under the grid."
+    },
+    "selected": {
+      "type": "text",
+      "required": false,
+      "description": "The value of the month shown and centred in the wheel (the current day's month)."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": [
+      "--s4",
+      "--w",
+      "--rule",
+      "--r",
+      "--rule-2",
+      "--s3",
+      "--ink",
+      "--s2",
+      "--f-label",
+      "--t-quiet",
+      "--mood-light",
+      "--mood-good",
+      "--mood-even",
+      "--mood-low",
+      "--mood-hard"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: no hover treatment; a day link has the base link treatment",
+    "focus-visible": "yes: the product focus ring on a day link (base)",
+    "active": "yes: a day written presses 1px down",
+    "disabled": "n/a: an empty day is not a control",
+    "selected": "yes: selected month (aria-selected, --ink, semibold, centred between the wheel's two hairlines) and its current day (ringed)",
+    "loading": "n/a: the months are drawn from known dates",
+    "error": "n/a: nothing here can fail",
+    "empty": "yes: a month with nothing written is all plain numbers, with the note under its grid"
+  },
+  "events": {
+    "pick": "a day written was chosen (bubbling; detail: { date: \"YYYY-MM-DD\" }); its link's default is prevented so the page can jump instead",
+    "month": "the selected month changed (detail: { value })"
+  },
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "a listbox of months (options) beside the shown month's grid, named by its month",
+    "keyboard": "Up and Down move the selected month, a month option is pressed to show it; Tab through the days written",
+    "labels": "each day link names the date and what it holds; each month option names month and year (\"August 2026\")"
+  },
+  "responsive": {
+    "wheel": "the month column is 76px wide at every width (the card is the calendar's width)"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-11",
+      "kind": "internal",
+      "change": "Converted from lock.css H2 (.cal, .dow, .day)."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-23",
+      "kind": "added",
+      "change": "The wheel form (v4 C1): months beside the days, mood dots, the current day ringed, the empty-month note; cal.js for the wheel."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-23",
+      "kind": "added",
+      "change": "The wheel form follows data-current: the ring and the selected month move with the day in view (v4 C1 round 2)."
+    },
+    {
+      "version": "0.4.0",
+      "date": "2026-10-23",
+      "kind": "removed",
+      "change": "The grid and nav forms (the zoom's month grid and the desktop index), the tag and form options and data-form: the wheel is the calendar's only form, its rules scoped by the root class alone."
+    }
+  ],
+  "contexts": [],
+  "behaviour": {
+    "script": "cal.js, the wheel form only, inside its root: centres the selected month in the wheel (padding the list so the first and last can centre); selecting by press, by scroll settling (120ms after the scroll stops, the month nearest the centre) or by Up/Down shows that month's grid and dispatches month; a day link dispatches pick. Smooth scrolling only without reduced motion (or with the review switch on). Exposes nothing else; opening and closing the calendar is its parent's. When its parent sets data-current (the wheel form), the ring moves to that day and the wheel shows and centres that day's month.",
+    "state": {
+      "data-current": {
+        "values": [
+          "YYYY-MM-DD"
+        ],
+        "setBy": "runtime",
+        "description": "The wheel form: the day in view, set by the parent (the Timeline's card) as the list scrolls: its day is ringed and its month selected."
+      }
+    }
+  }
+}

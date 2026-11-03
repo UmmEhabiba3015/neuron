@@ -1,0 +1,172 @@
+{
+  "name": "page",
+  "layer": "layout",
+  "version": "0.4.1",
+  "inventory": "A2",
+  "description": "The graph page: the ruled paper everything on a screen is written on. Full width at 390; from 700 an object of its own, exactly 40 graph modules wide (--page-w) and centred, running the full height; at 1200 it starts at the title block's edge. A split page lays its content in two columns at desktop.",
+  "variants": {
+    "layout": {
+      "values": [
+        "single",
+        "split"
+      ],
+      "default": "single",
+      "description": "split (was .page.split): from 1200, a grid of the record and a 340px second column (Timeline's index, the answer's sources), every item start-aligned (revision 39 and after)."
+    },
+    "head": {
+      "values": [
+        "title",
+        "pushed",
+        "untitled",
+        "bare"
+      ],
+      "default": "title",
+      "description": "What heads the page, which sets its lead at 1200 (was .page.pushed, .page.pushed.untitled, .page.bare): title, the masthead row; pushed, the back control and the title; untitled, the back control alone; bare, nothing."
+    }
+  },
+  "options": {
+    "scrolled": {
+      "type": "boolean",
+      "default": false,
+      "description": "iOS only: the screen scrolled, its large title gone (was .page.scrolled). The record moves up by --aj-l-page-overflow, which whoever shows the state sets (the mobile-app comp measures 292px)."
+    },
+    "reader": {
+      "type": "text",
+      "default": "",
+      "description": "A walkthrough's navbar page (the prototypes and the website, mobile and tablet): the reader's label, \"<reader> content\". Given, the page puts its children in the scrolling reader (data-place reader) between the header and the foot; empty, it writes header, children and foot in order."
+    }
+  },
+  "content": {},
+  "slots": {
+    "children": {
+      "accepts": [
+        "the screen's content: masthead (row form), destinations, sheets, components"
+      ],
+      "required": true,
+      "description": "The page's blocks, in reading order (with header and foot: what goes between them)."
+    },
+    "header": {
+      "accepts": [
+        "the header section (static or navbar form)"
+      ],
+      "required": false,
+      "description": "The masthead and destinations, first."
+    },
+    "foot": {
+      "accepts": [
+        "the composer"
+      ],
+      "required": false,
+      "description": "Last, after the reader when there is one."
+    }
+  },
+  "places": {
+    "block": "an object in the page column: the page gutter, --s6 below",
+    "record": "the day's record (the sheet): more space below it at desktop; on iOS it never shrinks",
+    "foot": "the composer: pushed to the foot of the page",
+    "main": "the single-purpose object (the stack): grows; capped at 700 and centred at desktop",
+    "aside": "the split page's second column (the calendar, the panel)",
+    "column": "with aside: the aside runs the whole height of the record's column on a split page (the Timeline's sticky date and mood card, v4 C1)",
+    "grow": "takes the room left (the auth spread)",
+    "head": "the masthead row: pinned to the top below desktop while the page scrolls under it",
+    "reader": "the scrolling reader on a navbar page (mobile and tablet walkthroughs), rendered by the page (option reader): it holds the page's blocks between the pinned header and the composer; the page then fills the view and does not scroll",
+    "fill": "with block: an object that is the page's whole view (Ask's chat): the page gutter, nothing below it, so its sticky foot rests on the view's bottom edge"
+  },
+  "tokens": {
+    "reads": [
+      "--grid",
+      "--mod",
+      "--page-w",
+      "--title-w",
+      "--s9",
+      "--gut",
+      "--s8",
+      "--s7",
+      "--s6",
+      "--paper",
+      "--t-mast",
+      "--tap",
+      "--safe-t",
+      "--tabh",
+      "--safe-b"
+    ],
+    "exposes": {
+      "--aj-l-page-lead": "The space above a single page's first object at desktop, by its head (data-head); the split page starts its columns there too.",
+      "--aj-l-page-overflow": "How far a scrolled iOS page has moved (scrolled): set by whoever shows the state; the mobile-app comp sets 292px in lock.css.",
+      "--aj-l-page-lead-set": "An override of the lead the website's runtime sets on its navbar page (0): it drops the lead.",
+      "--aj-l-page-view-height": "The height of a navbar page: the view less the browser's own furniture, set by the app (the website runtime) as it lays the page out."
+    },
+    "sets": [
+      "--gut"
+    ]
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: a surface, not interactive",
+    "focus-visible": "n/a: a surface, not interactive",
+    "active": "n/a: a surface, not interactive",
+    "disabled": "n/a: a surface, not interactive",
+    "selected": "n/a: a surface, not interactive",
+    "loading": "n/a: a surface; loading belongs to what it holds",
+    "error": "n/a: a surface; errors belong to what it holds",
+    "empty": "n/a: a page always holds content; an empty journal is the empty state component"
+  },
+  "events": {},
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none of its own: a generic container. The landmarks (header, nav, main) are its children",
+    "keyboard": "none",
+    "labels": "none"
+  },
+  "responsive": {
+    "700": "width 100% capped at --page-w, centred, min-height 1120px (revision 19); the gutter doubles to --s8 (set by legacy CSS on .page until its readers migrate)",
+    "1200": "min-height 784px; starts at --title-w with no right margin; split lays out two columns"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-10",
+      "kind": "internal",
+      "change": "Converted from lock.css A2 (.page) and the website preview's page rules."
+    },
+    {
+      "version": "0.1.0",
+      "date": "2026-10-13",
+      "kind": "added",
+      "change": "Option scrolled (data-scrolled), was the legacy class .scrolled; --aj-l-page-overflow is set directly, the legacy --overflow is gone."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-15",
+      "kind": "added",
+      "change": "Option reader and slots header, view and foot: the walkthrough's navbar page is rendered by the page modules (pages round 5), not rewritten at build (scripts/web-headers.mjs addReader, retired)."
+    },
+    {
+      "version": "0.2.1",
+      "date": "2026-10-20",
+      "kind": "internal",
+      "change": "The sidebar page's margins and the pinned head below desktop key on the container's 1200, no longer on the stage's platform (v4 D1); same weight, no visual change."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-23",
+      "kind": "added",
+      "change": "Place column (with aside): on a split page the aside spans every row of the record's column, so the Timeline's date and mood card can stick beside the whole list (v4 C1)."
+    },
+    {
+      "version": "0.4.0",
+      "date": "2026-10-23",
+      "kind": "removed",
+      "change": "The view slot and place: they held the timeline's List/Calendar zoom, gone in v4 C1. The split's comment now says what the split is (Timeline's card, Ask's sources), not the calendar index's history."
+    }
+  ],
+  "contexts": [
+    "data-clip",
+    "data-layout",
+    "data-platform",
+    "data-site",
+    "data-surface"
+  ]
+}

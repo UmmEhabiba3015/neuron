@@ -1,0 +1,131 @@
+{
+  "name": "login",
+  "layer": "pages",
+  "version": "0.4.1",
+  "description": "Sign in: the sign-in form on the plain-paper spread. One render for every platform, the same markup on each; a state is the form section's content.",
+  "variants": {
+    "platform": {
+      "values": [
+        "mobile",
+        "tablet",
+        "desktop"
+      ],
+      "default": "mobile",
+      "description": "The device the page is drawn for. No platform rule: the spread is the same markup on every platform; its sections respond to their container.",
+      "noRule": {
+        "mobile": "a page has no CSS: the platform chooses which modules it composes and how",
+        "tablet": "a page has no CSS: the platform chooses which modules it composes and how",
+        "desktop": "a page has no CSS: the platform chooses which modules it composes and how"
+      }
+    },
+    "state": {
+      "values": [
+        "default",
+        "error",
+        "invalid",
+        "sending",
+        "network",
+        "after-reset",
+        "after-delete",
+        "after-session",
+        "signed-out"
+      ],
+      "default": "default",
+      "description": "The page's states (journal-website.html: #auth-login, #auth-login-error, #auth-login-invalid, #auth-login-sending, #auth-login-network, #auth-login-after-reset, #auth-login-after-delete, #auth-login-after-session, #auth-signed-out).",
+      "noRule": {
+        "default": "a page has no CSS: a state is the form section's content",
+        "error": "a page has no CSS: a state is the form section's content",
+        "invalid": "a page has no CSS: a state is the form section's content",
+        "sending": "a page has no CSS: a state is the form section's content",
+        "network": "a page has no CSS: a state is the form section's content",
+        "after-reset": "a page has no CSS: a state is the form section's content",
+        "after-delete": "a page has no CSS: a state is the form section's content",
+        "after-session": "a page has no CSS: a state is the form section's content",
+        "signed-out": "a page has no CSS: a state is the form section's content"
+      }
+    },
+    "context": {
+      "values": [
+        "screen",
+        "walkthrough"
+      ],
+      "default": "screen",
+      "description": "Where the page is drawn. screen: the numbered screens (the static header). walkthrough: the prototypes and the website; below desktop a page with the header section draws it in its navbar form and puts its blocks in the page's reader (layout page, option reader). Pages without the header section draw the same in both.",
+      "noRule": {
+        "screen": "a page has no CSS: the context chooses how it composes its modules",
+        "walkthrough": "a page has no CSS: the context chooses how it composes its modules"
+      }
+    }
+  },
+  "options": {},
+  "content": {
+    "data": {
+      "type": "data",
+      "description": "data.mjs: each state's route and form section (13-login, 15-auth-states); the spread: system/content/auth-spread.mjs. Real copy: a page is not stress-tested."
+    }
+  },
+  "slots": {},
+  "places": {},
+  "tokens": {
+    "reads": [],
+    "exposes": {},
+    "sets": []
+  },
+  "states": {
+    "default": "yes: Sign in",
+    "hover": "n/a: a page; its controls carry their own",
+    "focus-visible": "n/a: a page; its controls carry their own",
+    "active": "n/a: a page; its controls carry their own",
+    "disabled": "n/a: a page; its controls carry their own",
+    "selected": "n/a: a page; its controls carry their own",
+    "loading": "yes: the sending state (a copy line over the form)",
+    "error": "yes: the error and invalid states (a notice or help lines)",
+    "empty": "n/a: a form, not a list"
+  },
+  "events": {},
+  "uses": {
+    "shell": "0.x",
+    "rail": "0.x",
+    "page": "0.x",
+    "mast": "0.x",
+    "keybox": "0.x",
+    "auth": "0.x",
+    "auth-form": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none of its own: the masthead (header) and the spread (main) with its two named sections",
+    "keyboard": "the form in order: fields, the show/hide toggles, the forgot link, the submit, then the links",
+    "labels": "each field by its label element; each section by its heading"
+  },
+  "responsive": {
+    "note": "no platform rule: the auth sections respond to their container"
+  },
+  "changelog": [
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "Pages round 4a: the states of 15-auth-states (10 with the default)."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-15",
+      "kind": "added",
+      "change": "Variant context (screen, walkthrough): the walkthroughs render the page directly (pages round 5)."
+    },
+    {
+      "version": "0.4.0",
+      "date": "2026-10-20",
+      "kind": "changed",
+      "change": "RecommendedChanges-v4 B4 and D2: the rate state (too many attempts) is removed; the page says Sign in, never Log in."
+    },
+    {
+      "version": "0.4.1",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 C5: after-session says \"You were signed out. Sign in again to carry on.\" and lands on Today (a written draft is a local save that a sign-out does not keep)."
+    }
+  ]
+}

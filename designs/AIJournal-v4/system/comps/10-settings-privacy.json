@@ -1,0 +1,15 @@
+{
+  "file": "10-settings-privacy.html",
+  "title": "Privacy, model visibility and Your data",
+  "comment": "Journal v3 design of record: 10-settings-privacy.html. Product scope is V3-REVISION.md; visual and motion rules remain in lock.css.",
+  "written": true,
+  "devices": [
+    { "page": "settings", "state": "privacy" },
+    { "page": "settings", "state": "visible" },
+    {
+      "page": "settings",
+      "state": "data",
+      "caption": { "title": "Privacy, model visibility and Your data", "text": "Journal v3 design of record. Product behavior and state transitions are specified in V3-REVISION.md." }
+    }
+  ]
+}

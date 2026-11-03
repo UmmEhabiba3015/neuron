@@ -1,0 +1,40 @@
+/* review.css: the prototype review furniture (decision 2026-10-12). Not product: the review pages'
+   backdrop, the uniform font switch, the prototype-states menu, the jump links, the motion-review notice,
+   the state lists. Outside the system: the build injects it into lock.css (REVIEW block); an export never
+   carries it. Its own rules stay in the legacy layer, as they were in lock.css. */
+@layer legacy{
+/* The page background and flex column of the stage (a module cannot style body). */
+body{background:#6F6A60;font-family:var(--f-label);
+     display:flex;flex-direction:column;align-items:flex-start;
+     padding:24px 16px 40px;min-height:100vh}
+
+/* Optional uniform font review: no installed font dependencies. */
+html[data-font-profile="portable"]{--f-prose:"Journal Portable Prose",serif;--f-label:"Journal Portable Labels",sans-serif;--f-hand:"Journal Portable Hand",cursive}
+
+/* The prototype-states menu: outcome links live below the form, never in a dialog. */
+.auth-preview{margin-top:var(--s8);padding-top:var(--s4);border-top:var(--w) dotted var(--rule-2);color:var(--rule)}
+.auth-preview summary{min-height:var(--tap);display:flex;align-items:center;cursor:pointer;font:400 var(--t-quiet)/1.5 var(--f-label);text-decoration:underline;text-underline-offset:3px}
+.auth-preview nav{display:flex;flex-wrap:wrap;gap:var(--s4) var(--s6)}
+.jump a{min-height:44px;display:inline-flex;align-items:center;box-sizing:border-box}
+
+.auth-state-control{margin:var(--s6) var(--gut);padding:var(--s6);background:var(--paper-2)}
+.auth-state-control .auth-preview{margin:0;padding:0;border:0}
+
+/* Review-stage notice only, outside the app: why the full handover can look still on a device where the
+   v2 review files forced motion on. */
+.motion-review-status{display:none}
+@media (prefers-reduced-motion:reduce){.motion-review-status{display:block}}
+
+/* The state lists inside the journal. */
+.prototype-list.in-journal{margin:0}
+.prototype-list.in-journal>*+*{border-top:var(--w) solid var(--rule)}
+}
+
+/* Module rules about review wrappers, above every module layer. */
+@layer review{
+/* the design-system guide's motion viewport lets the shell shrink */
+.ds-motion-viewport .aj-l-shell{min-width:0}
+
+/* the website preview's screen wrapper: the stage takes the window */
+:where([data-site]) .screen>.aj-l-stage,:where([data-site]) .screen>.aj-l-stage[data-platform="tablet"],:where([data-site]) .screen>.aj-l-stage[data-platform="desktop"]{width:100%;max-width:none;margin:0;box-shadow:none}
+}

@@ -1,0 +1,26 @@
+/* D2 the glance line. printed between two rules.
+   Moved from lock.css section D. The placement it had there (margin, and none on the title
+   block) stays in the legacy layer, written on .aj-c-glance. */
+/* REVISION 48. The weight, same reason again: .glance can be the h1 on a screen
+   with no wordmark and no date box. */
+.aj-c-glance{padding:var(--s4) 0;
+        border-top:var(--w) solid var(--rule);border-bottom:var(--w) solid var(--rule);
+        font-family:var(--f-prose);font-size:var(--t-glance);line-height:var(--lh-glance);
+        font-weight:400;
+        color:var(--rule)}
+
+/* The printed line types itself in: the product's own voice only. (The total on Timeline,
+   which shared the gesture, was removed: v4 drops it.) */
+@keyframes aj-c-glance-draw{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+/* context: [data-motion] is the shell that carries the arrival motion; it migrates with the shell */
+/* A parent that shows the line still (the overview) sets --aj-c-glance-motion: none. */
+[data-motion] .aj-c-glance .aj-c-glance__line{animation:var(--aj-c-glance-motion,aj-c-glance-draw var(--g-type) steps(48,start)/* token-exempt: 48 steps, one per printed character of the approved printed-line motion */ 0ms backwards)}
+/* context: [data-date="hand"] (the keybox date variant): the line waits for the handwritten date to be written */
+[data-motion]:has([data-date="hand"]) .aj-c-glance .aj-c-glance__line{animation:var(--aj-c-glance-motion,aj-c-glance-draw var(--g-type) steps(48,start)/* token-exempt: 48 steps, one per printed character of the approved printed-line motion */ var(--g-date) backwards)}
+
+
+@media (prefers-reduced-motion:reduce){
+  /* context: [data-motion] is the shell; reduced motion prints the line at once. The :is() carries the
+     date wait's weight (its :has([data-date="hand"])), so the guard wins over it too, by order. */
+  :is([data-motion],[data-motion]:has([data-date="hand"])):not(:where(html[data-motion-review="play"] *)) .aj-c-glance .aj-c-glance__line{animation:none}
+}

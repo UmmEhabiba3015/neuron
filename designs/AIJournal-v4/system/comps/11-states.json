@@ -1,0 +1,48 @@
+{
+  "file": "11-states.html",
+  "title": "States pack · nine current states",
+  "comment": "Journal v3 design of record: 11-states.html. Product scope is V3-REVISION.md; visual and motion rules remain in lock.css.",
+  "written": true,
+  "devices": [
+    {
+      "page": "today",
+      "state": "empty"
+    },
+    {
+      "page": "today",
+      "state": "first"
+    },
+    {
+      "page": "timeline",
+      "state": "thin-week"
+    },
+    {
+      "page": "today",
+      "state": "audio-no-transcript"
+    },
+    {
+      "page": "today",
+      "state": "note-open"
+    },
+    {
+      "page": "today",
+      "state": "draft"
+    },
+    {
+      "page": "today",
+      "state": "memo-draft"
+    },
+    {
+      "page": "today",
+      "state": "memo-draft-typed"
+    },
+    {
+      "page": "today",
+      "state": "empty-today-memo-draft",
+      "caption": {
+        "title": "States pack · nine current states",
+        "text": "Journal v3 design of record. Product behavior and state transitions are specified in V3-REVISION.md."
+      }
+    }
+  ]
+}

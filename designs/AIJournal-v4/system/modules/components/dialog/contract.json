@@ -1,0 +1,67 @@
+{
+  "name": "dialog",
+  "layer": "components",
+  "version": "0.1.0",
+  "inventory": "G2",
+  "description": "The one dialog in the product: delete everything. A scrim over the screen with a card centred on the page. If a second dialog appears, something has gone wrong (direction-lock.md §6 G2).",
+  "variants": {},
+  "options": {},
+  "content": {
+    "labelledBy": {
+      "type": "text",
+      "required": true,
+      "description": "The id of the card heading that names the dialog (aria-labelledby)."
+    }
+  },
+  "slots": {
+    "children": {
+      "accepts": ["card"],
+      "required": true,
+      "description": "The card the dialog holds."
+    }
+  },
+  "places": {
+    "block": "the dialog's card: the page gutter"
+  },
+  "tokens": {
+    "reads": ["--s6", "--ink", "--rail", "--gut"],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: open, as rendered (the comps show it open; closed is not rendered)",
+    "hover": "n/a: the scrim is not interactive; the card's actions carry their own states",
+    "focus-visible": "n/a: focus moves into the card's actions (createDialog)",
+    "active": "n/a: not interactive itself",
+    "disabled": "n/a: not interactive itself",
+    "selected": "n/a: not interactive itself",
+    "loading": "n/a: a pending delete is its own screen (/you/data/deleting)",
+    "error": "yes: the card carries a status paragraph (the failed-delete state)",
+    "empty": "n/a: a dialog without a card is not rendered"
+  },
+  "events": {},
+  "uses": {
+    "card": "0.x",
+    "button": "0.x"
+  },
+  "assets": [],
+  "a11y": {
+    "role": "dialog, aria-modal=\"true\", aria-labelledby the card's heading",
+    "keyboard": "focus moves into the card on open, Tab is trapped, Escape closes and focus returns to the trigger. In the comps this behaviour lives in createDialog (design system/components/journal-components.js); it moves into a dialog.js module script with the composite wave.",
+    "labels": "labelledBy is required"
+  },
+  "responsive": {
+    "700": "the scrim's left padding includes the rail, so the card centres on the page rather than on the app (revision 24)"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-09",
+      "kind": "internal",
+      "change": "Converted from lock.css G2 .dialog. Sets the card's --aj-c-card-measure-wide to 38ch (revision 26)."
+    }
+  ],
+  "catalogue": {
+    "height": 560,
+    "note": "The dialog covers its container; the catalogue frame stands in for the app."
+  }
+}

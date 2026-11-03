@@ -1,0 +1,65 @@
+{
+  "name": "mark",
+  "layer": "components",
+  "version": "0.1.0",
+  "inventory": "D4",
+  "description": "An item mark: a keyline, an optional glyph and a word, saying something about one item (Private, out of memory). Never colour alone, never a tint.",
+  "variants": {},
+  "options": {
+    "glyph": {
+      "values": ["lock", "none"],
+      "default": "lock",
+      "description": "The glyph before the word. \"lock\" in the designed screens; the walkthrough runtime adds marks with no glyph."
+    }
+  },
+  "content": {
+    "label": {
+      "type": "text",
+      "required": true,
+      "description": "The word or short phrase, final copy (\"Private, out of memory\"). Set in caps by the CSS; write it in sentence case."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": ["--s1", "--s3", "--w", "--rule-2", "--r", "--paper", "--t-key"],
+    "exposes": {
+      "--aj-c-mark-display": "Its display. Default inline-flex; an entry row with entry actions sets none, because the memory dropdown already says it."
+    }
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: not interactive",
+    "focus-visible": "n/a: not interactive and never focusable",
+    "active": "n/a: not interactive",
+    "disabled": "n/a: not interactive",
+    "selected": "n/a: not interactive",
+    "loading": "n/a: a mark states a fact about an item",
+    "error": "n/a: never used for errors",
+    "empty": "n/a: a mark with no word is not rendered"
+  },
+  "events": {},
+  "uses": {},
+  "assets": [
+    {
+      "name": "lock glyph",
+      "file": "inline SVG in mark.html.mjs (24x24 viewBox, stroke currentColor, width 2)",
+      "used": "the \"lock\" glyph of every mark",
+      "source": "drawn for the project (lock.css era)",
+      "licence": "project"
+    }
+  ],
+  "a11y": {
+    "role": "none: an inline span of text",
+    "keyboard": "none",
+    "labels": "the word is the content; the glyph is aria-hidden"
+  },
+  "responsive": {},
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-09",
+      "kind": "internal",
+      "change": "Converted from lock.css D4 .mark. The entry row hides it through the exposed --aj-c-mark-display (a legacy display:none could not override the module)."
+    }
+  ]
+}

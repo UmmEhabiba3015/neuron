@@ -1,0 +1,84 @@
+{
+  "name": "weekline",
+  "layer": "components",
+  "version": "0.1.0",
+  "inventory": "v4 C3",
+  "description": "Earlier weeks, under the Reflections booklet: a heading, then a vertical line with a ring per month and a dot per week; each week its dates and its line, the whole row opening that week's booklet; then how far back the journal goes.",
+  "variants": {},
+  "options": {},
+  "content": {
+    "id": {
+      "type": "text",
+      "required": false,
+      "description": "The section's id, the last leaf's link target: \"earlier\" (default)."
+    },
+    "heading": {
+      "type": "text",
+      "required": true,
+      "description": "\"Earlier weeks\"."
+    },
+    "weeks": {
+      "type": "list",
+      "required": true,
+      "description": "Newest first: { month: \"July\", dates: \"27 Jul to 2 Aug\", line: \"A bank holiday, done on purpose.\", href }. A week sits under the month it starts in; a month is drawn once, where its first week comes."
+    },
+    "since": {
+      "type": "text",
+      "required": false,
+      "description": "The line after the weeks: \"Since March 2026\"."
+    }
+  },
+  "slots": {},
+  "places": {},
+  "tokens": {
+    "reads": [
+      "--s5",
+      "--f-prose",
+      "--rule",
+      "--s8",
+      "--w",
+      "--s7",
+      "--s3",
+      "--f-label",
+      "--t-col",
+      "--rule-2",
+      "--paper",
+      "--s1",
+      "--s4",
+      "--tap",
+      "--t-quiet"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: the line, its months and weeks",
+    "hover": "yes: with a mouse, a week's line underlines",
+    "focus-visible": "yes: a week's row takes the product's ring (base)",
+    "active": "n/a: a row is a link; the page opens",
+    "disabled": "n/a: every week listed has a reflection",
+    "selected": "n/a: the week open is the booklet above, not a row",
+    "loading": "n/a: drawn with the page",
+    "error": "n/a: drawn with the page",
+    "empty": "n/a: with no earlier weeks (a first reflection, a new account) the page draws none"
+  },
+  "events": {},
+  "uses": {},
+  "assets": [],
+  "a11y": {
+    "role": "a section named by its heading (h2); each month a list of links",
+    "keyboard": "Tab through the weeks",
+    "labels": "each row's name is its dates and its line"
+  },
+  "responsive": {
+    "all": "one column at every width, 860px at most"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-28",
+      "kind": "added",
+      "change": "New (v4 C3): the earlier weeks of explore long-fold-out E, as booklet-feel f-mix draws them."
+    }
+  ],
+  "contexts": []
+}

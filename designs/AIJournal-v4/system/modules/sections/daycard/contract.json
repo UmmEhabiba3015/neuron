@@ -1,0 +1,170 @@
+{
+  "name": "daycard",
+  "layer": "sections",
+  "version": "0.1.0",
+  "description": "The Timeline's date and mood card (v4 C1): the date row, which unrolls the calendar over what is under the card; the mood row (\"Mood\", the week's name, a strip of the week's seven days, the week arrows while the panel is open); the mood panel with the week's graph. Both parts start closed. Every way to a day (a strip dot, a graph point, a calendar day) is one jump.",
+  "variants": {},
+  "options": {
+    "open": {
+      "type": "object",
+      "default": {},
+      "description": "{ mood?, calendar? }: render a part open (a comp state). At run time daycard.js opens and closes them."
+    }
+  },
+  "content": {
+    "day": {
+      "type": "text",
+      "required": true,
+      "description": "The day in view, YYYY-MM-DD: the date row's day, ringed in the graph and the calendar."
+    },
+    "date": {
+      "type": "text",
+      "required": true,
+      "description": "The date row's words, as the masthead writes a date: \"Sun 9 Aug '26\"."
+    },
+    "dateName": {
+      "type": "text",
+      "required": true,
+      "description": "The day in full for the date button's name: \"Sunday 9 August\" (\"Sunday 9 August. Choose a date\")."
+    },
+    "weeks": {
+      "type": "list",
+      "required": true,
+      "description": "The weeks the card steps through, oldest first: every week with something written and this week always (history skips empty weeks). { week, label, days, before?, after? }, days as moodgraph takes them (seven, Monday first). system/content/journal-days.mjs derives them."
+    },
+    "shown": {
+      "type": "text",
+      "required": false,
+      "description": "The week shown (its Monday); the last week (this week) by default."
+    },
+    "calendar": {
+      "type": "object",
+      "required": true,
+      "description": "{ months, selected }: the calendar's wheel form, from the first month written to this month (journal-days.mjs)."
+    },
+    "copy": {
+      "type": "object",
+      "required": false,
+      "description": "{ where, mood, thisWeek, earlier, later, choose, months, go }: the card's name, \"Mood\", \"This week\", the arrows' names, \"Choose a date\", the wheel's name, \"Go to this day\". The approved copy is the default."
+    },
+    "id": {
+      "type": "text",
+      "required": false,
+      "description": "The prefix of the two ids the toggles control (daycard-cal, daycard-mood); one card per page."
+    }
+  },
+  "slots": {},
+  "tokens": {
+    "reads": [
+      "--w",
+      "--rule",
+      "--r",
+      "--paper-2",
+      "--s4",
+      "--ctl",
+      "--s2",
+      "--s5",
+      "--s1",
+      "--s3",
+      "--rule-2",
+      "--t-field",
+      "--lh-flat",
+      "--f-hand",
+      "--tap",
+      "--t-hand-s",
+      "--lh-tight",
+      "--f-label",
+      "--g-panel",
+      "--gc-c1",
+      "--mood-light",
+      "--mood-good",
+      "--mood-even",
+      "--mood-low",
+      "--mood-hard",
+      "--elev-sheet",
+      "--g-cal",
+      "--s9"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: both parts closed: the date row above the mood row, the week as a strip of seven dots",
+    "hover": "yes: the date and the mood name underline and their arrows tint; a strip dot takes a wash (its controls' own)",
+    "focus-visible": "n/a: its controls carry the product focus ring",
+    "active": "n/a: its controls act at once",
+    "disabled": "yes: an arrow with no week that way is off (30% --rule)",
+    "selected": "yes: the mood panel open (the graph, the arrows instead of the strip); the calendar open (unrolled from the date)",
+    "loading": "n/a: drawn from the days the page has",
+    "error": "n/a: nothing here can fail",
+    "empty": "yes: nothing written this week: the strip's empty rings and the empty graph; this week is always there"
+  },
+  "events": {
+    "jump": "a strip dot, a graph point (moodgraph pick) or a calendar day (cal pick) chose a day (bubbling; detail: { date }): the app sets data-jump on the record, which scrolls to the day and draws the arrival. The card shows that day's week; a calendar pick closes the calendar."
+  },
+  "behaviour": {
+    "script": "daycard.js, inside its root: the date opens and closes the calendar (Escape and a press outside close it; it is inert while closed; opening moves focus into it, closing by the date or Escape gives it back); the mood name opens and closes the panel (inert while closed); the arrows show the next week rendered that way (the strip, the graph, the week's name) and go off at the ends; strip dots, moodgraph pick and cal pick dispatch jump. When the app sets data-day it writes the date row's words and name, and sets data-current on its graphs and its calendar.",
+    "state": {
+      "data-day": {
+        "values": [
+          "YYYY-MM-DD"
+        ],
+        "setBy": "runtime",
+        "description": "The day in view: the app sets it from the record's day event as the list scrolls. Rendered from day."
+      },
+      "data-mood-open": {
+        "values": [
+          "true"
+        ],
+        "setBy": "script",
+        "description": "The mood panel is open. Rendered from open.mood."
+      },
+      "data-cal-open": {
+        "values": [
+          "true"
+        ],
+        "setBy": "script",
+        "description": "The calendar is open. Rendered from open.calendar."
+      }
+    },
+    "hooks": {
+      "date": "the date row's words: daycard.js writes the day in view",
+      "week": "the mood row's week name (This week, or the week's dates): daycard.js writes the shown week's",
+      "data-week": "on each strip and graph wrapper: the week's Monday, which the arrows and a jump read",
+      "data-name": "on each strip: the week's name for the mood row (This week, or the week's dates)",
+      "data-step": "on the arrows: -1 earlier, 1 later",
+      "data-date": "on each strip dot: its day, the jump's date",
+      "data-mood": "on each strip dot: its day's mood, its colour",
+      "data-empty": "on a strip day with nothing written: a ring",
+      "data-future": "on a strip day still to come: nothing"
+    }
+  },
+  "uses": {
+    "moodgraph": "0.x",
+    "cal": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "a section named \"Where you are\"; the calendar a dialog (\"Choose a date\"); each strip a group (\"Mood, 3 to 9 Aug\")",
+    "keyboard": "Tab to the date (Enter opens the calendar, Escape closes it), the mood toggle (Enter opens the panel), each strip dot or graph point (Enter goes to its day) and the arrows",
+    "labels": "the date: \"Sunday 9 August. Choose a date\" (aria-expanded, aria-controls); the mood toggle: \"Mood\" and the week (aria-expanded, aria-controls); a strip dot: \"Sunday 9 August, Even. Go to this day\"; the arrows: \"Earlier week\", \"Later week\""
+  },
+  "responsive": {
+    "1200": "on a split page the card is the sticky column right of the list (top --s9), level with the search pill",
+    "all": "the calendar is the card's width at every size"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-23",
+      "kind": "added",
+      "change": "New (v4 C1 round 2): from explore timeline-jump-arrival f-wash-and-frame (timeline-collapse c-dot-strip revised, timeline-calendar C, timeline-desktop-space B, the common revision)."
+    }
+  ],
+  "contexts": [
+    "data-layout"
+  ],
+  "catalogue": {
+    "height": 560
+  }
+}

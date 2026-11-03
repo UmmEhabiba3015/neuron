@@ -1,0 +1,99 @@
+{
+  "name": "dayrow",
+  "layer": "components",
+  "version": "0.3.0",
+  "inventory": "H1",
+  "description": "A Timeline day: the 58px column carries the date, the row the day's lede. An empty day is not a row.",
+  "variants": {},
+  "options": {},
+  "content": {
+    "date": {
+      "type": "text",
+      "required": true,
+      "description": "The day, in a time element (Sun 9)."
+    },
+    "datetime": {
+      "type": "text",
+      "required": true,
+      "description": "ISO date for the time element."
+    }
+  },
+  "slots": {
+    "children": {
+      "accepts": [
+        "text"
+      ],
+      "required": true,
+      "description": "The day's lede."
+    }
+  },
+  "places": {
+    "after": "a mark after the day's lede: --s4 above"
+  },
+  "tokens": {
+    "reads": [
+      "--tcol",
+      "--w",
+      "--rule-2",
+      "--s6",
+      "--s4",
+      "--t-col",
+      "--lh-tight",
+      "--s5"
+    ],
+    "exposes": {
+      "--aj-c-dayrow-date": "The date column's colour (--rule-2). The Timeline's record sets it to the day's mood colour while the day is framed after a jump (v4 C1).",
+      "--aj-c-dayrow-date-fade": "The date column's transition (none). The record sets it while the date takes the mood colour."
+    }
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: not interactive",
+    "focus-visible": "n/a: not focusable",
+    "active": "n/a: not interactive",
+    "disabled": "n/a: not interactive",
+    "selected": "n/a: not interactive",
+    "loading": "n/a: a container shows its contents",
+    "error": "n/a: its contents report errors",
+    "empty": "n/a: never rendered empty"
+  },
+  "events": {},
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none: a row",
+    "keyboard": "none",
+    "labels": "the time element"
+  },
+  "responsive": {},
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-11",
+      "kind": "internal",
+      "change": "Converted from lock.css H1 (.dayrow)."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-23",
+      "kind": "added",
+      "change": "Exposes the date column's colour and its transition (v4 C1, the jump arrival's held date)."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-23",
+      "kind": "added",
+      "change": "Hook date on the date cell (v4 C1): the Timeline's search dates a later row of a day whose first row it hides. Markup only: one attribute."
+    }
+  ],
+  "contexts": [
+    "data-motion",
+    "data-platform"
+  ],
+  "behaviour": {
+    "hooks": {
+      "date": "the date cell (empty where the row continues the day): the Timeline's search writes the day's date into it (a time element) when the day's first row is hidden, and empties it again"
+    }
+  }
+}

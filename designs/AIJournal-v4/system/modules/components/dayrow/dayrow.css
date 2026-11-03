@@ -1,0 +1,14 @@
+/* H1 a timeline day. the 58px column carries the date, not the time.
+      An empty day is not a row. It does not exist. */
+.aj-c-dayrow{display:flex;align-items:stretch}
+.aj-c-dayrow .aj-c-dayrow__date{flex:0 0 var(--tcol);border-right:var(--w) solid var(--rule-2);
+              padding:var(--s6) var(--s4) var(--s6) 0;text-align:right;
+              font-size:var(--t-col);letter-spacing:.08em;/* token-exempt: the date column's tracking, .08em (tokens.json, --t-col) */
+              color:var(--aj-c-dayrow-date,var(--rule-2));transition:var(--aj-c-dayrow-date-fade);
+              line-height:var(--lh-tight);font-variant-numeric:tabular-nums}
+.aj-c-dayrow .aj-c-dayrow__body{flex:1 1 auto;padding:var(--s5) var(--s6) var(--s6);min-width:0}
+/* context: the website's sheet keeps its ruled date column within the gutter on every device but iOS */
+[data-motion]:not([data-platform="ios"] > *) .aj-c-dayrow .aj-c-dayrow__date{min-width:0;overflow-wrap:anywhere;text-align:left;padding-left:var(--s4);padding-right:var(--s4)}
+
+/* PLACEMENT BY ROLE (decision 2026-10-12): a mark after the day's lede (after) clears it (revision 1). */
+.aj-c-dayrow .aj-c-dayrow__body > [data-place~="after"]{margin-top:var(--s4)}

@@ -1,0 +1,131 @@
+{
+  "name": "srow",
+  "layer": "components",
+  "version": "0.2.2",
+  "inventory": "C2",
+  "description": "A ruled row of the record: the 58px time column, then the content. When it holds the entry actions, its body lays them out in a gutter at the right of the text; below 1000px of container the tools drop under the text, which takes the full width. Index pages (the motion index) use it without the time column.",
+  "variants": {},
+  "options": {
+    "bareTime": {
+      "type": "boolean",
+      "default": false,
+      "description": "The time as text (18's generic state pages draw it so); the runtime's entry template keeps the time element."
+    }
+  },
+  "content": {
+    "time": {
+      "type": "text",
+      "required": false,
+      "description": "The time (\"09:20\"), a <time> element; absent on index pages, where the row has no column."
+    },
+    "datetime": {
+      "type": "text",
+      "required": false,
+      "description": "The time's machine-readable value for the <time> element (\"2026-08-09T09:20\")."
+    }
+  },
+  "slots": {
+    "children": {
+      "accepts": [
+        "entry-actions",
+        "mark",
+        "shead",
+        "button",
+        "field",
+        "text"
+      ],
+      "required": true,
+      "description": "The body: the entry's prose, its entry actions and its mark; on index pages a section head, a lede and links."
+    }
+  },
+  "places": {
+    "after": "a mark after the words: --s4 above",
+    "span": "the entry editor, the delete confirmation, a state message: the full grid, --s4 above",
+    "tools": "the entry's actions (entry-actions, its tools form): the row's grid gives them the second column"
+  },
+  "tokens": {
+    "reads": [
+      "--tcol",
+      "--w",
+      "--rule-2",
+      "--s6",
+      "--s4",
+      "--t-col",
+      "--lh-tight",
+      "--s5",
+      "--tap",
+      "--s3",
+      "--s2"
+    ],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: the row has no hover of its own; its entry actions reveal themselves (their module reads the row)",
+    "focus-visible": "n/a: the row is not focusable; its controls carry the focus ring",
+    "active": "n/a: the row is not a control",
+    "disabled": "n/a: the row is not a control",
+    "selected": "n/a: rows are not selectable",
+    "loading": "n/a: a row is written with the page; saving is reported by a notice",
+    "error": "n/a: an error is a notice beside the row, not a state of it",
+    "empty": "n/a: a day with no entries shows the empty line, not an empty row"
+  },
+  "events": {},
+  "uses": {
+    "entry-actions": "0.x",
+    "mark": "0.x",
+    "shead": "0.x",
+    "button": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none (a div); the time is a <time> element",
+    "keyboard": "none of its own; Tab reaches its entry actions",
+    "labels": "the entry actions carry their own group label"
+  },
+  "responsive": {
+    "1000": "below 1000px of container, a row with entry actions drops the tools under the text; the text takes the full width"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-11",
+      "kind": "internal",
+      "change": "Converted from lock.css C2 (.srow, its .tcol and .ccol, and the entry action gutter)."
+    },
+    {
+      "version": "0.1.1",
+      "date": "2026-10-12",
+      "kind": "patch",
+      "change": "Declares datetime for the <time> element; the render writes it."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "Option bareTime: the time as text in its column (the generic state pages' entry rows), not a time element. Pages round 4b."
+    },
+    {
+      "version": "0.2.1",
+      "date": "2026-10-28",
+      "kind": "internal",
+      "change": "No longer sets --aj-c-entry-actions-trigger-max: entry-actions 0.3.0 has no memory dropdown."
+    },
+    {
+      "version": "0.2.2",
+      "date": "2026-10-28",
+      "kind": "internal",
+      "change": "Sets --aj-c-entry-actions-trigger-max again: entry-actions 0.4.0 has its memory dropdown back (on entries kept out)."
+    }
+  ],
+  "contexts": [
+    "data-motion",
+    "data-platform"
+  ],
+  "behaviour": {
+    "hooks": {
+      "data-entry-key": "The entry key of a row the prototype tracks (its model); the runtime writes it and finds the row by it."
+    }
+  }
+}

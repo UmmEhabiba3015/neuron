@@ -1,0 +1,79 @@
+{
+  "name": "stage",
+  "layer": "layout",
+  "version": "0.1.0",
+  "inventory": "A1",
+  "description": "The presentation stage: the device frame a comp is drawn in, its browser bar or iOS status bar, the caption under it and the iOS home indicator. Not product and never shipped; the only place a colour literal is allowed (direction-lock.md §6 A1).",
+  "variants": {
+    "platform": {
+      "values": ["mobile", "tablet", "desktop", "ios"],
+      "default": "mobile",
+      "description": "The device drawn. mobile 390 (data-platform=\"mobile\", written so modules can read the platform as a context), tablet 834 (was .device.t), desktop 1440 (was .device.d), ios 390 with the status bar in place of the browser bar (was .device.ios and .chrome.ios). Tablet and desktop never shrink below their width (revisions 30 and 33): the window scrolls sideways instead of showing the wrong platform. The caption takes the same attribute so it matches its device's width."
+    }
+  },
+  "options": {},
+  "content": {
+    "chromeLabel": {
+      "type": "text",
+      "required": false,
+      "description": "The browser bar's address, \"journal.app\" in every comp. Not rendered for ios, whose status bar shows the time instead."
+    },
+    "statusTime": {
+      "type": "text",
+      "required": false,
+      "description": "ios only: the status bar's time, e.g. \"21:58\"."
+    },
+    "captionTitle": {
+      "type": "text",
+      "required": false,
+      "description": "The caption's bold first line. Copy from the comp; a caption is copy someone reads (AGENTS.md)."
+    },
+    "captionText": {
+      "type": "text",
+      "required": false,
+      "description": "The caption's body after the line break."
+    }
+  },
+  "slots": {
+    "children": {
+      "accepts": ["shell"],
+      "required": true,
+      "description": "What the device shows: the product shell."
+    }
+  },
+  "tokens": {
+    "reads": ["--f-label", "--safe-t", "--paper", "--s8", "--ink", "--rule-2"],
+    "exposes": {}
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: furniture, not interactive",
+    "focus-visible": "n/a: furniture, not interactive",
+    "active": "n/a: furniture, not interactive",
+    "disabled": "n/a: furniture, not interactive",
+    "selected": "n/a: furniture, not interactive",
+    "loading": "n/a: furniture",
+    "error": "n/a: furniture",
+    "empty": "n/a: a stage always holds a shell"
+  },
+  "events": {},
+  "uses": {},
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none: the chrome and the home indicator are aria-hidden; the caption is ordinary text",
+    "keyboard": "none",
+    "labels": "none"
+  },
+  "responsive": {
+    "all": "Fixed widths per platform, not fluid: a comp is drawn at its device's real width. The website preview (#journal) lets the device fill the window and drops its shadow."
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-10",
+      "kind": "internal",
+      "change": "Converted from lock.css 2.1 (.device, .chrome, .caption, .homebar) and the website preview's stage rules."
+    }
+  ]
+}

@@ -1,0 +1,126 @@
+{
+  "file": "17-account-data.html",
+  "title": "Account and data states",
+  "comment": "Journal v3 design of record. Static states use the closed component inventory and lock.css.",
+  "viewport": "width=device-width,initial-scale=1",
+  "written": true,
+  "devices": [
+    {
+      "page": "settings",
+      "state": "delete-confirm",
+      "caption": {
+        "title": "Delete everything?",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "account-delete-confirm"
+    },
+    {
+      "page": "settings",
+      "state": "devices",
+      "caption": {
+        "title": "Account · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "account-devices"
+    },
+    {
+      "page": "settings",
+      "state": "only-device",
+      "caption": {
+        "title": "Account · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "account-only-device"
+    },
+    {
+      "page": "settings",
+      "state": "device-signed-out",
+      "caption": {
+        "title": "Account · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "account-device-signed-out"
+    },
+    {
+      "page": "settings",
+      "state": "device-failed",
+      "caption": {
+        "title": "Account · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "account-device-failed"
+    },
+    {
+      "page": "settings",
+      "state": "timezone",
+      "caption": {
+        "title": "Timezone · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "timezone-choose"
+    },
+    {
+      "page": "settings",
+      "state": "timezone-failed",
+      "caption": {
+        "title": "Timezone not changed · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "timezone-failed"
+    },
+    {
+      "page": "settings",
+      "state": "export-preparing",
+      "caption": {
+        "title": "Preparing export",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "export-preparing"
+    },
+    {
+      "page": "settings",
+      "state": "export-ready",
+      "caption": {
+        "title": "Export ready",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "export-ready"
+    },
+    {
+      "page": "settings",
+      "state": "export-empty",
+      "caption": {
+        "title": "Nothing to export yet",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "export-empty"
+    },
+    {
+      "page": "settings",
+      "state": "export-failed",
+      "caption": {
+        "title": "Export did not work",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "export-failed"
+    },
+    {
+      "page": "settings",
+      "state": "delete-pending",
+      "caption": {
+        "title": "Deleting account · {dir}",
+        "text": "Journal v3 review state. The action and recovery use existing fields, rows, notices and buttons. This static file illustrates the state; V3-REVISION.md specifies behavior."
+      },
+      "route": "account-delete-pending"
+    },
+    {
+      "page": "settings",
+      "state": "delete-failed",
+      "caption": {
+        "title": "Delete everything?",
+        "text": "Journal v3 design state. The surrounding page stays visible; V3-REVISION.md specifies integration behavior."
+      },
+      "route": "account-delete-failed"
+    }
+  ]
+}

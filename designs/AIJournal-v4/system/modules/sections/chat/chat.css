@@ -1,0 +1,108 @@
+/* chat. Ask's conversation (v4 C2, explore ask-readable a-mirror-bubble as revised; ask-states D; ask-cant-loading
+   f-mix). The head row sticks with paper fading under it; the thread runs down the column (--chat-w, which grows
+   with the screen); the composer sits at the foot and the thread slides under it. Where the chat sits on the page
+   is the page's. */
+
+@keyframes aj-s-chat-wash{
+  0%{clip-path:inset(0 100% 0 0);animation-timing-function:var(--gc-c1)}
+  45%{clip-path:inset(0 0 0 0);animation-timing-function:var(--gc-c1)}
+  100%{clip-path:inset(0 0 0 100%)}
+}
+@keyframes aj-s-chat-fade{0%{opacity:0;clip-path:none}30%,70%{opacity:1;clip-path:none}100%{opacity:0;clip-path:none}}
+@keyframes aj-s-chat-draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+
+.aj-s-chat{display:flex;flex-direction:column;min-height:var(--aj-s-chat-min,0px)}
+
+/* the head: sticks at the top, where it already stands (on desktop the page is bare, so the chat starts at the top
+   and the row never moves). Its pills sit in the middle of its paper, as much above them as below; the paper fades
+   out under them over --s6 and out to each side over --s9, so the band has no hard edge (DESIGN.md 2026-10-27).
+   On desktop the pills' middle is the wordmark's: --s7 above a --t-mast line. */
+.aj-s-chat__head{position:sticky;top:0;z-index:7;/* token-exempt: the head row over the thread that scrolls under it */
+  --aj-s-chat-head-pad:var(--s4);
+  padding:var(--aj-s-chat-head-pad) 0 calc(var(--aj-s-chat-head-pad) + var(--s6))}
+.aj-s-chat__head::before{content:"";position:absolute;inset:0;z-index:-1;/* token-exempt: the paper under the row, behind its pills */
+  background:linear-gradient(var(--paper) calc(100% - var(--s6)),transparent);/* token-exempt: the paper fading at its foot */
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 var(--s9),#000 calc(100% - var(--s9)),transparent);/* token-exempt: a mask's opaque stops, the sides fading out */
+  mask-image:linear-gradient(90deg,transparent,#000 var(--s9),#000 calc(100% - var(--s9)),transparent);/* token-exempt: a mask's opaque stops, the sides fading out */}
+.aj-s-chat__row{display:flex;align-items:center;justify-content:space-between;gap:var(--s4);max-width:var(--chat-w);margin-inline:auto}
+.aj-s-chat__end{flex:0 0 auto;display:flex}
+@container (min-width:1200px){.aj-s-chat__head{--aj-s-chat-head-pad:calc(var(--s7) + (var(--t-mast) - var(--tap)) / 2)}}
+/* the drawers drawn open without a script (a comp, data-drawn): the head lets go of its stickiness, so their layer
+   (absolute; live, a modal in the top layer) covers the screen's shell rather than this row */
+.aj-s-chat__head:has([data-module~="drawers"][data-drawn]){position:static;background:linear-gradient(var(--paper) calc(100% - var(--s6)),transparent);/* token-exempt: the paper fading at its foot */}
+.aj-s-chat__head:has([data-module~="drawers"][data-drawn])::before{content:none}
+
+/* the thread: the column; it takes the room the head and the composer leave */
+.aj-s-chat__thread{position:relative;flex:1 0 auto;width:100%;max-width:var(--chat-w);margin-inline:auto}
+.aj-s-chat__vh{position:absolute;width:1px;/* token-exempt: visually hidden */height:1px;/* token-exempt: visually hidden */overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+/* a session's line: its words on a slip of paper, so they read over the grid */
+.aj-s-chat__line{display:flex;align-items:center;gap:var(--s5);margin:var(--s7) 0 var(--s6);
+  font-family:var(--f-label);font-size:var(--t-quiet);line-height:1.4;/* token-exempt: the quiet line's leading */color:var(--rule-2)}
+.aj-s-chat__line::before,.aj-s-chat__line::after{content:"";flex:1;height:var(--w);
+  background:color-mix(in srgb,var(--rule) 30%,transparent);/* token-exempt: the session line's 30% rule */}
+.aj-s-chat__line span{padding:var(--s1) var(--s5);border-radius:999px;/* token-exempt: a slip's round ends */background:var(--paper)}
+
+/* the messages: yours a little closer to the answer that follows; a bookmark lands clear of the head and the composer */
+.aj-s-chat__session > [data-place~="you"]{margin:0 0 var(--s6)}
+.aj-s-chat__session > [data-place~="answer"]{margin:0 0 var(--s7)}
+.aj-s-chat__session > :is([data-place~="you"],[data-place~="answer"]){scroll-margin:150px 0 var(--aj-s-chat-foot,150px);/* token-exempt: clear of the sticky head */}
+
+/* a bookmark's arrival (the Timeline's, f-wash-and-frame; DESIGN.md 2026-10-26): its own layer in the thread (the root
+   stays unpositioned, so the drawers drawn open still cover the screen), over the messages,
+   under the head and the composer; it never takes a press. The wash, --rule light enough to read through (14%, as
+   the mood washes), passes through the message once in --g-wash; the frame, in --rule, is drawn round it as with a
+   pen in --g-frame, in the bubble's own shape, and held. The script places both. */
+.aj-s-chat__marks{position:absolute;inset:0;pointer-events:none;overflow:visible;
+  z-index:1/* token-exempt: the arrival over the bubbles, under the composer (6) and the head (7) */}
+.aj-s-chat__wash{position:absolute;mix-blend-mode:multiply;clip-path:inset(0 100% 0 0);
+  background:color-mix(in srgb,var(--rule) 14%,transparent);/* token-exempt: the arrival's wash, --rule at the mood washes' 14% */
+  animation:aj-s-chat-wash var(--g-wash) both}
+.aj-s-chat__frame{position:absolute;overflow:visible}
+.aj-s-chat__frame path{fill:none;stroke:var(--rule);
+  stroke-width:2.5;/* token-exempt: the frame's pen, 2.5px, as the Timeline's */
+  stroke-linejoin:round;stroke-dasharray:1 1;stroke-dashoffset:0;
+  animation:aj-s-chat-draw var(--g-frame) var(--gc-c1) both}
+
+/* the composer at the foot */
+.aj-s-chat > [data-place~="foot"]{width:100%;max-width:var(--chat-w);margin:auto auto 0}
+
+/* the composer's lead: what to ask in an empty session, what it can answer after a can't-answer, a failure's note */
+.aj-s-chat__hello{margin:0 0 var(--s4);font-family:var(--f-hand);font-size:var(--t-hand-s);line-height:1.1;/* token-exempt: the hand's tight leading */color:var(--rule)}
+.aj-s-chat__try{margin:0 0 var(--s3);font-family:var(--f-label);font-size:var(--t-quiet);line-height:var(--lh-tight);
+  letter-spacing:.06em;/* token-exempt: the uppercase label tracking */text-transform:uppercase;color:var(--rule-2)}
+.aj-s-chat__asks{display:flex;flex-wrap:wrap;gap:var(--s3);margin:0;padding:0;list-style:none}
+.aj-s-chat__ask{min-height:36px;/* token-exempt: a suggestion's height, approved (the lead's chips) */padding:var(--s2) var(--s5);
+  border:var(--w) solid color-mix(in srgb,var(--rule) 45%,transparent);/* token-exempt: the chip's 45% edge */
+  border-radius:999px;/* token-exempt: a chip's round ends */background:var(--paper);color:var(--rule);
+  font-family:var(--f-prose);font-size:15px;/* token-exempt: a suggestion's words, 15px */line-height:var(--lh-tight);text-align:left;cursor:pointer}
+@media (hover:hover) and (pointer:fine){.aj-s-chat__ask:hover{border-color:var(--rule)}}
+.aj-s-chat__note{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--s2);margin:0;font-family:var(--f-prose);font-size:var(--t-note);line-height:1.45;/* token-exempt: a bubble's leading */color:var(--rule)}
+.aj-s-chat__note b{font-weight:600}
+
+/* loading: the page is exactly the screen; the skeleton fills the thread and rests on the composer, a whole day
+   of sessions cut off at the top under a soft fade, as a long chat scrolled to its end */
+.aj-s-chat[data-state="loading"]{height:var(--aj-s-chat-screen,100dvh);/* token-exempt: the page is the screen while a day loads */overflow:hidden}
+.aj-s-chat[data-state="loading"] .aj-s-chat__thread{flex:1 1 0;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;
+  -webkit-mask-image:linear-gradient(transparent,#000 var(--s9));/* token-exempt: a mask's opaque stop */
+  mask-image:linear-gradient(transparent,#000 var(--s9));/* token-exempt: a mask's opaque stop */}
+.aj-s-chat__skeleton{flex:0 0 auto;padding:0 0 var(--s4)}
+.aj-s-chat__sk-line{display:flex;justify-content:center;margin:0 0 var(--s6)}
+.aj-s-chat__sk{margin:0 0 var(--s6)}
+.aj-s-chat__sk[data-voice="you"]{display:flex;flex-direction:column;align-items:flex-end}
+.aj-s-chat__sk-bubble{box-sizing:border-box;display:flex;flex-direction:column;gap:10px;/* token-exempt: the bones' line spacing */
+  padding:var(--s6) var(--s6) var(--s4);
+  border:var(--w) solid color-mix(in srgb,var(--rule) 30%,transparent);/* token-exempt: a skeleton bubble's 30% edge */
+  border-radius:16px 16px 16px 4px;/* token-exempt: the answer's corners */background:var(--paper-2);
+  width:min(94%,var(--chat-answer));/* token-exempt: the answer's real width, so nothing jumps when the day arrives */}
+.aj-s-chat__sk[data-voice="you"] .aj-s-chat__sk-bubble{padding-bottom:var(--s6);border-radius:16px 16px 4px 16px;/* token-exempt: your bubble's corners */
+  width:min(70%,clamp(260px,22vw,420px));/* token-exempt: a question's width in the skeleton */}
+/* the skeleton's bones are the bone's (v4 round 10); "entries used" sits --s3 under the answer's lines */
+.aj-s-chat__sk-bubble > [data-place~="used"]{margin-top:var(--s3)}
+.aj-s-chat__tools{display:flex;gap:var(--s6);padding:var(--s4) var(--s2) 0}
+.aj-s-chat__sk-bubble .aj-s-chat__tools{padding:var(--s3) 0 0}
+
+@media (prefers-reduced-motion:reduce){
+  .aj-s-chat:not(:where(html[data-motion-review="play"] *)) .aj-s-chat__wash{animation-name:aj-s-chat-fade}
+  .aj-s-chat:not(:where(html[data-motion-review="play"] *)) .aj-s-chat__frame path{animation:none}
+}

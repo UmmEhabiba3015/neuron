@@ -1,0 +1,12 @@
+/* F1 an inline notice. offline, guest, allowance. never touches history.
+   Moved from lock.css section 3.F. The margins it had there belong to its parents and stay in
+   the legacy layer until those parents are modules: margin:0 var(--gut) var(--s6) on a page,
+   full width inside .stack, 700px under a stack at desktop, and margin-bottom only in the
+   auth spread, which also sets the roomier --aj-c-notice-padding.
+   ALWAYS START-ALIGNED. A notice holds sentences, and centred multi-line prose is bad
+   typography; .stack centres its own short lines and used to reset this from outside
+   (revision 15). The notice now owns it. */
+.aj-c-notice{padding:var(--aj-c-notice-padding,var(--s5) var(--s6));
+        background:var(--paper-2);border:var(--w) solid var(--rule-2);
+        border-radius:var(--r);font-family:var(--f-prose);font-size:var(--t-note);
+        line-height:var(--lh-note);color:var(--rule);text-align:left}

@@ -1,0 +1,37 @@
+/* C2 a ruled row. the 58px column carries the time, or on Timeline the date. */
+.aj-c-srow{display:flex;align-items:stretch}
+.aj-c-srow .aj-c-srow__time{flex:0 0 var(--tcol);border-right:var(--w) solid var(--rule-2);
+            padding:var(--s6) var(--s4) 0 0;text-align:right;
+            font-size:var(--t-col);letter-spacing:.08em;/* token-exempt: the date column's tracking, .08em (tokens.json, --t-col) */
+            color:var(--rule-2);
+            line-height:var(--lh-tight);font-variant-numeric:tabular-nums}
+.aj-c-srow .aj-c-srow__body{flex:1 1 auto;padding:var(--s5) var(--s6) var(--s6);min-width:0}
+/* context: the website's sheet keeps its ruled date column within the gutter on every device but iOS */
+[data-motion]:not([data-platform="ios"] > *) .aj-c-srow .aj-c-srow__time{min-width:0;overflow-wrap:anywhere;text-align:left;padding-left:var(--s4);padding-right:var(--s4)}
+/* the action gutter, as approved in lock.css ("Approved revision: an action gutter"); the entry's text is its paragraph */
+/* the row's tools, by their role (data-place tools) */
+.aj-c-srow .aj-c-srow__body:has(>[data-place~="tools"]){display:grid;grid-template-columns:minmax(0,1fr) calc(2 * var(--tap) + var(--s3));column-gap:var(--s6);align-items:start}
+/* the row's tools, by their role (data-place tools) */
+.aj-c-srow .aj-c-srow__body:has(>[data-place~="tools"])>p{grid-column:1;grid-row:1;overflow-wrap:anywhere}
+/* the row's tools, by their role (data-place tools) */
+.aj-c-srow .aj-c-srow__body:has(>[data-place~="tools"]){--aj-c-mark-display:none}
+@container (max-width:1000px){
+ /* the row's tools, by their role (data-place tools) */
+ .aj-c-srow .aj-c-srow__body:has(>[data-place~="tools"]){--aj-c-srow-tools-width:calc(2 * var(--tap) + var(--s3));grid-template-columns:minmax(0,1fr) var(--aj-c-srow-tools-width);column-gap:var(--s3)}
+ /* the row's tools, by their role (data-place tools) */
+ .aj-c-srow .aj-c-srow__body:has(>[data-place~="tools"])>p{grid-column:1 / -1}
+ /* the row's tools, by their role (data-place tools) */
+}
+
+/* PLACEMENT BY ROLE (decision 2026-10-12). A mark after the words (after) clears them (revision 1); the
+   entry editor, the delete confirmation and a state message (span) take the body's full grid, --s4 below. */
+.aj-c-srow .aj-c-srow__body > [data-place~="after"]{margin-top:var(--s4)}
+.aj-c-srow .aj-c-srow__body > [data-place~="span"]{grid-column:1 / -1;margin-top:var(--s4)}
+
+/* The row reveals its tools (entry-actions' exposed properties): on hover and with focus inside
+   (at once with focus); below 1000 they stay shown and drop under the text. */
+.aj-c-srow:hover,.aj-c-srow:focus-within{--aj-c-entry-actions-shown:1;--aj-c-entry-actions-events:auto;--aj-c-entry-actions-fade:160ms/* token-exempt: the approved entry action gutter, 160ms in */}
+.aj-c-srow:focus-within{--aj-c-entry-actions-fade:0ms}
+@container (max-width:1000px){
+  .aj-c-srow .aj-c-srow__body{--aj-c-entry-actions-shown:1;--aj-c-entry-actions-events:auto;--aj-c-entry-actions-fade:0ms;--aj-c-entry-actions-tools-row:2;--aj-c-entry-actions-tools-gap:var(--s2);--aj-c-entry-actions-trigger-max:calc(100% - var(--aj-c-srow-tools-width) - var(--s3))}
+}

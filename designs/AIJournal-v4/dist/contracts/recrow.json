@@ -1,0 +1,238 @@
+{
+  "name": "recrow",
+  "layer": "components",
+  "version": "0.6.1",
+  "inventory": "C3",
+  "description": "The recording: the only row that carries a tone (--block-2 ground, --block marks). Its head always carries the 58px column, holding the time on a day's screen and the date on Timeline, present and empty where the row continues the day above (empty is not absent); beside it play, the waveform and the duration. The transcript body below is present on Pro and absent on Free, and holds the entry actions in the same gutter as the written row. The one head without the column is the capture surface, which stacks, because a recording in progress has no timestamp yet.",
+  "variants": {},
+  "options": {
+    "head": {
+      "values": [
+        "dated",
+        "capture"
+      ],
+      "default": "dated",
+      "description": "dated: the head with the date column (every memo row, was .head.dated). capture: the capture surface, stacked, no column (was .head.col; no screen draws it today)."
+    },
+    "live": {
+      "type": "boolean",
+      "default": false,
+      "description": "A memo recorded in this session, cloned by the prototype runtime from the template recrow-live: the root carries data-live-memo (its id), the head's player line is a grid (play, the wave, the clock), and the body holds an empty label paragraph (text, prose) the runtime fills. The wave and the clock are the row's own parts (the wave twice, base and played; hooks elapsed, total)."
+    },
+    "transcriptForm": {
+      "type": "enum",
+      "values": [
+        "prose",
+        "label"
+      ],
+      "default": "prose",
+      "description": "How the transcript reads: prose, or the label a recording carries until it is transcribed (18: Voice memo)."
+    }
+  },
+  "content": {
+    "time": {
+      "type": "text",
+      "required": false,
+      "description": "The time or date, a <time> element; empty where the row continues the day."
+    },
+    "datetime": {
+      "type": "text",
+      "required": false,
+      "description": "The time's machine-readable value for the <time> element (\"2026-08-09T09:20\")."
+    },
+    "duration": {
+      "type": "text",
+      "required": false,
+      "description": "\"2:41\". The live memo has none: its clock (elapsed and total) is drawn by the runtime."
+    },
+    "transcript": {
+      "type": "text",
+      "required": false,
+      "description": "The transcript (Pro); without it the row has no body."
+    }
+  },
+  "slots": {
+    "player": {
+      "accepts": [
+        "play",
+        "wave"
+      ],
+      "required": true,
+      "description": "Play and the waveform. A live memo takes only play: it renders its own wave and clock after it."
+    },
+    "children": {
+      "accepts": [
+        "entry-actions",
+        "mark",
+        "text"
+      ],
+      "required": false,
+      "description": "The body after the transcript: its entry actions and mark."
+    }
+  },
+  "places": {
+    "after": "a mark after the transcript: --s4 above",
+    "span": "the delete confirmation, a state message: the full grid, --s4 above",
+    "tools": "the entry's actions (entry-actions, its tools form): the row's grid gives them the second column"
+  },
+  "tokens": {
+    "reads": [
+      "--block-2",
+      "--s6",
+      "--paper-2",
+      "--w",
+      "--block",
+      "--tcol",
+      "--rule-2",
+      "--s4",
+      "--t-col",
+      "--lh-tight",
+      "--s5",
+      "--tap",
+      "--s3",
+      "--t-print",
+      "--s2",
+      "--f-label"
+    ],
+    "exposes": {
+      "--aj-c-recrow-progress": "The live memo's playback progress, 0 to 1 (0); the runtime sets it on the row each frame while it plays, and keeps the position reached on a stop. The progress clip scales by it.",
+      "--aj-c-recrow-timer-ch": "The live memo clock's width in characters (8); the runtime sets it on the row from the length of the total.",
+      "--aj-c-recrow-date": "The time column's colour in the dated head. The Timeline's record sets it to the day's mood colour while the day is framed after a jump (v4 C1).",
+      "--aj-c-recrow-date-fade": "The dated head's time column transition (none). The record sets it while the date takes the mood colour."
+    }
+  },
+  "states": {
+    "default": "yes: as rendered",
+    "hover": "n/a: no hover of its own; play has its own, and the entry actions reveal themselves",
+    "focus-visible": "n/a: not focusable from the keyboard (the runtime focuses a new memo row programmatically, tabindex=-1); its controls carry the ring",
+    "active": "n/a: the row is not a control; play presses",
+    "disabled": "n/a: the row is not a control",
+    "selected": "n/a: rows are not selectable",
+    "loading": "n/a: transcribing is the body's copy, not a state of the row",
+    "error": "n/a: a playback failure is a notice the runtime adds beside the row",
+    "empty": "n/a: a memo always has its head; a missing transcript is the Free form (no body), not an empty row"
+  },
+  "events": {},
+  "uses": {
+    "play": "0.x",
+    "wave": "0.x",
+    "entry-actions": "0.x",
+    "mark": "0.x",
+    "text": "0.x"
+  },
+  "assets": [],
+  "legacyClasses": [],
+  "a11y": {
+    "role": "none (a div); the time is a <time> element",
+    "keyboard": "Tab reaches play and the entry actions",
+    "labels": "play names the recording and its length"
+  },
+  "responsive": {
+    "620": "the live memo's player line tightens (a viewport query, legacy context: the shell)",
+    "1000": "below 1000px of container the entry tools drop under the transcript"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-10-11",
+      "kind": "internal",
+      "change": "Converted from lock.css C3 (.recrow, .head, .body, .tcol, .ccol, .dur, the live memo row and the entry action gutter)."
+    },
+    {
+      "version": "0.1.1",
+      "date": "2026-10-12",
+      "kind": "patch",
+      "change": "Declares datetime (the render already took it); the live memo renders no duration, as the runtime's row has none."
+    },
+    {
+      "version": "0.1.2",
+      "date": "2026-10-13",
+      "kind": "patch",
+      "change": "The live memo renders its playback parts (wave, base and played layers, progress clip, clock with its total) and its label paragraph; the lock.css rules for them moved here, on data-playback (playing, complete) and --aj-c-recrow-progress. Exposes --aj-c-recrow-progress and --aj-c-recrow-timer-ch."
+    },
+    {
+      "version": "0.1.3",
+      "date": "2026-10-14",
+      "kind": "fixed",
+      "change": "A kept recording's transcript is the text module (prose), as the live row's is; it wrote an old class (prose)."
+    },
+    {
+      "version": "0.1.4",
+      "date": "2026-10-14",
+      "kind": "fixed",
+      "change": "A time without a datetime is the bare text in its column, as the options states draw it; it wrote a <time> with no datetime."
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-14",
+      "kind": "added",
+      "change": "Option transcriptForm: the text module's form for the transcript (prose; label for a recording not yet transcribed: Voice memo). Pages round 4b."
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-20",
+      "kind": "changed",
+      "change": "RecommendedChanges-v4 B6: slot shape, the live memo's fixed decorative drawing; the runtime no longer draws recorded bars."
+    },
+    {
+      "version": "0.4.0",
+      "date": "2026-10-23",
+      "kind": "added",
+      "change": "Exposes the dated head's time colour and its transition (v4 C1, the jump arrival's held date)."
+    },
+    {
+      "version": "0.5.0",
+      "date": "2026-10-23",
+      "kind": "added",
+      "change": "Hook date on the head's time column (v4 C1): the Timeline's search dates a later row of a day whose first row it hides. Markup only: one attribute."
+    },
+    {
+      "version": "0.5.1",
+      "date": "2026-10-28",
+      "kind": "internal",
+      "change": "No longer sets --aj-c-entry-actions-trigger-max: entry-actions 0.3.0 has no memory dropdown."
+    },
+    {
+      "version": "0.5.2",
+      "date": "2026-10-28",
+      "kind": "internal",
+      "change": "Sets --aj-c-entry-actions-trigger-max again: entry-actions 0.4.0 has its memory dropdown back (on entries kept out)."
+    },
+    {
+      "version": "0.6.0",
+      "date": "2026-10-29",
+      "kind": "changed",
+      "change": "v4 round 10: the live memo's waveform is the wave module twice (base and played, stacked), the memo's phrase at a fixed pitch as every memo row draws it; the progress reveals the played copy with a clip. The shape slot and hook, and the svg's ids, go."
+    },
+    {
+      "version": "0.6.1",
+      "date": "2026-10-29",
+      "kind": "added",
+      "change": "v4 round 10: hook progress on the played layer, so the playback runtime finds its clip by a declared hook."
+    }
+  ],
+  "contexts": [
+    "data-motion",
+    "data-platform"
+  ],
+  "behaviour": {
+    "state": {
+      "data-playback": {
+        "values": [
+          "playing",
+          "complete"
+        ],
+        "setBy": "runtime",
+        "description": "A live memo playing (the wave dims, its played part shows) or played to the end (the played part stays)."
+      }
+    },
+    "hooks": {
+      "data-live-memo": "The live memo's id on a row the runtime made from the recrow-live template; the runtime writes it and finds the row by it.",
+      "data-entry-key": "The entry key of a row the prototype tracks (its model); the runtime writes it and finds the row by it.",
+      "elapsed": "The live memo's elapsed time; the runtime writes it while playing.",
+      "total": "The live memo's length; the runtime writes it.",
+      "date": "the date cell (empty where the row continues the day): the Timeline's search writes the day's date into it (a time element) when the day's first row is hidden, and empties it again",
+      "progress": "The live memo's played layer: the runtime resets its clip's transition when playback starts and reads the clip's position when it stops (the progress itself is --aj-c-recrow-progress on the row)."
+    }
+  }
+}
