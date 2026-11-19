@@ -1,32 +1,27 @@
 # ADR-021: What the Screen Shows While a Request Is in Flight
 
-**Status:** Accepted
-**Date:** 2026-10-07 (Day 17)
+**Status:** Accepted 2026-10-07 (Day 17). Revised 2026-11-18 in the v4
+reconciliation (Umer, with Habiba and the designer), accepted by Umer on
+2026-11-19. The 2026-10-07 text is in git history; the
+rulings are in `docs/learning/reconciliation-v4/rulings.md`.
 
 ---
 
 ## Context
 
-On Day 17 the owner used the product as its first real user and reported
-what felt wrong. Two of her findings were the same fault: pressing "Try
-again" while the server was down, and pressing a mood button, both gave no
-sign that the press had been received. Nothing on the screen was untrue, and
-the person was left without an answer.
-
 Every action has three moments: the press, the request in flight, and the
-answer. A screen feels broken when it says nothing during the second.
+answer. A screen feels broken when it says nothing during the second. On
+Day 17 Habiba found exactly that: pressing "Try again" while the server was
+down, and pressing a mood, gave no sign that the press had been received.
 
 There are two ways to design that moment.
 
 - **Wait, then show.** The screen changes only after the API answers, and
-  shows a plain line meanwhile. It never shows anything untrue. The person
-  waits.
+  shows that it is waiting meanwhile. It never shows anything untrue. The
+  person waits.
 - **Show at once, then confirm**, the optimistic update. The screen changes
   immediately and the request follows. It feels instant. The screen is
   untrue for a moment, and a failure has to be undone and said.
-
-The designer's rules bound both: a sentence in place, and never a spinner, a
-skeleton, a toast or a disabled control.
 
 ---
 
@@ -37,66 +32,73 @@ have to show.
 
 | Action | Choice | Reason |
 |---|---|---|
-| **Writing an entry** | Wait, then show | The owner's: the server decides an entry's time and its day. To show the entry at once, the browser would have to invent both from its own clock, which breaks the Day 15 rule that the API is the authority on which day it is |
-| **Deleting an entry** | Show at once, and put it back if the delete fails | The owner's: the screen needs nothing from the server to remove something it already shows. On failure the entry returns to exactly where it was, with a sentence |
-| **Asking again after a failure** | Wait, with a plain line while asking | A press must always be seen to have been received |
+| **Writing an entry** | Wait, then show | The server decides an entry's time and its day. Showing it at once would mean the browser inventing both from its own clock, which ADR-015 forbids |
+| **Saving a voice memo** | Wait, then show, on the recorder | The same reason as writing |
+| **Deleting an entry or memo** (Today and the Timeline) | Show at once, and put it back if the delete fails | The screen needs nothing from the server to remove what it already shows. On failure the item returns to where it was, with a sentence |
+| **Setting today's mood** | Show at once, and go back if it fails | The choice is the person's own; on failure it returns to what it was, with a sentence |
+| **Asking again after a failure** | Wait, and show it is asking | A press must always be seen to have been received |
+| **Opening a page** | Wait, with a skeleton | The page draws its real frame, with shapes at the real content's widths, so nothing jumps when the data arrives |
 
-Three rules follow for writing:
+**Writing, in detail:**
 
-- **The text stays in the composer until the API has confirmed the entry.**
-  It is never lost to a failed save.
-- **After a successful save the screen asks the API for today again**, and
-  does not add the entry to the page itself. An entry written near 4am may
-  belong to a different day than the one on the screen, and only the API
-  knows.
-- **A second press while a save is in flight sends nothing.**
-- **The composer sends the text without the spaces and blank lines at its two
-  ends.** Spaces and line breaks inside the text are kept. The owner's
-  decision, on the worker's argument that a person who presses Enter after
-  their last sentence did not mean to store an empty line. The API is
-  unchanged: it still stores exactly what it is sent and trims nothing
-  (ADR-005). The trimming is the browser's choice about what to send.
+- Pressing Save sends the entry at once. **The words stay in the composer
+  and Save shows a loader** until the API confirms the entry.
+- Once confirmed, the screen asks the API for today again, and does not add
+  the entry to the page itself: only the API knows which day it belongs to.
+- **If saving fails, an error box says so;** the words stay, and Save works
+  again. Nothing retries on its own, and no unsent entry appears in the
+  list.
+- A second press while a save is in flight sends nothing.
+- The composer sends the text without the spaces and blank lines at its two
+  ends; the API stores exactly what it is sent (ADR-005).
+- **Unfinished writing is kept in the browser,** so it survives a reload. It
+  is cleared at sign-out, so nothing is left on a shared computer, and it
+  does not follow the person to another device.
+
+**A voice memo, in detail:**
+
+- After Stop and keep, **the memo waits on the recorder with a loader** and
+  moves to Today only once saved.
+- **If the upload fails, the recorder shows the error box and Try again.**
+- **Leaving the recorder while recording asks "Keep this memo?"** with Keep
+  and Discard, so an upload never fails where the person cannot see it.
+- Refreshing the page loses a recording that has not been kept.
+
+**What the designer allows:** a sentence or an error box in place, a loader
+on the button that was pressed, a skeleton while a page loads, and an error
+modal for refusals that belong to no single field (a rate limit). No toast.
 
 ---
 
 ## The delete choice was challenged, and stands
 
-The worker who built it disagreed for one case. The failure sentence has to
-appear in the entry's own row, because the designer forbids anything that
-floats over the page. On a long day a person may delete an entry near the top
-and scroll away. If the delete then fails, the sentence appears where they
-are no longer looking, and they leave believing a private entry is gone. The
-worker and the Master Thread both recommended changing delete to "wait, then
-show".
-
-The owner heard the argument and kept "show at once". It is recorded here as
-her decision made with the cost known, and as the first revisit condition
-below.
+The worker who built delete disagreed for one case. The failure sentence
+appears in the item's own row. On a long list a person may delete an item
+near the top and scroll away; if the delete then fails, the sentence appears
+where they are no longer looking, and they may believe a private entry is
+gone. The worker and the Master Thread both recommended "wait, then show".
+Habiba heard the argument and kept "show at once", with the cost known.
 
 ---
 
 ## Accepted costs
 
-- **A person on a slow connection waits to see what they wrote.** The line
-  that says it is being saved is what makes that wait acceptable.
-- **An optimistic delete can mislead.** If the delete fails after the entry
-  has vanished and the person has looked away, they may believe it is gone.
-  The sentence on failure has to be impossible to miss.
-- **Text typed when a session ends is lost today.** Keeping it across a
-  sign-in needs drafts on the server, which is Day 18.
+- **A person on a slow connection waits to see what they wrote.** The loader
+  is what makes that wait acceptable.
+- **An optimistic delete can mislead,** as above. The sentence on failure
+  has to be impossible to miss.
+- **Writing left in the composer is lost at sign-out,** by choice, and does
+  not reach another device.
+- **A recording is lost if the page is refreshed** before it is kept.
 
 ---
 
 ## Revisit when
 
-- **A person is misled by a failed delete**, or the Timeline and day pages
-  make long lists ordinary. That is the case the delete choice was challenged
-  on.
-
-- **Mood is wired.** The designer's rule already describes it as optimistic:
-  the choice shows at once and "returns to what it was, with a sentence".
-- **Drafts exist** (Day 18). Saving as the person types changes what "wait"
-  means for the composer.
-- **A person reports that writing feels slow.** That is the evidence that
-  would justify showing an entry early, and it would need the API to return
-  enough for the browser not to guess.
+- **A person is misled by a failed delete.** The Timeline's long list makes
+  that case more likely.
+- **A person reports that writing feels slow.** That would justify showing
+  an entry early, and it would need the API to return enough for the
+  browser not to guess.
+- **People lose writing at sign-out or across devices** often enough to ask
+  for it back: drafts on the server are the alternative.
