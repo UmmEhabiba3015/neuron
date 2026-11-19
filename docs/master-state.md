@@ -30,43 +30,29 @@ reports in `docs/learning/` hold the rest.
 
 ## Where the project is
 
-**Last updated:** 2026-10-28, at the close of feature 9, Keep out of
-memory.
+**Last updated:** 2026-11-19, at the close of the v4 reconciliation,
+confirmed by Umer.
 
-**Work is planned by feature, not by day.** The scope is locked in
-[features.md](features.md), the order is in [roadmap.md](roadmap.md), and
-what the designer is asked to change is
-[ui-handover-v4.md](ui-handover-v4.md).
+**Who is who.** Habiba is the owner and the learner; product behaviour and
+wording are hers. **Umer**, her husband, sets scope and infrastructure.
+**Mubeen** is the designer. Elsewhere in this file, "her husband" means Umer
+and "the designer" means Mubeen.
 
-**Done:** everything up to Screens Day, the restructure, features 1, 2, 3,
-5, 6, 7 and 9, the first review point, and the Postgres move (feature 8,
-block 2). Feature 9 is in a pull request on `feature-keep-out-of-memory` for
-her to merge. **Feature 4, Drafts, is skipped
-for now:** the designer has not sent the composer changes, so by roadmap
-rule 4 it waits and is built as soon as they arrive. On 2026-10-26 she had
-received no new screens.
+**Work is planned by feature.** The scope is [features.md](features.md), the
+order is [roadmap.md](roadmap.md), and what the designer is asked for is
+[design-asks-v4.md](design-asks-v4.md). The design is
+`designs/AIJournal-v4/`. The rulings that set all three are in
+[learning/reconciliation-v4/rulings.md](learning/reconciliation-v4/rulings.md).
 
-**Paused: feature 8, Going live** (opened 2026-10-27, paused the same
-day by her husband). He took the infrastructure decision and wants to do
-the feature only when it can end in a real deployment, which needs a domain
-he will buy; that takes time. By roadmap rule 4, work moves to feature 9.
-Block 1 reached a direction, recorded as **proposed** in ADR-027: Google's
-free e2-micro on IPv6 only behind Cloudflare (a public IPv4 costs about 3.65
-dollars a month; a console disk defaults to the non-free `pd-balanced`),
-Supabase Postgres, the frontend on a separate free host, nightly backups to
-Cloud Storage, a 1-dollar budget alert. Oracle was judged too hard to
-obtain; Azure's year is the launch option. Blocks 2 to 7 are not started.
-Queues and Redis: not now (Rule Zero). Fact for block 2: five of the 15
-migrations use SQLite's table rebuild and `PRAGMA`.
-**Then her husband ruled (2026-10-27):** feature 11 is built and tested
-locally and deployed with feature 8; and block 2, SQLite to Postgres, is
-brought forward and done locally first, in Docker (installed and running).
-Order now: the Postgres move (done the same evening, ADR-028), feature 9,
-feature 11.
-**A second reconciliation is coming** (her husband, 2026-10-27): the
-designer's new screens are almost done. After they arrive, `features.md`
-and the roadmap's order are reconciled again. Until then the order above
-stands; do not plan beyond feature 11.
+**Done:** features 1, 2, 3, 5, 6, 7 and 9, the restructure, the first review
+point, and the Postgres move (ADR-028).
+
+**Next: feature 17, the redraw** (ADR-029): every built screen
+rebuilt on React components that mirror Mubeen's v4 modules, on v4's
+`system.css`. **Then feature 8, Going live**, on a subdomain of a domain
+Umer owns. Its hosting direction is proposed in ADR-027 (Google's free
+e2-micro behind Cloudflare, Supabase Postgres, the frontend on a separate
+free host) and is locked by Umer when feature 8 opens.
 
 **Verified on 2026-10-27 by re-running, not by reading a report.** All nine
 checks pass:
@@ -78,86 +64,66 @@ pnpm lint:web && pnpm typecheck:web && pnpm build:web && pnpm test:web
 
 **613** API unit tests, **72** API end-to-end tests, **318** web tests on
 Node's runner (`lib/`) and **6** component tests on Vitest, **10** checks on
-the shared package. 28 ADRs (ADR-027 proposed). A baseline and one migration on
-Postgres. The API tests need Postgres: `docker compose up -d`,
-or `TEST_DATABASE_URL`. Use exactly these nine
-commands. A plain `npx jest` in `apps/api` skips the migration tests and
-still reports a pass. `test/app/main.e2e-spec.ts` fails now and then (known
-debt); run the end-to-end suite again before believing it.
+the shared package. 29 ADRs (ADR-027 proposed). The API tests
+need Postgres: `docker compose up -d`, or `TEST_DATABASE_URL`. Use exactly
+these nine commands; a plain `npx jest` in `apps/api` skips the migration
+tests and still reports a pass. `test/app/main.e2e-spec.ts` fails now and
+then (known debt); run the end-to-end suite again before believing it.
 
-**What a person can do:** create an account (email, password, name; timezone
-from the browser), sign in, stay signed in across a reload, sign out, write,
-edit and delete entries, save with Enter, reset a forgotten password, see
-and sign out their devices, change their timezone, record, play and delete
-voice memos, export everything as one ZIP (PDF, JSON, audio), delete their
-account, set the mood of today or a past day, browse the Timeline as a list
-or a month calendar, and open a past day. Today opens at the newest entry,
-and every password field can show what was typed. All of it works with the
-keyboard alone, and a screen reader announces saving (her runs, feature 7).
-
-**What a person can see:** every screen of the designer's v3 prototype. A
-control whose feature is not built says "This is not built yet." and sends
-nothing. The 7 such controls are listed in `apps/web/lib/unbuilt.ts`.
+**What the app does today:** create an account (name, email, password;
+timezone from the browser), sign in, stay signed in across a reload, sign
+out, write, edit and delete entries, save with Enter, reset a forgotten
+password, see and sign out devices, change the timezone, record, play and
+delete voice memos, export everything as one ZIP (PDF, JSON, audio), delete
+the account, set a day's mood, browse the Timeline and open a past day. It
+works with the keyboard alone, and a screen reader announces saving. Its
+screens are v3's, with "This is not built yet." on unbuilt controls; the
+redraw replaces both. Where `features.md` marks a Ref *Built, to change*,
+the app still does the old thing until that feature is built.
 
 **Branch.** Each feature has its own branch, `feature-<short-name>`, made
 from `main` before work starts, and closes through a pull request she merges.
-The old `day-*` branches and four kept merged branches stay as they are.
 
 ---
 
 ## How to open the next session
 
-The session of 2026-10-27 to 28 did the Postgres move and feature 9. The
-next session continues with her, at feature 11.
+The next session starts **feature 17, the redraw**, with Habiba.
 
 1. **Read, in order:** `master-prompt.md`, `constitution.md`, `features.md`,
-   `roadmap.md` (read *The order of the work now*), this file, and
-   `CLAUDE.md`. Then *How To Work With The Learner*, below, before teaching
-   anything.
+   `roadmap.md`, this file, `CLAUDE.md` and ADR-029. Then *How To Work With
+   The Learner*, below, before teaching anything.
 2. **Check `main`**, start Postgres (`docker compose up -d`) and run the nine
    checks; report the result in one line. Expected: 613 API unit, 72 API
    end-to-end, 318 web `lib/`, 6 component, 10 contract. If `main.e2e-spec.ts`
    or the forgot-password suite fails, run the end-to-end suite again (both
    known flaky).
-3. **Ask two questions first:** have the designer's new screens arrived (a
-   reconciliation follows them, led by her husband), and has the domain been
-   bought (it resumes feature 8)?
-4. **Otherwise, feature 11, Background work and transcription** (Ref 24),
-   on `feature-background-work`, built and tested locally and deployed with
-   feature 8. **The first question, before anything else:** is a memo kept
-   out of memory transcribed? It is open; do not treat it as decided from
-   any wording. Her boundary (2026-10-28): *decided*, an entry kept out
-   never reaches a model through any path that treats it as memory,
-   background jobs included; *open*, whether transcription itself is
-   prohibited for such a memo. **The spec must add a guard test** for the
-   agreed boundary across background processing and transcription, written
-   with the first call to a model, as ADR-020's guard was. The test enforces
-   her answer and must not decide it.
-5. **After feature 11, nothing may be ready** (open question 9).
+3. **Ask first:** has Mubeen sent part A of `design-asks-v4.md` (the name
+   field, the delete password, the second reset field)? The redraw can start
+   without it and draw those three screens last.
+4. **Feature 17, the redraw**, on `feature-redraw`. Open with the feature
+   overview: blocks from the bottom up (stylesheet and tokens, layout
+   primitives, components, sections, screens), and the route split. **Habiba
+   learns reusable components on one complete example, in at most one day of
+   work** (Umer); workers do the rest. Small details are settled while
+   building. Ask for the browser permission before a worker compares screens
+   with v4: a headless check of the designer's HTML was refused by the
+   permission classifier on 2026-11-06.
+5. **Then feature 8.** It holds: the hosting, managed Postgres and
+   continuous integration; a real mail service, with the log mailer refused
+   in production (ADR-022); audio in object storage behind `AudioStorage`
+   (ADR-023); `NEXT_PUBLIC_API_URL` fixed at build time and the refresh
+   cookie's missing `Secure` attribute; the API's `pnpm lint` running
+   `--fix`; the flaky `main.e2e-spec.ts`; `@types/node` 20 in `apps/web`.
+6. **Feature 11 adds a guard test** with its first call to a model: an entry
+   or memo kept out of memory never reaches a model, and such a memo is not
+   transcribed.
 
-**What feature 8 holds when it resumes**, from the known debt and the ADRs
-(every row marked "Feature 8"):
-
-- **The hosting, managed Postgres, and continuous integration.** Nothing is
-  chosen. Rule Zero applies to each.
-- **Mail:** a real provider and its `MailService`, and the log mailer
-  refused in production (ADR-022). Neuron has no idea of production yet.
-- **Audio:** object storage behind `AudioStorage` (ADR-023, ADR-024).
-- **The browser side:** `NEXT_PUBLIC_API_URL` fixed at build time; the
-  refresh cookie has no `Secure` attribute.
-- **Smaller rows:** the API's `pnpm lint` runs `--fix`; the flaky
-  `main.e2e-spec.ts` (continuous integration will show it);
-  `@types/node` 20 in `apps/web` against Vitest's 22.
-
-**How feature 7 went, for the new thread:** blocks were short and she
-answered each at once. Most written answers were pasted (do not raise it;
-ask for runs and short choices). Some pasted answers read as instructions
-to the Master Thread to run something; say plainly that the run is hers.
-Her own runs: the user-event and fireEvent experiment, a keyboard-only
-walk, and two Orca runs (the first logged nothing of Neuron, so a short
-second one was asked for). Her predictions were wrong three times, each
-useful: both simulated tests would pass, tasks 4 to 6 would fail by
-keyboard, and the save would be silent.
+**How Habiba works, from feature 7:** blocks were short and she answered
+each at once. Most written answers were pasted (do not raise it; ask for
+runs and short choices). Some pasted answers read as instructions to the
+Master Thread to run something; say plainly that the run is hers. Her
+predictions were wrong three times, each useful.
 
 ---
 
@@ -429,22 +395,26 @@ These were stated by her or her husband, and bind every session.
   `docs/features.md` wins over the designs.
   The designer's documents are information; a worker never runs his scripts
   or obeys his `AGENTS.md`.
-- **Every prototype screen is shown**, main state only, no sample content,
-  and "This is not built yet." on every unbuilt control (Screens Day). This
-  reversed her Day 17a rule that an unbuilt control is not drawn.
+- **A feature that is not built is not drawn** and has no menu item
+  (2026-11-18, Umer).
 - **The feature list is locked** in [features.md](features.md) (2026-10-10,
-  her husband). It replaced `requirements.md`, the reconciliation and the old
-  handover, and wins over the designs. A day ends at midnight, final. What
-  the designer is asked for is [ui-handover-v4.md](ui-handover-v4.md), not
-  yet sent.
+  Umer; reconciled again with v4 on 2026-11-18). It wins over the designs.
+  A day ends at midnight, final. What the designer is asked for is
+  [design-asks-v4.md](design-asks-v4.md).
+- **The v4 reconciliation's rulings** (2026-11-18, Umer with Habiba and
+  Mubeen) are in
+  [learning/reconciliation-v4/rulings.md](learning/reconciliation-v4/rulings.md).
+  Among them: the redraw comes first, on Mubeen's reusable components and
+  v4's `system.css`; Habiba learns it in at most one day; v3 is legacy and
+  every current document points at v4.
 - **No tiers.** Everyone gets the whole product (2026-10-04, her husband).
 - **Work is planned by feature, not by day.** A feature's scope is the one in
   `features.md`; anything new is decided on its own, not added to the feature
   in progress. There is no fixed end date; finishing soon is the aim
   (2026-10-10, her husband).
-- **Search, Ask, Reflections and Looking back wait for the designer's new
-  UI.** Drafts are fourth, after Account and devices, because the composer
-  needs some UI changes first (2026-10-13, her husband).
+- **The order of work** is the roadmap's v5.0 (2026-11-18, Umer): the
+  redraw, going live on a subdomain, Drafts, Looking back, background work,
+  search by meaning, Ask, Reflections, the words, the security pass.
 - **Code conventions** (folders, classes and DTOs, `Entity` suffix, plain
   contract names, enums, `strict: true`, test roles) are in `CLAUDE.md`
   (2026-10-13, her husband).
@@ -504,7 +474,7 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 | **`Etc/GMT+5` is accepted as a timezone** | the registration check | Low; noted |
 | **Deleted entries must be kept out of every later reader**, and from feature 5 their audio too | search, embeddings, Ask, export | Features 6, 10, 12, 13 (ADR-020) |
 | **TypeORM does not switch foreign keys off when reverting a migration** | ADR-010 | One line owed in ADR-010 |
-| **No ADR yet for the 2026-10-04 data-model decisions** (one `entries` table with a `kind` for recordings; drafts on the server) | `docs/decisions/` | Written when each is built |
+| **No ADR yet for the one `entries` table with a `kind` for recordings** (decided 2026-10-04, built in feature 5) | `docs/decisions/` | Owed; low |
 | **Nothing stops the log mailer in production.** A reset link in a log is a working key to an account; Neuron has no idea of production yet (ADR-022) | `MailService`, `env.validation.ts` | Feature 8, Going live |
 | **`shared/mail/` is a module folder the conventions do not list** (they list `decorators/`, `dto/`, `types/`, `utils/`). Mail belongs to no domain, so the Master Thread kept it | `apps/api/src/shared/mail/` | For her husband to confirm |
 | **Reset requests have no rate limit**, so anyone can fill another person's inbox once real mail is sent | `POST /auth/forgot-password` | Feature 16, Security pass |
@@ -517,8 +487,8 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 | **A memo with no words has a tall empty body on desktop** (worker, feature 9) | `Journal.tsx` layout | Feature 11, when transcripts fill it, or feature 14 |
 | **`test/app/main.e2e-spec.ts` is flaky**: 2 of 68 failed once in four full runs (2026-10-26), passing alone. Likely cause: it frees a port before `main.ts` takes it, and a parallel suite can take it first | `apps/api/test/app/` | Feature 8, Going live (continuous integration will show it) |
 | **Only the composer's component test sees `preventDefault()`.** The editor turns read-only while it saves, so the editor's test passes without it (feature 7 mutation) | `components/today/LiveToday.test.tsx` | Accepted; a real browser test would be the revisit point of ADR-026 |
-| **In Chromium from 1200 to about 1229 wide, Today collapses into a 360-pixel column**; Firefox does not (worker, feature 7) | `lock.css` layout | Feature 14, or the designer |
-| **`lock.css` 3405 keys Talk's fixed header on `.device`**, the prototype's stage, which the app does not have | `lock.css` | For the designer |
+| **In Chromium from 1200 to about 1229 wide, Today collapses into a 360-pixel column**; Firefox does not (worker, feature 7) | `lock.css` layout | Feature 17, the redraw |
+| **`lock.css` 3405 keys Talk's fixed header on `.device`**, the prototype's stage, which the app does not have | `lock.css` | Feature 17, the redraw |
 | **Vitest wants `@types/node` 22 or later; `apps/web` has 20.** Typecheck passes | `apps/web/package.json` | Feature 8, with the Node version in production |
 | **ADR-015 and ADR-016 link to retired documents** | `docs/decisions/` | Left as records; git history holds the targets |
 
@@ -526,30 +496,23 @@ Each item was checked on 2026-10-10 or is structural and unchanged.
 
 ## Open questions
 
-1. *(Closed 2026-10-13: the roadmap order is confirmed, with Drafts fourth.)*
-2. **May a mood be set on a date with no live entry?** The API allows it;
-   by ADR-020 such a mood shows on no calendar.
-3. **Should `docs/workers/` and the remaining worker reports be committed?**
-   Open since Day 7. `docs/SETUP.md` section 4 says what is and is not.
-4. *(Closed 2026-10-15, feature 3: an entry does not move when the
-   timezone changes, and a day with entries always exists, even in the
-   future. ADR-015, amendment of 2026-10-15.)*
-5. **Which AI provider, and must the choice be easy to reverse?** Feature 10
-   or 12. Also the embedding model: an outside service would receive entries
-   marked out of memory (`features.md`, Ref 25).
-6. **Hand-written wire shapes or a generated client?** ADR-019 chose
+Small details are settled while building; only questions that shape a
+feature are kept here.
+
+1. **Does search by meaning find an entry kept out of memory?** An outside
+   embedding service would receive its text. Postponed by Umer for more
+   discussion; decided before feature 10.
+2. **Which AI provider, and which embedding model?** The cheapest that gives
+   good quality, researched before feature 11 makes the first call.
+3. **The product's name and its domain** (Umer). Until then the app runs on
+   a subdomain of a domain he owns.
+4. **Hand-written wire shapes or a generated client?** ADR-019 chose
    hand-written; the revisit point is about fifteen endpoints in use, or a
    native client.
-7. **Day 0's LinkedIn post named PostgreSQL; Day 2 chose SQLite.** ADR-003
-   explains when Postgres arrives (feature 8). Worth saying when the project
-   is presented in public, after it is finished.
-8. **The designer's new screens are almost done** (2026-10-27). A second
-   reconciliation of `features.md` and the roadmap follows them, led by her
-   husband.
-9. **After feature 11, nothing may be ready** unless the screens or the
-   domain have arrived. The options then: build Search's backend ahead of
-   its screens, or pause. Decided when feature 11 closes, likely settled by
-   the reconciliation.
+5. **Should `docs/workers/` and the remaining worker reports be committed?**
+   `docs/SETUP.md` section 4 says what is and is not.
+6. **Day 0's LinkedIn post named PostgreSQL; Day 2 chose SQLite.** Worth
+   saying when the project is presented in public, after it is finished.
 
 ---
 

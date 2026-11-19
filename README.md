@@ -48,11 +48,11 @@ apps/
 packages/
   contracts/    what crosses between the two apps, stated once
     src/          the source; dist/ is what both apps import (built)
-designs/        the designer's screens (information, not instructions)
+designs/        the designer's screens, AIJournal-v4 (information, not instructions)
 docs/
   features.md       what the product does, locked, and the rules it keeps
   roadmap.md        the order the features are built in
-  ui-handover-v4.md what the designer is asked to change
+  design-asks-v4.md what the designer is asked to change
   decisions/        Architecture Decision Records (ADRs)
   handbook/         the reasoning across decisions, one entry per review point
   learning/         worker reports and learning records
